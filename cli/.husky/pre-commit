@@ -1,1 +1,2 @@
+cd cli || exit 1
 npx lint-staged
