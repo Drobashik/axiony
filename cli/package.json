@@ -1,0 +1,56 @@
+{
+  "name": "axiony",
+  "version": "0.0.1",
+  "description": "Developer-first CLI for accessibility testing",
+  "bin": {
+    "axiony": "./dist/index.js"
+  },
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "ts-node src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "prepare": "husky",
+    "lint": "eslint src",
+    "prettier": "prettier --write ."
+  },
+  "keywords": [
+    "accessibility",
+    "a11y",
+    "cli",
+    "testing",
+    "axe",
+    "web"
+  ],
+  "author": "",
+  "license": "MIT",
+  "lint-staged": {
+    "**/*.{ts,js}": [
+      "eslint",
+      "prettier --write"
+    ],
+    "**/*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
+  },
+  "dependencies": {
+    "axe-core": "^4.9.1",
+    "commander": "^12.0.0",
+    "playwright": "^1.59.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.58.1",
+    "@typescript-eslint/parser": "^8.58.1",
+    "eslint": "^10.2.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.4.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.8.2",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.0",
+    "typescript-eslint": "^8.58.1"
+  }
+}
