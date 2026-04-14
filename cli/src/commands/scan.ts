@@ -1,22 +1,31 @@
 import { program } from 'commander';
 import { validateUrl } from '../helpers';
+import { logger } from '../logger/Logger';
 
 const SCAN = 'scan';
 
+const scanLogger = logger.child(SCAN);
+
 const runScanCommand = async (url: string) => {
   try {
+    scanLogger.debug('Validating scan target URL', { url });
+
     validateUrl(url);
 
-    console.log(`Scanning ${url}...`);
-    console.log('');
-    console.log('CLI is wired correctly. Scanner implementation comes next.');
+    scanLogger.info(`Scanning ${url}...`);
+
+    scanLogger.info(
+      'CLI is wired correctly. Scanner implementation comes next.',
+    );
+
+    scanLogger.success('Scan command finished successfully.');
 
     process.exit(0);
   } catch (error) {
     const message =
       error instanceof Error ? error.message : 'Unknown error occurred';
 
-    console.error(message);
+    scanLogger.error(message, error);
 
     process.exit(2);
   }
