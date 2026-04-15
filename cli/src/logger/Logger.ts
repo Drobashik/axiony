@@ -41,8 +41,13 @@ export class Logger {
   }
 
   private write(level: LogLevel, message: string, meta: LogValue[]): void {
-    const output = this.formatMessage(level, message);
     const stream = level === 'error' ? console.error : console.log;
+    if (!message) {
+      stream(message);
+      return;
+    }
+
+    const output = this.formatMessage(level, message);
 
     if (meta.length === 0) {
       stream(output);
@@ -54,7 +59,7 @@ export class Logger {
 
   private formatMessage(level: LogLevel, message: string): string {
     const timestamp = new Date().toISOString();
-    const levelLabel = level.toUpperCase().padEnd(7, ' ');
+    const levelLabel = level.toUpperCase().padEnd(5, ' ');
     const contextLabel = this.context ? ` [${this.context}]` : '';
 
     return `${timestamp} ${levelLabel}${contextLabel} ${message}`;

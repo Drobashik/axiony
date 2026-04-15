@@ -1,33 +1,53 @@
 import { program } from 'commander';
 import { validateUrl } from '../helpers';
 import { logger } from '../logger/Logger';
+import { scanUrl } from '../core/scan/scan-url';
+import { EMPTY_STRING } from './constants';
 
 const SCAN = 'scan';
 
-const scanLogger = logger.child(SCAN);
+export const scanLogger = logger.child(SCAN);
 
 const runScanCommand = async (url: string) => {
   try {
-    scanLogger.debug('Validating scan target URL', { url });
-
     validateUrl(url);
 
     scanLogger.info(`Scanning ${url}...`);
 
-    scanLogger.info(
-      'CLI is wired correctly. Scanner implementation comes next.',
-    );
+    scanLogger.info(EMPTY_STRING);
 
-    scanLogger.success('Scan command finished successfully.');
+    const result = await scanUrl(url);
 
-    process.exit(0);
+    if (result.issues.length === 0) {
+      scanLogger.info('No accessibility issues found.');
+
+      process.exitCode = 0;
+
+      return;
+    }
+
+    scanLogger.info(`${result.issues.length} accessibility issue(s) found:\n`);
+
+    for (const issue of result.issues) {
+      scanLogger.info(`[${issue.impact}] ${issue.id}`);
+
+      scanLogger.info(`Element: ${issue.selector}`);
+
+      scanLogger.info(issue.help);
+
+      scanLogger.info(issue.description);
+
+      scanLogger.info(EMPTY_STRING);
+    }
+
+    process.exitCode = 1;
   } catch (error) {
     const message =
       error instanceof Error ? error.message : 'Unknown error occurred';
 
-    scanLogger.error(message, error);
+    console.error(message);
 
-    process.exit(2);
+    process.exitCode = 2;
   }
 };
 
