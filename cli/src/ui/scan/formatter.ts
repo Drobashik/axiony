@@ -1,4 +1,8 @@
-import type { ScanIssue, ScanResult } from '../../core/scan/types';
+import type {
+  ScanIssue,
+  ScanOutputFormat,
+  ScanResult,
+} from '../../core/scan/types';
 import { text } from '../terminal/styles';
 
 const severityOrder = ['critical', 'serious', 'moderate', 'minor', 'unknown'];
@@ -130,4 +134,15 @@ export const formatScanReport = (result: ScanResult): string => {
   );
 
   return lines.join('\n');
+};
+
+export const formatScanOutput = (
+  result: ScanResult,
+  format: ScanOutputFormat,
+): string => {
+  if (format === 'json') {
+    return JSON.stringify(result, null, 2);
+  }
+
+  return formatScanReport(result);
 };

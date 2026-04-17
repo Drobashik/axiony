@@ -42,7 +42,7 @@ export class CliSpinner {
   }
 
   succeed(message: string): void {
-    this.stop(`${text.success('[ok]')} ${message}`);
+    this.stop(`${text.success('[done]')} ${message}`);
   }
 
   fail(message: string): void {
