@@ -1,5 +1,5 @@
 {
-  "name": "axiony",
+  "name": "axiony-cli",
   "version": "0.1.0-alpha.0",
   "description": "Early alpha CLI for scanning web pages for accessibility issues with axe-core.",
   "bin": {

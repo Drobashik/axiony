@@ -1,19 +1,24 @@
 # Axiony
 
-Axiony is an early alpha TypeScript CLI for scanning a single web page for accessibility issues. It opens the page in Playwright, runs `axe-core`, and prints a developer-friendly report.
+Axiony is an accessibility tooling project. Today it ships an early alpha TypeScript CLI for scanning a single web page; in the future, this repository will also include the Axiony web app alongside the CLI.
 
-This is a preview release. The current CLI is intentionally small and should be treated as an early tool for local checks and experimentation, not a complete accessibility auditing platform.
+The CLI opens a page in Playwright, runs `axe-core`, and prints a developer-friendly report. This is a preview release: the current CLI is intentionally small and should be treated as an early tool for local checks and experimentation, not a complete accessibility auditing platform.
+
+## Packages
+
+- `cli`: npm package `axiony-cli`, installed as the `axiony` command
+- `web`: planned Axiony web app
 
 ## Install
 
 ```bash
-npm install -g axiony@alpha
+npm install -g axiony-cli@alpha
 ```
 
 You can also run it without a global install:
 
 ```bash
-npx axiony@alpha scan https://example.com
+npx axiony-cli@alpha scan https://example.com
 ```
 
 Axiony uses Playwright. If the browser is not installed yet, run:
