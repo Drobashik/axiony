@@ -2,50 +2,39 @@ import { program } from 'commander';
 import { validateUrl } from '../helpers';
 import { logger } from '../logger/Logger';
 import { scanUrl } from '../core/scan/scan-url';
-import { EMPTY_STRING } from './constants';
+import { CliSpinner } from '../ui/terminal/spinner';
+import { formatScanReport } from '../ui/scan/formatter';
 
-const SCAN = 'scan';
-
-export const scanLogger = logger.child(SCAN);
+const scanLogger = logger.child('scan');
 
 const runScanCommand = async (url: string) => {
+  const spinner = new CliSpinner(scanLogger);
+
   try {
     validateUrl(url);
 
-    scanLogger.info(`Scanning ${url}...`);
+    spinner.start(`Scanning ${url}`);
 
-    scanLogger.info(EMPTY_STRING);
+    const result = await scanUrl(url, {
+      onProgress: (message) => spinner.update(`${message} ${url}`),
+    });
 
-    const result = await scanUrl(url);
+    spinner.succeed(
+      result.issues.length === 0
+        ? `Scan completed for ${url}`
+        : `Scan completed with issues for ${url}`,
+    );
 
-    if (result.issues.length === 0) {
-      scanLogger.info('No accessibility issues found.');
+    scanLogger.print(formatScanReport(result));
 
-      process.exitCode = 0;
-
-      return;
-    }
-
-    scanLogger.info(`${result.issues.length} accessibility issue(s) found:\n`);
-
-    for (const issue of result.issues) {
-      scanLogger.info(`[${issue.impact}] ${issue.id}`);
-
-      scanLogger.info(`Element: ${issue.selector}`);
-
-      scanLogger.info(issue.help);
-
-      scanLogger.info(issue.description);
-
-      scanLogger.info(EMPTY_STRING);
-    }
-
-    process.exitCode = 1;
+    process.exitCode = result.issues.length === 0 ? 0 : 1;
   } catch (error) {
     const message =
       error instanceof Error ? error.message : 'Unknown error occurred';
 
-    console.error(message);
+    spinner.fail(`Scan failed for ${url}`);
+
+    scanLogger.print(message, { stream: 'stderr' });
 
     process.exitCode = 2;
   }
@@ -53,7 +42,7 @@ const runScanCommand = async (url: string) => {
 
 export const registerScanCommand = () => {
   program
-    .command(SCAN)
+    .command('scan')
     .description('Scan a page for accessibility issues')
     .argument('<url>', 'Target URL to scan')
     .action(runScanCommand);
