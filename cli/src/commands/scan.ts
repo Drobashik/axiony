@@ -24,13 +24,17 @@ const writeOutputFile = async (fileName: string, output: string) => {
 
   const filePath = join(reportsDir, safeFileName);
 
-  await mkdir(dirname(filePath), { recursive: true });
-  await writeFile(filePath, `${output}\n`, 'utf8');
+  try {
+    await mkdir(dirname(filePath), { recursive: true });
+    await writeFile(filePath, `${output}\n`, 'utf8');
+  } catch {
+    throw new Error('Could not write output file.');
+  }
 };
 
 const validateScanOptions = (options: ScanCommandOptions) => {
   if (options.output && !options.json) {
-    throw new Error('--output can only be used with --json');
+    throw new Error('Use --json with --output.');
   }
 };
 
@@ -39,6 +43,7 @@ const runScanCommand = async (url: string, options: ScanCommandOptions) => {
   const shouldPrintToStdout = !options.output;
   const shouldPrintProgress = shouldPrintToStdout && format === 'text';
   const spinner = new CliSpinner(scanLogger);
+  let spinnerStarted = false;
 
   try {
     validateUrl(url);
@@ -46,6 +51,7 @@ const runScanCommand = async (url: string, options: ScanCommandOptions) => {
 
     if (shouldPrintProgress) {
       spinner.start(`Scanning ${url}`);
+      spinnerStarted = true;
     }
 
     const result = await scanUrl(url, {
@@ -77,7 +83,7 @@ const runScanCommand = async (url: string, options: ScanCommandOptions) => {
     const message =
       error instanceof Error ? error.message : 'Unknown error occurred';
 
-    if (shouldPrintProgress) {
+    if (spinnerStarted) {
       spinner.fail(`Scan failed for ${url}`);
     }
 
@@ -90,9 +96,25 @@ const runScanCommand = async (url: string, options: ScanCommandOptions) => {
 export const registerScanCommand = () => {
   program
     .command('scan')
-    .description('Scan a page for accessibility issues')
+    .summary('Scan one URL for accessibility issues')
+    .description(
+      'Scan one page with axe-core and print an accessibility report.',
+    )
     .argument('<url>', 'Target URL to scan')
-    .option('--json', 'Print pretty JSON output')
-    .option('-o, --output <file>', 'Write the final output to a file')
+    .option('--json', 'Print the scan result as pretty JSON')
+    .option(
+      '-o, --output <name>',
+      'Write JSON output to a file in axy-reports (requires --json)',
+    )
+    .addHelpText(
+      'after',
+      `
+
+Examples:
+  $ axiony scan https://example.com
+  $ axiony scan https://example.com --json
+  $ axiony scan https://example.com --json --output example
+`,
+    )
     .action(runScanCommand);
 };

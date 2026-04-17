@@ -4,15 +4,13 @@ export const validateUrl = (value: string) => {
   try {
     parsedUrl = new URL(value);
   } catch {
-    throw new Error(`Invalid URL: ${value}`);
+    throw new Error('Invalid URL. Use a full http:// or https:// URL.');
   }
 
   const isHttpProtocol =
     parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:';
 
   if (!isHttpProtocol) {
-    throw new Error(
-      `Invalid URL protocol: ${parsedUrl.protocol}. Please use http:// or https://`,
-    );
+    throw new Error('Invalid URL. Use a full http:// or https:// URL.');
   }
 };
