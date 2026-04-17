@@ -11,6 +11,8 @@ export type ScanResult = {
   issues: ScanIssue[];
 };
 
+export type ScanOutputFormat = 'text' | 'json';
+
 export type ScanProgressMessage =
   | 'Launching browser'
   | 'Opening page'
@@ -19,7 +21,7 @@ export type ScanProgressMessage =
   | 'Processing results';
 
 export type ScanUrlOptions = {
-  onProgress?: (message: ScanProgressMessage) => void;
+  onProgressPrint?: (message: ScanProgressMessage) => void;
 };
 
 type AxeNodeResult = {

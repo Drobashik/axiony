@@ -7,29 +7,31 @@ import type {
   WindowWithAxe,
 } from './types';
 import { BROWSER_TIMEOUT, IMPACT_UNKNOWN } from './constants';
+import { text } from '../../ui/terminal/styles';
 
 export async function scanUrl(
   url: string,
   options: ScanUrlOptions = {},
 ): Promise<ScanResult> {
   let browser: Browser;
-  const { onProgress = () => undefined } = options;
+  const { onProgressPrint = () => undefined } = options;
 
   try {
-    onProgress('Launching browser');
+    onProgressPrint('Launching browser');
+
     browser = await chromium.launch({ headless: true });
   } catch {
     throw new Error(
-      'Playwright browser not installed. Run: npx playwright install',
+      `Playwright browser not installed. Run: ${text.bold('npx playwright install')}`,
     );
   }
 
   try {
-    onProgress('Opening page');
+    onProgressPrint('Opening page');
 
     const page = await browser.newPage();
 
-    onProgress('Injecting accessibility engine');
+    onProgressPrint('Injecting accessibility engine');
 
     await page.addInitScript({
       content: axe.source,
@@ -40,7 +42,7 @@ export async function scanUrl(
       timeout: BROWSER_TIMEOUT,
     });
 
-    onProgress('Running accessibility checks');
+    onProgressPrint('Running accessibility checks');
 
     const result = await page.evaluate(async () => {
       const runtimeWindow = window as unknown as WindowWithAxe;
@@ -48,14 +50,14 @@ export async function scanUrl(
       return await runtimeWindow.axe.run();
     });
 
-    onProgress('Processing results');
+    onProgressPrint('Processing results');
 
     const issues: ScanIssue[] = result.violations.map((violation) => ({
       id: violation.id,
       impact: violation.impact ?? IMPACT_UNKNOWN,
       description: violation.description,
       help: violation.help,
-      selectors: violation.nodes.flatMap((node) => `\n${node.target}`),
+      selectors: violation.nodes.flatMap((node) => node.target),
     }));
 
     return {
