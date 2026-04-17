@@ -85,8 +85,16 @@ const formatIssue = (issue: ScanIssue): string => {
   ].join('\n');
 };
 
+const formatManualCheck = (issue: ScanIssue): string =>
+  [
+    text.bold(issue.id),
+    `${text.muted('Check:')} ${issue.help}`,
+    `${text.muted('Elements:')} ${formatSelectors(issue.selectors)}`,
+  ].join('\n');
+
 export const formatScanReport = (result: ScanResult): string => {
   const issueCount = result.issues.length;
+  const manualCheckCount = result.manualChecks.length;
   const elementCount = result.issues.reduce(
     (count, issue) => count + issue.selectors.length,
     0,
@@ -103,25 +111,34 @@ export const formatScanReport = (result: ScanResult): string => {
     `${text.muted('Status:')} ${statusLine}`,
   ];
 
-  if (issueCount === 0) {
+  if (issueCount > 0) {
     lines.push(
-      `${text.muted('Summary:')} ${text.success('Ready to ship with no axe violations.')}`,
+      `${text.muted('Severity:')} ${formatSeveritySummary(result.issues)}`,
     );
-    return lines.join('\n');
+
+    for (const [severity, issues] of groupIssuesBySeverity(result.issues)) {
+      lines.push('');
+      lines.push(
+        `${severityStyle(severity)(text.bold(titleCase(severity)))} ${text.muted(`(${issues.length})`)}`,
+      );
+
+      for (const issue of issues) {
+        lines.push(formatIssue(issue));
+        lines.push('');
+      }
+
+      lines.pop();
+    }
   }
 
-  lines.push(
-    `${text.muted('Severity:')} ${formatSeveritySummary(result.issues)}`,
-  );
-
-  for (const [severity, issues] of groupIssuesBySeverity(result.issues)) {
+  if (manualCheckCount > 0) {
     lines.push('');
     lines.push(
-      `${severityStyle(severity)(text.bold(titleCase(severity)))} ${text.muted(`(${issues.length})`)}`,
+      `${text.info(text.bold('Manual checks'))} ${text.muted(`(${manualCheckCount})`)}`,
     );
 
-    for (const issue of issues) {
-      lines.push(formatIssue(issue));
+    for (const issue of sortIssues(result.manualChecks)) {
+      lines.push(formatManualCheck(issue));
       lines.push('');
     }
 
@@ -130,7 +147,9 @@ export const formatScanReport = (result: ScanResult): string => {
 
   lines.push('');
   lines.push(
-    `${text.muted('Summary:')} Review the ${issueCount} highlighted rule violation(s) and re-run ${text.bold('axiony scan')} after fixes.`,
+    issueCount === 0
+      ? `${text.muted('Summary:')} ${text.success('Ready to ship with no axe violations.')}`
+      : `${text.muted('Summary:')} Review the ${issueCount} highlighted rule violation(s) and re-run ${text.bold('axiony scan')} after fixes.`,
   );
 
   return lines.join('\n');
