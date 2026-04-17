@@ -3,12 +3,16 @@ export type ScanIssue = {
   impact: string;
   description: string;
   help: string;
+  helpUrl: string;
+  tags: string[];
   selectors: string[];
 };
 
 export type ScanResult = {
   url: string;
+  timestamp: string;
   issues: ScanIssue[];
+  manualChecks: ScanIssue[];
 };
 
 export type ScanOutputFormat = 'text' | 'json';
@@ -28,16 +32,21 @@ type AxeNodeResult = {
   target: string[];
 };
 
-type AxeViolation = {
+type AxeRuleResult = {
   id: string;
   impact?: string | null;
   description: string;
   help: string;
+  helpUrl: string;
+  tags: string[];
   nodes: AxeNodeResult[];
 };
 
 export type AxeRunResult = {
-  violations: AxeViolation[];
+  url: string;
+  timestamp: string;
+  violations: AxeRuleResult[];
+  incomplete: AxeRuleResult[];
 };
 
 export type WindowWithAxe = Window & {

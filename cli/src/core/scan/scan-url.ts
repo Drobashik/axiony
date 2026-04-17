@@ -15,6 +15,18 @@ const formatNavigationError = (error: unknown): string =>
     ? 'Page load timed out. Check the URL and try again.'
     : 'Could not open the page. Check the URL and try again.';
 
+const mapAxeResultToIssue = (
+  result: AxeRunResult['violations'][number],
+): ScanIssue => ({
+  id: result.id,
+  impact: result.impact ?? IMPACT_UNKNOWN,
+  description: result.description,
+  help: result.help,
+  helpUrl: result.helpUrl,
+  tags: result.tags,
+  selectors: result.nodes.flatMap((node) => node.target),
+});
+
 export async function scanUrl(
   url: string,
   options: ScanUrlOptions = {},
@@ -74,17 +86,11 @@ export async function scanUrl(
 
     onProgressPrint('Processing results');
 
-    const issues: ScanIssue[] = result.violations.map((violation) => ({
-      id: violation.id,
-      impact: violation.impact ?? IMPACT_UNKNOWN,
-      description: violation.description,
-      help: violation.help,
-      selectors: violation.nodes.flatMap((node) => node.target),
-    }));
-
     return {
-      url,
-      issues,
+      url: result.url,
+      timestamp: result.timestamp,
+      issues: result.violations.map(mapAxeResultToIssue),
+      manualChecks: result.incomplete.map(mapAxeResultToIssue),
     };
   } finally {
     await browser?.close().catch(() => undefined);
