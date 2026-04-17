@@ -3,12 +3,23 @@ export type ScanIssue = {
   impact: string;
   description: string;
   help: string;
-  selector: string;
+  selectors: string[];
 };
 
 export type ScanResult = {
   url: string;
   issues: ScanIssue[];
+};
+
+export type ScanProgressMessage =
+  | 'Launching browser'
+  | 'Opening page'
+  | 'Injecting accessibility engine'
+  | 'Running accessibility checks'
+  | 'Processing results';
+
+export type ScanUrlOptions = {
+  onProgress?: (message: ScanProgressMessage) => void;
 };
 
 type AxeNodeResult = {

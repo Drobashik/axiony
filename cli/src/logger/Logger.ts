@@ -1,4 +1,4 @@
-import { LoggerOptions, LogLevel, LogValue } from './types';
+import { LoggerOptions, LogLevel, LogValue, LoggerWriteOptions } from './types';
 
 export class Logger {
   private readonly context?: string;
@@ -33,6 +33,21 @@ export class Logger {
     this.write('success', message, meta);
   }
 
+  print(
+    message: string,
+    options: LoggerWriteOptions = {},
+    ...meta: LogValue[]
+  ): void {
+    this.write('info', message, meta, {
+      formatted: false,
+      ...options,
+    });
+  }
+
+  newline(options: LoggerWriteOptions = {}): void {
+    this.print('', options);
+  }
+
   child(context: string): Logger {
     return new Logger({
       context: this.context ? `${this.context}:${context}` : context,
@@ -40,14 +55,25 @@ export class Logger {
     });
   }
 
-  private write(level: LogLevel, message: string, meta: LogValue[]): void {
-    const stream = level === 'error' ? console.error : console.log;
+  private write(
+    level: LogLevel,
+    message: string,
+    meta: LogValue[],
+    options: LoggerWriteOptions = {},
+  ): void {
+    const stream =
+      options.stream === 'stderr' || level === 'error'
+        ? console.error
+        : console.log;
     if (!message) {
       stream(message);
       return;
     }
 
-    const output = this.formatMessage(level, message);
+    const output =
+      options.formatted === false
+        ? message
+        : this.formatMessage(level, message);
 
     if (meta.length === 0) {
       stream(output);
