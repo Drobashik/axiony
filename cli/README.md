@@ -7,13 +7,13 @@ This is a preview release. The current CLI is intentionally small and should be 
 ## Install
 
 ```bash
-npm install -g axiony@alpha
+npm install -g axiony-cli@alpha
 ```
 
 You can also run it without a global install:
 
 ```bash
-npx axiony@alpha scan https://example.com
+npx axiony-cli@alpha scan https://example.com
 ```
 
 Axiony uses Playwright. If the browser is not installed yet, run:
