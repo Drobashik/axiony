@@ -1,6 +1,6 @@
 # Axiony
 
-Axiony is an early alpha TypeScript CLI for scanning a single web page for accessibility issues. It opens the page in Playwright, runs `axe-core`, and prints a developer-friendly report.
+Axiony is an early alpha CLI for scanning a single web page for accessibility issues. It opens the page in Playwright, runs `axe-core`, and prints a developer-friendly report.
 
 This is a preview release. The current CLI is intentionally small and should be treated as an early tool for local checks and experimentation, not a complete accessibility auditing platform.
 
@@ -84,14 +84,11 @@ axy-reports/example.json
 - `1`: scan completed and accessibility issues were found
 - `2`: runtime error or invalid usage
 
-## Development
+## Commands
 
 ```bash
-cd cli
-npm install
-npm run build
-npm run lint
-npm start -- --help
+axiony --help
+axiony scan --help
 ```
 
 ## Alpha Status

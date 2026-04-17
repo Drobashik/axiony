@@ -1,6 +1,7 @@
 import axe from 'axe-core';
 import { Browser, chromium } from 'playwright';
 import type {
+  AxeRunResult,
   ScanIssue,
   ScanResult,
   ScanUrlOptions,
@@ -9,11 +10,16 @@ import type {
 import { BROWSER_TIMEOUT, IMPACT_UNKNOWN } from './constants';
 import { text } from '../../ui/terminal/styles';
 
+const formatNavigationError = (error: unknown): string =>
+  error instanceof Error && error.message.includes('Timeout')
+    ? 'Page load timed out. Check the URL and try again.'
+    : 'Could not open the page. Check the URL and try again.';
+
 export async function scanUrl(
   url: string,
   options: ScanUrlOptions = {},
 ): Promise<ScanResult> {
-  let browser: Browser;
+  let browser: Browser | undefined;
   const { onProgressPrint = () => undefined } = options;
 
   try {
@@ -22,7 +28,7 @@ export async function scanUrl(
     browser = await chromium.launch({ headless: true });
   } catch {
     throw new Error(
-      `Playwright browser not installed. Run: ${text.bold('npx playwright install')}`,
+      `Could not launch browser. Run ${text.bold('npx playwright install')} and try again.`,
     );
   }
 
@@ -37,18 +43,34 @@ export async function scanUrl(
       content: axe.source,
     });
 
-    await page.goto(url, {
-      waitUntil: 'domcontentloaded',
-      timeout: BROWSER_TIMEOUT,
-    });
+    try {
+      await page.goto(url, {
+        waitUntil: 'domcontentloaded',
+        timeout: BROWSER_TIMEOUT,
+      });
+    } catch (error) {
+      const navigationError = new Error(
+        formatNavigationError(error),
+      ) as Error & {
+        cause?: unknown;
+      };
+      navigationError.cause = error;
+      throw navigationError;
+    }
 
     onProgressPrint('Running accessibility checks');
 
-    const result = await page.evaluate(async () => {
-      const runtimeWindow = window as unknown as WindowWithAxe;
+    let result: AxeRunResult;
 
-      return await runtimeWindow.axe.run();
-    });
+    try {
+      result = await page.evaluate(async () => {
+        const runtimeWindow = window as unknown as WindowWithAxe;
+
+        return await runtimeWindow.axe.run();
+      });
+    } catch {
+      throw new Error('Could not run accessibility scan.');
+    }
 
     onProgressPrint('Processing results');
 
@@ -65,6 +87,6 @@ export async function scanUrl(
       issues,
     };
   } finally {
-    await browser.close();
+    await browser?.close().catch(() => undefined);
   }
 }
