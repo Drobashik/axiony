@@ -1,6 +1,6 @@
 {
   "name": "axiony-cli",
-  "version": "0.1.0-alpha.1",
+  "version": "0.2.0-alpha.0",
   "description": "Early alpha CLI for scanning web pages for accessibility issues with axe-core.",
   "bin": {
     "axiony": "./dist/index.js"
@@ -20,8 +20,8 @@
     "lint": "eslint src",
     "prettier": "prettier --write .",
     "prettier:check": "prettier --check .",
-    "version": "npm version patch",
-    "version:alpha": "npm version prerelease --preid=alpha",
+    "bump": "npm version patch",
+    "bump:alpha": "npm version prerelease --preid=alpha",
     "publish": "npm publish --access public"
   },
   "keywords": [
