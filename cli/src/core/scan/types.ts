@@ -11,6 +11,9 @@ export type ScanIssue = {
 export type ScanResult = {
   url: string;
   timestamp: string;
+  metadata?: {
+    selector?: string;
+  };
   issues: ScanIssue[];
   manualChecks: ScanIssue[];
 };
@@ -21,11 +24,13 @@ export type ScanProgressMessage =
   | 'Launching browser'
   | 'Opening page'
   | 'Injecting accessibility engine'
+  | 'Validating selector'
   | 'Running accessibility checks'
   | 'Processing results';
 
 export type ScanUrlOptions = {
   onProgressPrint?: (message: ScanProgressMessage) => void;
+  selector?: string;
 };
 
 type AxeNodeResult = {
@@ -51,6 +56,6 @@ export type AxeRunResult = {
 
 export type WindowWithAxe = Window & {
   axe: {
-    run: () => Promise<AxeRunResult>;
+    run: (context?: string) => Promise<AxeRunResult>;
   };
 };
