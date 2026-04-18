@@ -22,7 +22,7 @@
     "prettier:check": "prettier --check .",
     "bump": "npm version patch",
     "bump:alpha": "npm version prerelease --preid=alpha",
-    "publish": "npm publish --access public"
+    "promote": "npm publish --access public"
   },
   "keywords": [
     "accessibility",
