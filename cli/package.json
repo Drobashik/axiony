@@ -18,7 +18,11 @@
     "start": "node dist/index.js",
     "prepack": "npm run build",
     "lint": "eslint src",
-    "prettier": "prettier --write ."
+    "prettier": "prettier --write .",
+    "prettier:check": "prettier --check .",
+    "version": "npm version patch",
+    "version:alpha": "npm version prerelease --preid=alpha",
+    "publish": "npm publish --access public"
   },
   "keywords": [
     "accessibility",

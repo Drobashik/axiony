@@ -1,0 +1,125 @@
+name: CLI CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - cli/**
+      - .github/workflows/cli-ci.yml
+  pull_request:
+    paths:
+      - cli/**
+      - .github/workflows/cli-ci.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cli:
+    name: CLI / Node ${{ matrix.node-version }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version:
+          - 20.x
+          - 22.x
+
+    defaults:
+      run:
+        working-directory: cli
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+          cache-dependency-path: cli/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Check formatting
+        run: npm run prettier:check
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm test --if-present
+
+      - name: CLI help smoke test
+        run: node dist/index.js --help
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Accessibility scan smoke test
+        run: |
+          mkdir -p tmp-ci-site
+          cat > tmp-ci-site/index.html <<'HTML'
+          <!doctype html>
+          <html lang="en">
+            <head>
+              <meta charset="utf-8">
+              <title>Axiony CI smoke test</title>
+            </head>
+            <body>
+              <main>
+                <h1>Axiony CI smoke test</h1>
+                <p>This page should pass the basic axe-core smoke scan.</p>
+              </main>
+            </body>
+          </html>
+          HTML
+
+          node <<'NODE' &
+          const http = require('node:http');
+          const fs = require('node:fs');
+          const path = require('node:path');
+
+          const filePath = path.join(process.cwd(), 'tmp-ci-site', 'index.html');
+          const page = fs.readFileSync(filePath);
+
+          http
+            .createServer((request, response) => {
+              response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+              response.end(page);
+            })
+            .listen(4173, '127.0.0.1');
+          NODE
+
+          server_pid=$!
+          trap 'kill "$server_pid"' EXIT
+
+          for attempt in {1..20}; do
+            if curl --fail --silent --show-error http://127.0.0.1:4173 > /dev/null; then
+              break
+            fi
+
+            if [ "$attempt" -eq 20 ]; then
+              echo "Local smoke-test server did not start in time"
+              exit 1
+            fi
+
+            sleep 0.5
+          done
+
+          node dist/index.js scan http://127.0.0.1:4173 --json
+
+      - name: Package dry run
+        run: npm pack --dry-run
