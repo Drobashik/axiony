@@ -1,42 +1,24 @@
-import { mkdir, writeFile } from 'node:fs/promises';
-import { dirname, join, resolve } from 'node:path';
 import { program } from 'commander';
 import { validateUrl } from '../helpers';
 import { logger } from '../logger/Logger';
 import { scanUrl } from '../core/scan/scan-url';
 import { CliSpinner } from '../ui/terminal/spinner';
 import { formatScanOutput } from '../ui/scan/formatter';
-import type { ScanOutputFormat } from '../core/scan/types';
+import {
+  getScanOutputFormat,
+  validateJsonOutputOptions,
+  writeOutputFile,
+  type JsonOutputOptions,
+} from './shared';
 
 const scanLogger = logger.child('scan');
 
-type ScanCommandOptions = {
-  json?: boolean;
-  output?: string;
+type ScanCommandOptions = JsonOutputOptions & {
   selector?: string;
 };
 
-const writeOutputFile = async (fileName: string, output: string) => {
-  const reportsDir = resolve(process.cwd(), 'axy-reports');
-
-  const safeFileName = fileName.endsWith('.json')
-    ? fileName
-    : `${fileName}.json`;
-
-  const filePath = join(reportsDir, safeFileName);
-
-  try {
-    await mkdir(dirname(filePath), { recursive: true });
-    await writeFile(filePath, `${output}\n`, 'utf8');
-  } catch {
-    throw new Error('Could not write output file.');
-  }
-};
-
 const validateScanOptions = (options: ScanCommandOptions) => {
-  if (options.output && !options.json) {
-    throw new Error('Use --json with --output.');
-  }
+  validateJsonOutputOptions(options);
 
   if (options.selector !== undefined && options.selector.trim().length === 0) {
     throw new Error('Use --selector with a non-empty CSS selector.');
@@ -44,7 +26,7 @@ const validateScanOptions = (options: ScanCommandOptions) => {
 };
 
 const runScanCommand = async (url: string, options: ScanCommandOptions) => {
-  const format: ScanOutputFormat = options.json ? 'json' : 'text';
+  const format = getScanOutputFormat(options);
   const shouldPrintToStdout = !options.output;
   const shouldPrintProgress = shouldPrintToStdout && format === 'text';
   const spinner = new CliSpinner(scanLogger);
