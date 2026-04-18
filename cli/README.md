@@ -33,9 +33,12 @@ Examples:
 ```bash
 axiony scan https://example.com
 axiony scan http://localhost:3000
+axiony scan https://example.com --selector main
 ```
 
 By default, Axiony prints a human-readable report to stdout.
+
+Use `--selector <selector>` to scan only the matched DOM region. If the selector does not exist on the page, Axiony exits with a clear error.
 
 ## JSON Output
 

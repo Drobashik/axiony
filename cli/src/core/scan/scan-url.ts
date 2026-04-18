@@ -27,12 +27,26 @@ const mapAxeResultToIssue = (
   selectors: result.nodes.flatMap((node) => node.target),
 });
 
+const selectorExists = async (
+  page: Awaited<ReturnType<Browser['newPage']>>,
+  selector: string,
+): Promise<boolean> => {
+  try {
+    return await page.evaluate(
+      (cssSelector) => document.querySelector(cssSelector) !== null,
+      selector,
+    );
+  } catch {
+    throw new Error(`Selector "${selector}" is invalid.`);
+  }
+};
+
 export async function scanUrl(
   url: string,
   options: ScanUrlOptions = {},
 ): Promise<ScanResult> {
   let browser: Browser | undefined;
-  const { onProgressPrint = () => undefined } = options;
+  const { onProgressPrint = () => undefined, selector } = options;
 
   try {
     onProgressPrint('Launching browser');
@@ -70,16 +84,24 @@ export async function scanUrl(
       throw navigationError;
     }
 
+    if (selector) {
+      onProgressPrint('Validating selector');
+
+      if (!(await selectorExists(page, selector))) {
+        throw new Error(`Selector "${selector}" was not found on the page.`);
+      }
+    }
+
     onProgressPrint('Running accessibility checks');
 
     let result: AxeRunResult;
 
     try {
-      result = await page.evaluate(async () => {
+      result = await page.evaluate(async (context) => {
         const runtimeWindow = window as unknown as WindowWithAxe;
 
-        return await runtimeWindow.axe.run();
-      });
+        return await runtimeWindow.axe.run(context);
+      }, selector);
     } catch {
       throw new Error('Could not run accessibility scan.');
     }
@@ -89,6 +111,7 @@ export async function scanUrl(
     return {
       url: result.url,
       timestamp: result.timestamp,
+      metadata: selector ? { selector } : undefined,
       issues: result.violations.map(mapAxeResultToIssue),
       manualChecks: result.incomplete.map(mapAxeResultToIssue),
     };

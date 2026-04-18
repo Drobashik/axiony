@@ -108,8 +108,13 @@ export const formatScanReport = (result: ScanResult): string => {
     '',
     text.bold('Axiony Accessibility Scan'),
     `${text.muted('Target:')} ${result.url}`,
-    `${text.muted('Status:')} ${statusLine}`,
   ];
+
+  if (result.metadata?.selector) {
+    lines.push(`${text.muted('Selector:')} ${result.metadata.selector}`);
+  }
+
+  lines.push(`${text.muted('Status:')} ${statusLine}`);
 
   if (issueCount > 0) {
     lines.push(
