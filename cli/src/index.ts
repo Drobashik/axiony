@@ -18,6 +18,7 @@ async function main(): Promise<void> {
 
 Examples:
   $ axiony scan https://example.com
+  $ axiony html --file ./page.html
   $ axiony scan https://example.com --json
   $ axiony scan https://example.com --json --output report
 `,

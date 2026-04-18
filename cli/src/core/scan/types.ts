@@ -23,6 +23,7 @@ export type ScanOutputFormat = 'text' | 'json';
 export type ScanProgressMessage =
   | 'Launching browser'
   | 'Opening page'
+  | 'Rendering HTML'
   | 'Injecting accessibility engine'
   | 'Validating selector'
   | 'Running accessibility checks'
