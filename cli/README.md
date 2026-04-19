@@ -1,20 +1,20 @@
 # Axiony
 
-Axiony is an early alpha CLI for scanning web pages and raw HTML for accessibility issues. It opens content in Playwright, runs `axe-core`, and prints a developer-friendly report.
+Axiony is a CLI for scanning web pages and raw HTML for accessibility issues. It opens content in Playwright, runs `axe-core`, and prints a developer-friendly report.
 
 This is a preview release. The current CLI is intentionally small and should be treated as an early tool for local checks and experimentation, not a complete accessibility auditing platform.
 
 ## Install
 
 ```bash
-npm install -g axiony-cli@alpha
+npm install -g axiony-cli
 ```
 
 You can also run it without a global install:
 
 ```bash
-npx axiony-cli@alpha scan https://example.com
-npx axiony-cli@alpha html --file ./page.html
+npx axiony-cli scan https://example.com
+npx axiony-cli html --file ./page.html
 ```
 
 Axiony uses Playwright. If the browser is not installed yet, run:
@@ -111,9 +111,9 @@ axiony scan --help
 axiony html --help
 ```
 
-## Alpha Status
+## Status
 
-This release is an initial alpha preview. It currently supports single-page URL scans and raw HTML scans only. Before a broader public release, Axiony still needs deeper test coverage, CI examples, more reporting controls, configuration support, and broader real-world validation.
+This release currently supports single-page URL scans and raw HTML scans only. Axiony still needs deeper test coverage, CI examples, more reporting controls, configuration support, and broader real-world validation.
 
 ## License
 
