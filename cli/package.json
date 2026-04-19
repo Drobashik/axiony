@@ -1,7 +1,7 @@
 {
   "name": "axiony-cli",
-  "version": "0.2.0-alpha.0",
-  "description": "Early alpha CLI for scanning web pages for accessibility issues with axe-core.",
+  "version": "0.2.0",
+  "description": "CLI for scanning web pages for accessibility issues with axe-core.",
   "bin": {
     "axiony": "./dist/index.js"
   },
@@ -21,7 +21,6 @@
     "prettier": "prettier --write .",
     "prettier:check": "prettier --check .",
     "bump": "npm version patch",
-    "bump:alpha": "npm version prerelease --preid=alpha",
     "promote": "npm publish --access public --tag latest"
   },
   "keywords": [
@@ -39,6 +38,10 @@
   ],
   "author": "",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Drobashik/axiony.git"
+  },
   "lint-staged": {
     "**/*.{ts,js}": [
       "eslint",
