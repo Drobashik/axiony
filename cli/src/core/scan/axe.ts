@@ -9,7 +9,14 @@ import type {
   ScanResult,
   WindowWithAxe,
 } from './types';
-import { IMPACT_UNKNOWN } from './constants';
+import {
+  IMPACT_UNKNOWN,
+  SCAN_ACCEPT_LANGUAGE,
+  SCAN_LOCALE,
+  SCAN_TIMEZONE_ID,
+  SCAN_VIEWPORT_HEIGHT,
+  SCAN_VIEWPORT_WIDTH,
+} from './constants';
 import { findDuplicateIdIssues } from './custom-checks';
 import { text } from '../../ui/terminal/styles';
 
@@ -25,6 +32,26 @@ export const launchScanBrowser = async (
       `Could not launch browser. Run ${text.bold('npx playwright install')} and try again.`,
     );
   }
+};
+
+const createDesktopChromeUserAgent = (chromeVersion: string): string =>
+  `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${chromeVersion} Safari/537.36`;
+
+export const createScanPage = async (browser: Browser): Promise<Page> => {
+  const context = await browser.newContext({
+    extraHTTPHeaders: {
+      'Accept-Language': SCAN_ACCEPT_LANGUAGE,
+    },
+    locale: SCAN_LOCALE,
+    timezoneId: SCAN_TIMEZONE_ID,
+    userAgent: createDesktopChromeUserAgent(browser.version()),
+    viewport: {
+      height: SCAN_VIEWPORT_HEIGHT,
+      width: SCAN_VIEWPORT_WIDTH,
+    },
+  });
+
+  return await context.newPage();
 };
 
 export const addAxeInitScript = async (page: Page): Promise<void> => {

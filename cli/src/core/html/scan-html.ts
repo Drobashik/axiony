@@ -1,5 +1,5 @@
 import { BROWSER_TIMEOUT } from '../scan/constants';
-import { launchScanBrowser, runAxeOnPage } from '../scan/axe';
+import { createScanPage, launchScanBrowser, runAxeOnPage } from '../scan/axe';
 import type { ScanResult } from '../scan/types';
 import type { ScanHtmlOptions } from './types';
 
@@ -18,7 +18,7 @@ export async function scanHtml(
   try {
     onProgressPrint('Rendering HTML');
 
-    const page = await browser.newPage();
+    const page = await createScanPage(browser);
 
     try {
       await page.setContent(html, {

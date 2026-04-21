@@ -1,11 +1,44 @@
 import { BROWSER_TIMEOUT } from './constants';
-import { addAxeInitScript, launchScanBrowser, runAxeOnPage } from './axe';
+import {
+  addAxeInitScript,
+  createScanPage,
+  launchScanBrowser,
+  runAxeOnPage,
+} from './axe';
+import {
+  detectPageWarnings,
+  waitForChallengeResolution,
+  waitForPageReadiness,
+} from './page-readiness';
 import type { ScanResult, ScanUrlOptions } from './types';
+
+type ScanUrlMetadata = NonNullable<ScanResult['metadata']>;
 
 const formatNavigationError = (error: unknown): string =>
   error instanceof Error && error.message.includes('Timeout')
     ? 'Page load timed out. Check the URL and try again.'
     : 'Could not open the page. Check the URL and try again.';
+
+const buildScanUrlMetadata = (
+  selector: string | undefined,
+  warnings: string[],
+): ScanUrlMetadata | undefined => {
+  const metadata: ScanUrlMetadata = {};
+
+  if (selector) {
+    metadata.selector = selector;
+  }
+
+  if (warnings.length > 0) {
+    metadata.warnings = warnings;
+  }
+
+  if (Object.keys(metadata).length === 0) {
+    return undefined;
+  }
+
+  return metadata;
+};
 
 export async function scanUrl(
   url: string,
@@ -18,7 +51,7 @@ export async function scanUrl(
   try {
     onProgressPrint('Opening page');
 
-    const page = await browser.newPage();
+    const page = await createScanPage(browser);
     await addAxeInitScript(page);
 
     try {
@@ -36,6 +69,12 @@ export async function scanUrl(
       throw navigationError;
     }
 
+    onProgressPrint('Waiting for page readiness');
+    await waitForPageReadiness(page);
+    await waitForChallengeResolution(page);
+
+    const warnings = await detectPageWarnings(page);
+
     const result = await runAxeOnPage(page, {
       onProgressPrint,
       selector,
@@ -44,7 +83,7 @@ export async function scanUrl(
     return {
       url: result.url,
       timestamp: result.timestamp,
-      metadata: selector ? { selector } : undefined,
+      metadata: buildScanUrlMetadata(selector, warnings),
       issues: result.issues,
       manualChecks: result.manualChecks,
     };

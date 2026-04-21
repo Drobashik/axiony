@@ -163,6 +163,12 @@ export const formatScanReport = (
     lines.push(`${text.muted('Selector:')} ${result.metadata.selector}`);
   }
 
+  if (result.metadata?.warnings?.length) {
+    for (const warning of result.metadata.warnings) {
+      lines.push(`${text.warning('Warning:')} ${warning}`);
+    }
+  }
+
   lines.push(`${text.muted('Status:')} ${statusLine}`);
 
   if (issueCount > 0) {
