@@ -6,6 +6,8 @@ import type {
 import { text } from '../terminal/styles';
 
 const severityOrder = ['critical', 'serious', 'moderate', 'minor', 'unknown'];
+const SNIPPET_PREVIEW_MAX_LENGTH = 240;
+const SNIPPET_PREVIEW_ELLIPSIS = '...';
 
 type ScanReportOptions = {
   command?: string;
@@ -53,11 +55,14 @@ const formatSelectors = (selectors: string[]): string => {
 const formatSnippet = (snippet: string): string => {
   const collapsed = snippet.replace(/\s+/g, ' ').trim();
 
-  if (collapsed.length <= 240) {
+  if (collapsed.length <= SNIPPET_PREVIEW_MAX_LENGTH) {
     return collapsed;
   }
 
-  return `${collapsed.slice(0, 237)}...`;
+  return `${collapsed.slice(
+    0,
+    SNIPPET_PREVIEW_MAX_LENGTH - SNIPPET_PREVIEW_ELLIPSIS.length,
+  )}${SNIPPET_PREVIEW_ELLIPSIS}`;
 };
 
 const formatSeveritySummary = (issues: ScanIssue[]): string =>
