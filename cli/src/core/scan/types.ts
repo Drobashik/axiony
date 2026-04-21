@@ -12,10 +12,16 @@ export type ScanResult = {
   url: string;
   timestamp: string;
   metadata?: {
+    disabledRules?: string[];
+    profile?: string;
     selector?: string;
   };
   issues: ScanIssue[];
   manualChecks: ScanIssue[];
+};
+
+export type AxeRunOptions = {
+  rules?: Record<string, { enabled: boolean }>;
 };
 
 export type ScanOutputFormat = 'text' | 'json';
@@ -24,6 +30,7 @@ export type ScanProgressMessage =
   | 'Launching browser'
   | 'Opening page'
   | 'Rendering HTML'
+  | 'Rendering component'
   | 'Injecting accessibility engine'
   | 'Validating selector'
   | 'Running accessibility checks'
@@ -57,6 +64,6 @@ export type AxeRunResult = {
 
 export type WindowWithAxe = Window & {
   axe: {
-    run: (context?: string) => Promise<AxeRunResult>;
+    run: (context?: string, options?: AxeRunOptions) => Promise<AxeRunResult>;
   };
 };

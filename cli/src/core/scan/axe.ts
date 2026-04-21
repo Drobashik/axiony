@@ -3,6 +3,7 @@ import { chromium } from 'playwright';
 import type { Browser, Page } from 'playwright';
 import type {
   AxeRunResult,
+  AxeRunOptions,
   ScanIssue,
   ScanProgressMessage,
   ScanResult,
@@ -74,11 +75,12 @@ const ensureAxeIsReady = async (page: Page): Promise<void> => {
 export async function runAxeOnPage(
   page: Page,
   options: {
+    axeOptions?: AxeRunOptions;
     onProgressPrint: (message: ScanProgressMessage) => void;
     selector?: string;
   },
 ): Promise<Pick<ScanResult, 'url' | 'timestamp' | 'issues' | 'manualChecks'>> {
-  const { onProgressPrint, selector } = options;
+  const { axeOptions, onProgressPrint, selector } = options;
 
   onProgressPrint('Injecting accessibility engine');
 
@@ -101,11 +103,14 @@ export async function runAxeOnPage(
   let result: AxeRunResult;
 
   try {
-    result = await page.evaluate(async (context) => {
-      const runtimeWindow = window as unknown as WindowWithAxe;
+    result = await page.evaluate(
+      async ({ context, runOptions }) => {
+        const runtimeWindow = window as unknown as WindowWithAxe;
 
-      return await runtimeWindow.axe.run(context);
-    }, selector);
+        return await runtimeWindow.axe.run(context, runOptions);
+      },
+      { context: selector, runOptions: axeOptions },
+    );
   } catch {
     throw new Error('Could not run accessibility scan.');
   }

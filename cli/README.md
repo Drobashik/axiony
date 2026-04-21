@@ -15,6 +15,7 @@ You can also run it without a global install:
 ```bash
 npx axiony-cli scan https://example.com
 npx axiony-cli html --file ./page.html
+npx axiony-cli component ./src/Button.tsx
 ```
 
 Axiony uses Playwright. If the browser is not installed yet, run:
@@ -38,6 +39,12 @@ axiony html --file <path>
 axiony html --html "<html>..."
 ```
 
+Scan a local React component:
+
+```bash
+axiony component <path>
+```
+
 Examples:
 
 ```bash
@@ -46,6 +53,7 @@ axiony scan http://localhost:3000
 axiony scan https://example.com --selector main
 axiony html --file ./page.html
 axiony html --html "<main><img src='hero.png'></main>"
+axiony component ./src/Button.tsx
 ```
 
 By default, Axiony prints a human-readable report to stdout.
@@ -54,6 +62,10 @@ Use `--selector <selector>` to scan only the matched DOM region. If the selector
 
 For `axiony html`, provide exactly one input source: `--file <path>` or `--html "<html>..."`.
 
+For `axiony component`, provide one local `.tsx`, `.jsx`, `.ts`, or `.js` React component file from a project that has `react` and `react-dom` installed. Axiony uses zero-config best-effort rendering: it prefers a default export, otherwise it tries the first likely PascalCase named component export, renders it with empty props, and scans the rendered DOM. Components that need required props, providers, routing, app runtime context, CSS/module bundling, or non-React frameworks may fail with a clear message instead of being scanned. Storybook, Vue, Angular, custom wrappers, prop generation, and autofix are not supported in this first version.
+
+Component scans use a component-focused axe profile. By default Axiony scans `#root` and disables page-level rules that are usually noisy for isolated components: `landmark-one-main`, `page-has-heading-one`, and `region`. Full page scans still run those rules through `axiony scan`.
+
 ## JSON Output
 
 Use `--json` to print pretty JSON:
@@ -61,6 +73,7 @@ Use `--json` to print pretty JSON:
 ```bash
 axiony scan https://example.com --json
 axiony html --file ./page.html --json
+axiony component ./src/Button.tsx --json
 ```
 
 Example shape:
@@ -87,6 +100,7 @@ Use `--json --output <name>` to write the JSON report to `axy-reports`.
 ```bash
 axiony scan https://example.com --json --output example
 axiony html --file ./page.html --json --output page
+axiony component ./src/Button.tsx --json --output button
 ```
 
 This writes:
@@ -109,11 +123,12 @@ axy-reports/example.json
 axiony --help
 axiony scan --help
 axiony html --help
+axiony component --help
 ```
 
 ## Status
 
-This release currently supports single-page URL scans and raw HTML scans only. Axiony still needs deeper test coverage, CI examples, more reporting controls, configuration support, and broader real-world validation.
+This release currently supports single-page URL scans, raw HTML scans, and best-effort local React component scans. Axiony still needs deeper test coverage, CI examples, more reporting controls, configuration support, and broader real-world validation.
 
 ## License
 
