@@ -6,6 +6,13 @@ import type {
 import { text } from '../terminal/styles';
 
 const severityOrder = ['critical', 'serious', 'moderate', 'minor', 'unknown'];
+const SNIPPET_PREVIEW_MAX_LENGTH = 240;
+const SNIPPET_PREVIEW_ELLIPSIS = '...';
+
+type ScanReportOptions = {
+  command?: string;
+  verbose?: boolean;
+};
 
 const severityStyle = (severity: string): ((value: string) => string) => {
   switch (severity) {
@@ -45,6 +52,19 @@ const formatSelectors = (selectors: string[]): string => {
   return `${preview} ${text.muted(`+${selectors.length - 3} more`)}`;
 };
 
+const formatSnippet = (snippet: string): string => {
+  const collapsed = snippet.replace(/\s+/g, ' ').trim();
+
+  if (collapsed.length <= SNIPPET_PREVIEW_MAX_LENGTH) {
+    return collapsed;
+  }
+
+  return `${collapsed.slice(
+    0,
+    SNIPPET_PREVIEW_MAX_LENGTH - SNIPPET_PREVIEW_ELLIPSIS.length,
+  )}${SNIPPET_PREVIEW_ELLIPSIS}`;
+};
+
 const formatSeveritySummary = (issues: ScanIssue[]): string =>
   severityOrder
     .map((severity) => {
@@ -74,25 +94,54 @@ const groupIssuesBySeverity = (
     .filter(([, entries]) => entries.length > 0);
 };
 
-const formatIssue = (issue: ScanIssue): string => {
+const formatIssueElements = (
+  issue: ScanIssue,
+  options: ScanReportOptions,
+): string => {
+  if (!options.verbose) {
+    return `${text.muted('Elements:')} ${formatSelectors(issue.selectors)}`;
+  }
+
+  const lines = [`${text.muted('Elements:')} ${issue.selectors.length}`];
+
+  issue.selectors.forEach((selector, index) => {
+    lines.push(`${index + 1}. ${selector}`);
+
+    const snippet = issue.snippets?.[index];
+
+    if (snippet) {
+      lines.push(`   ${text.muted(formatSnippet(snippet))}`);
+    }
+  });
+
+  return lines.join('\n');
+};
+
+const formatIssue = (issue: ScanIssue, options: ScanReportOptions): string => {
   const severity = severityStyle(issue.impact)(titleCase(issue.impact));
 
   return [
     `${severity} ${text.bold(issue.id)}`,
     `${text.muted('Fix:')} ${issue.help}`,
     `${text.muted('Why:')} ${issue.description}`,
-    `${text.muted('Elements:')} ${formatSelectors(issue.selectors)}`,
+    formatIssueElements(issue, options),
   ].join('\n');
 };
 
-const formatManualCheck = (issue: ScanIssue): string =>
+const formatManualCheck = (
+  issue: ScanIssue,
+  options: ScanReportOptions,
+): string =>
   [
     text.bold(issue.id),
     `${text.muted('Check:')} ${issue.help}`,
-    `${text.muted('Elements:')} ${formatSelectors(issue.selectors)}`,
+    formatIssueElements(issue, options),
   ].join('\n');
 
-export const formatScanReport = (result: ScanResult): string => {
+export const formatScanReport = (
+  result: ScanResult,
+  options: ScanReportOptions = {},
+): string => {
   const issueCount = result.issues.length;
   const manualCheckCount = result.manualChecks.length;
   const elementCount = result.issues.reduce(
@@ -128,7 +177,7 @@ export const formatScanReport = (result: ScanResult): string => {
       );
 
       for (const issue of issues) {
-        lines.push(formatIssue(issue));
+        lines.push(formatIssue(issue, options));
         lines.push('');
       }
 
@@ -143,7 +192,7 @@ export const formatScanReport = (result: ScanResult): string => {
     );
 
     for (const issue of sortIssues(result.manualChecks)) {
-      lines.push(formatManualCheck(issue));
+      lines.push(formatManualCheck(issue, options));
       lines.push('');
     }
 
@@ -154,7 +203,7 @@ export const formatScanReport = (result: ScanResult): string => {
   lines.push(
     issueCount === 0
       ? `${text.muted('Summary:')} ${text.success('Ready to ship with no axe violations.')}`
-      : `${text.muted('Summary:')} Review the ${issueCount} highlighted rule violation(s) and re-run ${text.bold('axiony scan')} after fixes.`,
+      : `${text.muted('Summary:')} Review the ${issueCount} highlighted rule violation(s) and re-run ${text.bold(options.command ?? 'Axiony')} after fixes.`,
   );
 
   return lines.join('\n');
@@ -163,10 +212,11 @@ export const formatScanReport = (result: ScanResult): string => {
 export const formatScanOutput = (
   result: ScanResult,
   format: ScanOutputFormat,
+  options: ScanReportOptions = {},
 ): string => {
   if (format === 'json') {
     return JSON.stringify(result, null, 2);
   }
 
-  return formatScanReport(result);
+  return formatScanReport(result, options);
 };

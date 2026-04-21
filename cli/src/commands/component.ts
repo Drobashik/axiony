@@ -15,6 +15,7 @@ const componentLogger = logger.child('component');
 
 type ComponentCommandOptions = JsonOutputOptions & {
   selector?: string;
+  verbose?: boolean;
 };
 
 const validateComponentOptions = (options: ComponentCommandOptions) => {
@@ -66,7 +67,10 @@ const runComponentCommand = async (
       );
     }
 
-    const output = formatScanOutput(result, format);
+    const output = formatScanOutput(result, format, {
+      command: 'axiony component',
+      verbose: options.verbose,
+    });
 
     if (options.output) {
       await writeOutputFile(options.output, output);
@@ -99,6 +103,7 @@ export const registerComponentCommand = () => {
     .argument('<path>', 'Local .tsx, .jsx, .ts, or .js React component file')
     .option('--json', 'Print the scan result as pretty JSON')
     .option('--selector <selector>', 'Scan only within a matched DOM region')
+    .option('--verbose', 'Print all matched elements and HTML snippets')
     .option(
       '-o, --output <name>',
       'Write JSON output to a file in axy-reports (requires --json)',
@@ -110,6 +115,7 @@ export const registerComponentCommand = () => {
 Examples:
   $ axiony component ./src/Button.tsx
   $ axiony component ./src/Button.tsx --json
+  $ axiony component ./src/Button.tsx --verbose
   $ axiony component ./src/Button.tsx --selector "#root"
 `,
     )
