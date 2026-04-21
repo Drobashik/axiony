@@ -68,6 +68,8 @@ Use `--verbose` to print every matched selector and a compact HTML snippet for e
 
 Use `--selector <selector>` to scan only the matched DOM region. If the selector does not exist on the page or rendered HTML, Axiony exits with a clear error.
 
+For URL scans, Axiony waits briefly for meaningful page content and a stable DOM before running axe. If the loaded page looks like a bot challenge or refresh page, the report includes a warning because the results may not represent the intended target page.
+
 For `axiony html`, provide exactly one input source: `--file <path>` or `--html "<html>..."`.
 
 For `axiony component`, provide one local `.tsx`, `.jsx`, `.ts`, or `.js` React component file from a project that has `react` and `react-dom` installed. Axiony uses zero-config best-effort rendering: it prefers a default export, otherwise it tries the first likely PascalCase named component export, renders it with empty props, and scans the rendered DOM. Components that need required props, providers, routing, app runtime context, CSS/module bundling, or non-React frameworks may fail with a clear message instead of being scanned. Storybook, Vue, Angular, custom wrappers, prop generation, and autofix are not supported in this first version.

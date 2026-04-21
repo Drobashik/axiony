@@ -16,6 +16,7 @@ export type ScanResult = {
     disabledRules?: string[];
     profile?: string;
     selector?: string;
+    warnings?: string[];
   };
   issues: ScanIssue[];
   manualChecks: ScanIssue[];
@@ -30,6 +31,7 @@ export type ScanOutputFormat = 'text' | 'json';
 export type ScanProgressMessage =
   | 'Launching browser'
   | 'Opening page'
+  | 'Waiting for page readiness'
   | 'Rendering HTML'
   | 'Rendering component'
   | 'Injecting accessibility engine'

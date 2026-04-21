@@ -4,7 +4,7 @@ import { extname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type { Browser } from 'playwright';
 import { BROWSER_TIMEOUT } from '../scan/constants';
-import { launchScanBrowser, runAxeOnPage } from '../scan/axe';
+import { createScanPage, launchScanBrowser, runAxeOnPage } from '../scan/axe';
 import type { ScanResult } from '../scan/types';
 import {
   COMPONENT_HARNESS_HTML,
@@ -72,7 +72,7 @@ export async function scanComponent(
 
     browser = await launchScanBrowser(onProgressPrint);
 
-    const page = await browser.newPage();
+    const page = await createScanPage(browser);
 
     try {
       await page.goto(pathToFileURL(harnessPath).href, {
