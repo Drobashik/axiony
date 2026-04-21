@@ -4,6 +4,7 @@ export type ScanIssue = {
   description: string;
   help: string;
   helpUrl: string;
+  snippets?: string[];
   tags: string[];
   selectors: string[];
 };
@@ -42,6 +43,7 @@ export type ScanUrlOptions = {
 };
 
 type AxeNodeResult = {
+  html?: string;
   target: string[];
 };
 

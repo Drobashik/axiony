@@ -15,6 +15,7 @@ const scanLogger = logger.child('scan');
 
 type ScanCommandOptions = JsonOutputOptions & {
   selector?: string;
+  verbose?: boolean;
 };
 
 const validateScanOptions = (options: ScanCommandOptions) => {
@@ -58,7 +59,10 @@ const runScanCommand = async (url: string, options: ScanCommandOptions) => {
       );
     }
 
-    const output = formatScanOutput(result, format);
+    const output = formatScanOutput(result, format, {
+      command: 'axiony scan',
+      verbose: options.verbose,
+    });
 
     if (options.output) {
       await writeOutputFile(options.output, output);
@@ -91,6 +95,7 @@ export const registerScanCommand = () => {
     .argument('<url>', 'Target URL to scan')
     .option('--json', 'Print the scan result as pretty JSON')
     .option('--selector <selector>', 'Scan only within a matched DOM region')
+    .option('--verbose', 'Print all matched elements and HTML snippets')
     .option(
       '-o, --output <name>',
       'Write JSON output to a file in axy-reports (requires --json)',
@@ -102,6 +107,7 @@ export const registerScanCommand = () => {
 Examples:
   $ axiony scan https://example.com
   $ axiony scan https://example.com --selector main
+  $ axiony scan https://example.com --verbose
   $ axiony scan https://example.com --json
   $ axiony scan https://example.com --json --output example
 `,

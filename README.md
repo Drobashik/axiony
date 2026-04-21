@@ -56,12 +56,15 @@ Examples:
 axiony scan https://example.com
 axiony scan http://localhost:3000
 axiony scan https://example.com --selector main
+axiony scan https://example.com --verbose
 axiony html --file ./page.html
 axiony html --html "<main><img src='hero.png'></main>"
 axiony component ./src/Button.tsx
 ```
 
 By default, Axiony prints a human-readable report to stdout.
+
+Use `--verbose` to print every matched selector and a compact HTML snippet for each affected element.
 
 Use `--selector <selector>` to scan only the matched DOM region. If the selector does not exist on the page or rendered HTML, Axiony exits with a clear error.
 
@@ -70,6 +73,29 @@ For `axiony html`, provide exactly one input source: `--file <path>` or `--html 
 For `axiony component`, provide one local `.tsx`, `.jsx`, `.ts`, or `.js` React component file from a project that has `react` and `react-dom` installed. Axiony uses zero-config best-effort rendering: it prefers a default export, otherwise it tries the first likely PascalCase named component export, renders it with empty props, and scans the rendered DOM. Components that need required props, providers, routing, app runtime context, CSS/module bundling, or non-React frameworks may fail with a clear message instead of being scanned. Storybook, Vue, Angular, custom wrappers, prop generation, and autofix are not supported in this first version.
 
 Component scans use a component-focused axe profile. By default Axiony scans `#root` and disables page-level rules that are usually noisy for isolated components: `landmark-one-main`, `page-has-heading-one`, and `region`. Full page scans still run those rules through `axiony scan`.
+
+## Verbose Output
+
+Use `--verbose` when you need more context for each issue:
+
+```bash
+axiony html --html "<main><h1>Demo</h1><div id='Path'>One</div><span id='Path'>Two</span></main>" --verbose
+```
+
+Example excerpt:
+
+```text
+Serious duplicate-id
+Fix: ID attributes must be unique
+Why: Ensures id attribute values are unique. Duplicate value: "Path".
+Elements: 2
+1. #Path
+   <div id="Path">One</div>
+2. #Path
+   <span id="Path">Two</span>
+```
+
+Without `--verbose`, Axiony keeps reports compact and shows a short selector preview instead.
 
 ## JSON Output
 

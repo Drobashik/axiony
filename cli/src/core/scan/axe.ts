@@ -10,6 +10,7 @@ import type {
   WindowWithAxe,
 } from './types';
 import { IMPACT_UNKNOWN } from './constants';
+import { findDuplicateIdIssues } from './custom-checks';
 import { text } from '../../ui/terminal/styles';
 
 export const launchScanBrowser = async (
@@ -40,6 +41,9 @@ const mapAxeResultToIssue = (
   description: result.description,
   help: result.help,
   helpUrl: result.helpUrl,
+  snippets: result.nodes
+    .map((node) => node.html)
+    .filter((html): html is string => Boolean(html)),
   tags: result.tags,
   selectors: result.nodes.flatMap((node) => node.target),
 });
@@ -117,10 +121,12 @@ export async function runAxeOnPage(
 
   onProgressPrint('Processing results');
 
+  const customIssues = await findDuplicateIdIssues(page, selector);
+
   return {
     url: result.url,
     timestamp: result.timestamp,
-    issues: result.violations.map(mapAxeResultToIssue),
+    issues: [...result.violations.map(mapAxeResultToIssue), ...customIssues],
     manualChecks: result.incomplete.map(mapAxeResultToIssue),
   };
 }

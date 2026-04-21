@@ -18,6 +18,7 @@ type HtmlCommandOptions = JsonOutputOptions & {
   file?: string;
   html?: string;
   selector?: string;
+  verbose?: boolean;
 };
 
 const validateHtmlOptions = (options: HtmlCommandOptions) => {
@@ -87,7 +88,10 @@ const runHtmlCommand = async (options: HtmlCommandOptions) => {
       );
     }
 
-    const output = formatScanOutput(result, format);
+    const output = formatScanOutput(result, format, {
+      command: 'axiony html',
+      verbose: options.verbose,
+    });
 
     if (options.output) {
       await writeOutputFile(options.output, output);
@@ -121,6 +125,7 @@ export const registerHtmlCommand = () => {
     .option('--html <html>', 'Read HTML from an inline string')
     .option('--json', 'Print the scan result as pretty JSON')
     .option('--selector <selector>', 'Scan only within a matched DOM region')
+    .option('--verbose', 'Print all matched elements and HTML snippets')
     .option(
       '-o, --output <name>',
       'Write JSON output to a file in axy-reports (requires --json)',
@@ -132,6 +137,7 @@ export const registerHtmlCommand = () => {
 Examples:
   $ axiony html --file ./page.html
   $ axiony html --html "<main><img src='hero.png'></main>"
+  $ axiony html --file ./page.html --verbose
   $ axiony html --file ./page.html --json
   $ axiony html --file ./page.html --json --output page
 `,
