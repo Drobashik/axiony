@@ -1,5 +1,15 @@
 export const BROWSER_TIMEOUT = 100_000;
 
+export const MISSING_CHROMIUM_MESSAGE = [
+  'Axiony needs Playwright Chromium to run scans.',
+  '',
+  'Run:',
+  '  axiony install',
+  '',
+  'For CI/Linux:',
+  '  axiony install --with-deps',
+].join('\n');
+
 export const IMPACT_UNKNOWN = 'unknown';
 
 export const PAGE_READINESS_TIMEOUT = 7_000;

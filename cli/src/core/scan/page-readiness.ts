@@ -12,11 +12,7 @@ import {
 export const POSSIBLE_CHALLENGE_PAGE_WARNING =
   'The page appears to be a bot challenge or refresh page. Results may not represent the intended target page.';
 
-const CHALLENGE_URL_PATTERNS = [
-  '__cf_chl_rt_tk',
-  '/cdn-cgi/challenge-platform/',
-  'challenge',
-];
+const CHALLENGE_URL_PATTERNS = ['__cf_chl_rt_tk', '/cdn-cgi/challenge-platform/', 'challenge'];
 
 const CHALLENGE_TEXT_PATTERNS = [
   'checking your browser',
@@ -28,9 +24,7 @@ const CHALLENGE_TEXT_PATTERNS = [
 const looksLikeChallengeUrl = (url: string): boolean => {
   const normalizedUrl = url.toLowerCase();
 
-  return CHALLENGE_URL_PATTERNS.some((pattern) =>
-    normalizedUrl.includes(pattern),
-  );
+  return CHALLENGE_URL_PATTERNS.some((pattern) => normalizedUrl.includes(pattern));
 };
 
 const delay = async (timeout: number): Promise<void> => {
@@ -40,9 +34,7 @@ const delay = async (timeout: number): Promise<void> => {
 };
 
 export const waitForPageReadiness = async (page: Page): Promise<void> => {
-  await page
-    .waitForSelector('body', { timeout: PAGE_READINESS_TIMEOUT })
-    .catch(() => undefined);
+  await page.waitForSelector('body', { timeout: PAGE_READINESS_TIMEOUT }).catch(() => undefined);
 
   await page
     .evaluate(
@@ -74,10 +66,7 @@ export const waitForPageReadiness = async (page: Page): Promise<void> => {
               'a,button,input,select,textarea,main,nav,header,footer,[role]',
             ).length;
 
-            return (
-              textLength >= minTextLength ||
-              interactiveCount >= minInteractiveElements
-            );
+            return textLength >= minTextLength || interactiveCount >= minInteractiveElements;
           };
 
           const observer = new MutationObserver(() => {
@@ -114,15 +103,11 @@ export const waitForPageReadiness = async (page: Page): Promise<void> => {
 export const detectPageWarnings = async (page: Page): Promise<string[]> => {
   const warningSignals = await page
     .evaluate((challengeTextPatterns) => {
-      const hasMetaRefresh = Boolean(
-        document.querySelector('meta[http-equiv="refresh" i]'),
-      );
+      const hasMetaRefresh = Boolean(document.querySelector('meta[http-equiv="refresh" i]'));
       const pageText = `${document.title} ${document.body?.innerText ?? ''}`
         .toLowerCase()
         .slice(0, 5_000);
-      const hasChallengeText = challengeTextPatterns.some((pattern) =>
-        pageText.includes(pattern),
-      );
+      const hasChallengeText = challengeTextPatterns.some((pattern) => pageText.includes(pattern));
 
       return {
         hasChallengeText,

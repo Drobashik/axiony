@@ -72,9 +72,7 @@ export class CliSpinner {
       return;
     }
 
-    const frame = text.accent(
-      FRAMES[this.frameIndex % FRAMES.length] ?? FRAMES[0],
-    );
+    const frame = text.accent(FRAMES[this.frameIndex % FRAMES.length] ?? FRAMES[0]);
     this.frameIndex += 1;
     process.stdout.write(`\r\x1b[2K${frame} ${this.text}`);
   }

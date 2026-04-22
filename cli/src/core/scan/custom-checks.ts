@@ -1,8 +1,7 @@
 import type { Page } from 'playwright';
 import type { ScanIssue } from './types';
 
-const DUPLICATE_ID_HELP_URL =
-  'https://www.w3.org/WAI/WCAG21/Techniques/failures/F77';
+const DUPLICATE_ID_HELP_URL = 'https://www.w3.org/WAI/WCAG21/Techniques/failures/F77';
 
 type DuplicateIdResult = {
   idValue: string;
@@ -17,9 +16,7 @@ export const findDuplicateIdIssues = async (
   selector?: string,
 ): Promise<ScanIssue[]> => {
   const duplicates = await page.evaluate((contextSelector) => {
-    const root = contextSelector
-      ? document.querySelector(contextSelector)
-      : document;
+    const root = contextSelector ? document.querySelector(contextSelector) : document;
 
     if (!root) {
       return [];
@@ -61,11 +58,7 @@ export const findDuplicateIdIssues = async (
       ].map((name) => name.toLowerCase()),
     );
 
-    const A11Y_REFERENCE_ATTRIBUTES = [
-      'aria-describedby',
-      'aria-labelledby',
-      'for',
-    ];
+    const A11Y_REFERENCE_ATTRIBUTES = ['aria-describedby', 'aria-labelledby', 'for'];
 
     const getReferenceTokens = (value: string | null): string[] =>
       value?.split(/\s+/).filter(Boolean) ?? [];
@@ -73,17 +66,13 @@ export const findDuplicateIdIssues = async (
     const isSvgResourceElement = (element: Element): boolean => {
       const elementName = element.localName.toLowerCase();
 
-      return (
-        SVG_RESOURCE_NAMES.has(elementName) || Boolean(element.closest('defs'))
-      );
+      return SVG_RESOURCE_NAMES.has(elementName) || Boolean(element.closest('defs'));
     };
 
     const isReferencedByA11yAttribute = (id: string): boolean =>
       Array.from(
         root.querySelectorAll(
-          A11Y_REFERENCE_ATTRIBUTES.map((attribute) => `[${attribute}]`).join(
-            ',',
-          ),
+          A11Y_REFERENCE_ATTRIBUTES.map((attribute) => `[${attribute}]`).join(','),
         ),
       ).some((element) =>
         A11Y_REFERENCE_ATTRIBUTES.some((attribute) =>
@@ -92,21 +81,18 @@ export const findDuplicateIdIssues = async (
       );
 
     const isReferencedByFragmentLink = (id: string): boolean =>
-      Array.from(root.querySelectorAll('a[href],area[href]')).some(
-        (element) => {
-          const href = element.getAttribute('href');
+      Array.from(root.querySelectorAll('a[href],area[href]')).some((element) => {
+        const href = element.getAttribute('href');
 
-          return href === `#${id}`;
-        },
-      );
+        return href === `#${id}`;
+      });
 
     return Array.from(byId.entries())
       .filter(([, elements]) => elements.length > 1)
       .map(([idValue, elements]) => {
         const isSvgResourceOnly = elements.every(isSvgResourceElement);
         const hasStrongA11yRisk =
-          isReferencedByA11yAttribute(idValue) ||
-          isReferencedByFragmentLink(idValue);
+          isReferencedByA11yAttribute(idValue) || isReferencedByFragmentLink(idValue);
 
         return {
           idValue,

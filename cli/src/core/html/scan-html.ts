@@ -3,15 +3,8 @@ import { createScanPage, launchScanBrowser, runAxeOnPage } from '../scan/axe';
 import type { ScanResult } from '../scan/types';
 import type { ScanHtmlOptions } from './types';
 
-export async function scanHtml(
-  html: string,
-  options: ScanHtmlOptions = {},
-): Promise<ScanResult> {
-  const {
-    label = 'HTML input',
-    onProgressPrint = () => undefined,
-    selector,
-  } = options;
+export async function scanHtml(html: string, options: ScanHtmlOptions = {}): Promise<ScanResult> {
+  const { label = 'HTML input', onProgressPrint = () => undefined, selector } = options;
 
   const browser = await launchScanBrowser(onProgressPrint);
 

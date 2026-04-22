@@ -57,10 +57,7 @@ test('uses a component-focused axe profile without page-level rules', async () =
     const issueIds = result.issues.map((issue) => issue.id);
 
     assert.equal(result.metadata?.profile, 'component');
-    assert.deepEqual(
-      result.metadata?.disabledRules,
-      COMPONENT_SCAN_DISABLED_RULES,
-    );
+    assert.deepEqual(result.metadata?.disabledRules, COMPONENT_SCAN_DISABLED_RULES);
     assert.ok(!issueIds.includes('landmark-one-main'));
     assert.ok(!issueIds.includes('page-has-heading-one'));
     assert.ok(!issueIds.includes('region'));
@@ -100,10 +97,7 @@ test('fails clearly when no component export exists', async () => {
   try {
     await writeFile(componentPath, 'export const label = "Save";', 'utf8');
 
-    await assert.rejects(
-      () => scanComponent(componentPath),
-      /no React component export found/,
-    );
+    await assert.rejects(() => scanComponent(componentPath), /no React component export found/);
   } finally {
     await rm(tempDir, { force: true, recursive: true });
   }
@@ -120,10 +114,7 @@ test('fails clearly when React dependencies are not installed in the target proj
       'utf8',
     );
 
-    await assert.rejects(
-      () => scanComponent(componentPath),
-      /React dependencies were not found/,
-    );
+    await assert.rejects(() => scanComponent(componentPath), /React dependencies were not found/);
   } finally {
     await rm(tempDir, { force: true, recursive: true });
   }

@@ -15,10 +15,7 @@ import {
   COMPONENT_TEMP_DIR_PREFIX,
 } from './constants';
 import type { ScanComponentOptions } from './types';
-import {
-  buildReactComponentBundle,
-  renderBundledReactComponent,
-} from './react/render-harness';
+import { buildReactComponentBundle, renderBundledReactComponent } from './react/render-harness';
 import { resolveReactComponentExport } from './react/export-resolution';
 import { COMPONENT_SCAN_AXE_OPTIONS } from './profile';
 
@@ -60,11 +57,7 @@ export async function scanComponent(
   let browser: Browser | undefined;
 
   try {
-    const bundlePath = await buildReactComponentBundle(
-      resolvedPath,
-      selection,
-      tempDir,
-    );
+    const bundlePath = await buildReactComponentBundle(resolvedPath, selection, tempDir);
 
     await writeFile(harnessPath, COMPONENT_HARNESS_HTML, 'utf8');
 
@@ -81,17 +74,11 @@ export async function scanComponent(
       });
       await renderBundledReactComponent(page, bundlePath);
     } catch (error) {
-      if (
-        error instanceof Error &&
-        error.message.includes('Component could not be rendered')
-      ) {
+      if (error instanceof Error && error.message.includes('Component could not be rendered')) {
         throw error;
       }
 
-      if (
-        error instanceof Error &&
-        error.message.includes('failed to import component file')
-      ) {
+      if (error instanceof Error && error.message.includes('failed to import component file')) {
         throw error;
       }
 

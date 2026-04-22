@@ -10,8 +10,7 @@ const ANSI = {
   gray: '\x1b[90m',
 } as const;
 
-const supportsColor = (): boolean =>
-  Boolean(process.stdout.isTTY) && !process.env.NO_COLOR;
+const supportsColor = (): boolean => Boolean(process.stdout.isTTY) && !process.env.NO_COLOR;
 
 const apply = (value: string, ...codes: string[]): string => {
   if (!supportsColor()) {

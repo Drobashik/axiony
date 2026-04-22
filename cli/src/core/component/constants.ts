@@ -8,12 +8,7 @@ export const COMPONENT_SCAN_DISABLED_RULES = [
   'region',
 ];
 
-export const COMPONENT_SUPPORTED_EXTENSIONS = new Set([
-  '.tsx',
-  '.jsx',
-  '.ts',
-  '.js',
-]);
+export const COMPONENT_SUPPORTED_EXTENSIONS = new Set(['.tsx', '.jsx', '.ts', '.js']);
 
 export const COMPONENT_TEMP_DIR_PREFIX = 'axiony-component-';
 

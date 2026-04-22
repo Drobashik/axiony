@@ -1,8 +1,4 @@
-import type {
-  ScanIssue,
-  ScanOutputFormat,
-  ScanResult,
-} from '../../core/scan/types';
+import type { ScanIssue, ScanOutputFormat, ScanResult } from '../../core/scan/types';
 import { text } from '../terminal/styles';
 
 const severityOrder = ['critical', 'serious', 'moderate', 'minor', 'unknown'];
@@ -28,13 +24,11 @@ const severityStyle = (severity: string): ((value: string) => string) => {
   }
 };
 
-const titleCase = (value: string): string =>
-  value.charAt(0).toUpperCase() + value.slice(1);
+const titleCase = (value: string): string => value.charAt(0).toUpperCase() + value.slice(1);
 
 const sortIssues = (issues: ScanIssue[]): ScanIssue[] =>
   [...issues].sort((left, right) => {
-    const severityDelta =
-      severityOrder.indexOf(left.impact) - severityOrder.indexOf(right.impact);
+    const severityDelta = severityOrder.indexOf(left.impact) - severityOrder.indexOf(right.impact);
 
     if (severityDelta !== 0) {
       return severityDelta;
@@ -94,10 +88,7 @@ const groupIssuesBySeverity = (
     .filter(([, entries]) => entries.length > 0);
 };
 
-const formatIssueElements = (
-  issue: ScanIssue,
-  options: ScanReportOptions,
-): string => {
+const formatIssueElements = (issue: ScanIssue, options: ScanReportOptions): string => {
   if (!options.verbose) {
     return `${text.muted('Elements:')} ${formatSelectors(issue.selectors)}`;
   }
@@ -128,26 +119,17 @@ const formatIssue = (issue: ScanIssue, options: ScanReportOptions): string => {
   ].join('\n');
 };
 
-const formatManualCheck = (
-  issue: ScanIssue,
-  options: ScanReportOptions,
-): string =>
+const formatManualCheck = (issue: ScanIssue, options: ScanReportOptions): string =>
   [
     text.bold(issue.id),
     `${text.muted('Check:')} ${issue.help}`,
     formatIssueElements(issue, options),
   ].join('\n');
 
-export const formatScanReport = (
-  result: ScanResult,
-  options: ScanReportOptions = {},
-): string => {
+export const formatScanReport = (result: ScanResult, options: ScanReportOptions = {}): string => {
   const issueCount = result.issues.length;
   const manualCheckCount = result.manualChecks.length;
-  const elementCount = result.issues.reduce(
-    (count, issue) => count + issue.selectors.length,
-    0,
-  );
+  const elementCount = result.issues.reduce((count, issue) => count + issue.selectors.length, 0);
   const statusLine =
     issueCount === 0
       ? `${text.success('PASS')} No accessibility issues detected`
@@ -172,9 +154,7 @@ export const formatScanReport = (
   lines.push(`${text.muted('Status:')} ${statusLine}`);
 
   if (issueCount > 0) {
-    lines.push(
-      `${text.muted('Severity:')} ${formatSeveritySummary(result.issues)}`,
-    );
+    lines.push(`${text.muted('Severity:')} ${formatSeveritySummary(result.issues)}`);
 
     for (const [severity, issues] of groupIssuesBySeverity(result.issues)) {
       lines.push('');
@@ -193,9 +173,7 @@ export const formatScanReport = (
 
   if (manualCheckCount > 0) {
     lines.push('');
-    lines.push(
-      `${text.info(text.bold('Manual checks'))} ${text.muted(`(${manualCheckCount})`)}`,
-    );
+    lines.push(`${text.info(text.bold('Manual checks'))} ${text.muted(`(${manualCheckCount})`)}`);
 
     for (const issue of sortIssues(result.manualChecks)) {
       lines.push(formatManualCheck(issue, options));

@@ -33,11 +33,7 @@ export class Logger {
     this.write('success', message, meta);
   }
 
-  print(
-    message: string,
-    options: LoggerWriteOptions = {},
-    ...meta: LogValue[]
-  ): void {
+  print(message: string, options: LoggerWriteOptions = {}, ...meta: LogValue[]): void {
     this.write('info', message, meta, {
       formatted: false,
       ...options,
@@ -61,19 +57,13 @@ export class Logger {
     meta: LogValue[],
     options: LoggerWriteOptions = {},
   ): void {
-    const stream =
-      options.stream === 'stderr' || level === 'error'
-        ? console.error
-        : console.log;
+    const stream = options.stream === 'stderr' || level === 'error' ? console.error : console.log;
     if (!message) {
       stream(message);
       return;
     }
 
-    const output =
-      options.formatted === false
-        ? message
-        : this.formatMessage(level, message);
+    const output = options.formatted === false ? message : this.formatMessage(level, message);
 
     if (meta.length === 0) {
       stream(output);

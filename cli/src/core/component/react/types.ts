@@ -1,6 +1,4 @@
-export type BrowserRenderResult =
-  | { ok: true }
-  | { ok: false; message: string; stack?: string };
+export type BrowserRenderResult = { ok: true } | { ok: false; message: string; stack?: string };
 
 export type ReactComponentBundle = {
   scriptPath: string;

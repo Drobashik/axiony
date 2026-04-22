@@ -3,14 +3,9 @@ import assert from 'node:assert/strict';
 import { scanHtml } from '../../html/scan-html';
 import type { ScanIssue, ScanResult } from '../types';
 
-const findDuplicateIdIssue = (
-  result: ScanResult,
-  duplicateValue: string,
-): ScanIssue | undefined =>
+const findDuplicateIdIssue = (result: ScanResult, duplicateValue: string): ScanIssue | undefined =>
   result.issues.find(
-    (issue) =>
-      issue.id === 'duplicate-id' &&
-      issue.description.includes(`"${duplicateValue}"`),
+    (issue) => issue.id === 'duplicate-id' && issue.description.includes(`"${duplicateValue}"`),
   );
 
 test('adds duplicate id issues with element snippets', async () => {
