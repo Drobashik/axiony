@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { formatScanOutput } from '../formatter';
+import { formatCiScanReport, formatScanOutput } from '../formatter';
 import type { ScanResult } from '../../../core/scan/types';
 
 const scanResult: ScanResult = {
@@ -42,4 +42,18 @@ test('prints selectors and snippets in verbose text reports', () => {
   assert.match(output, /<div id="Path">First<\/div>/);
   assert.match(output, /2\. #Path/);
   assert.match(output, /<span id="Path">Second<\/span>/);
+});
+
+test('prints a compact CI scan report with JSON artifact path', () => {
+  const output = formatCiScanReport(scanResult, {
+    outputPath: 'axy-reports/component.json',
+  });
+
+  assert.match(output, /Axiony accessibility scan/);
+  assert.match(output, /Target: fixture/);
+  assert.match(output, /Status: failed/);
+  assert.match(output, /Issues: 1/);
+  assert.match(output, /serious\s+1/);
+  assert.match(output, /serious\s+duplicate-id\s+#Path, #Path/);
+  assert.match(output, /JSON report:\n\s{2}axy-reports\/component\.json/);
 });
