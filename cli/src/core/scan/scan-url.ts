@@ -1,10 +1,5 @@
 import { BROWSER_TIMEOUT } from './constants';
-import {
-  addAxeInitScript,
-  createScanPage,
-  launchScanBrowser,
-  runAxeOnPage,
-} from './axe';
+import { addAxeInitScript, createScanPage, launchScanBrowser, runAxeOnPage } from './axe';
 import {
   detectPageWarnings,
   waitForChallengeResolution,
@@ -40,10 +35,7 @@ const buildScanUrlMetadata = (
   return metadata;
 };
 
-export async function scanUrl(
-  url: string,
-  options: ScanUrlOptions = {},
-): Promise<ScanResult> {
+export async function scanUrl(url: string, options: ScanUrlOptions = {}): Promise<ScanResult> {
   const { onProgressPrint = () => undefined, selector } = options;
 
   const browser = await launchScanBrowser(onProgressPrint);
@@ -60,9 +52,7 @@ export async function scanUrl(
         timeout: BROWSER_TIMEOUT,
       });
     } catch (error) {
-      const navigationError = new Error(
-        formatNavigationError(error),
-      ) as Error & {
+      const navigationError = new Error(formatNavigationError(error)) as Error & {
         cause?: unknown;
       };
       navigationError.cause = error;

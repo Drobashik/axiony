@@ -2,10 +2,7 @@ import { writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { build, type BuildFailure } from 'esbuild';
 import type { Page } from 'playwright';
-import {
-  COMPONENT_RENDER_TIMEOUT_ERROR,
-  MISSING_REACT_DEPENDENCIES_MESSAGE,
-} from '../constants';
+import { COMPONENT_RENDER_TIMEOUT_ERROR, MISSING_REACT_DEPENDENCIES_MESSAGE } from '../constants';
 import type { ComponentExportSelection } from '../types';
 import { resolveReactDependencies } from './dependencies';
 import { createReactRenderEntry } from './entry-template';
@@ -88,11 +85,7 @@ export const renderBundledReactComponent = async (
     .waitForFunction(() => Boolean(window.__AXIONY_COMPONENT_RENDER__), null, {
       timeout: 5000,
     })
-    .then(() =>
-      page.evaluate(
-        () => window.__AXIONY_COMPONENT_RENDER__ as BrowserRenderResult,
-      ),
-    )
+    .then(() => page.evaluate(() => window.__AXIONY_COMPONENT_RENDER__ as BrowserRenderResult))
     .catch((): BrowserRenderResult => {
       return {
         ok: false,
@@ -101,13 +94,10 @@ export const renderBundledReactComponent = async (
     });
 
   if (!result.ok) {
-    const location = await mapStackToOriginalLocation(
-      result.stack,
-      bundle.sourceMapPath,
-    ).catch(() => undefined);
-    const message = location
-      ? `${result.message}\nLocation: ${location}`
-      : result.message;
+    const location = await mapStackToOriginalLocation(result.stack, bundle.sourceMapPath).catch(
+      () => undefined,
+    );
+    const message = location ? `${result.message}\nLocation: ${location}` : result.message;
 
     throw new Error(message);
   }

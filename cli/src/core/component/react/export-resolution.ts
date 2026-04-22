@@ -1,8 +1,7 @@
 import ts from 'typescript';
 import type { ComponentExportSelection } from '../types';
 
-const isPascalCase = (value: string): boolean =>
-  /^[A-Z][A-Za-z0-9]*$/.test(value);
+const isPascalCase = (value: string): boolean => /^[A-Z][A-Za-z0-9]*$/.test(value);
 
 const hasModifier = (
   node: ts.Node,
@@ -11,17 +10,14 @@ const hasModifier = (
   ts.canHaveModifiers(node) &&
   Boolean(ts.getModifiers(node)?.some((modifier) => modifier.kind === kind));
 
-const isExported = (node: ts.Node): boolean =>
-  hasModifier(node, ts.SyntaxKind.ExportKeyword);
+const isExported = (node: ts.Node): boolean => hasModifier(node, ts.SyntaxKind.ExportKeyword);
 
 const isDefaultExported = (node: ts.Node): boolean =>
   isExported(node) && hasModifier(node, ts.SyntaxKind.DefaultKeyword);
 
 const exportedVariableNames = (statement: ts.VariableStatement): string[] =>
   statement.declarationList.declarations
-    .map((declaration) =>
-      ts.isIdentifier(declaration.name) ? declaration.name.text : undefined,
-    )
+    .map((declaration) => (ts.isIdentifier(declaration.name) ? declaration.name.text : undefined))
     .filter((name): name is string => Boolean(name));
 
 export const resolveReactComponentExport = (
@@ -44,16 +40,14 @@ export const resolveReactComponentExport = (
     }
 
     if (
-      (ts.isFunctionDeclaration(statement) ||
-        ts.isClassDeclaration(statement)) &&
+      (ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement)) &&
       isDefaultExported(statement)
     ) {
       return { kind: 'default', exportName: 'default' };
     }
 
     if (
-      (ts.isFunctionDeclaration(statement) ||
-        ts.isClassDeclaration(statement)) &&
+      (ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement)) &&
       isExported(statement) &&
       statement.name &&
       isPascalCase(statement.name.text)
@@ -62,9 +56,7 @@ export const resolveReactComponentExport = (
     }
 
     if (ts.isVariableStatement(statement) && isExported(statement)) {
-      namedCandidates.push(
-        ...exportedVariableNames(statement).filter(isPascalCase),
-      );
+      namedCandidates.push(...exportedVariableNames(statement).filter(isPascalCase));
     }
 
     if (

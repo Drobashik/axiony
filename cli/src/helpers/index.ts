@@ -7,8 +7,7 @@ export const validateUrl = (value: string) => {
     throw new Error('Invalid URL. Use a full http:// or https:// URL.');
   }
 
-  const isHttpProtocol =
-    parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:';
+  const isHttpProtocol = parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:';
 
   if (!isHttpProtocol) {
     throw new Error('Invalid URL. Use a full http:// or https:// URL.');

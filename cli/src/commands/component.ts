@@ -26,10 +26,7 @@ const validateComponentOptions = (options: ComponentCommandOptions) => {
   }
 };
 
-const runComponentCommand = async (
-  filePath: string,
-  options: ComponentCommandOptions,
-) => {
+const runComponentCommand = async (filePath: string, options: ComponentCommandOptions) => {
   const format = getScanOutputFormat(options);
 
   const shouldPrintToStdout = !options.output;
@@ -80,8 +77,7 @@ const runComponentCommand = async (
 
     process.exitCode = result.issues.length === 0 ? 0 : 1;
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : 'Unknown error occurred';
+    const message = error instanceof Error ? error.message : 'Unknown error occurred';
 
     if (spinnerStarted) {
       spinner.fail(`Scan failed for ${targetLabel}`);
@@ -104,10 +100,7 @@ export const registerComponentCommand = () => {
     .option('--json', 'Print the scan result as pretty JSON')
     .option('--selector <selector>', 'Scan only within a matched DOM region')
     .option('--verbose', 'Print all matched elements and HTML snippets')
-    .option(
-      '-o, --output <name>',
-      'Write JSON output to a file in axy-reports (requires --json)',
-    )
+    .option('-o, --output <name>', 'Write JSON output to a file in axy-reports (requires --json)')
     .addHelpText(
       'after',
       `

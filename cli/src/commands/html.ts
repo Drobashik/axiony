@@ -24,13 +24,10 @@ type HtmlCommandOptions = JsonOutputOptions & {
 const validateHtmlOptions = (options: HtmlCommandOptions) => {
   validateJsonOutputOptions(options);
 
-  const inputCount =
-    Number(options.file !== undefined) + Number(options.html !== undefined);
+  const inputCount = Number(options.file !== undefined) + Number(options.html !== undefined);
 
   if (inputCount !== 1) {
-    throw new Error(
-      'Provide exactly one input source: --file <path> or --html "<html>...".',
-    );
+    throw new Error('Provide exactly one input source: --file <path> or --html "<html>...".');
   }
 
   if (options.selector !== undefined && options.selector.trim().length === 0) {
@@ -58,12 +55,9 @@ const runHtmlCommand = async (options: HtmlCommandOptions) => {
     validateHtmlOptions(options);
 
     const html =
-      options.file !== undefined
-        ? await readHtmlFile(options.file)
-        : (options.html ?? '');
+      options.file !== undefined ? await readHtmlFile(options.file) : (options.html ?? '');
 
-    targetLabel =
-      options.file !== undefined ? resolve(options.file) : 'HTML input';
+    targetLabel = options.file !== undefined ? resolve(options.file) : 'HTML input';
 
     if (shouldPrintProgress) {
       spinner.start(`Scanning ${targetLabel}`);
@@ -101,8 +95,7 @@ const runHtmlCommand = async (options: HtmlCommandOptions) => {
 
     process.exitCode = result.issues.length === 0 ? 0 : 1;
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : 'Unknown error occurred';
+    const message = error instanceof Error ? error.message : 'Unknown error occurred';
 
     if (spinnerStarted) {
       spinner.fail(`Scan failed for ${targetLabel}`);
@@ -126,10 +119,7 @@ export const registerHtmlCommand = () => {
     .option('--json', 'Print the scan result as pretty JSON')
     .option('--selector <selector>', 'Scan only within a matched DOM region')
     .option('--verbose', 'Print all matched elements and HTML snippets')
-    .option(
-      '-o, --output <name>',
-      'Write JSON output to a file in axy-reports (requires --json)',
-    )
+    .option('-o, --output <name>', 'Write JSON output to a file in axy-reports (requires --json)')
     .addHelpText(
       'after',
       `

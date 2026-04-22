@@ -1,2 +1,1 @@
-export const toBrowserImportPath = (filePath: string): string =>
-  filePath.replace(/\\/g, '/');
+export const toBrowserImportPath = (filePath: string): string => filePath.replace(/\\/g, '/');

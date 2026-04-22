@@ -1,11 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { dirname, isAbsolute, normalize, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import {
-  originalPositionFor,
-  TraceMap,
-  type SourceMapInput,
-} from '@jridgewell/trace-mapping';
+import { originalPositionFor, TraceMap, type SourceMapInput } from '@jridgewell/trace-mapping';
 
 const formatSourcePath = (source: string, sourceMapPath: string): string => {
   if (source.startsWith('file://')) {
@@ -32,9 +28,7 @@ export const mapStackToOriginalLocation = async (
     return undefined;
   }
 
-  const sourceMap = JSON.parse(
-    await readFile(sourceMapPath, 'utf8'),
-  ) as SourceMapInput;
+  const sourceMap = JSON.parse(await readFile(sourceMapPath, 'utf8')) as SourceMapInput;
   const traceMap = new TraceMap(sourceMap);
   const framePattern = /bundle\.js:(\d+):(\d+)/g;
   let match: RegExpExecArray | null;
@@ -47,11 +41,7 @@ export const mapStackToOriginalLocation = async (
       column: Math.max(0, column - 1),
     });
 
-    if (
-      original.source &&
-      original.line !== null &&
-      isRelevantSource(original.source)
-    ) {
+    if (original.source && original.line !== null && isRelevantSource(original.source)) {
       return `${formatSourcePath(original.source, sourceMapPath)}:${original.line}:${(original.column ?? 0) + 1}`;
     }
   }

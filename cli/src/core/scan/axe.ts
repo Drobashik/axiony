@@ -11,6 +11,7 @@ import type {
 } from './types';
 import {
   IMPACT_UNKNOWN,
+  MISSING_CHROMIUM_MESSAGE,
   SCAN_ACCEPT_LANGUAGE,
   SCAN_LOCALE,
   SCAN_TIMEZONE_ID,
@@ -18,7 +19,6 @@ import {
   SCAN_VIEWPORT_WIDTH,
 } from './constants';
 import { findDuplicateIdIssues } from './custom-checks';
-import { text } from '../../ui/terminal/styles';
 
 export const launchScanBrowser = async (
   onProgressPrint: (message: ScanProgressMessage) => void,
@@ -28,9 +28,7 @@ export const launchScanBrowser = async (
 
     return await chromium.launch({ headless: true });
   } catch {
-    throw new Error(
-      `Could not launch browser. Run ${text.bold('npx playwright install')} and try again.`,
-    );
+    throw new Error(MISSING_CHROMIUM_MESSAGE);
   }
 };
 
@@ -60,25 +58,18 @@ export const addAxeInitScript = async (page: Page): Promise<void> => {
   });
 };
 
-const mapAxeResultToIssue = (
-  result: AxeRunResult['violations'][number],
-): ScanIssue => ({
+const mapAxeResultToIssue = (result: AxeRunResult['violations'][number]): ScanIssue => ({
   id: result.id,
   impact: result.impact ?? IMPACT_UNKNOWN,
   description: result.description,
   help: result.help,
   helpUrl: result.helpUrl,
-  snippets: result.nodes
-    .map((node) => node.html)
-    .filter((html): html is string => Boolean(html)),
+  snippets: result.nodes.map((node) => node.html).filter((html): html is string => Boolean(html)),
   tags: result.tags,
   selectors: result.nodes.flatMap((node) => node.target),
 });
 
-const selectorExists = async (
-  page: Page,
-  selector: string,
-): Promise<boolean> => {
+const selectorExists = async (page: Page, selector: string): Promise<boolean> => {
   try {
     return await page.evaluate(
       (cssSelector) => document.querySelector(cssSelector) !== null,

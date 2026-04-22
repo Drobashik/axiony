@@ -4,9 +4,7 @@ import { createServer, type IncomingMessage, type Server } from 'node:http';
 import { scanUrl } from '../scan-url';
 import { POSSIBLE_CHALLENGE_PAGE_WARNING } from '../page-readiness';
 
-const listen = async (
-  html: string,
-): Promise<{ server: Server; url: string }> => {
+const listen = async (html: string): Promise<{ server: Server; url: string }> => {
   return listenWithHandler(() => html);
 };
 
@@ -64,9 +62,7 @@ test('warns when URL scan lands on a meta-refresh page', async () => {
   try {
     const result = await scanUrl(url);
 
-    assert.deepEqual(result.metadata?.warnings, [
-      POSSIBLE_CHALLENGE_PAGE_WARNING,
-    ]);
+    assert.deepEqual(result.metadata?.warnings, [POSSIBLE_CHALLENGE_PAGE_WARNING]);
   } finally {
     await closeServer(server);
   }

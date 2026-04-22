@@ -2,9 +2,7 @@ import type { ComponentExportSelection } from '../types';
 import type { ReactDependencyPaths } from './types';
 import { toBrowserImportPath } from './path';
 
-const selectedComponentExpression = (
-  selection: ComponentExportSelection,
-): string =>
+const selectedComponentExpression = (selection: ComponentExportSelection): string =>
   selection.kind === 'default'
     ? 'ComponentModule.default'
     : `ComponentModule[${JSON.stringify(selection.exportName)}]`;

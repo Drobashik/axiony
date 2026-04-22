@@ -72,8 +72,7 @@ const runScanCommand = async (url: string, options: ScanCommandOptions) => {
 
     process.exitCode = result.issues.length === 0 ? 0 : 1;
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : 'Unknown error occurred';
+    const message = error instanceof Error ? error.message : 'Unknown error occurred';
 
     if (spinnerStarted) {
       spinner.fail(`Scan failed for ${url}`);
@@ -89,17 +88,12 @@ export const registerScanCommand = () => {
   program
     .command('scan')
     .summary('Scan one URL for accessibility issues')
-    .description(
-      'Scan one page with axe-core and print an accessibility report.',
-    )
+    .description('Scan one page with axe-core and print an accessibility report.')
     .argument('<url>', 'Target URL to scan')
     .option('--json', 'Print the scan result as pretty JSON')
     .option('--selector <selector>', 'Scan only within a matched DOM region')
     .option('--verbose', 'Print all matched elements and HTML snippets')
-    .option(
-      '-o, --output <name>',
-      'Write JSON output to a file in axy-reports (requires --json)',
-    )
+    .option('-o, --output <name>', 'Write JSON output to a file in axy-reports (requires --json)')
     .addHelpText(
       'after',
       `
