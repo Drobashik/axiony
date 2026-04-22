@@ -3,7 +3,7 @@ import { validateUrl } from '../helpers';
 import { logger } from '../logger/Logger';
 import { scanUrl } from '../core/scan/scan-url';
 import { CliSpinner } from '../ui/terminal/spinner';
-import { formatScanOutput } from '../ui/scan/formatter';
+import { formatCiScanReport, formatScanOutput } from '../ui/scan/formatter';
 import {
   getScanOutputFormat,
   validateJsonOutputOptions,
@@ -14,6 +14,7 @@ import {
 const scanLogger = logger.child('scan');
 
 type ScanCommandOptions = JsonOutputOptions & {
+  ci?: boolean;
   selector?: string;
   verbose?: boolean;
 };
@@ -29,7 +30,7 @@ const validateScanOptions = (options: ScanCommandOptions) => {
 const runScanCommand = async (url: string, options: ScanCommandOptions) => {
   const format = getScanOutputFormat(options);
   const shouldPrintToStdout = !options.output;
-  const shouldPrintProgress = shouldPrintToStdout && format === 'text';
+  const shouldPrintProgress = !options.ci && shouldPrintToStdout && format === 'text';
   const spinner = new CliSpinner(scanLogger);
   let spinnerStarted = false;
 
@@ -59,15 +60,23 @@ const runScanCommand = async (url: string, options: ScanCommandOptions) => {
       );
     }
 
-    const output = formatScanOutput(result, format, {
-      command: 'axiony scan',
-      verbose: options.verbose,
-    });
+    if (options.ci) {
+      const outputPath = options.output
+        ? await writeOutputFile(options.output, JSON.stringify(result, null, 2))
+        : undefined;
 
-    if (options.output) {
-      await writeOutputFile(options.output, output);
+      scanLogger.print(formatCiScanReport(result, { outputPath }));
     } else {
-      scanLogger.print(output);
+      const output = formatScanOutput(result, format, {
+        command: 'axiony scan',
+        verbose: options.verbose,
+      });
+
+      if (options.output) {
+        await writeOutputFile(options.output, output);
+      } else {
+        scanLogger.print(output);
+      }
     }
 
     process.exitCode = result.issues.length === 0 ? 0 : 1;
@@ -91,9 +100,13 @@ export const registerScanCommand = () => {
     .description('Scan one page with axe-core and print an accessibility report.')
     .argument('<url>', 'Target URL to scan')
     .option('--json', 'Print the scan result as pretty JSON')
+    .option('--ci', 'Print a compact CI-friendly scan summary')
     .option('--selector <selector>', 'Scan only within a matched DOM region')
     .option('--verbose', 'Print all matched elements and HTML snippets')
-    .option('-o, --output <name>', 'Write JSON output to a file in axy-reports (requires --json)')
+    .option(
+      '-o, --output <name>',
+      'Write JSON output to a file in axy-reports (requires --json or --ci)',
+    )
     .addHelpText(
       'after',
       `
@@ -104,6 +117,7 @@ Examples:
   $ axiony scan https://example.com --verbose
   $ axiony scan https://example.com --json
   $ axiony scan https://example.com --json --output example
+  $ axiony scan http://127.0.0.1:3000 --ci --output app
 `,
     )
     .action(runScanCommand);

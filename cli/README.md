@@ -8,6 +8,7 @@ This is a preview release. The current CLI is intentionally small and should be 
 
 ```bash
 npm install -g axiony-cli
+axiony install
 ```
 
 You can also run it without a global install:
@@ -21,7 +22,13 @@ npx axiony-cli component ./src/Button.tsx
 Axiony uses Playwright. If the browser is not installed yet, run:
 
 ```bash
-npx playwright install
+axiony install
+```
+
+For CI/Linux environments, install Chromium with system dependencies:
+
+```bash
+npx axiony-cli install --with-deps
 ```
 
 ## Usage
@@ -52,12 +59,15 @@ axiony scan https://example.com
 axiony scan http://localhost:3000
 axiony scan https://example.com --selector main
 axiony scan https://example.com --verbose
+axiony scan http://127.0.0.1:3000 --ci
 axiony html --file ./page.html
 axiony html --html "<main><img src='hero.png'></main>"
 axiony component ./src/Button.tsx
 ```
 
 By default, Axiony prints a human-readable report to stdout.
+
+Use `--ci` to print a compact pipeline-friendly summary without spinner output.
 
 Use `--verbose` to print every matched selector and a compact HTML snippet for each affected element.
 
@@ -139,6 +149,112 @@ axy-reports/example.json
 
 `--output` requires `--json`.
 
+In CI mode, `--output` writes a JSON artifact while the console still receives a readable CI summary:
+
+```bash
+axiony scan http://127.0.0.1:3000 --ci --output app
+```
+
+This writes:
+
+```text
+axy-reports/app.json
+```
+
+## CI/CD Usage
+
+Axiony works best in CI when the pipeline scans the rendered output of your app. For a full application scan, build the app, start it with the command your framework uses, wait until the local URL is ready, then scan that URL:
+
+```bash
+npm ci
+npm run build
+npx axiony-cli install --with-deps
+# Start your app with your framework's production or preview command.
+# Example for Vite:
+npm run preview -- --host 127.0.0.1 --port 3000
+npx wait-on http://127.0.0.1:3000
+npx axiony-cli scan http://127.0.0.1:3000 --ci --output axiony-report
+```
+
+The start command is framework-specific. For Vite, use `npm run preview -- --host 127.0.0.1 --port 3000`. For Next.js, use `npm run start -- --hostname 127.0.0.1 --port 3000`. For static builds, serve the generated output directory.
+
+Static builds can be served with a small static server:
+
+```bash
+npm run build
+npx serve dist --listen 3000
+npx wait-on http://127.0.0.1:3000
+npx axiony-cli scan http://127.0.0.1:3000 --ci --output axiony-report
+```
+
+The `scan` command checks the DOM rendered in a browser. It does not statically analyze source files. Use `component` for isolated React component checks and `html` for static HTML files:
+
+```bash
+npx axiony-cli scan http://127.0.0.1:3000 --ci --output app
+npx axiony-cli component ./src/components/Button.tsx --ci --output button
+npx axiony-cli html --file ./dist/index.html --ci --output page
+```
+
+`component` scans are useful for design systems and self-contained React components, but they do not replace a full app scan. Components that require props, providers, routing, app runtime context, CSS/module bundling, or framework-specific runtime behavior may need a small wrapper component.
+
+### GitHub Actions
+
+```yaml
+name: Accessibility
+
+on:
+  pull_request:
+
+jobs:
+  axiony:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+      - run: npx axiony-cli install --with-deps
+      # Use your framework's production/preview server command here.
+      # Vite: npm run preview -- --host 127.0.0.1 --port 3000
+      # Next.js: npm run start -- --hostname 127.0.0.1 --port 3000
+      - run: npm run preview -- --host 127.0.0.1 --port 3000 &
+      - run: npx wait-on http://127.0.0.1:3000
+      - run: npx axiony-cli scan http://127.0.0.1:3000 --ci --output axiony-report
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: axiony-report
+          path: axy-reports/
+```
+
+### GitLab CI
+
+```yaml
+accessibility:
+  image: node:20
+  script:
+    - npm ci
+    - npm run build
+    - npx axiony-cli install --with-deps
+    # Use your framework's production/preview server command here.
+    - npm run preview -- --host 127.0.0.1 --port 3000 &
+    - npx wait-on http://127.0.0.1:3000
+    - npx axiony-cli scan http://127.0.0.1:3000 --ci --output axiony-report
+  artifacts:
+    when: always
+    paths:
+      - axy-reports/
+```
+
+In CI, Axiony keeps the same exit codes as local scans.
+
 ## Exit Codes
 
 - `0`: scan completed and no accessibility issues were found
@@ -149,6 +265,7 @@ axy-reports/example.json
 
 ```bash
 axiony --help
+axiony install --help
 axiony scan --help
 axiony html --help
 axiony component --help
@@ -156,7 +273,7 @@ axiony component --help
 
 ## Status
 
-This release currently supports single-page URL scans, raw HTML scans, and best-effort local React component scans. Axiony still needs deeper test coverage, CI examples, more reporting controls, configuration support, and broader real-world validation.
+This release currently supports single-page URL scans, raw HTML scans, best-effort local React component scans, and CI-friendly summaries. Axiony still needs deeper test coverage, more reporting controls, configuration support, and broader real-world validation.
 
 ## License
 

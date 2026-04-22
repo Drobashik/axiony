@@ -4,7 +4,7 @@ import { program } from 'commander';
 import { logger } from '../logger/Logger';
 import { scanHtml } from '../core/html/scan-html';
 import { CliSpinner } from '../ui/terminal/spinner';
-import { formatScanOutput } from '../ui/scan/formatter';
+import { formatCiScanReport, formatScanOutput } from '../ui/scan/formatter';
 import {
   getScanOutputFormat,
   validateJsonOutputOptions,
@@ -15,6 +15,7 @@ import {
 const htmlLogger = logger.child('html');
 
 type HtmlCommandOptions = JsonOutputOptions & {
+  ci?: boolean;
   file?: string;
   html?: string;
   selector?: string;
@@ -46,7 +47,7 @@ const readHtmlFile = async (filePath: string): Promise<string> => {
 const runHtmlCommand = async (options: HtmlCommandOptions) => {
   const format = getScanOutputFormat(options);
   const shouldPrintToStdout = !options.output;
-  const shouldPrintProgress = shouldPrintToStdout && format === 'text';
+  const shouldPrintProgress = !options.ci && shouldPrintToStdout && format === 'text';
   const spinner = new CliSpinner(htmlLogger);
   let spinnerStarted = false;
   let targetLabel = 'HTML input';
@@ -82,15 +83,23 @@ const runHtmlCommand = async (options: HtmlCommandOptions) => {
       );
     }
 
-    const output = formatScanOutput(result, format, {
-      command: 'axiony html',
-      verbose: options.verbose,
-    });
+    if (options.ci) {
+      const outputPath = options.output
+        ? await writeOutputFile(options.output, JSON.stringify(result, null, 2))
+        : undefined;
 
-    if (options.output) {
-      await writeOutputFile(options.output, output);
+      htmlLogger.print(formatCiScanReport(result, { outputPath }));
     } else {
-      htmlLogger.print(output);
+      const output = formatScanOutput(result, format, {
+        command: 'axiony html',
+        verbose: options.verbose,
+      });
+
+      if (options.output) {
+        await writeOutputFile(options.output, output);
+      } else {
+        htmlLogger.print(output);
+      }
     }
 
     process.exitCode = result.issues.length === 0 ? 0 : 1;
@@ -117,9 +126,13 @@ export const registerHtmlCommand = () => {
     .option('--file <path>', 'Read HTML from a local file')
     .option('--html <html>', 'Read HTML from an inline string')
     .option('--json', 'Print the scan result as pretty JSON')
+    .option('--ci', 'Print a compact CI-friendly scan summary')
     .option('--selector <selector>', 'Scan only within a matched DOM region')
     .option('--verbose', 'Print all matched elements and HTML snippets')
-    .option('-o, --output <name>', 'Write JSON output to a file in axy-reports (requires --json)')
+    .option(
+      '-o, --output <name>',
+      'Write JSON output to a file in axy-reports (requires --json or --ci)',
+    )
     .addHelpText(
       'after',
       `
@@ -130,6 +143,7 @@ Examples:
   $ axiony html --file ./page.html --verbose
   $ axiony html --file ./page.html --json
   $ axiony html --file ./page.html --json --output page
+  $ axiony html --file ./page.html --ci --output page
 `,
     )
     .action(runHtmlCommand);

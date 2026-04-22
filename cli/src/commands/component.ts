@@ -3,7 +3,7 @@ import { program } from 'commander';
 import { logger } from '../logger/Logger';
 import { scanComponent } from '../core/component/scan-component';
 import { CliSpinner } from '../ui/terminal/spinner';
-import { formatScanOutput } from '../ui/scan/formatter';
+import { formatCiScanReport, formatScanOutput } from '../ui/scan/formatter';
 import {
   getScanOutputFormat,
   validateJsonOutputOptions,
@@ -14,6 +14,7 @@ import {
 const componentLogger = logger.child('component');
 
 type ComponentCommandOptions = JsonOutputOptions & {
+  ci?: boolean;
   selector?: string;
   verbose?: boolean;
 };
@@ -31,7 +32,7 @@ const runComponentCommand = async (filePath: string, options: ComponentCommandOp
 
   const shouldPrintToStdout = !options.output;
 
-  const shouldPrintProgress = shouldPrintToStdout && format === 'text';
+  const shouldPrintProgress = !options.ci && shouldPrintToStdout && format === 'text';
 
   const spinner = new CliSpinner(componentLogger);
 
@@ -64,15 +65,23 @@ const runComponentCommand = async (filePath: string, options: ComponentCommandOp
       );
     }
 
-    const output = formatScanOutput(result, format, {
-      command: 'axiony component',
-      verbose: options.verbose,
-    });
+    if (options.ci) {
+      const outputPath = options.output
+        ? await writeOutputFile(options.output, JSON.stringify(result, null, 2))
+        : undefined;
 
-    if (options.output) {
-      await writeOutputFile(options.output, output);
+      componentLogger.print(formatCiScanReport(result, { outputPath }));
     } else {
-      componentLogger.print(output);
+      const output = formatScanOutput(result, format, {
+        command: 'axiony component',
+        verbose: options.verbose,
+      });
+
+      if (options.output) {
+        await writeOutputFile(options.output, output);
+      } else {
+        componentLogger.print(output);
+      }
     }
 
     process.exitCode = result.issues.length === 0 ? 0 : 1;
@@ -98,9 +107,13 @@ export const registerComponentCommand = () => {
     )
     .argument('<path>', 'Local .tsx, .jsx, .ts, or .js React component file')
     .option('--json', 'Print the scan result as pretty JSON')
+    .option('--ci', 'Print a compact CI-friendly scan summary')
     .option('--selector <selector>', 'Scan only within a matched DOM region')
     .option('--verbose', 'Print all matched elements and HTML snippets')
-    .option('-o, --output <name>', 'Write JSON output to a file in axy-reports (requires --json)')
+    .option(
+      '-o, --output <name>',
+      'Write JSON output to a file in axy-reports (requires --json or --ci)',
+    )
     .addHelpText(
       'after',
       `
@@ -110,6 +123,7 @@ Examples:
   $ axiony component ./src/Button.tsx --json
   $ axiony component ./src/Button.tsx --verbose
   $ axiony component ./src/Button.tsx --selector "#root"
+  $ axiony component ./src/Button.tsx --ci --output button
 `,
     )
     .action(runComponentCommand);

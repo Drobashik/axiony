@@ -10,6 +10,11 @@ type ScanReportOptions = {
   verbose?: boolean;
 };
 
+type CiScanReportOptions = {
+  outputPath?: string;
+  topIssueLimit?: number;
+};
+
 const severityStyle = (severity: string): ((value: string) => string) => {
   switch (severity) {
     case 'critical':
@@ -44,6 +49,18 @@ const formatSelectors = (selectors: string[]): string => {
 
   const preview = selectors.slice(0, 3).join(', ');
   return `${preview} ${text.muted(`+${selectors.length - 3} more`)}`;
+};
+
+const formatCiSelectors = (selectors: string[]): string => {
+  if (selectors.length === 0) {
+    return '-';
+  }
+
+  if (selectors.length <= 2) {
+    return selectors.join(', ');
+  }
+
+  return `${selectors.slice(0, 2).join(', ')} +${selectors.length - 2} more`;
 };
 
 const formatSnippet = (snippet: string): string => {
@@ -189,6 +206,63 @@ export const formatScanReport = (result: ScanResult, options: ScanReportOptions 
       ? `${text.muted('Summary:')} ${text.success('Ready to ship with no axe violations.')}`
       : `${text.muted('Summary:')} Review the ${issueCount} highlighted rule violation(s) and re-run ${text.bold(options.command ?? 'Axiony')} after fixes.`,
   );
+
+  return lines.join('\n');
+};
+
+export const formatCiScanReport = (
+  result: ScanResult,
+  options: CiScanReportOptions = {},
+): string => {
+  const issueCount = result.issues.length;
+  const status = issueCount === 0 ? 'passed' : 'failed';
+  const topIssueLimit = options.topIssueLimit ?? 5;
+  const lines = ['Axiony accessibility scan', '', `Target: ${result.url}`];
+
+  if (result.metadata?.selector) {
+    lines.push(`Selector: ${result.metadata.selector}`);
+  }
+
+  if (result.metadata?.warnings?.length) {
+    for (const warning of result.metadata.warnings) {
+      lines.push(`Warning: ${warning}`);
+    }
+  }
+
+  lines.push(`Status: ${status}`, `Issues: ${issueCount}`, '');
+  lines.push('Severity:');
+
+  for (const severity of severityOrder) {
+    const count = result.issues.filter((issue) => issue.impact === severity).length;
+
+    if (severity === 'unknown' && count === 0) {
+      continue;
+    }
+
+    lines.push(`  ${severity.padEnd(9)} ${count}`);
+  }
+
+  if (issueCount > 0) {
+    lines.push('', 'Top issues:');
+
+    for (const issue of sortIssues(result.issues).slice(0, topIssueLimit)) {
+      lines.push(
+        `  ${issue.impact.padEnd(9)} ${issue.id.padEnd(18)} ${formatCiSelectors(issue.selectors)}`,
+      );
+    }
+
+    if (issueCount > topIssueLimit) {
+      lines.push(`  ... ${issueCount - topIssueLimit} more issue(s)`);
+    }
+  }
+
+  if (result.manualChecks.length > 0) {
+    lines.push('', `Manual checks: ${result.manualChecks.length}`);
+  }
+
+  if (options.outputPath) {
+    lines.push('', 'JSON report:', `  ${options.outputPath}`);
+  }
 
   return lines.join('\n');
 };
