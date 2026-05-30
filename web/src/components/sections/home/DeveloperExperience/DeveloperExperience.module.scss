@@ -1,0 +1,77 @@
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+
+  @include breakpoint-down(lg) { grid-template-columns: 1fr; }
+}
+
+.lead {
+  margin-top: 12px;
+  margin-bottom: 28px;
+  font-size: 1rem;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  padding: 4px;
+  background: var(--bg-muted);
+  border-radius: var(--radius-md);
+  width: fit-content;
+}
+
+.tab {
+  font-size: 0.82rem;
+  font-weight: 500;
+  font-family: var(--font-mono);
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all $transition;
+  color: var(--text-secondary);
+  border: none;
+  background: transparent;
+}
+
+.tabActive {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.example {
+  margin-top: 8px;
+}
+
+.highlights {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.highlightHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.highlightDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.highlightTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.highlightDesc {
+  font-size: 0.85rem;
+}

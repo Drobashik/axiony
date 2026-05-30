@@ -1,0 +1,11 @@
+.tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.775rem;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-muted);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-default);
+}

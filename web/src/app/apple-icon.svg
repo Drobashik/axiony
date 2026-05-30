@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" fill="none">
+  <!-- Larger artwork for Apple touch icon (180x180). iOS clips
+       to its own rounded mask, so the rect can stay square — but
+       we keep a small radius so non-iOS clients still look right. -->
+  <rect width="180" height="180" rx="40" fill="#1d6cf3"/>
+  <path d="M40 142 L90 38 L140 142" stroke="white" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M65 105 H115" stroke="white" stroke-width="15" stroke-linecap="round"/>
+</svg>

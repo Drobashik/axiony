@@ -1,0 +1,97 @@
+.intro {
+  text-align: center;
+  margin-bottom: 56px;
+}
+
+.connectorRow {
+  display: flex;
+  align-items: center;
+  padding: 24px 0 0;
+}
+
+.dotWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+.dot {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0;
+  position: relative;
+  z-index: 1;
+  transition:
+    background 0.4s ease,
+    border-color 0.4s ease,
+    color 0.4s ease,
+    box-shadow 0.4s ease;
+}
+
+.dotActive {
+  background: var(--blue-dim);
+  border-color: var(--blue-border);
+  color: var(--blue);
+  animation: stepPulse 2.4s ease-out infinite;
+}
+
+.line {
+  flex: 1;
+  height: 1px;
+  background: var(--border-default);
+  position: relative;
+  overflow: hidden;
+}
+
+.fill {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--blue), var(--violet));
+  box-shadow: 0 0 6px oklch(0.62 0.22 240 / 0.5);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.6s $ease-out;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  list-style: none;
+  padding: 0;
+
+  @include breakpoint-down(lg) { grid-template-columns: 1fr 1fr; }
+  @include breakpoint-down(md) { grid-template-columns: 1fr; }
+}
+
+.step {
+  padding: 24px;
+  text-align: center;
+  position: relative;
+
+  h4 {
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+    transition: color 0.4s ease;
+  }
+
+  p {
+    font-size: 0.875rem;
+    transition: color 0.4s ease;
+  }
+}
+
+.stepActive h4 {
+  color: var(--blue);
+}

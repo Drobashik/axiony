@@ -1,0 +1,72 @@
+.intro {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.grid {
+  @include responsive-grid(3, 16px);
+}
+
+.card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: 28px;
+  margin: 0;
+  transition:
+    transform 200ms $ease-out,
+    box-shadow 200ms $ease-out,
+    border-color $transition;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--border-default);
+  }
+}
+
+.quoteMark {
+  color: var(--blue);
+  font-size: 1.4rem;
+  margin-bottom: 12px;
+  line-height: 1;
+}
+
+.quote {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  margin: 0 0 20px;
+  font-style: italic;
+}
+
+.author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.meta {
+  font-size: 0.825rem;
+
+  strong {
+    display: block;
+    color: var(--text-primary);
+  }
+
+  span {
+    color: var(--text-muted);
+  }
+}

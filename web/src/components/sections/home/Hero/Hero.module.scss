@@ -1,0 +1,287 @@
+// =====================================================================
+// Hero — "scan in progress → scan complete" choreography.
+//
+// The Hero is mounted *after* the BootGate's loading screen has
+// cleared, so every animation here fires naturally on first paint —
+// no readiness flag, no class gating. Each element starts hidden
+// (opacity 0) and animates into view via `animation-fill-mode: both`
+// so the initial keyframe applies even before the animation starts.
+//
+// Sequence on mount:
+//   1. The grid + orbs swell in.
+//   2. A scan beam sweeps from top to bottom of the section once.
+//   3. Title characters illuminate one after another with a brief
+//      blue glow.
+//   4. Subtitle / actions / terminal cascade in beneath the title.
+//   5. Floating severity markers fade in like real scan results.
+// =====================================================================
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: 100px 0 80px;
+  text-align: center;
+  isolation: isolate; // contain z-index for the scan beam + markers
+}
+
+.container {
+  position: relative;
+  z-index: 2;
+}
+
+// ── Background grid ──────────────────────────────────────────────────
+.grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background-image:
+    linear-gradient(var(--text-primary) 1px, transparent 1px),
+    linear-gradient(90deg, var(--text-primary) 1px, transparent 1px);
+  background-size: 80px 80px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
+  animation: gridIn 0.7s $ease-out 0s both;
+}
+
+@keyframes gridIn {
+  from { opacity: 0; }
+  to   { opacity: 0.04; }
+}
+
+// ── Drifting orbs ────────────────────────────────────────────────────
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(72px);
+}
+
+.orbA {
+  width: 520px; height: 520px; top: -60px; left: 38%;
+  background: oklch(0.62 0.22 240 / 0.22);
+  animation:
+    orbBloom  0.9s $ease-out 0s    both,
+    orbDriftA 9s   ease-in-out 1s  infinite;
+}
+
+.orbB {
+  width: 380px; height: 380px; top: 80px; left: 18%;
+  background: oklch(0.62 0.20 290 / 0.16);
+  animation:
+    orbBloom  1s   $ease-out 0.1s  both,
+    orbDriftB 12s  ease-in-out 1.2s infinite;
+}
+
+.orbC {
+  width: 300px; height: 300px; top: 120px; right: 12%;
+  background: oklch(0.72 0.18 145 / 0.12);
+  animation:
+    orbBloom  1.1s $ease-out 0.2s  both,
+    orbDriftC 15s  ease-in-out 1.4s infinite;
+}
+
+@keyframes orbBloom {
+  from { opacity: 0; transform: scale(0.7); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+// ── Scan beam ────────────────────────────────────────────────────────
+.scanBeam {
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  height: 2px;
+  top: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    oklch(0.62 0.22 240 / 0.6) 30%,
+    oklch(0.62 0.22 240 / 0.95) 50%,
+    oklch(0.62 0.22 240 / 0.6) 70%,
+    transparent 100%
+  );
+  box-shadow:
+    0 0 8px  oklch(0.62 0.22 240 / 0.6),
+    0 0 24px oklch(0.62 0.22 240 / 0.4),
+    0 0 48px oklch(0.62 0.22 240 / 0.25);
+  animation: scanSweep 1.2s cubic-bezier(0.65, 0, 0.35, 1) 0.05s both;
+}
+
+@keyframes scanSweep {
+  0%   { top: -2%;  opacity: 0; }
+  10%  {            opacity: 1; }
+  90%  {            opacity: 1; }
+  100% { top: 102%; opacity: 0; }
+}
+
+.markerContainer {
+  position: absolute;
+
+  width: 100%;
+  height: 100vh;
+}
+
+// ── Severity markers (decorative scan results) ──────────────────────
+// Markers fade in once after the scan beam passes; their outer ring
+// keeps pulsing afterward like a radar ping. No vertical float, since
+// that motion read as "laggy".
+.marker {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  z-index: 1;
+  pointer-events: none;
+  animation: markerIn 0.4s $ease-out var(--marker-delay, 0s) both;
+}
+
+.marker::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  opacity: 0;
+  animation: markerRing 2.4s ease-out infinite;
+  animation-delay: calc(var(--marker-delay, 0s) + 0.4s);
+}
+
+.marker_critical { color: var(--severity-critical); background: var(--severity-critical); }
+.marker_serious  { color: var(--severity-serious);  background: var(--severity-serious); }
+.marker_moderate { color: var(--severity-moderate); background: var(--severity-moderate); }
+.marker_minor    { color: var(--severity-minor);    background: var(--severity-minor); }
+
+@keyframes markerIn {
+  from { opacity: 0;    transform: scale(0.4); }
+  to   { opacity: 0.85; transform: scale(1); }
+}
+
+@keyframes markerRing {
+  0%   { transform: scale(0.7); opacity: 0.6; }
+  80%  { opacity: 0; }
+  100% { transform: scale(2);   opacity: 0; }
+}
+
+// ── "v0.3.0 preview" pill ───────────────────────────────────────────
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--blue);
+  border: 1px solid var(--blue-border);
+  background: var(--blue-dim);
+  padding: 4px 12px;
+  border-radius: 99px;
+  margin-bottom: 28px;
+  animation:
+    fadeUp     0.5s $ease-out 0s    both,
+    floatBadge 5s   ease-in-out 0.8s infinite;
+}
+
+// ── Title with per-character illumination ───────────────────────────
+.title {
+  max-width: 920px;
+  margin: 0 auto 20px;
+  perspective: 800px;
+}
+
+.titleAccent {
+  font-style: normal;
+  color: var(--blue);
+}
+
+/// Words are wrapped in `inline-block` containers so they never break
+/// mid-letter, while a regular space between them keeps natural
+/// line-wrapping between words.
+.word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/// Each letter slides up + un-blurs and briefly glows blue as if the
+/// scan beam hit it.
+.char {
+  display: inline-block;
+  animation: charReveal 0.5s cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+@keyframes charReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+    filter: blur(6px);
+    text-shadow:
+      0 0 24px oklch(0.62 0.22 240 / 0),
+      0 0 8px  oklch(0.62 0.22 240 / 0);
+  }
+  35% {
+    opacity: 1;
+    transform: translateY(2px);
+    filter: blur(0);
+    text-shadow:
+      0 0 24px oklch(0.62 0.22 240 / 0.55),
+      0 0 8px  oklch(0.62 0.22 240 / 0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+    text-shadow:
+      0 0 24px oklch(0.62 0.22 240 / 0),
+      0 0 8px  oklch(0.62 0.22 240 / 0);
+  }
+}
+
+// ── Subtitle / actions / terminal ──────────────────────────────────
+.subtitle {
+  font-size: 1.125rem;
+  color: var(--text-secondary);
+  max-width: 560px;
+  margin: 0 auto 36px;
+  line-height: 1.65;
+  animation: fadeUp 0.6s $ease-out 0.55s both;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 56px;
+  animation: fadeUp 0.6s $ease-out 0.7s both;
+}
+
+.terminalWrap {
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: left;
+  animation: scaleIn 0.6s $ease-out 0.85s both;
+}
+
+// ── Reduced-motion fallback ────────────────────────────────────────
+@media (prefers-reduced-motion: reduce) {
+  .grid,
+  .orb,
+  .label,
+  .char,
+  .subtitle,
+  .actions,
+  .terminalWrap,
+  .marker,
+  .marker::after {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+    filter: none;
+    text-shadow: none;
+  }
+
+  .grid     { opacity: 0.04; }
+  .scanBeam { display: none; }
+  .marker   { opacity: 0.85; }
+  .marker::after { opacity: 0; }
+}

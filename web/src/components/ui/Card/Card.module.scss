@@ -1,0 +1,13 @@
+.card {
+  @include surface;
+  padding: 24px;
+
+  &:hover {
+    border-color: var(--border-default);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+.flush {
+  padding: 0;
+}

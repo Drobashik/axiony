@@ -1,0 +1,83 @@
+@use "variables" as *;
+
+// =====================================================================
+// Mixins — small, single-purpose helpers used by component modules.
+// =====================================================================
+
+// ── Responsive breakpoints (mobile-first style, max-width queries) ──
+@mixin breakpoint-down($size) {
+  @if $size == sm {
+    @media (max-width: $bp-sm) { @content; }
+  } @else if $size == md {
+    @media (max-width: $bp-md) { @content; }
+  } @else if $size == lg {
+    @media (max-width: $bp-lg) { @content; }
+  } @else if $size == xl {
+    @media (max-width: $bp-xl) { @content; }
+  }
+}
+
+// ── Centered, padded container ──
+@mixin container($max: $container-max) {
+  max-width: $max;
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+
+// ── Flex helpers ──
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-row($gap: 0) {
+  display: flex;
+  align-items: center;
+  gap: $gap;
+}
+
+// ── Responsive grid (collapses to 1 column on narrow screens) ──
+@mixin responsive-grid($cols: 3, $gap: 16px) {
+  display: grid;
+  grid-template-columns: repeat($cols, 1fr);
+  gap: $gap;
+
+  @include breakpoint-down(lg) {
+    grid-template-columns: repeat(min($cols, 2), 1fr);
+  }
+
+  @include breakpoint-down(md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ── Card surface ──
+@mixin surface($bg: var(--bg-surface), $radius: var(--radius-xl)) {
+  background: $bg;
+  border: 1px solid var(--border-subtle);
+  border-radius: $radius;
+  transition:
+    border-color $transition,
+    box-shadow   $transition;
+}
+
+// ── Single-line ellipsis ──
+@mixin truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// ── Visually hidden but available to screen readers ──
+@mixin visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

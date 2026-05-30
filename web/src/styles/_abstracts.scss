@@ -1,0 +1,8 @@
+// =====================================================================
+// Abstracts barrel — variables + mixins.
+// Loaded automatically into every SCSS file via `next.config.mjs`
+// (`prependData: '@use "abstracts" as *;'`).
+// =====================================================================
+
+@forward "variables";
+@forward "mixins";

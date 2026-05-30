@@ -1,0 +1,86 @@
+.intro {
+  text-align: center;
+  margin-bottom: 56px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+
+  @include breakpoint-down(lg) { grid-template-columns: 1fr; }
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.row {
+  display: flex;
+  gap: 16px;
+
+  h4 { margin-bottom: 4px; }
+  p  { font-size: 0.875rem; }
+}
+
+.icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+// ── Report card ──
+.report {
+  @include surface(var(--bg-surface), var(--radius-lg));
+  border-color: var(--border-default);
+  overflow: hidden;
+}
+
+.reportHeader {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.reportFile {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-right: auto;
+}
+
+.reportRow {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  font-size: 0.83rem;
+  transition: background 150ms ease;
+
+  &:last-child { border-bottom: none; }
+  &:hover      { background: var(--bg-elevated); }
+}
+
+.issue {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.desc {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  margin-top: 2px;
+}
+
+.node {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}

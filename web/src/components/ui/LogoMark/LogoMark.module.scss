@@ -1,0 +1,7 @@
+.mark {
+  @include flex-center;
+  background: var(--blue);
+  border-radius: 6px;
+  flex-shrink: 0;
+  color: #fff;
+}
