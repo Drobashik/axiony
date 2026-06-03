@@ -1,0 +1,78 @@
+// =====================================================================
+// Design tokens
+// ---------------------------------------------------------------------
+// SCSS variables are kept in lock-step with the matching CSS variables
+// defined in `globals.scss`. The CSS-vars are the runtime source of
+// truth (themable, accessible from inline styles); the SCSS-vars exist
+// so we can compose them inside @media queries and mixins.
+// =====================================================================
+
+// ── Backgrounds ──
+$bg-base:     #09090b;
+$bg-surface:  #111116;
+$bg-elevated: #17171f;
+$bg-muted:    #1c1c26;
+
+// ── Borders ──
+$border-subtle:  rgba(255, 255, 255, 0.06);
+$border-default: rgba(255, 255, 255, 0.10);
+$border-strong:  rgba(255, 255, 255, 0.18);
+
+// ── Text ──
+$text-primary:   #f0f0f5;
+$text-secondary: #8888a8;
+$text-muted:     #55556a;
+$text-code:      #c4cde8;
+
+// ── Brand & accents (oklch for richer color) ──
+$blue:        oklch(0.62 0.22 240);
+$blue-dim:    oklch(0.62 0.22 240 / 0.14);
+$blue-border: oklch(0.62 0.22 240 / 0.30);
+
+$green:        oklch(0.72 0.18 145);
+$green-dim:    oklch(0.72 0.18 145 / 0.14);
+$green-border: oklch(0.72 0.18 145 / 0.30);
+
+$violet:        oklch(0.62 0.20 290);
+$violet-dim:    oklch(0.62 0.20 290 / 0.14);
+$violet-border: oklch(0.62 0.20 290 / 0.30);
+
+// ── Severity (used across scan/dashboard) ──
+$severity-critical: oklch(0.72 0.20 20);
+$severity-serious:  oklch(0.72 0.18 50);
+$severity-moderate: oklch(0.75 0.15 80);
+$severity-minor:    $blue;
+
+// ── Radii ──
+$radius-sm:  4px;
+$radius-md:  8px;
+$radius-lg:  12px;
+$radius-xl:  16px;
+$radius-2xl: 24px;
+
+// ── Shadows ──
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+$shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5);
+$shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.6);
+$shadow-glow-blue:   0 0 40px oklch(0.62 0.22 240 / 0.18);
+$shadow-glow-green:  0 0 40px oklch(0.72 0.18 145 / 0.18);
+$shadow-glow-violet: 0 0 40px oklch(0.62 0.20 290 / 0.18);
+
+// ── Typography ──
+$font-sans: 'Space Grotesk', system-ui, sans-serif;
+$font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+// ── Motion ──
+$transition: 160ms cubic-bezier(0.2, 0, 0, 1);
+$ease-out:   cubic-bezier(0.2, 0, 0, 1);
+
+// ── Layout ──
+$container-max:        1120px;
+$container-narrow-max: 760px;
+$nav-height:           60px;
+
+// ── Breakpoints ──
+$bp-sm: 500px;
+$bp-md: 700px;
+$bp-lg: 900px;
+$bp-xl: 1100px;

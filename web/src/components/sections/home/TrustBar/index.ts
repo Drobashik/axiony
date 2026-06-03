@@ -1,0 +1,1 @@
+export { TrustBar } from "./TrustBar";

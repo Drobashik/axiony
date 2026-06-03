@@ -1,0 +1,7 @@
+.default {
+  @include container;
+}
+
+.narrow {
+  @include container($container-narrow-max);
+}

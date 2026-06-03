@@ -1,0 +1,15 @@
+// Wrap the page in a brief fade-in once the loader clears, so the
+// transition between the two visual states feels smooth instead of
+// snapping.
+.app {
+  animation: appFadeIn 0.35s ease both;
+}
+
+@keyframes appFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app { animation: none; }
+}

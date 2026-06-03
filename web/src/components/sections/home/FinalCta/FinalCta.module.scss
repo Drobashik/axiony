@@ -1,0 +1,46 @@
+.cta {
+  text-align: center;
+  padding: 120px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.glow {
+  position: absolute;
+  bottom: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 700px;
+  height: 400px;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 100%, oklch(0.62 0.22 240 / 0.12) 0%, transparent 65%);
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
+}
+
+.eyebrow {
+  text-align: center;
+}
+
+.lead {
+  max-width: 440px;
+  margin: 0 auto 36px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.tags {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
