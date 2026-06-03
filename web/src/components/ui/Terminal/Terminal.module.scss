@@ -19,7 +19,10 @@
   border-bottom: 1px solid var(--border-subtle);
 }
 
-.dots { display: flex; gap: 6px; }
+.dots {
+  display: flex;
+  gap: 6px;
+}
 
 .dot {
   width: 10px;

@@ -43,13 +43,13 @@
   transition:
     color $transition,
     border-color $transition;
-}
 
-.badge svg {
-  color: var(--green);
-}
+  svg {
+    color: var(--green);
+  }
 
-.badge:hover {
-  border-color: var(--border-strong);
-  color: var(--text-primary);
+  &:hover {
+    border-color: var(--border-strong);
+    color: var(--text-primary);
+  }
 }

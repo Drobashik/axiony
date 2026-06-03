@@ -7,13 +7,29 @@
   border: 1px solid transparent;
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all var(--transition);
+  transition:
+    background var(--transition),
+    border-color var(--transition),
+    box-shadow var(--transition),
+    color var(--transition),
+    opacity var(--transition),
+    transform var(--transition);
   text-decoration: none;
   white-space: nowrap;
   letter-spacing: -0.01em;
 
-  &:hover { text-decoration: none; }
-  &:disabled { opacity: 0.45; cursor: not-allowed; }
+  &:hover {
+    text-decoration: none;
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
 }
 
 .block {

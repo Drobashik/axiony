@@ -1,19 +1,11 @@
 .workflow {
   position: relative;
   overflow: hidden;
-}
-
-.workflow::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image:
-    linear-gradient(var(--text-primary) 1px, transparent 1px),
-    linear-gradient(90deg, var(--text-primary) 1px, transparent 1px);
-  background-size: 96px 96px;
-  mask-image: radial-gradient(ellipse 74% 60% at 50% 40%, black, transparent);
-  opacity: 0.03;
+  @include grid-overlay(
+    96px,
+    0.03,
+    radial-gradient(ellipse 74% 60% at 50% 40%, black, transparent)
+  );
 }
 
 .header {
@@ -21,17 +13,17 @@
   max-width: 720px;
   margin: 0 auto 36px;
   text-align: center;
-}
 
-.header h2 {
-  max-width: 640px;
-  margin: 12px auto 16px;
-}
+  h2 {
+    max-width: 640px;
+    margin: 12px auto 16px;
+  }
 
-.header p {
-  color: var(--text-secondary);
-  font-size: 1.05rem;
-  line-height: 1.75;
+  p {
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    line-height: 1.75;
+  }
 }
 
 // ── Stepper ──────────────────────────────────────────────────────────
@@ -62,37 +54,36 @@
     border-color 180ms ease,
     background 180ms ease,
     transform 180ms ease;
+
+  &:not(:last-child)::after {
+    content: "→";
+    position: absolute;
+    top: 50%;
+    right: -21px;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 1rem;
+  }
+
+  &:hover {
+    border-color: var(--cb);
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+
+  &.step_active {
+    border-color: var(--cb);
+    background:
+      linear-gradient(90deg, var(--cd), transparent 80%),
+      var(--bg-elevated);
+  }
 }
 
 .step_green { --c: var(--green); --cb: #{$green-border}; --cd: var(--green-dim); }
 .step_blue { --c: var(--blue); --cb: var(--blue-border); --cd: var(--blue-dim); }
 .step_violet { --c: var(--violet); --cb: #{$violet-border}; --cd: var(--violet-dim); }
-
-.step:not(:last-child)::after {
-  content: "→";
-  position: absolute;
-  top: 50%;
-  right: -21px;
-  transform: translateY(-50%);
-  color: var(--text-muted);
-  font-size: 1rem;
-}
-
-.step:hover {
-  border-color: var(--cb);
-}
-
-.step:focus-visible {
-  outline: 2px solid var(--blue);
-  outline-offset: 2px;
-}
-
-.step_active {
-  border-color: var(--cb);
-  background:
-    linear-gradient(90deg, var(--cd), transparent 80%),
-    var(--bg-elevated);
-}
 
 .stepNum {
   display: grid;
@@ -127,27 +118,27 @@
   display: grid;
   gap: 2px;
   min-width: 0;
-}
 
-.stepText strong {
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-  transition: color 180ms ease;
-}
+  strong {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    transition: color 180ms ease;
 
-.step_active .stepText strong {
-  color: var(--text-primary);
-}
+    .step_active & {
+      color: var(--text-primary);
+    }
+  }
 
-.stepText span {
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 700;
-}
+  span {
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 700;
 
-.step_active .stepText span {
-  color: var(--c);
+    .step_active & {
+      color: var(--c);
+    }
+  }
 }
 
 // ── Stage ────────────────────────────────────────────────────────────
@@ -156,17 +147,10 @@
   max-width: 920px;
   min-height: 388px;
   margin: 0 auto;
-  border: 1px solid var(--border-default);
+  @include elevated-panel;
   border-top: 2px solid var(--c);
-  border-radius: var(--radius-xl);
   padding: 20px 22px 22px;
   overflow: hidden;
-  background:
-    linear-gradient(180deg, oklch(0.19 0.024 250 / 0.94), oklch(0.13 0.016 250 / 0.98)),
-    var(--bg-surface);
-  box-shadow:
-    0 24px 70px oklch(0 0 0 / 0.34),
-    inset 0 1px 0 oklch(1 0 0 / 0.06);
   animation: stageIn 0.55s $ease-out both;
 }
 
@@ -213,10 +197,10 @@
   font-family: var(--font-mono);
   font-size: 0.86rem;
   font-weight: 700;
-}
 
-.target svg {
-  color: var(--blue);
+  svg {
+    color: var(--blue);
+  }
 }
 
 .pages {
@@ -264,15 +248,15 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
-}
 
-.blockHead > span:first-child {
-  color: var(--text-secondary);
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  > span:first-child {
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
 }
 
 .blockMeta {
@@ -339,6 +323,12 @@
   padding: 7px 8px;
   border-radius: var(--radius-sm);
   background: var(--bg-base);
+
+  code {
+    color: var(--text-code);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+  }
 }
 
 .storedRight {
@@ -360,12 +350,6 @@
   font-size: 0.66rem;
   font-weight: 800;
   white-space: nowrap;
-}
-
-.storedRow code {
-  color: var(--text-code);
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
 }
 
 .sev {
@@ -421,6 +405,13 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 14px;
+
+  strong {
+    display: block;
+    margin-top: 3px;
+    color: var(--text-primary);
+    font-size: 1.02rem;
+  }
 }
 
 .dashKicker {
@@ -429,13 +420,6 @@
   font-family: var(--font-mono);
   font-size: 0.72rem;
   text-transform: uppercase;
-}
-
-.teamHead strong {
-  display: block;
-  margin-top: 3px;
-  color: var(--text-primary);
-  font-size: 1.02rem;
 }
 
 .avatars {
@@ -455,10 +439,10 @@
   font-family: var(--font-mono);
   font-size: 0.66rem;
   font-weight: 800;
-}
 
-.avatar:first-child {
-  margin-left: 0;
+  &:first-child {
+    margin-left: 0;
+  }
 }
 
 .avatarMore {
@@ -499,16 +483,16 @@
   display: grid;
   gap: 1px;
   min-width: 0;
-}
 
-.intText strong {
-  color: var(--text-primary);
-  font-size: 0.9rem;
-}
+  strong {
+    color: var(--text-primary);
+    font-size: 0.9rem;
+  }
 
-.intText span {
-  color: var(--text-muted);
-  font-size: 0.78rem;
+  span {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+  }
 }
 
 .connected {

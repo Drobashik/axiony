@@ -11,17 +11,17 @@
   color: var(--text-secondary);
   font-size: 1.05rem;
   line-height: 1.75;
-}
 
-.lead strong {
-  color: var(--text-primary);
-  font-weight: 700;
-}
+  strong {
+    color: var(--text-primary);
+    font-weight: 700;
+  }
 
-.lead em {
-  color: var(--blue);
-  font-style: normal;
-  font-weight: 700;
+  em {
+    color: var(--blue);
+    font-style: normal;
+    font-weight: 700;
+  }
 }
 
 // ── Interactive centerpiece ──────────────────────────────────────────
@@ -32,33 +32,18 @@
 
 .stage {
   position: relative;
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-xl);
+  @include elevated-panel;
+  @include grid-overlay(
+    46px,
+    0.04,
+    radial-gradient(ellipse 70% 60% at 50% 24%, black, transparent)
+  );
   padding: 22px 24px 24px;
   overflow: hidden;
-  background:
-    linear-gradient(180deg, oklch(0.19 0.024 250 / 0.94), oklch(0.13 0.016 250 / 0.98)),
-    var(--bg-surface);
-  box-shadow:
-    0 24px 70px oklch(0 0 0 / 0.34),
-    inset 0 1px 0 oklch(1 0 0 / 0.06);
-}
 
-.stage::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image:
-    linear-gradient(var(--text-primary) 1px, transparent 1px),
-    linear-gradient(90deg, var(--text-primary) 1px, transparent 1px);
-  background-size: 46px 46px;
-  mask-image: radial-gradient(ellipse 70% 60% at 50% 24%, black, transparent);
-  opacity: 0.04;
-}
-
-.stage > * {
-  position: relative;
+  > * {
+    position: relative;
+  }
 }
 
 .stageHeader {
@@ -107,9 +92,11 @@
   overflow: visible;
 }
 
-.grid line {
-  stroke: oklch(1 0 0 / 0.06);
-  stroke-width: 1;
+.grid {
+  line {
+    stroke: oklch(1 0 0 / 0.06);
+    stroke-width: 1;
+  }
 }
 
 .baseLine {
@@ -159,19 +146,19 @@
 
 .ghost {
   animation: ghostReject 1.25s $ease-out forwards;
-}
 
-.ghost line {
-  stroke: var(--severity-critical);
-  stroke-width: 2.5;
-  stroke-dasharray: 3 3;
-  stroke-linecap: round;
-}
+  line {
+    stroke: var(--severity-critical);
+    stroke-width: 2.5;
+    stroke-dasharray: 3 3;
+    stroke-linecap: round;
+  }
 
-.ghost circle {
-  fill: oklch(0.72 0.20 20 / 0.25);
-  stroke: var(--severity-critical);
-  stroke-width: 1.5;
+  circle {
+    fill: oklch(0.72 0.20 20 / 0.25);
+    stroke: var(--severity-critical);
+    stroke-width: 1.5;
+  }
 }
 
 .ghostX {
@@ -195,10 +182,10 @@
     border-color 200ms ease,
     background 200ms ease,
     color 200ms ease;
-}
 
-.statusLine svg {
-  flex: none;
+  svg {
+    flex: none;
+  }
 }
 
 .status_idle {
@@ -236,27 +223,27 @@
   padding: 10px 12px;
   background: oklch(0.16 0.018 250 / 0.7);
   color: var(--text-muted);
-}
 
-.stat svg {
-  flex: none;
-  color: var(--text-secondary);
+  svg {
+    flex: none;
+    color: var(--text-secondary);
+  }
+
+  strong {
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    line-height: 1;
+  }
+
+  span {
+    font-size: 0.74rem;
+    font-weight: 700;
+  }
 }
 
 .statCheck {
   color: var(--green);
-}
-
-.stat strong {
-  color: var(--text-primary);
-  font-family: var(--font-mono);
-  font-size: 1.25rem;
-  line-height: 1;
-}
-
-.stat span {
-  font-size: 0.74rem;
-  font-weight: 700;
 }
 
 .debtDot {
@@ -292,39 +279,36 @@
     border-color 160ms ease,
     color 160ms ease,
     transform 120ms ease;
-}
 
-.tryBtn:active,
-.mergeBtn:active {
-  transform: translateY(1px);
-}
+  &:active {
+    transform: translateY(1px);
+  }
 
-.tryBtn:focus-visible,
-.mergeBtn:focus-visible {
-  outline: 2px solid var(--blue);
-  outline-offset: 2px;
+  &:focus-visible {
+    @include focus-ring;
+  }
 }
 
 .tryBtn {
   border: 1px solid var(--border-strong);
   background: transparent;
   color: var(--text-secondary);
-}
 
-.tryBtn:hover {
-  border-color: oklch(0.72 0.20 20 / 0.45);
-  background: oklch(0.72 0.20 20 / 0.08);
-  color: var(--severity-critical);
+  &:hover {
+    border-color: oklch(0.72 0.20 20 / 0.45);
+    background: oklch(0.72 0.20 20 / 0.08);
+    color: var(--severity-critical);
+  }
 }
 
 .mergeBtn {
   border: 1px solid $green-border;
   background: var(--green-dim);
   color: var(--green);
-}
 
-.mergeBtn:hover {
-  background: oklch(0.72 0.18 145 / 0.22);
+  &:hover {
+    background: oklch(0.72 0.18 145 / 0.22);
+  }
 }
 
 // ── Product layers ───────────────────────────────────────────────────
@@ -347,20 +331,17 @@
     border-color 180ms ease,
     transform 180ms ease,
     box-shadow 180ms ease;
-}
 
-.layer:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 16px 44px oklch(0 0 0 / 0.3);
+  &:hover {
+    border-color: var(--accent-border);
+    transform: translateY(-3px);
+    box-shadow: 0 16px 44px oklch(0 0 0 / 0.3);
+  }
 }
 
 .layer_green { @include accent("green"); }
 .layer_blue { @include accent("blue"); }
 .layer_violet { @include accent("violet"); }
-
-.layer:hover {
-  border-color: var(--accent-border);
-}
 
 .layerTop {
   display: flex;
@@ -449,16 +430,16 @@
   margin: auto 0 0;
   padding: 0;
   list-style: none;
-}
 
-.points li {
-  display: grid;
-  grid-template-columns: 18px 1fr;
-  gap: 9px;
-  align-items: start;
-  color: var(--text-secondary);
-  font-size: 0.86rem;
-  line-height: 1.45;
+  li {
+    display: grid;
+    grid-template-columns: 18px 1fr;
+    gap: 9px;
+    align-items: start;
+    color: var(--text-secondary);
+    font-size: 0.86rem;
+    line-height: 1.45;
+  }
 }
 
 .pointCheck {
@@ -469,14 +450,14 @@
 // ── CTA ──────────────────────────────────────────────────────────────
 .cta {
   text-align: center;
-}
 
-.cta p {
-  max-width: 540px;
-  margin: 0 auto 18px;
-  color: var(--text-secondary);
-  font-size: 0.96rem;
-  line-height: 1.65;
+  p {
+    max-width: 540px;
+    margin: 0 auto 18px;
+    color: var(--text-secondary);
+    font-size: 0.96rem;
+    line-height: 1.65;
+  }
 }
 
 .ctaButtons {

@@ -101,16 +101,15 @@
   transition:
     color 150ms ease,
     border-color 150ms ease;
-}
 
-.copy:hover {
-  color: var(--text-primary);
-  border-color: var(--border-strong);
-}
+  &:hover {
+    color: var(--text-primary);
+    border-color: var(--border-strong);
+  }
 
-.copy:focus-visible {
-  outline: 2px solid var(--blue);
-  outline-offset: 2px;
+  &:focus-visible {
+    @include focus-ring;
+  }
 }
 
 .copied {
@@ -123,12 +122,12 @@
   color: var(--text-secondary);
   font-size: 0.86rem;
   line-height: 1.55;
-}
 
-.note code {
-  color: var(--text-code);
-  font-family: var(--font-mono);
-  font-size: 0.82rem;
+  code {
+    color: var(--text-code);
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+  }
 }
 
 .footer {
@@ -143,12 +142,12 @@
 .npx {
   color: var(--text-muted);
   font-size: 0.9rem;
-}
 
-.npx code {
-  color: var(--text-code);
-  font-family: var(--font-mono);
-  font-size: 0.84rem;
+  code {
+    color: var(--text-code);
+    font-family: var(--font-mono);
+    font-size: 0.84rem;
+  }
 }
 
 @media (max-width: 820px) {

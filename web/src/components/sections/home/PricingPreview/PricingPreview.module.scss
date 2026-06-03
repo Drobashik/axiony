@@ -33,15 +33,15 @@
   transition:
     border-color 180ms ease,
     transform 180ms ease;
+
+  &:hover {
+    border-color: var(--accent-border);
+  }
 }
 
 .card_green { @include accent("green"); }
 .card_blue { @include accent("blue"); }
 .card_violet { @include accent("violet"); }
-
-.card:hover {
-  border-color: var(--accent-border);
-}
 
 // Featured tier — lifted, accent border + glow.
 .featured {
@@ -50,10 +50,8 @@
     linear-gradient(180deg, var(--accent-dim), transparent 42%),
     var(--bg-surface);
   box-shadow: 0 22px 60px oklch(0 0 0 / 0.34);
-}
 
-@media (min-width: 901px) {
-  .featured {
+  @media (min-width: 901px) {
     transform: translateY(-12px);
   }
 }
@@ -149,16 +147,16 @@
   margin: 20px 0 0;
   padding: 0;
   list-style: none;
-}
 
-.features li {
-  display: grid;
-  grid-template-columns: 18px 1fr;
-  gap: 9px;
-  align-items: start;
-  color: var(--text-secondary);
-  font-size: 0.88rem;
-  line-height: 1.45;
+  li {
+    display: grid;
+    grid-template-columns: 18px 1fr;
+    gap: 9px;
+    align-items: start;
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+    line-height: 1.45;
+  }
 }
 
 .inherits {
