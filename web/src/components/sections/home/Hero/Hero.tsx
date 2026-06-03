@@ -16,7 +16,7 @@ export const Hero = () => (
       <div className={styles.copy}>
         <div className={styles.label}>
           <span className={styles.labelDot} aria-hidden="true" />
-          Free open-source CLI · Hosted cloud for teams
+          Free open-source CLI · Team cloud in development
         </div>
 
         <h1 className={styles.title}>
@@ -28,8 +28,9 @@ export const Hero = () => (
         </h1>
 
         <p className={styles.subtitle}>
-          Axiony scans your UI with axe-core in your terminal, your CI, and the
-          cloud — then locks a baseline so the issues you fix never come back.
+          Axiony runs axe-core in your terminal, CI, and the cloud — then locks
+          a baseline. Existing issues become tracked debt; new ones get caught
+          before they merge. One workflow for developers, QA, and product.
         </p>
 
         <div className={styles.valuePoints} aria-label="Why Axiony">
@@ -40,11 +41,11 @@ export const Hero = () => (
 
         <div className={styles.actions}>
           <Button href="/scan" size="lg">
-            Start scanning free
+          Start cloud scanning
             <ArrowRightIcon />
           </Button>
           <Button href="/dashboard" variant="secondary" size="lg">
-            View dashboard preview
+            Preview the dashboard
           </Button>
         </div>
       </div>

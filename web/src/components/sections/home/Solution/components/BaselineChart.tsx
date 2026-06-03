@@ -29,7 +29,7 @@ export const BaselineChart = ({ points, regressKey, mergeKey }: BaselineChartPro
   const regressionY = y(Math.max(SMIN, last - 18));
 
   return (
-    <svg className={styles.chart} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Accessibility health baseline, currently locked at ${last}`}>
+    <svg className={styles.chart} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Accessibility score, currently ${last} out of 100`}>
       <g className={styles.grid}>
         {[60, 75, 90].map((score) => (
           <line key={score} x1={PAD.l} y1={y(score)} x2={W - PAD.r} y2={y(score)} />

@@ -62,7 +62,7 @@ export const Nav = () => {
             <GitHubIcon />
             GitHub
           </a>
-          <Button href="#quickstart" size="sm">
+          <Button href="/scan" size="sm">
             <ScanIcon />
             Start scanning
           </Button>
@@ -107,7 +107,7 @@ export const Nav = () => {
             GitHub
           </a>
         </nav>
-        <Button href="#quickstart" size="lg" block onClick={close}>
+        <Button href="/scan" size="lg" block onClick={close}>
           Start scanning free
         </Button>
       </div>

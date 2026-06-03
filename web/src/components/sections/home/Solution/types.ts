@@ -11,7 +11,23 @@ export interface SolutionLayer {
   accent: AccentColor;
 }
 
-export interface BaselineStatus {
-  kind: "idle" | "merge" | "block";
-  text: string;
+export type WorkflowStatusKind = "idle" | "block" | "merge";
+
+export interface WorkflowStep {
+  key: "scan" | "pr" | "improve";
+  n: string;
+  label: string;
+  tag: string;
+  title: string;
+  detail: string;
+  roleLabel: string;
+  roleText: string;
+  points: number[];
+  statusKind: WorkflowStatusKind;
+  statusText: string;
+  stats: {
+    tracked: number;
+    flagged: number;
+    merged: number;
+  };
 }

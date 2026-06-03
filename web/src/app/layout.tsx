@@ -5,11 +5,11 @@ import "@/styles/globals.scss";
 
 export const metadata: Metadata = {
   title: {
-    default: "Axiony — Accessibility Testing for Developers",
+    default: "Axiony — Accessibility Workflow for Product & Engineering Teams",
     template: "%s — Axiony",
   },
   description:
-    "Developer-first accessibility testing for modern teams. Scan URLs, components, and raw HTML. Monitor issues over time. Fix faster — in the browser or in CI.",
+    "An accessibility workflow platform for product and engineering teams. Find, track, and prevent accessibility regressions — from a free, open-source CLI to CI checks, a cloud dashboard, and pull-request protection.",
   applicationName: "Axiony",
 };
 

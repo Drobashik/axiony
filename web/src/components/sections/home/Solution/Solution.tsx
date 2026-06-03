@@ -11,12 +11,14 @@ export const Solution = () => (
     <Container>
       <div className={cn(styles.intro, "reveal")}>
         <SectionEyebrow>Solution</SectionEyebrow>
-        <h2>Accessibility that can only get better.</h2>
+        <h2>Stop treating accessibility like a cleanup project.</h2>
         <p className={styles.lead}>
-          Other tools hand you a 500-issue report and wish you luck. Axiony
-          draws a line — your <strong>baseline</strong> — and blocks every{" "}
-          <em>new</em> issue at the pull request. Existing debt is tracked, not
-          blocking. So your score moves one way: up.
+          Most tools hand you a 500-issue report and wish you luck. Axiony makes
+          accessibility a <strong>continuous workflow</strong> instead. Your
+          first scan becomes a <strong>baseline</strong> — existing issues are
+          tracked as known debt, never blocking a release. From there, every{" "}
+          <em>new</em> issue is flagged before it merges, and the whole team
+          watches the score climb, release after release.
         </p>
       </div>
 
@@ -32,11 +34,11 @@ export const Solution = () => (
 
       <div className={cn(styles.cta, "reveal")}>
         <p>
-          Start free with the CLI. Upgrade to the cloud when you want it to
-          remember, track, and protect what you&apos;ve fixed.
+          Start free with the CLI. Add the cloud when you want it to remember,
+          track, and protect what your team has fixed.
         </p>
         <div className={styles.ctaButtons}>
-          <Button href="/docs">Start free with the CLI</Button>
+          <Button href="/docs">Start cloud scanning</Button>
           <Button href="/pricing" variant="secondary">
             See cloud pricing
           </Button>

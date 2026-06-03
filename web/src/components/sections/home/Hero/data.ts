@@ -1,10 +1,10 @@
-export const TITLE_LINE_ONE = "Catch accessibility issues";
-export const TITLE_LINE_TWO = "before your users do.";
+export const TITLE_LINE_ONE = "Find, track, and prevent";
+export const TITLE_LINE_TWO = "accessibility regressions.";
 
 export const VALUE_POINTS = [
-  "Free CLI to start",
+  "Free, open-source CLI",
   "Scans in CI & the cloud",
-  "Regressions can't merge",
+  "Blocks new regressions before merge",
 ] as const;
 
 export interface HeroIssue {

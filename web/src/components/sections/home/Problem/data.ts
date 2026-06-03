@@ -5,7 +5,7 @@ export const PROBLEMS: readonly ProblemItem[] = [
     number: "01",
     title: "Text you can barely read",
     description:
-      "Low-contrast text is the single most common accessibility failure on the web.",
+      "Low-contrast text is one of the most common accessibility failures on the web.",
     headline: "Can you actually read this?",
     spec: "color-contrast",
     demo: "contrast",

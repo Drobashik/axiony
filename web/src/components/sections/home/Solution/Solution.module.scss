@@ -254,31 +254,33 @@
   background: oklch(0.72 0.18 50 / 0.3);
 }
 
-// ── Controls ─────────────────────────────────────────────────────────
-.controls {
+// ── Step tabs ────────────────────────────────────────────────────────
+.steps {
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
+  gap: 8px;
+  margin: 14px 0 18px;
 }
 
-.tryBtn,
-.mergeBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 42px;
-  padding: 0 18px;
+.stepCard {
+  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  font-family: var(--font-sans);
-  font-size: 0.9rem;
-  font-weight: 800;
+  padding: 10px 13px;
+  background: oklch(0.16 0.018 250 / 0.7);
+  text-align: left;
   cursor: pointer;
   transition:
-    background 160ms ease,
     border-color 160ms ease,
-    color 160ms ease,
+    background 160ms ease,
     transform 120ms ease;
+
+  &:hover {
+    border-color: var(--border-strong);
+  }
 
   &:active {
     transform: translateY(1px);
@@ -289,26 +291,63 @@
   }
 }
 
-.tryBtn {
-  border: 1px solid var(--border-strong);
-  background: transparent;
-  color: var(--text-secondary);
+.stepCard_active {
+  border-color: $green-border;
+  background: var(--green-dim);
 
-  &:hover {
-    border-color: oklch(0.72 0.20 20 / 0.45);
-    background: oklch(0.72 0.20 20 / 0.08);
-    color: var(--severity-critical);
+  .stepNum {
+    color: var(--green);
+  }
+
+  .stepLabel {
+    color: var(--text-primary);
   }
 }
 
-.mergeBtn {
-  border: 1px solid $green-border;
-  background: var(--green-dim);
-  color: var(--green);
+.stepNum {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
 
-  &:hover {
-    background: oklch(0.72 0.18 145 / 0.22);
-  }
+.stepLabel {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+// ── Step panel copy ──────────────────────────────────────────────────
+.stageDetail {
+  margin-bottom: 16px;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+
+.stageRole {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.roleTag {
+  border: 1px solid var(--border-default);
+  border-radius: 99px;
+  padding: 3px 10px;
+  background: var(--bg-base);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
 }
 
 // ── Product layers ───────────────────────────────────────────────────
@@ -524,8 +563,11 @@
     min-width: calc(50% - 4px);
   }
 
-  .tryBtn,
-  .mergeBtn {
-    flex: 1 1 100%;
+  .steps {
+    gap: 6px;
+  }
+
+  .stepCard {
+    padding: 9px 10px;
   }
 }

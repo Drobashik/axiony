@@ -8,13 +8,14 @@ export const SCAN_LINES: TerminalLine[] = [
   blank,
   [txt("  ✓ Loaded page · waited for stable DOM", "output")],
   [txt("  ✓ Ran axe-core ruleset · 142 checks", "success")],
+  [txt("  ✓ Compared against baseline · 47 known issues", "output")],
   blank,
-  [txt("  9 issues found", "output")],
-  [txt("  ├─ ", "dim"), txt("2 critical", "error"), txt("   color-contrast, button-name", "output")],
-  [txt("  ├─ ", "dim"), txt("4 serious", "warn"), txt("    link-name, label", "output")],
-  [txt("  └─ ", "dim"), txt("3 moderate", "blue"), txt("   heading-order", "output")],
+  [txt("  2 new issues", "output"), txt("   · 47 known (tracked, not blocking)", "dim")],
+  [txt("  ├─ ", "dim"), txt("1 critical", "error"), txt("   color-contrast", "output")],
+  [txt("  └─ ", "dim"), txt("1 serious", "warn"), txt("    button-name", "output")],
   blank,
-  [txt("  Exit 1", "warn"), txt("  · fails the build, blocks the merge", "dim")],
+  [txt("  Exit 1", "warn"), txt("  · new issues found — fails this check", "dim")],
+  [txt("  (set as a required check to block the merge)", "dim")],
 ];
 
 export const STEPS: readonly StepDef[] = [
@@ -25,7 +26,7 @@ export const STEPS: readonly StepDef[] = [
     tag: "CLI · Free",
     accent: "green",
     caption:
-      "Every push runs the free, open-source CLI in your pipeline. It scans the real DOM with axe-core and fails the build on new issues — no account needed.",
+      "Every push runs the free, open-source CLI in your pipeline. It scans the real DOM with axe-core, compares against your baseline, and fails the check only on new issues — so known debt never blocks a release. No account needed.",
   },
   {
     key: "site",
