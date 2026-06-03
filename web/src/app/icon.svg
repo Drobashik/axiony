@@ -1,7 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <!-- Rounded blue tile (matches LogoMark) -->
-  <rect width="32" height="32" rx="7" fill="#1d6cf3"/>
-  <!-- "A" chevron - strokes thickened so the mark stays legible at 16px -->
-  <path d="M7 25 L16 7 L25 25" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M11.5 18.5 H20.5" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="axiHexFav" x1="14" y1="4" x2="50" y2="60" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#55a7ff"/>
+      <stop offset="0.38" stop-color="#245cff"/>
+      <stop offset="0.72" stop-color="#3b34d7"/>
+      <stop offset="1" stop-color="#6a22e8"/>
+    </linearGradient>
+    <radialGradient id="axiGlowFav" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(22 13) rotate(54) scale(55 48)">
+      <stop stop-color="#ffffff" stop-opacity="0.34"/>
+      <stop offset="0.45" stop-color="#ffffff" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <path d="M32 2.5c2.7 0 5.3.72 7.6 2.1l14 8.25a15.2 15.2 0 0 1 7.43 13.1v12.1a15.2 15.2 0 0 1-7.43 13.1l-14 8.25a15 15 0 0 1-15.2 0l-14-8.25a15.2 15.2 0 0 1-7.43-13.1v-12.1a15.2 15.2 0 0 1 7.43-13.1l14-8.25A15 15 0 0 1 32 2.5Z" fill="url(#axiHexFav)"/>
+  <path d="M32 2.5c2.7 0 5.3.72 7.6 2.1l14 8.25a15.2 15.2 0 0 1 7.43 13.1v12.1a15.2 15.2 0 0 1-7.43 13.1l-14 8.25a15 15 0 0 1-15.2 0l-14-8.25a15.2 15.2 0 0 1-7.43-13.1v-12.1a15.2 15.2 0 0 1 7.43-13.1l14-8.25A15 15 0 0 1 32 2.5Z" fill="url(#axiGlowFav)"/>
+  <path d="M18.5 44.5 32 18.5 45.5 44.5" stroke="#ffffff" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="18.5" cy="44.5" r="5.2" fill="#ffffff"/>
+  <circle cx="45.5" cy="44.5" r="5.2" fill="#ffffff"/>
+  <circle cx="32" cy="18.5" r="5.5" fill="#27e2a4"/>
 </svg>

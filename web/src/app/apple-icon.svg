@@ -1,8 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" fill="none">
-  <!-- Larger artwork for Apple touch icon (180x180). iOS clips
-       to its own rounded mask, so the rect can stay square — but
-       we keep a small radius so non-iOS clients still look right. -->
-  <rect width="180" height="180" rx="40" fill="#1d6cf3"/>
-  <path d="M40 142 L90 38 L140 142" stroke="white" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M65 105 H115" stroke="white" stroke-width="15" stroke-linecap="round"/>
+  <defs>
+    <linearGradient id="axiHexApple" x1="48" y1="18" x2="132" y2="162" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#55a7ff"/>
+      <stop offset="0.38" stop-color="#245cff"/>
+      <stop offset="0.72" stop-color="#3b34d7"/>
+      <stop offset="1" stop-color="#6a22e8"/>
+    </linearGradient>
+    <radialGradient id="axiGlowApple" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(62 40) rotate(54) scale(145 126)">
+      <stop stop-color="#ffffff" stop-opacity="0.34"/>
+      <stop offset="0.45" stop-color="#ffffff" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="180" height="180" rx="40" fill="#090914"/>
+  <path d="M90 14c7.6 0 15 2.04 21.5 5.94l39.4 23.2A42.8 42.8 0 0 1 171.8 80v20a42.8 42.8 0 0 1-20.9 36.86l-39.4 23.2a42.3 42.3 0 0 1-43 0l-39.4-23.2A42.8 42.8 0 0 1 8.2 100V80a42.8 42.8 0 0 1 20.9-36.86l39.4-23.2A42.3 42.3 0 0 1 90 14Z" fill="url(#axiHexApple)" stroke="rgba(255,255,255,0.2)" stroke-width="1.8"/>
+  <path d="M90 14c7.6 0 15 2.04 21.5 5.94l39.4 23.2A42.8 42.8 0 0 1 171.8 80v20a42.8 42.8 0 0 1-20.9 36.86l-39.4 23.2a42.3 42.3 0 0 1-43 0l-39.4-23.2A42.8 42.8 0 0 1 8.2 100V80a42.8 42.8 0 0 1 20.9-36.86l39.4-23.2A42.3 42.3 0 0 1 90 14Z" fill="url(#axiGlowApple)"/>
+  <path d="M52 125 90 52 128 125" stroke="#ffffff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="52" cy="125" r="14.6" fill="#ffffff"/>
+  <circle cx="128" cy="125" r="14.6" fill="#ffffff"/>
+  <circle cx="90" cy="52" r="15.5" fill="#27e2a4"/>
 </svg>

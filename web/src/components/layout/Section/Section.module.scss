@@ -1,5 +1,7 @@
 .section {
   padding: 96px 0;
+  // Keep anchored sections clear of the fixed header on jump.
+  scroll-margin-top: var(--nav-height);
 }
 
 .small {

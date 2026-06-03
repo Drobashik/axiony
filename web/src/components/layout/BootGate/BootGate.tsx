@@ -43,8 +43,6 @@ export function BootGate({ disabled, durationMs = 2000, children }: BootGateProp
   // Memoise so consumers don't re-render on every parent render.
   const status = useMemo<BootStatus>(() => ({ loaded }), [loaded]);
 
-  console.log(loaded)
-
   return (
     <BootContext.Provider value={status}>
       {!loaded && (

@@ -1,192 +1,92 @@
 // =====================================================================
-// Hero — "scan in progress → scan complete" choreography.
-//
-// The Hero is mounted *after* the BootGate's loading screen has
-// cleared, so every animation here fires naturally on first paint —
-// no readiness flag, no class gating. Each element starts hidden
-// (opacity 0) and animates into view via `animation-fill-mode: both`
-// so the initial keyframe applies even before the animation starts.
-//
-// Sequence on mount:
-//   1. The grid + orbs swell in.
-//   2. A scan beam sweeps from top to bottom of the section once.
-//   3. Title characters illuminate one after another with a brief
-//      blue glow.
-//   4. Subtitle / actions / terminal cascade in beneath the title.
-//   5. Floating severity markers fade in like real scan results.
+// Hero — benefit copy + CTAs on the left, an animated "live scan
+// result" card on the right. Mounted after the BootGate loader clears,
+// so animations fire on first paint.
 // =====================================================================
 
 .hero {
   position: relative;
   overflow: hidden;
-  padding: 100px 0 80px;
-  text-align: center;
-  isolation: isolate; // contain z-index for the scan beam + markers
+  padding: 92px 0 84px;
+  isolation: isolate;
 }
 
-.container {
-  position: relative;
-  z-index: 2;
-}
-
-// ── Background grid ──────────────────────────────────────────────────
+// ── Background grid + accent glow ────────────────────────────────────
+// Soft dot texture — far gentler behind text than a line grid, and the
+// alpha lives in the dot colour so the entrance fade can't blow it out.
 .grid {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  overflow: hidden;
-  background-image:
-    linear-gradient(var(--text-primary) 1px, transparent 1px),
-    linear-gradient(90deg, var(--text-primary) 1px, transparent 1px);
-  background-size: 80px 80px;
-  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
-  animation: gridIn 0.7s $ease-out 0s both;
+  background-image: radial-gradient(oklch(1 0 0 / 0.05) 1px, transparent 1.6px);
+  background-size: 30px 30px;
+  mask-image: radial-gradient(ellipse 95% 68% at 56% 28%, black, transparent 76%);
+  animation: heroFadeIn 0.9s $ease-out both;
 }
 
-@keyframes gridIn {
+.glow {
+  position: absolute;
+  top: -12%;
+  right: -8%;
+  width: 62%;
+  height: 92%;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, oklch(0.62 0.22 240 / 0.12), transparent 66%);
+  filter: blur(26px);
+  animation: heroFadeIn 1.3s $ease-out both;
+}
+
+@keyframes heroFadeIn {
   from { opacity: 0; }
-  to   { opacity: 0.04; }
+  to   { opacity: 1; }
 }
 
-// ── Drifting orbs ────────────────────────────────────────────────────
-.orb {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-  filter: blur(72px);
+// ── Layout ───────────────────────────────────────────────────────────
+.container {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.94fr);
+  gap: 52px;
+  align-items: center;
 }
 
-.orbA {
-  width: 520px; height: 520px; top: -60px; left: 38%;
-  background: oklch(0.62 0.22 240 / 0.22);
-  animation:
-    orbBloom  0.9s $ease-out 0s    both,
-    orbDriftA 9s   ease-in-out 1s  infinite;
+.copy {
+  text-align: left;
 }
 
-.orbB {
-  width: 380px; height: 380px; top: 80px; left: 18%;
-  background: oklch(0.62 0.20 290 / 0.16);
-  animation:
-    orbBloom  1s   $ease-out 0.1s  both,
-    orbDriftB 12s  ease-in-out 1.2s infinite;
-}
-
-.orbC {
-  width: 300px; height: 300px; top: 120px; right: 12%;
-  background: oklch(0.72 0.18 145 / 0.12);
-  animation:
-    orbBloom  1.1s $ease-out 0.2s  both,
-    orbDriftC 15s  ease-in-out 1.4s infinite;
-}
-
-@keyframes orbBloom {
-  from { opacity: 0; transform: scale(0.7); }
-  to   { opacity: 1; transform: scale(1); }
-}
-
-// ── Scan beam ────────────────────────────────────────────────────────
-.scanBeam {
-  position: absolute;
-  left: -10%;
-  right: -10%;
-  height: 2px;
-  top: 0;
-  z-index: 1;
-  pointer-events: none;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    oklch(0.62 0.22 240 / 0.6) 30%,
-    oklch(0.62 0.22 240 / 0.95) 50%,
-    oklch(0.62 0.22 240 / 0.6) 70%,
-    transparent 100%
-  );
-  box-shadow:
-    0 0 8px  oklch(0.62 0.22 240 / 0.6),
-    0 0 24px oklch(0.62 0.22 240 / 0.4),
-    0 0 48px oklch(0.62 0.22 240 / 0.25);
-  animation: scanSweep 1.2s cubic-bezier(0.65, 0, 0.35, 1) 0.05s both;
-}
-
-@keyframes scanSweep {
-  0%   { top: -2%;  opacity: 0; }
-  10%  {            opacity: 1; }
-  90%  {            opacity: 1; }
-  100% { top: 102%; opacity: 0; }
-}
-
-.markerContainer {
-  position: absolute;
-
-  width: 100%;
-  height: 100vh;
-}
-
-// ── Severity markers (decorative scan results) ──────────────────────
-// Markers fade in once after the scan beam passes; their outer ring
-// keeps pulsing afterward like a radar ping. No vertical float, since
-// that motion read as "laggy".
-.marker {
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  z-index: 1;
-  pointer-events: none;
-  animation: markerIn 0.4s $ease-out var(--marker-delay, 0s) both;
-}
-
-.marker::after {
-  content: "";
-  position: absolute;
-  inset: -6px;
-  border-radius: 50%;
-  border: 1px solid currentColor;
-  opacity: 0;
-  animation: markerRing 2.4s ease-out infinite;
-  animation-delay: calc(var(--marker-delay, 0s) + 0.4s);
-}
-
-.marker_critical { color: var(--severity-critical); background: var(--severity-critical); }
-.marker_serious  { color: var(--severity-serious);  background: var(--severity-serious); }
-.marker_moderate { color: var(--severity-moderate); background: var(--severity-moderate); }
-.marker_minor    { color: var(--severity-minor);    background: var(--severity-minor); }
-
-@keyframes markerIn {
-  from { opacity: 0;    transform: scale(0.4); }
-  to   { opacity: 0.85; transform: scale(1); }
-}
-
-@keyframes markerRing {
-  0%   { transform: scale(0.7); opacity: 0.6; }
-  80%  { opacity: 0; }
-  100% { transform: scale(2);   opacity: 0; }
-}
-
-// ── "v0.3.0 preview" pill ───────────────────────────────────────────
+// ── Eyebrow pill ─────────────────────────────────────────────────────
 .label {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  color: var(--blue);
+  margin-bottom: 24px;
   border: 1px solid var(--blue-border);
-  background: var(--blue-dim);
-  padding: 4px 12px;
   border-radius: 99px;
-  margin-bottom: 28px;
-  animation:
-    fadeUp     0.5s $ease-out 0s    both,
-    floatBadge 5s   ease-in-out 0.8s infinite;
+  padding: 5px 13px;
+  background: var(--blue-dim);
+  color: var(--blue);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 600;
+  animation: fadeUp 0.5s $ease-out both;
+}
+
+.labelDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--blue);
+  box-shadow: 0 0 0 0 var(--blue);
+  animation: labelPulse 2s ease-in-out infinite;
 }
 
 // ── Title with per-character illumination ───────────────────────────
 .title {
-  max-width: 920px;
-  margin: 0 auto 20px;
-  perspective: 800px;
+  margin: 0 0 20px;
+  font-size: clamp(2.2rem, 4.2vw, 3.5rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
 }
 
 .titleAccent {
@@ -194,16 +94,11 @@
   color: var(--blue);
 }
 
-/// Words are wrapped in `inline-block` containers so they never break
-/// mid-letter, while a regular space between them keeps natural
-/// line-wrapping between words.
 .word {
   display: inline-block;
   white-space: nowrap;
 }
 
-/// Each letter slides up + un-blurs and briefly glows blue as if the
-/// scan beam hit it.
 .char {
   display: inline-block;
   animation: charReveal 0.5s cubic-bezier(0.2, 0, 0, 1) both;
@@ -212,67 +107,335 @@
 @keyframes charReveal {
   0% {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(18px);
     filter: blur(6px);
-    text-shadow:
-      0 0 24px oklch(0.62 0.22 240 / 0),
-      0 0 8px  oklch(0.62 0.22 240 / 0);
+    text-shadow: 0 0 8px oklch(0.62 0.22 240 / 0);
   }
   35% {
     opacity: 1;
     transform: translateY(2px);
     filter: blur(0);
-    text-shadow:
-      0 0 24px oklch(0.62 0.22 240 / 0.55),
-      0 0 8px  oklch(0.62 0.22 240 / 0.85);
+    text-shadow: 0 0 10px oklch(0.62 0.22 240 / 0.8);
   }
   100% {
     opacity: 1;
     transform: translateY(0);
     filter: blur(0);
-    text-shadow:
-      0 0 24px oklch(0.62 0.22 240 / 0),
-      0 0 8px  oklch(0.62 0.22 240 / 0);
+    text-shadow: 0 0 8px oklch(0.62 0.22 240 / 0);
   }
 }
 
-// ── Subtitle / actions / terminal ──────────────────────────────────
+// ── Subtitle / value chips / actions ────────────────────────────────
 .subtitle {
-  font-size: 1.125rem;
+  max-width: 540px;
+  margin: 0 0 22px;
   color: var(--text-secondary);
-  max-width: 560px;
-  margin: 0 auto 36px;
+  font-size: 1.1rem;
   line-height: 1.65;
-  animation: fadeUp 0.6s $ease-out 0.55s both;
+  animation: fadeUp 0.6s $ease-out 0.5s both;
+}
+
+.valuePoints {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin: 0 0 30px;
+  animation: fadeUp 0.6s $ease-out 0.58s both;
+}
+
+.valuePoints span {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  border: 1px solid var(--border-default);
+  border-radius: 99px;
+  padding: 0 13px;
+  background: oklch(0.18 0.02 250 / 0.72);
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+  font-weight: 700;
 }
 
 .actions {
   display: flex;
   gap: 12px;
-  justify-content: center;
   flex-wrap: wrap;
-  margin-bottom: 56px;
-  animation: fadeUp 0.6s $ease-out 0.7s both;
+  animation: fadeUp 0.6s $ease-out 0.66s both;
 }
 
-.terminalWrap {
-  max-width: 720px;
-  margin: 0 auto;
-  text-align: left;
-  animation: scaleIn 0.6s $ease-out 0.85s both;
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-// ── Reduced-motion fallback ────────────────────────────────────────
+@keyframes labelPulse {
+  0%, 100% { box-shadow: 0 0 0 0 oklch(0.62 0.22 240 / 0.5); }
+  50%      { box-shadow: 0 0 0 5px oklch(0.62 0.22 240 / 0); }
+}
+
+// ── Scan result card ─────────────────────────────────────────────────
+.card {
+  position: relative;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, oklch(0.19 0.024 250 / 0.96), oklch(0.13 0.016 250 / 0.98)),
+    var(--bg-surface);
+  box-shadow:
+    0 30px 80px oklch(0 0 0 / 0.42),
+    inset 0 1px 0 oklch(1 0 0 / 0.06);
+  animation: cardIn 0.7s $ease-out 0.3s both;
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 12px 16px;
+  background: oklch(0.16 0.018 250 / 0.6);
+}
+
+.dots {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.dots span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: oklch(1 0 0 / 0.14);
+}
+
+.dots span:first-child { background: oklch(0.72 0.20 20 / 0.8); }
+.dots span:nth-child(2) { background: oklch(0.75 0.15 80 / 0.8); }
+.dots span:nth-child(3) { background: oklch(0.72 0.18 145 / 0.8); }
+
+.cardCmd {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cardStatus {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #{$green-border};
+  border-radius: 99px;
+  padding: 3px 10px;
+  background: var(--green-dim);
+  color: var(--green);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.cardBody {
+  position: relative;
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+  overflow: hidden;
+}
+
+.cardBeam {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, oklch(0.62 0.22 240 / 0.9), transparent);
+  box-shadow: 0 0 14px oklch(0.62 0.22 240 / 0.7);
+  animation: cardSweep 1s cubic-bezier(0.65, 0, 0.35, 1) 0.5s both;
+}
+
+@keyframes cardSweep {
+  0%   { top: 0; opacity: 0; }
+  15%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+// Score
+.scoreRow {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.ring {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  flex: none;
+}
+
+.ring svg {
+  width: 100%;
+  height: 100%;
+}
+
+.ringTrack {
+  fill: none;
+  stroke: oklch(1 0 0 / 0.1);
+  stroke-width: 7;
+}
+
+.ringFill {
+  fill: none;
+  stroke: var(--green);
+  stroke-width: 7;
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+  stroke-dasharray: 214;
+  stroke-dashoffset: 214;
+  animation: ringDraw 1.1s $ease-out 0.7s both;
+}
+
+@keyframes ringDraw {
+  to { stroke-dashoffset: 17; }
+}
+
+.ringVal {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--green);
+  font-family: var(--font-mono);
+  font-size: 1.7rem;
+  font-weight: 900;
+}
+
+.scoreMeta {
+  display: grid;
+  gap: 6px;
+}
+
+.scoreMeta strong {
+  color: var(--text-primary);
+  font-size: 0.98rem;
+}
+
+.baselinePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  border: 1px solid #{$green-border};
+  border-radius: 99px;
+  padding: 3px 10px;
+  background: var(--green-dim);
+  color: var(--green);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.scoreSub {
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+// Findings
+.issues {
+  display: grid;
+  gap: 7px;
+}
+
+.issueRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 9px 12px;
+  background: var(--bg-base);
+  opacity: 0;
+  animation: rowIn 0.4s $ease-out both;
+  animation-delay: calc(1s + var(--i) * 0.13s);
+}
+
+.issueRow code {
+  color: var(--text-code);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+.issueWhere {
+  margin-left: auto;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+}
+
+.sev {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.sev_critical { background: var(--severity-critical); }
+.sev_serious { background: var(--severity-serious); }
+.sev_moderate { background: var(--severity-moderate); }
+
+@keyframes rowIn {
+  from { opacity: 0; transform: translateX(8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.cardFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 14px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 700;
+  opacity: 0;
+  animation: rowIn 0.4s $ease-out 1.45s both;
+}
+
+.blocked {
+  color: var(--severity-critical);
+}
+
+// ── Reduced motion ───────────────────────────────────────────────────
 @media (prefers-reduced-motion: reduce) {
   .grid,
-  .orb,
+  .glow,
   .label,
+  .labelDot,
   .char,
   .subtitle,
+  .valuePoints,
   .actions,
-  .terminalWrap,
-  .marker,
-  .marker::after {
+  .card,
+  .cardBeam,
+  .ringFill,
+  .issueRow,
+  .cardFoot {
     animation: none !important;
     opacity: 1;
     transform: none;
@@ -280,8 +443,52 @@
     text-shadow: none;
   }
 
-  .grid     { opacity: 0.04; }
-  .scanBeam { display: none; }
-  .marker   { opacity: 0.85; }
-  .marker::after { opacity: 0; }
+  .cardBeam { display: none; }
+  .ringFill { stroke-dashoffset: 17; }
+}
+
+// ── Responsive ───────────────────────────────────────────────────────
+@media (max-width: 980px) {
+  .container {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    max-width: 560px;
+    margin-inline: auto;
+  }
+
+  .copy {
+    text-align: center;
+  }
+
+  .subtitle {
+    margin-inline: auto;
+  }
+
+  .valuePoints,
+  .actions {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero {
+    padding: 72px 0 64px;
+  }
+
+  .valuePoints span {
+    font-size: 0.78rem;
+  }
+
+  .cardBody {
+    padding: 16px;
+  }
+
+  .scoreRow {
+    gap: 14px;
+  }
+
+  .ring {
+    width: 72px;
+    height: 72px;
+  }
 }

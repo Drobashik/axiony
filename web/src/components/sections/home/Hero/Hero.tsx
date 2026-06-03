@@ -1,131 +1,152 @@
 "use client";
 
-import { Fragment, useEffect, useRef, useState } from "react";
-import { Button, Container, Terminal, TerminalLine } from "@/components/ui";
+import { CSSProperties, Fragment } from "react";
+import { Button, Container } from "@/components/ui";
 import cn from "classnames";
-import { HERO_TERMINAL_LINES } from "@/lib/data/hero-terminal";
 import styles from "./Hero.module.scss";
 
-const TITLE_LINE_ONE = "Accessibility testing for";
-const TITLE_LINE_TWO = "modern product teams.";
+const TITLE_LINE_ONE = "Catch accessibility issues";
+const TITLE_LINE_TWO = "before your users do.";
 
-/** Decorative dots that appear after the scan beam crosses the hero. */
-const SCAN_MARKERS: ReadonlyArray<{
-  top: string;
-  left: string;
-  delay: number;
-  variant: "critical" | "serious" | "moderate" | "minor";
+const VALUE_POINTS = [
+  "Free CLI to start",
+  "Scans in CI & the cloud",
+  "Regressions can't merge",
+] as const;
+
+const HERO_ISSUES: ReadonlyArray<{
+  sev: "critical" | "serious" | "moderate";
+  rule: string;
+  where: string;
 }> = [
-  { top: "18%", left: "12%", delay: 1.0, variant: "critical" },
-  { top: "32%", left: "84%", delay: 1.15, variant: "moderate" },
-  { top: "58%", left: "9%", delay: 1.3, variant: "serious" },
-  { top: "70%", left: "88%", delay: 1.45, variant: "minor" },
-  { top: "44%", left: "92%", delay: 1.6, variant: "moderate" },
-  { top: "82%", left: "16%", delay: 1.75, variant: "minor" },
+  { sev: "critical", rule: "color-contrast", where: ".cta-banner" },
+  { sev: "serious", rule: "button-name", where: "header" },
+  { sev: "moderate", rule: "heading-order", where: "/pricing" },
 ];
 
 /**
- * Marketing hero — full "scan in progress → scan complete" choreography.
+ * Marketing hero. Benefit-led copy + CTAs on the left, an animated
+ * "live scan result" card on the right that shows the product at a
+ * glance: a score ring, real findings, and a locked baseline.
  *
- * The component is mounted *after* the BootGate's loading screen has
- * cleared, so all CSS animations fire naturally on first paint. No
- * external readiness flag is needed.
- *
- * Sequence:
- *   1. The grid + orbs swell in.
- *   2. A scan beam sweeps from top to bottom of the section once.
- *   3. Title characters illuminate one after another with a brief
- *      blue glow, as if the scan beam is illuminating each letter.
- *   4. Subtitle / actions / terminal cascade in beneath the title.
- *   5. Floating severity markers fade in like real scan results.
+ * Mounted after the BootGate loader clears, so CSS animations fire
+ * naturally on first paint.
  */
 export function Hero() {
-  const lines = useTypewriter(HERO_TERMINAL_LINES);
-
   return (
     <section className={styles.hero}>
       <div className={styles.grid} aria-hidden="true" />
-      <span className={cn(styles.orb, styles.orbA)} aria-hidden="true" />
-      <span className={cn(styles.orb, styles.orbB)} aria-hidden="true" />
-      <span className={cn(styles.orb, styles.orbC)} aria-hidden="true" />
-
-      {/* The scan beam — a horizontal blue glow that sweeps top→bottom
-          through the hero exactly once on mount. */}
-      <span className={styles.scanBeam} aria-hidden="true" />
-
-      {/* Severity markers that fade in after the beam clears. */}
-      <div className={styles.markerContainer}>
-        {SCAN_MARKERS.map((marker, i) => (
-          <span
-            key={i}
-            className={cn(styles.marker, styles[`marker_${marker.variant}`])}
-            // The marker plays two animations (fade-in + float). Both
-            // reference `--marker-delay` so a single value drives both.
-            style={
-              {
-                top: marker.top,
-                left: marker.left,
-                "--marker-delay": `${marker.delay}s`,
-              } as React.CSSProperties
-            }
-            aria-hidden="true"
-          />
-        ))}
-      </div>
+      <div className={styles.glow} aria-hidden="true" />
 
       <Container className={styles.container}>
-        <div className={styles.label}>
-          <svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true">
-            <circle cx="4" cy="4" r="3" fill="currentColor" />
-          </svg>
-          v0.3.0 preview · MIT-licensed open source
+        <div className={styles.copy}>
+          <div className={styles.label}>
+            <span className={styles.labelDot} aria-hidden="true" />
+            Free open-source CLI · Hosted cloud for teams
+          </div>
+
+          <h1 className={styles.title}>
+            <RevealLine text={TITLE_LINE_ONE} startDelay={0.15} />
+            <br />
+            <em className={styles.titleAccent}>
+              <RevealLine text={TITLE_LINE_TWO} startDelay={0.45} />
+            </em>
+          </h1>
+
+          <p className={styles.subtitle}>
+            Axiony scans your UI with axe-core in your terminal, your CI, and the
+            cloud — then locks a baseline so the issues you fix never come back.
+          </p>
+
+          <div className={styles.valuePoints} aria-label="Why Axiony">
+            {VALUE_POINTS.map((point) => (
+              <span key={point}>{point}</span>
+            ))}
+          </div>
+
+          <div className={styles.actions}>
+            <Button href="/scan" size="lg">
+              Start scanning free
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            </Button>
+            <Button href="/dashboard" variant="secondary" size="lg">
+              View dashboard preview
+            </Button>
+          </div>
         </div>
 
-        <h1 className={styles.title}>
-          <RevealLine text={TITLE_LINE_ONE} startDelay={0.15} />
-          <br />
-          <em className={styles.titleAccent}>
-            <RevealLine text={TITLE_LINE_TWO} startDelay={0.4} />
-          </em>
-        </h1>
-
-        <p className={styles.subtitle}>
-          A small, focused CLI that scans URLs, raw HTML and individual React
-          components with axe-core — in your terminal, in CI, or anywhere a
-          headless browser can run.
-        </p>
-
-        <div className={styles.actions}>
-          <Button href="/scan" size="lg">
-            Start scanning free
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              aria-hidden="true"
-            >
-              <path d="M5 12h14M13 6l6 6-6 6" />
-            </svg>
-          </Button>
-          <Button href="/dashboard" variant="secondary" size="lg">
-            View dashboard →
-          </Button>
-        </div>
-
-        <div className={styles.terminalWrap}>
-          <Terminal
-            lines={lines.visible}
-            filename="axiony — bash"
-            showCursor={!lines.complete}
-            animated
-          />
-        </div>
+        <ScanCard />
       </Container>
     </section>
+  );
+}
+
+/** Animated product preview: scan sweep → score + findings appear. */
+function ScanCard() {
+  return (
+    <div className={styles.card} aria-hidden="true">
+      <div className={styles.cardHead}>
+        <span className={styles.dots}>
+          <span />
+          <span />
+          <span />
+        </span>
+        <span className={styles.cardCmd}>axiony scan acme.com</span>
+        <span className={styles.cardStatus}>complete</span>
+      </div>
+
+      <div className={styles.cardBody}>
+        <span className={styles.cardBeam} />
+
+        <div className={styles.scoreRow}>
+          <div className={styles.ring}>
+            <svg viewBox="0 0 80 80" aria-hidden="true">
+              <circle className={styles.ringTrack} cx="40" cy="40" r="34" />
+              <circle className={styles.ringFill} cx="40" cy="40" r="34" />
+            </svg>
+            <span className={styles.ringVal}>92</span>
+          </div>
+          <div className={styles.scoreMeta}>
+            <strong>Accessibility score</strong>
+            <span className={styles.baselinePill}>
+              <LockMark />
+              baseline locked
+            </span>
+            <span className={styles.scoreSub}>+6 since last release</span>
+          </div>
+        </div>
+
+        <div className={styles.issues}>
+          {HERO_ISSUES.map((issue, i) => (
+            <div
+              key={issue.rule}
+              className={styles.issueRow}
+              style={{ "--i": i } as CSSProperties}
+            >
+              <span className={cn(styles.sev, styles[`sev_${issue.sev}`])} />
+              <code>{issue.rule}</code>
+              <span className={styles.issueWhere}>{issue.where}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className={styles.cardFoot}>
+          <span>9 issues · tracked</span>
+          <span className={styles.blocked}>2 new · blocked</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LockMark() {
+  return (
+    <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="5" y="11" width="14" height="9" rx="2" />
+      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+    </svg>
   );
 }
 
@@ -135,12 +156,7 @@ interface RevealLineProps {
   startDelay: number;
 }
 
-/**
- * Renders a string as individually animated characters. Words are
- * wrapped in `inline-block` containers so they never break mid-letter,
- * with a regular space between them so natural line-wrapping still
- * works.
- */
+/** Renders a string as individually illuminating characters. */
 function RevealLine({ text, startDelay }: RevealLineProps) {
   const PER_CHAR = 0.025;
   const words = text.split(" ");
@@ -154,9 +170,7 @@ function RevealLine({ text, startDelay }: RevealLineProps) {
             <span
               key={cIdx}
               className={styles.char}
-              style={{
-                animationDelay: `${startDelay + cumulativeIndex * PER_CHAR}s`,
-              }}
+              style={{ animationDelay: `${startDelay + cumulativeIndex * PER_CHAR}s` }}
             >
               {char}
             </span>
@@ -174,43 +188,4 @@ function RevealLine({ text, startDelay }: RevealLineProps) {
       })}
     </>
   );
-}
-
-interface TypewriterState {
-  visible: TerminalLine[];
-  complete: boolean;
-}
-
-/**
- * Plays back terminal lines one at a time so the hero terminal feels
- * alive. The hook starts ticking on mount; the small lead-in matches
- * the time it takes the terminal frame to scale in.
- */
-function useTypewriter(lines: TerminalLine[]): TypewriterState {
-  const [visible, setVisible] = useState<TerminalLine[]>([]);
-  const [complete, setComplete] = useState(false);
-  const indexRef = useRef(0);
-
-  useEffect(() => {
-    let timeoutId: number | undefined;
-
-    const advance = () => {
-      const i = indexRef.current;
-      if (i >= lines.length) {
-        setComplete(true);
-        return;
-      }
-      setVisible((prev) => [...prev, lines[i]]);
-      const delay = i < 3 ? 80 : i < 8 ? 120 : 100;
-      indexRef.current = i + 1;
-      timeoutId = window.setTimeout(advance, delay);
-    };
-
-    timeoutId = window.setTimeout(advance, 800);
-    return () => {
-      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
-    };
-  }, [lines]);
-
-  return { visible, complete };
 }

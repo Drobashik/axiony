@@ -1,19 +1,15 @@
 "use client";
 
 import {
-  DeveloperExperience,
-  DocsPreview,
   Faq,
-  Features,
   FinalCta,
   Hero,
-  HowItWorks,
   PricingPreview,
   Problem,
+  QuickStart,
+  ScanWorkflow,
   Solution,
-  Testimonials,
   TrustBar,
-  UseCases,
 } from "@/components/sections/home";
 import { useReveal } from "@/lib/hooks/useReveal";
 
@@ -31,13 +27,9 @@ export default function HomePage() {
       <TrustBar />
       <Problem />
       <Solution />
-      <Features />
-      <HowItWorks />
-      <DeveloperExperience />
-      <DocsPreview />
-      <UseCases />
+      <ScanWorkflow />
+      <QuickStart />
       <PricingPreview />
-      <Testimonials />
       <Faq />
       <FinalCta />
     </>

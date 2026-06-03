@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import cn from "classnames";
+import { LogoLockup } from "../LogoMark";
 import styles from "./LoadingScreen.module.scss";
 
 export interface LoadingScreenProps {
@@ -87,37 +88,9 @@ export function LoadingScreen({
         <span className={styles.glow} />
       </div>
 
-      {/* Logo + scan line */}
+      {/* Logo */}
       <div className={cn(styles.logoWrap, styles.logoReady)}>
-        <div className={styles.logo}>
-          <svg
-            width="30"
-            height="30"
-            viewBox="0 0 16 16"
-            fill="none"
-            aria-hidden="true"
-          >
-            <path
-              d="M3 13L8 3L13 13"
-              stroke="white"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className={cn(styles.stroke, styles.strokeMain)}
-              style={{ strokeDashoffset: 0 }}
-            />
-            <path
-              d="M5.5 9.5H10.5"
-              stroke="white"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              className={cn(styles.stroke, styles.strokeBar)}
-              style={{ strokeDashoffset: 0 }}
-            />
-          </svg>
-          <span className={styles.scan} aria-hidden="true" />
-        </div>
-        <div className={styles.wordmark}>Axiony</div>
+        <LogoLockup markSize={86} />
       </div>
 
       {/* Progress + status */}
