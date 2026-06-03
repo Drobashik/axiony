@@ -1,4 +1,4 @@
-// Barrel of home-page sections — keeps `page.tsx` short and readable.
+// Public API for home-page sections. Keep `page.tsx` short and readable.
 export * from "./Faq";
 export * from "./FinalCta";
 export * from "./Hero";

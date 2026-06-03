@@ -1,1 +1,1 @@
-export * from "./ScanWorkflow";
+export { ScanWorkflow } from "./ScanWorkflow";

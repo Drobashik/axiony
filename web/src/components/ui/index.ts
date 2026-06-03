@@ -1,4 +1,4 @@
-// Barrel for UI primitives — keeps imports tidy in pages and sections.
+// Public API for UI primitives. Keep exports local to this domain.
 
 export * from "./Button";
 export * from "./Container";
