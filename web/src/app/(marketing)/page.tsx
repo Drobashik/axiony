@@ -13,12 +13,7 @@ import {
 } from "@/components/sections/home";
 import { useReveal } from "@/lib/hooks/useReveal";
 
-/**
- * Marketing home page — assembled from focused section components.
- * The BootGate that plays the loading screen lives at the root layout
- * level, so we don't have to wrap anything here.
- */
-export default function HomePage() {
+const HomePage = () => {
   useReveal();
 
   return (
@@ -34,4 +29,6 @@ export default function HomePage() {
       <FinalCta />
     </>
   );
-}
+};
+
+export default HomePage;

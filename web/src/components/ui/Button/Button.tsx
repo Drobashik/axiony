@@ -1,9 +1,11 @@
 import Link from "next/link";
-import {
+import { forwardRef } from "react";
+import type {
   AnchorHTMLAttributes,
   ButtonHTMLAttributes,
-  forwardRef,
+  ForwardedRef,
   ReactNode,
+  Ref,
 } from "react";
 import cn from "classnames";
 import styles from "./Button.module.scss";
@@ -14,7 +16,6 @@ export type ButtonSize = "sm" | "md" | "lg";
 interface CommonProps {
   variant?: ButtonVariant;
   size?: ButtonSize;
-  /** When true, the button stretches to fill its container. */
   block?: boolean;
   className?: string;
   children: ReactNode;
@@ -28,68 +29,61 @@ type NativeButtonProps = CommonProps &
 
 export type ButtonProps = AnchorProps | NativeButtonProps;
 
-/**
- * Detects routes that should be handled by Next's `<Link>` (client-side
- * navigation, no full page reload) vs. external/anchor links that need
- * a real `<a>`. Internal links start with `/` and don't have `target`.
- */
-function isInternalLink(href: string, target: string | undefined): boolean {
-  return href.startsWith("/") && !target;
-}
+const isInternalLink = (href: string, target: string | undefined): boolean =>
+  href.startsWith("/") && !target;
 
-/**
- * Button primitive — renders as a real `<button>` by default, or as
- * a navigation element when `href` is provided. Internal links use
- * Next's `<Link>` so the SPA stays fast; external links fall back to
- * a regular `<a>`.
- */
-export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>(
-  function Button({ variant = "primary", size = "md", block, className, children, ...rest }, ref) {
-    const cls = cn(
-      styles.btn,
-      styles[`variant_${variant}`],
-      styles[`size_${size}`],
-      block && styles.block,
-      className,
-    );
+const ButtonBase = (
+  { variant = "primary", size = "md", block, className, children, ...rest }: ButtonProps,
+  ref: ForwardedRef<HTMLButtonElement | HTMLAnchorElement>,
+) => {
+  const cls = cn(
+    styles.btn,
+    styles[`variant_${variant}`],
+    styles[`size_${size}`],
+    block && styles.block,
+    className,
+  );
 
-    if ("href" in rest && rest.href !== undefined) {
-      const { href, target, ...anchorRest } = rest as AnchorHTMLAttributes<HTMLAnchorElement> & { href: string };
+  if ("href" in rest && rest.href !== undefined) {
+    const { href, target, ...anchorRest } = rest as AnchorHTMLAttributes<HTMLAnchorElement> & { href: string };
 
-      if (isInternalLink(href, target)) {
-        return (
-          <Link
-            ref={ref as React.Ref<HTMLAnchorElement>}
-            href={href}
-            className={cls}
-            {...anchorRest}
-          >
-            {children}
-          </Link>
-        );
-      }
-
+    if (isInternalLink(href, target)) {
       return (
-        <a
-          ref={ref as React.Ref<HTMLAnchorElement>}
+        <Link
+          ref={ref as Ref<HTMLAnchorElement>}
           href={href}
-          target={target}
           className={cls}
           {...anchorRest}
         >
           {children}
-        </a>
+        </Link>
       );
     }
 
     return (
-      <button
-        ref={ref as React.Ref<HTMLButtonElement>}
+      <a
+        ref={ref as Ref<HTMLAnchorElement>}
+        href={href}
+        target={target}
         className={cls}
-        {...(rest as ButtonHTMLAttributes<HTMLButtonElement>)}
+        {...anchorRest}
       >
         {children}
-      </button>
+      </a>
     );
-  },
-);
+  }
+
+  return (
+    <button
+      ref={ref as Ref<HTMLButtonElement>}
+      className={cls}
+      {...(rest as ButtonHTMLAttributes<HTMLButtonElement>)}
+    >
+      {children}
+    </button>
+  );
+};
+
+export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>(ButtonBase);
+
+Button.displayName = "Button";

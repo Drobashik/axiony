@@ -6,30 +6,26 @@ import { LogoLockup } from "../LogoMark";
 import styles from "./LoadingScreen.module.scss";
 
 export interface LoadingScreenProps {
-  /** Called once the exit animation has finished. */
   onDone?: () => void;
-  /** Total time the screen stays visible (ms). */
   durationMs?: number;
 }
 
 type Phase = "enter" | "visible" | "exit";
 
-/**
- * Boot screen shown briefly on the home and dashboard pages.
- *
- * Three concentric rings, a glowing logo with a scan-line sweep, a
- * gradient progress bar and a status caption that walks through three
- * phases. The whole component owns its lifecycle — when finished it
- * fires `onDone()` so the caller can hide it.
- */
-export function LoadingScreen({
+const statusForProgress = (progress: number): string => {
+  if (progress < 35) return "Initializing scanner...";
+  if (progress < 65) return "Loading WCAG ruleset...";
+  if (progress < 90) return "Preparing workspace...";
+  return "Ready";
+};
+
+export const LoadingScreen = ({
   onDone,
   durationMs = 2000,
-}: LoadingScreenProps) {
+}: LoadingScreenProps) => {
   const [phase, setPhase] = useState<Phase>("enter");
   const [progress, setProgress] = useState(0);
 
-  // Drive a slightly-randomised progress counter that always ends at 100.
   useEffect(() => {
     let current = 0;
     const id = window.setInterval(() => {
@@ -43,7 +39,6 @@ export function LoadingScreen({
     return () => window.clearInterval(id);
   }, []);
 
-  // Phase machine: enter → visible → exit → onDone.
   useEffect(() => {
     const enterDelay = 200;
     const exitDelay = Math.max(durationMs - 500, enterDelay + 200);
@@ -70,7 +65,6 @@ export function LoadingScreen({
       aria-live="polite"
       aria-label="Loading Axiony"
     >
-      {/* Ambient rings + radial glow */}
       <div className={styles.rings} aria-hidden="true">
         {[300, 460, 620].map((size, i) => (
           <span
@@ -88,12 +82,10 @@ export function LoadingScreen({
         <span className={styles.glow} />
       </div>
 
-      {/* Logo */}
       <div className={cn(styles.logoWrap, styles.logoReady)}>
         <LogoLockup markSize={86} />
       </div>
 
-      {/* Progress + status */}
       <div className={cn(styles.progress, styles.progressReady)}>
         <div className={styles.bar}>
           <div className={styles.fill} style={{ width: `${progress}%` }} />
@@ -102,11 +94,4 @@ export function LoadingScreen({
       </div>
     </div>
   );
-}
-
-function statusForProgress(progress: number): string {
-  if (progress < 35) return "Initializing scanner...";
-  if (progress < 65) return "Loading WCAG ruleset...";
-  if (progress < 90) return "Preparing workspace...";
-  return "Ready";
-}
+};

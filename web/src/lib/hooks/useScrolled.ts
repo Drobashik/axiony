@@ -2,11 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-/**
- * Reports whether the page has been scrolled past `threshold` pixels.
- * Used by the navigation bar to toggle a "scrolled" border state.
- */
-export function useScrolled(threshold: number = 10): boolean {
+export const useScrolled = (threshold: number = 10): boolean => {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -17,4 +13,4 @@ export function useScrolled(threshold: number = 10): boolean {
   }, [threshold]);
 
   return scrolled;
-}
+};

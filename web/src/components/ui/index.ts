@@ -1,5 +1,3 @@
-// Public API for UI primitives. Keep exports local to this domain.
-
 export * from "./Button";
 export * from "./Container";
 export * from "./Icon";

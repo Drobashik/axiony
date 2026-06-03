@@ -2,15 +2,9 @@
 
 import { useEffect } from "react";
 
-/**
- * Adds a `visible` class to elements that match the provided selectors
- * when they intersect the viewport. Used for scroll-reveal animations.
- *
- * Pure side-effect hook with no return value — the styling lives in CSS.
- */
-export function useReveal(
+export const useReveal = (
   selectors: string = ".reveal, .reveal-left, .reveal-right, .reveal-scale",
-): void {
+): void => {
   useEffect(() => {
     const elements = document.querySelectorAll(selectors);
 
@@ -30,4 +24,4 @@ export function useReveal(
 
     return () => observer.disconnect();
   }, [selectors]);
-}
+};

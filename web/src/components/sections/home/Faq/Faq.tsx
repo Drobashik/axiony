@@ -1,87 +1,14 @@
 "use client";
 
-import { ReactNode, useState } from "react";
-import { Button, Container, SectionEyebrow } from "@/components/ui";
+import { useState } from "react";
 import { Section } from "@/components/layout";
+import { Button, Container, SectionEyebrow } from "@/components/ui";
 import cn from "classnames";
+import { FaqItem } from "./components/FaqItem";
+import { FAQS } from "./data";
 import styles from "./Faq.module.scss";
 
-interface QA {
-  q: string;
-  a: ReactNode;
-}
-
-const FAQS: QA[] = [
-  {
-    q: "What does Axiony do?",
-    a: (
-      <>
-        It scans your UI for accessibility issues with axe-core — in your
-        terminal, in CI, and in the cloud — so you catch them before your users
-        do.
-      </>
-    ),
-  },
-  {
-    q: "What can it scan?",
-    a: (
-      <>
-        A live URL (<code>axiony scan</code>), an HTML file (
-        <code>axiony html</code>), or a React component (
-        <code>axiony component</code>). Add <code>--selector</code> to scan just
-        part of a page.
-      </>
-    ),
-  },
-  {
-    q: "How fast can I try it?",
-    a: (
-      <>
-        One command, no account: <code>{"npx axiony-cli scan <url>"}</code>.
-        Prefer to keep it around? <code>npm i -g axiony-cli</code>.
-      </>
-    ),
-  },
-  {
-    q: "Can it replace a manual audit?",
-    a: (
-      <>
-        No — and nothing should. Automated checks find about a third of WCAG
-        issues; Axiony catches those on every commit, so your manual review
-        stays small instead of becoming a cleanup project.
-      </>
-    ),
-  },
-  {
-    q: "Does it fit my framework and CI?",
-    a: (
-      <>
-        Yes. It scans the rendered DOM, so it works with React, Vue, Svelte or
-        plain HTML — and runs in GitHub Actions, GitLab CI, or any pipeline.
-      </>
-    ),
-  },
-  {
-    q: "What does it cost?",
-    a: (
-      <>
-        The CLI is free and MIT-licensed, forever. The hosted scanner,
-        dashboard, and team features are the planned Pro and Team plans.
-      </>
-    ),
-  },
-  {
-    q: "Is the cloud ready?",
-    a: (
-      <>
-        The CLI ships today. The hosted scanner and dashboard are a preview —
-        pricing is planned, with no card needed to start.
-      </>
-    ),
-  },
-];
-
-export function Faq() {
+export const Faq = () => {
   const [open, setOpen] = useState<number | null>(0);
 
   return (
@@ -114,38 +41,16 @@ export function Faq() {
           </div>
 
           <ul className={cn(styles.list, "reveal-right")}>
-            {FAQS.map((item, i) => {
-              const isOpen = open === i;
+            {FAQS.map((item, index) => {
+              const isOpen = open === index;
+
               return (
-                <li key={item.q} className={cn(styles.item, isOpen && styles.item_open)}>
-                  <button
-                    type="button"
-                    className={styles.question}
-                    aria-expanded={isOpen}
-                    onClick={() => setOpen(isOpen ? null : i)}
-                  >
-                    <span>{item.q}</span>
-                    <svg
-                      className={styles.chevron}
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                    >
-                      <path d="M6 9l6 6 6-6" />
-                    </svg>
-                  </button>
-                  <div className={styles.answer}>
-                    <div className={styles.answerInner}>
-                      <p>{item.a}</p>
-                    </div>
-                  </div>
-                </li>
+                <FaqItem
+                  key={item.q}
+                  item={item}
+                  isOpen={isOpen}
+                  onToggle={() => setOpen(isOpen ? null : index)}
+                />
               );
             })}
           </ul>
@@ -153,4 +58,4 @@ export function Faq() {
       </Container>
     </Section>
   );
-}
+};

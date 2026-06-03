@@ -1,20 +1,14 @@
-import { IconName } from "@/types";
-import { ReactNode } from "react";
+import type { IconName } from "@/types";
+import type { ReactNode } from "react";
 
 export interface IconProps {
   name: IconName;
   size?: number;
-  /** Stroke / fill color — defaults to `currentColor` so it inherits. */
   color?: string;
   className?: string;
   "aria-label"?: string;
 }
 
-/**
- * Small SVG icon set, kept inline so we don't ship a runtime icon
- * library. Each path is hand-tuned to the same 24x24 viewBox and
- * uses `currentColor` so the icon inherits from its parent.
- */
 const PATHS: Record<IconName, ReactNode> = {
   scan: (
     <>
@@ -79,19 +73,17 @@ const PATHS: Record<IconName, ReactNode> = {
   ),
 };
 
-export function Icon({ name, size = 18, color = "currentColor", className, "aria-label": ariaLabel }: IconProps) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      stroke={color}
-      className={className}
-      role={ariaLabel ? "img" : undefined}
-      aria-label={ariaLabel}
-      aria-hidden={ariaLabel ? undefined : true}
-    >
-      {PATHS[name]}
-    </svg>
-  );
-}
+export const Icon = ({ name, size = 18, color = "currentColor", className, "aria-label": ariaLabel }: IconProps) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    stroke={color}
+    className={className}
+    role={ariaLabel ? "img" : undefined}
+    aria-label={ariaLabel}
+    aria-hidden={ariaLabel ? undefined : true}
+  >
+    {PATHS[name]}
+  </svg>
+);
