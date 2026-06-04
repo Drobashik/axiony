@@ -6,7 +6,9 @@ export const useReveal = (
   selectors: string = ".reveal, .reveal-left, .reveal-right, .reveal-scale",
 ): void => {
   useEffect(() => {
-    const elements = document.querySelectorAll(selectors);
+    if (typeof window === "undefined") return;
+
+    const observed = new WeakSet<Element>();
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -20,8 +22,38 @@ export const useReveal = (
       { threshold: 0.12, rootMargin: "0px 0px -40px 0px" },
     );
 
-    elements.forEach((el) => observer.observe(el));
+    const observeReveal = (el: Element) => {
+      if (observed.has(el) || el.classList.contains("visible")) return;
+      observed.add(el);
+      observer.observe(el);
+    };
 
-    return () => observer.disconnect();
+    const observeTree = (root: ParentNode) => {
+      root.querySelectorAll(selectors).forEach(observeReveal);
+    };
+
+    observeTree(document);
+
+    const mutationObserver = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeType !== Node.ELEMENT_NODE) return;
+
+          const element = node as Element;
+          if (element.matches(selectors)) observeReveal(element);
+          observeTree(element);
+        });
+      }
+    });
+
+    mutationObserver.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    return () => {
+      observer.disconnect();
+      mutationObserver.disconnect();
+    };
   }, [selectors]);
 };
