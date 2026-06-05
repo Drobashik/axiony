@@ -29,7 +29,6 @@ interface MutableScanJob extends ScanJobSnapshot {
 }
 
 declare global {
-  // eslint-disable-next-line no-var
   var __axionyScanJobs: Map<string, MutableScanJob> | undefined;
 }
 

@@ -143,7 +143,7 @@ export const useScanEngine = (): ScanEngine => {
   }, [clearPolling]);
 
   const pollJob = useCallback(
-    async (jobId: string) => {
+    async function pollJob(jobId: string) {
       if (activeJob.current !== jobId) return;
 
       abortController.current = new AbortController();

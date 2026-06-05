@@ -5,13 +5,14 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 interface RouteContext {
-  params: {
+  params: Promise<{
     jobId: string;
-  };
+  }>;
 }
 
 export const GET = async (_request: Request, { params }: RouteContext) => {
-  const job = getScanJob(params.jobId);
+  const { jobId } = await params;
+  const job = getScanJob(jobId);
 
   if (!job) {
     return NextResponse.json({ error: "Scan job was not found." }, { status: 404 });
