@@ -1,6 +1,7 @@
 import { BROWSER_TIMEOUT } from './constants';
 import { addAxeInitScript, createScanPage, launchScanBrowser, runAxeOnPage } from './axe';
 import {
+  detectBlockedScanPage,
   detectPageWarnings,
   waitForChallengeResolution,
   waitForPageReadiness,
@@ -46,11 +47,14 @@ export async function scanUrl(url: string, options: ScanUrlOptions = {}): Promis
     const page = await createScanPage(browser);
     await addAxeInitScript(page);
 
+    let responseStatus: number | undefined;
+
     try {
-      await page.goto(url, {
+      const response = await page.goto(url, {
         waitUntil: 'domcontentloaded',
         timeout: BROWSER_TIMEOUT,
       });
+      responseStatus = response?.status();
     } catch (error) {
       const navigationError = new Error(formatNavigationError(error)) as Error & {
         cause?: unknown;
@@ -62,6 +66,11 @@ export async function scanUrl(url: string, options: ScanUrlOptions = {}): Promis
     onProgressPrint('Waiting for page readiness');
     await waitForPageReadiness(page);
     await waitForChallengeResolution(page);
+
+    const blockedScanError = await detectBlockedScanPage(page, responseStatus);
+    if (blockedScanError) {
+      throw new Error(blockedScanError);
+    }
 
     const warnings = await detectPageWarnings(page);
 

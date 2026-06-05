@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import cn from "classnames";
 import { normalizeUrl, validateUrl } from "@/lib/scan/url";
@@ -15,6 +15,7 @@ interface UrlConsoleProps {
   busy: boolean;
   onUrlChange: (value: string) => void;
   onLevelChange: (level: WcagLevel) => void;
+  focusSignal?: number;
   /** Called with a normalised, validated URL. */
   onScan: (url: string) => void;
 }
@@ -25,6 +26,7 @@ export const UrlConsole = ({
   busy,
   onUrlChange,
   onLevelChange,
+  focusSignal = 0,
   onScan,
 }: UrlConsoleProps) => {
   const inputId = useId();
@@ -34,6 +36,12 @@ export const UrlConsole = ({
 
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (focusSignal > 0 && !busy) {
+      inputRef.current?.focus();
+    }
+  }, [busy, focusSignal]);
 
   const run = (raw: string) => {
     const { url: valid, error: validationError } = validateUrl(raw);

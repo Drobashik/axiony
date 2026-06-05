@@ -3,8 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "npm --prefix ../cli run build",
     "dev": "next dev",
+    "prebuild": "npm --prefix ../cli run build",
     "build": "next build",
+    "prestart": "npm --prefix ../cli run build",
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit"

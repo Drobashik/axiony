@@ -18,6 +18,11 @@ export interface IssueTemplate {
   wcag: string[];
   nodes: string[];
   fix: string;
+  whatHappened?: string;
+  whyItMatters?: string;
+  suggestedFix?: string;
+  beforeCode?: string;
+  afterCode?: string;
   /** Optional code snippet illustrating the fix (rendered by /scan). */
   code?: string;
 }

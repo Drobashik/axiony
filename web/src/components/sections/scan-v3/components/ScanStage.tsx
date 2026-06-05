@@ -11,14 +11,16 @@ interface ScanStageProps {
   progress: number;
   lines: TerminalLine[];
   reduce: boolean;
+  status?: "scanning" | "failed";
 }
 
 const RADIUS = 32;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
-export const ScanStage = ({ url, progress, lines, reduce }: ScanStageProps) => {
+export const ScanStage = ({ url, progress, lines, reduce, status = "scanning" }: ScanStageProps) => {
   const phase = phaseForProgress(progress);
   const offset = CIRCUMFERENCE * (1 - progress / 100);
+  const failed = status === "failed";
 
   return (
     <div className={styles.stage}>
@@ -45,14 +47,14 @@ export const ScanStage = ({ url, progress, lines, reduce }: ScanStageProps) => {
         </div>
 
         <div className={styles.stageMeta}>
-          <strong>Scanning&hellip;</strong>
+          <strong>{failed ? "Scan failed" : "Scanning…"}</strong>
           <span className={styles.stageUrl}>{url}</span>
         </div>
       </div>
 
       {/* Announce phase changes without visual noise. */}
       <p className={styles.srOnly} role="status" aria-live="polite">
-        {SCAN_PHASES[phase].label} — {progress}% complete
+        {failed ? "Scan failed" : `${SCAN_PHASES[phase].label} — ${progress}% complete`}
       </p>
 
       <ol className={styles.phases}>
@@ -79,7 +81,12 @@ export const ScanStage = ({ url, progress, lines, reduce }: ScanStageProps) => {
       </ol>
 
       <div className={styles.stageTerminal}>
-        <Terminal filename="axiony — cloud scan" lines={lines} showCursor={!reduce && progress < 100} animated />
+        <Terminal
+          filename="axiony — cloud scan"
+          lines={lines}
+          showCursor={!reduce && !failed && progress < 100}
+          animated={!failed}
+        />
       </div>
     </div>
   );
