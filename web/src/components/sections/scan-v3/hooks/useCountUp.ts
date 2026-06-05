@@ -10,17 +10,16 @@ import { usePrefersReducedMotion } from "@/lib/hooks/usePrefersReducedMotion";
 export const useCountUp = (target: number, durationMs = 900, active = true): number => {
   const reduce = usePrefersReducedMotion();
   const [value, setValue] = useState(active && !reduce ? 0 : target);
-  const raf = useRef<number>();
+  const raf = useRef<number | null>(null);
 
   useEffect(() => {
     // No animation needed — show the final value immediately.
     if (!active || reduce || (typeof document !== "undefined" && document.hidden)) {
-      setValue(target);
-      return undefined;
+      const immediate = window.setTimeout(() => setValue(target), 0);
+      return () => window.clearTimeout(immediate);
     }
 
     let startTs: number | null = null;
-    setValue(0);
 
     const tick = (ts: number) => {
       if (startTs === null) startTs = ts;
@@ -35,7 +34,7 @@ export const useCountUp = (target: number, durationMs = 900, active = true): num
     const fallback = window.setTimeout(() => setValue(target), durationMs + 150);
 
     return () => {
-      if (raf.current) cancelAnimationFrame(raf.current);
+      if (raf.current !== null) cancelAnimationFrame(raf.current);
       window.clearTimeout(fallback);
     };
   }, [target, durationMs, active, reduce]);

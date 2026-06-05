@@ -862,8 +862,8 @@ const repairTemplates: Record<string, RepairTemplate> = {
       "An id used by a label or ARIA relationship is duplicated on the page.",
     whyItMatters:
       "When aria-labelledby, aria-describedby, or for points to a duplicate id, assistive technology may read the wrong label or description.",
-    suggestedFix: ({ before }) =>
-      `Make this referenced id unique. Then update matching for, aria-labelledby, aria-describedby, aria-controls, or SVG url(#id) references.`,
+    suggestedFix:
+      "Make this referenced id unique. Then update matching for, aria-labelledby, aria-describedby, aria-controls, or SVG url(#id) references.",
     afterCode: buildDuplicateIdFix,
   },
   "empty-heading": {
