@@ -36,8 +36,12 @@
 }
 
 @keyframes heroFadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 // ── Layout ───────────────────────────────────────────────────────────
@@ -163,13 +167,24 @@
 }
 
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(14px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes labelPulse {
-  0%, 100% { box-shadow: 0 0 0 0 oklch(0.62 0.22 240 / 0.5); }
-  50%      { box-shadow: 0 0 0 5px oklch(0.62 0.22 240 / 0); }
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 oklch(0.62 0.22 240 / 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 5px oklch(0.62 0.22 240 / 0);
+  }
 }
 
 // ── Scan result card ─────────────────────────────────────────────────
@@ -181,8 +196,14 @@
 }
 
 @keyframes cardIn {
-  from { opacity: 0; transform: translateY(20px) scale(0.98); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .cardHead {
@@ -204,9 +225,15 @@
     border-radius: 50%;
     background: oklch(1 0 0 / 0.14);
 
-    &:first-child { background: oklch(0.72 0.20 20 / 0.8); }
-    &:nth-child(2) { background: oklch(0.75 0.15 80 / 0.8); }
-    &:nth-child(3) { background: oklch(0.72 0.18 145 / 0.8); }
+    &:first-child {
+      background: oklch(0.72 0.2 20 / 0.8);
+    }
+    &:nth-child(2) {
+      background: oklch(0.75 0.15 80 / 0.8);
+    }
+    &:nth-child(3) {
+      background: oklch(0.72 0.18 145 / 0.8);
+    }
   }
 }
 
@@ -257,10 +284,20 @@
 }
 
 @keyframes cardSweep {
-  0%   { top: 0; opacity: 0; }
-  15%  { opacity: 1; }
-  85%  { opacity: 1; }
-  100% { top: 100%; opacity: 0; }
+  0% {
+    top: 0;
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
 }
 
 // Score
@@ -301,7 +338,9 @@
 }
 
 @keyframes ringDraw {
-  to { stroke-dashoffset: 17; }
+  to {
+    stroke-dashoffset: 17;
+  }
 }
 
 .ringVal {
@@ -385,13 +424,25 @@
   border-radius: 50%;
 }
 
-.sev_critical { background: var(--severity-critical); }
-.sev_serious { background: var(--severity-serious); }
-.sev_moderate { background: var(--severity-moderate); }
+.sev_critical {
+  background: var(--severity-critical);
+}
+.sev_serious {
+  background: var(--severity-serious);
+}
+.sev_moderate {
+  background: var(--severity-moderate);
+}
 
 @keyframes rowIn {
-  from { opacity: 0; transform: translateX(8px); }
-  to   { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .cardFoot {
@@ -435,8 +486,12 @@
     text-shadow: none;
   }
 
-  .cardBeam { display: none; }
-  .ringFill { stroke-dashoffset: 17; }
+  .cardBeam {
+    display: none;
+  }
+  .ringFill {
+    stroke-dashoffset: 17;
+  }
 }
 
 // ── Responsive ───────────────────────────────────────────────────────

@@ -21,8 +21,7 @@ interface CommonProps {
   children: ReactNode;
 }
 
-type AnchorProps = CommonProps &
-  AnchorHTMLAttributes<HTMLAnchorElement> & { href: string };
+type AnchorProps = CommonProps & AnchorHTMLAttributes<HTMLAnchorElement> & { href: string };
 
 type NativeButtonProps = CommonProps &
   ButtonHTMLAttributes<HTMLButtonElement> & { href?: undefined };
@@ -45,16 +44,13 @@ const ButtonBase = (
   );
 
   if ("href" in rest && rest.href !== undefined) {
-    const { href, target, ...anchorRest } = rest as AnchorHTMLAttributes<HTMLAnchorElement> & { href: string };
+    const { href, target, ...anchorRest } = rest as AnchorHTMLAttributes<HTMLAnchorElement> & {
+      href: string;
+    };
 
     if (isInternalLink(href, target)) {
       return (
-        <Link
-          ref={ref as Ref<HTMLAnchorElement>}
-          href={href}
-          className={cls}
-          {...anchorRest}
-        >
+        <Link ref={ref as Ref<HTMLAnchorElement>} href={href} className={cls} {...anchorRest}>
           {children}
         </Link>
       );

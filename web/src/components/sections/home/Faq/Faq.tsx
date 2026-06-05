@@ -18,9 +18,7 @@ export const Faq = () => {
           <div className={cn(styles.aside, "reveal-left")}>
             <SectionEyebrow>FAQ</SectionEyebrow>
             <h2>Questions, answered.</h2>
-            <p className={styles.asideLead}>
-              Everything worth knowing before your first scan.
-            </p>
+            <p className={styles.asideLead}>Everything worth knowing before your first scan.</p>
             <div className={styles.help}>
               <span className={styles.helpLabel}>Still curious?</span>
               <div className={styles.helpLinks}>

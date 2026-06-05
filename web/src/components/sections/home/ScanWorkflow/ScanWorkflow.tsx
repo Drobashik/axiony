@@ -21,7 +21,10 @@ export const ScanWorkflow = () => {
   useEffect(() => {
     if (!inView || reduce || !auto) return undefined;
 
-    const id = window.setInterval(() => setActive((current) => (current + 1) % STEPS.length), STEP_MS);
+    const id = window.setInterval(
+      () => setActive((current) => (current + 1) % STEPS.length),
+      STEP_MS,
+    );
     return () => window.clearInterval(id);
   }, [auto, inView, reduce]);
 
@@ -40,9 +43,9 @@ export const ScanWorkflow = () => {
             <SectionEyebrow>Workflow</SectionEyebrow>
             <h2>Start free in your terminal. Scale to the whole team.</h2>
             <p>
-              The free CLI gives developers instant feedback locally and in CI. Axiony
-              Cloud adds scheduled site-wide scans with full history, then a shared
-              workspace wired into GitHub, GitLab and Slack.
+              The free CLI gives developers instant feedback locally and in CI. Axiony Cloud adds
+              scheduled site-wide scans with full history, then a shared workspace wired into
+              GitHub, GitLab and Slack.
             </p>
           </div>
 

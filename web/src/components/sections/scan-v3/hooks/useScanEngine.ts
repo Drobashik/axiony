@@ -114,33 +114,36 @@ export const useScanEngine = (): ScanEngine => {
     setLines((prev) => [...prev, toTerminalLine(`✕ ${message}`)]);
   }, []);
 
-  const applyJob = useCallback((job: ApiScanJob) => {
-    setUrl(job.url);
-    setProgress(job.progress);
-    setLines(job.lines.map(toTerminalLine));
+  const applyJob = useCallback(
+    (job: ApiScanJob) => {
+      setUrl(job.url);
+      setProgress(job.progress);
+      setLines(job.lines.map(toTerminalLine));
 
-    if (job.status === "complete" && job.report) {
-      clearPolling();
-      activeJob.current = null;
-      setReport(toReport(job.report));
-      setError(null);
-      setStatus("results");
-      return;
-    }
+      if (job.status === "complete" && job.report) {
+        clearPolling();
+        activeJob.current = null;
+        setReport(toReport(job.report));
+        setError(null);
+        setStatus("results");
+        return;
+      }
 
-    if (job.status === "failed") {
-      clearPolling();
-      activeJob.current = null;
+      if (job.status === "failed") {
+        clearPolling();
+        activeJob.current = null;
+        setReport(null);
+        setError(job.error ?? "Scan failed.");
+        setStatus("failed");
+        return;
+      }
+
       setReport(null);
-      setError(job.error ?? "Scan failed.");
-      setStatus("failed");
-      return;
-    }
-
-    setReport(null);
-    setError(null);
-    setStatus("scanning");
-  }, [clearPolling]);
+      setError(null);
+      setStatus("scanning");
+    },
+    [clearPolling],
+  );
 
   const pollJob = useCallback(
     async function pollJob(jobId: string) {
@@ -171,7 +174,8 @@ export const useScanEngine = (): ScanEngine => {
         if (pollError instanceof DOMException && pollError.name === "AbortError") return;
         if (activeJob.current !== jobId) return;
 
-        const message = pollError instanceof Error ? pollError.message : "Could not read scan status.";
+        const message =
+          pollError instanceof Error ? pollError.message : "Could not read scan status.";
         clearPolling();
         activeJob.current = null;
         fail(url, message);
@@ -193,7 +197,10 @@ export const useScanEngine = (): ScanEngine => {
       setProgress(randomInitialProgress());
       setStatus("scanning");
 
-      const initialLines = [`$ axiony scan ${target} --json`, `  WCAG ${level} · starting live axe-core scan`];
+      const initialLines = [
+        `$ axiony scan ${target} --json`,
+        `  WCAG ${level} · starting live axe-core scan`,
+      ];
       setLines(initialLines.map(toTerminalLine));
 
       void (async () => {
@@ -215,13 +222,17 @@ export const useScanEngine = (): ScanEngine => {
           activeJob.current = job.jobId;
           applyJob(job);
 
-          pollTimer.current = window.setTimeout(() => {
-            void pollJob(job.jobId);
-          }, reduce ? 250 : POLL_MS);
+          pollTimer.current = window.setTimeout(
+            () => {
+              void pollJob(job.jobId);
+            },
+            reduce ? 250 : POLL_MS,
+          );
         } catch (startError) {
           if (startError instanceof DOMException && startError.name === "AbortError") return;
 
-          const message = startError instanceof Error ? startError.message : "Could not start scan.";
+          const message =
+            startError instanceof Error ? startError.message : "Could not start scan.";
           activeJob.current = null;
           fail(target, message);
         }

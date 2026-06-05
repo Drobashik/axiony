@@ -54,7 +54,9 @@ export const ScannerViz = () => (
                   AI fix
                 </span>
               )}
-              <span className={cn(styles.statusPill, styles[`st_${item.tone}`])}>{item.status}</span>
+              <span className={cn(styles.statusPill, styles[`st_${item.tone}`])}>
+                {item.status}
+              </span>
             </span>
           </div>
         ))}

@@ -26,13 +26,7 @@ export const Nav = () => {
   const close = () => setMenuOpen(false);
 
   return (
-    <header
-      className={cn(
-        styles.nav,
-        scrolled && styles.scrolled,
-        menuOpen && styles.menuOpen,
-      )}
-    >
+    <header className={cn(styles.nav, scrolled && styles.scrolled, menuOpen && styles.menuOpen)}>
       <div className={styles.inner}>
         <Link href="/" className={styles.logo} onClick={close} aria-label="Axiony — home">
           <LogoMark size={30} />
@@ -53,12 +47,7 @@ export const Nav = () => {
         </nav>
 
         <div className={styles.actions}>
-          <a
-            href="https://github.com"
-            target="_blank"
-            rel="noreferrer"
-            className={styles.ghLink}
-          >
+          <a href="https://github.com" target="_blank" rel="noreferrer" className={styles.ghLink}>
             <GitHubIcon />
             GitHub
           </a>
@@ -82,10 +71,7 @@ export const Nav = () => {
         </button>
       </div>
 
-      <div
-        id="mobile-navigation"
-        className={cn(styles.mobile, menuOpen && styles.mobileOpen)}
-      >
+      <div id="mobile-navigation" className={cn(styles.mobile, menuOpen && styles.mobileOpen)}>
         <nav className={styles.mobileLinks} aria-label="Mobile">
           {LINKS.map((link) => (
             <a

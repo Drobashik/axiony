@@ -9,8 +9,12 @@
   grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
   gap: 40px;
 
-  @include breakpoint-down(lg) { grid-template-columns: 1fr 1fr; }
-  @include breakpoint-down(sm) { grid-template-columns: 1fr; }
+  @include breakpoint-down(lg) {
+    grid-template-columns: 1fr 1fr;
+  }
+  @include breakpoint-down(sm) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .brand {

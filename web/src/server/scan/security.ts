@@ -19,12 +19,14 @@ export class ScanRequestError extends Error {
 const isWcagLevel = (value: unknown): value is WcagLevel =>
   value === "A" || value === "AA" || value === "AAA";
 
-const normalizeHostname = (hostname: string): string =>
-  hostname.toLowerCase().replace(/\.$/, "");
+const normalizeHostname = (hostname: string): string => hostname.toLowerCase().replace(/\.$/, "");
 
 const isPrivateIpv4 = (address: string): boolean => {
   const parts = address.split(".").map((part) => Number(part));
-  if (parts.length !== 4 || parts.some((part) => !Number.isInteger(part) || part < 0 || part > 255)) {
+  if (
+    parts.length !== 4 ||
+    parts.some((part) => !Number.isInteger(part) || part < 0 || part > 255)
+  ) {
     return true;
   }
 
@@ -86,11 +88,15 @@ const ensurePublicHost = async (hostname: string) => {
   }
 
   if (addresses.length === 0 || addresses.some(({ address }) => isPrivateAddress(address))) {
-    throw new ScanRequestError("That domain resolves to an internal address and cannot be scanned.");
+    throw new ScanRequestError(
+      "That domain resolves to an internal address and cannot be scanned.",
+    );
   }
 };
 
-export const validateScanRequest = async (body: unknown): Promise<{ url: string; level: WcagLevel }> => {
+export const validateScanRequest = async (
+  body: unknown,
+): Promise<{ url: string; level: WcagLevel }> => {
   if (!body || typeof body !== "object") {
     throw new ScanRequestError("Request body must be a JSON object.");
   }

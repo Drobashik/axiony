@@ -28,9 +28,9 @@ export const Hero = () => (
         </h1>
 
         <p className={styles.subtitle}>
-          Axiony runs axe-core in your terminal, CI, and the cloud — then locks
-          a baseline. Existing issues become tracked debt; new ones get caught
-          before they merge. One workflow for developers, QA, and product.
+          Axiony runs axe-core in your terminal, CI, and the cloud — then locks a baseline. Existing
+          issues become tracked debt; new ones get caught before they merge. One workflow for
+          developers, QA, and product.
         </p>
 
         <div className={styles.valuePoints} aria-label="Why Axiony">
@@ -41,7 +41,7 @@ export const Hero = () => (
 
         <div className={styles.actions}>
           <Button href="/scan" size="lg">
-          Start cloud scanning
+            Start cloud scanning
             <ArrowRightIcon />
           </Button>
           <Button href="/dashboard" variant="secondary" size="lg">

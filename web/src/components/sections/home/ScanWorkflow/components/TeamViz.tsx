@@ -5,8 +5,20 @@ import { GitHubMark, GitLabMark, SlackMark } from "./marks";
 import styles from "../ScanWorkflow.module.scss";
 
 const INTEGRATIONS = [
-  { key: "gh", name: "GitHub", detail: "Status checks + PR comments · 3 repos", Logo: GitHubMark, brand: "gh" },
-  { key: "gl", name: "GitLab", detail: "MR checks + comments · 2 projects", Logo: GitLabMark, brand: "gl" },
+  {
+    key: "gh",
+    name: "GitHub",
+    detail: "Status checks + PR comments · 3 repos",
+    Logo: GitHubMark,
+    brand: "gh",
+  },
+  {
+    key: "gl",
+    name: "GitLab",
+    detail: "MR checks + comments · 2 projects",
+    Logo: GitLabMark,
+    brand: "gl",
+  },
   { key: "sl", name: "Slack", detail: "Live alerts to #a11y-alerts", Logo: SlackMark, brand: "sl" },
 ] as const;
 

@@ -21,7 +21,9 @@ export const StatTiles = ({ counts, total, filter, onFilter }: StatTilesProps) =
       onClick={() => onFilter("all")}
       aria-pressed={filter === "all"}
     >
-      <span className={styles.tileNum}><CountUp value={total} /></span>
+      <span className={styles.tileNum}>
+        <CountUp value={total} />
+      </span>
       <span className={styles.tileLabel}>Total issues</span>
     </button>
 
@@ -29,12 +31,18 @@ export const StatTiles = ({ counts, total, filter, onFilter }: StatTilesProps) =
       <button
         key={severity}
         type="button"
-        className={cn(styles.tile, styles[`tile_${severity}`], filter === severity && styles.tileActive)}
+        className={cn(
+          styles.tile,
+          styles[`tile_${severity}`],
+          filter === severity && styles.tileActive,
+        )}
         onClick={() => onFilter(filter === severity ? "all" : severity)}
         aria-pressed={filter === severity}
         aria-label={`Filter to ${counts[severity]} ${SEVERITY_LABEL[severity]} issues`}
       >
-        <span className={styles.tileNum}><CountUp value={counts[severity]} /></span>
+        <span className={styles.tileNum}>
+          <CountUp value={counts[severity]} />
+        </span>
         <span className={styles.tileLabel}>{SEVERITY_LABEL[severity]}</span>
       </button>
     ))}

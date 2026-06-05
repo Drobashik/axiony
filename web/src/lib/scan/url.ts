@@ -39,5 +39,4 @@ export const validateUrl = (raw: string): UrlValidation => {
   return { url: candidate };
 };
 
-export const isValidEmail = (raw: string): boolean =>
-  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw.trim());
+export const isValidEmail = (raw: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw.trim());

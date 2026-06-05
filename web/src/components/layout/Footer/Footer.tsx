@@ -13,7 +13,8 @@ export const Footer = () => (
             Axiony
           </Link>
           <p className={styles.brandTag}>
-            An accessibility workflow platform for product and engineering teams — from a free, open-source CLI to cloud dashboards and pull-request checks.
+            An accessibility workflow platform for product and engineering teams — from a free,
+            open-source CLI to cloud dashboards and pull-request checks.
           </p>
         </div>
 

@@ -10,12 +10,7 @@ interface ResetScanDialogProps {
   onConfirm: () => void;
 }
 
-export const ResetScanDialog = ({
-  mode,
-  url,
-  onCancel,
-  onConfirm,
-}: ResetScanDialogProps) => {
+export const ResetScanDialog = ({ mode, url, onCancel, onConfirm }: ResetScanDialogProps) => {
   const title = mode === "report" ? "Start a new scan?" : "Stop this scan?";
   const body =
     mode === "report"

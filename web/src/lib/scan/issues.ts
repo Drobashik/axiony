@@ -118,7 +118,10 @@ color: #595959;`,
       "Interactive elements must have a visible focus indicator when focused via keyboard. CSS outline:none without a replacement fails this criterion.",
     rule: "wcag-2.4.11",
     wcag: ["2.4.11 Focus Appearance (AA)", "2.4.7 Focus Visible (AA)"],
-    nodes: ['<button class="btn btn--ghost">Learn more</button>', '<a href="/pricing" class="nav__link">Pricing</a>'],
+    nodes: [
+      '<button class="btn btn--ghost">Learn more</button>',
+      '<a href="/pricing" class="nav__link">Pricing</a>',
+    ],
     fix: "Remove outline:none or replace it with a custom high-contrast focus style. Use :focus-visible to show focus only for keyboard navigation.",
     code: `:focus-visible {
   outline: 2px solid #4c8dff;
@@ -215,10 +218,12 @@ color: #595959;`,
 
 // Cheap deterministic PRNG so each URL always produces the same (but
 // varied) report. Good enough for a demo.
-const makeRng = (seed: number) => (n: number): number => {
-  const x = Math.sin(seed * n + n) * 10000;
-  return x - Math.floor(x);
-};
+const makeRng =
+  (seed: number) =>
+  (n: number): number => {
+    const x = Math.sin(seed * n + n) * 10000;
+    return x - Math.floor(x);
+  };
 
 export const generateIssues = (url: string): Issue[] => {
   const seed = url.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
@@ -238,7 +243,10 @@ export const generateIssues = (url: string): Issue[] => {
 
   return selected.map((issue, i) => ({
     ...issue,
-    nodes: issue.nodes.slice(0, 1 + Math.floor(rng(i + 10) * Math.max(issue.nodes.length - 1, 0)) + 1),
+    nodes: issue.nodes.slice(
+      0,
+      1 + Math.floor(rng(i + 10) * Math.max(issue.nodes.length - 1, 0)) + 1,
+    ),
     animationDelay: i * 60,
   }));
 };

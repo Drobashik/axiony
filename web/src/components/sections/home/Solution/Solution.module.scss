@@ -155,7 +155,7 @@
   }
 
   circle {
-    fill: oklch(0.72 0.20 20 / 0.25);
+    fill: oklch(0.72 0.2 20 / 0.25);
     stroke: var(--severity-critical);
     stroke-width: 1.5;
   }
@@ -199,8 +199,8 @@
 }
 
 .status_block {
-  border-color: oklch(0.72 0.20 20 / 0.35);
-  background: oklch(0.72 0.20 20 / 0.10);
+  border-color: oklch(0.72 0.2 20 / 0.35);
+  background: oklch(0.72 0.2 20 / 0.1);
   color: var(--severity-critical);
 }
 
@@ -378,9 +378,15 @@
   }
 }
 
-.layer_green { @include accent("green"); }
-.layer_blue { @include accent("blue"); }
-.layer_violet { @include accent("violet"); }
+.layer_green {
+  @include accent("green");
+}
+.layer_blue {
+  @include accent("blue");
+}
+.layer_violet {
+  @include accent("violet");
+}
 
 .layerTop {
   display: flex;
@@ -508,23 +514,52 @@
 
 // ── Keyframes ────────────────────────────────────────────────────────
 @keyframes headPop {
-  0%   { transform: scale(0.2); }
-  60%  { transform: scale(1.35); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(0.2);
+  }
+  60% {
+    transform: scale(1.35);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 @keyframes headRing {
-  0%, 100% { opacity: 0.5; transform: scale(1); }
-  50%      { opacity: 0; transform: scale(2.1); }
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0;
+    transform: scale(2.1);
+  }
 }
 
 @keyframes ghostReject {
-  0%   { opacity: 0; transform: translateY(-6px); }
-  22%  { opacity: 1; transform: translateY(0); }
-  40%  { transform: translateX(-2px); }
-  52%  { transform: translateX(2px); }
-  64%  { transform: translateX(0); opacity: 1; }
-  100% { opacity: 0; transform: translateY(0); }
+  0% {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  22% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateX(-2px);
+  }
+  52% {
+    transform: translateX(2px);
+  }
+  64% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(0);
+  }
 }
 
 // ── Reduced motion ───────────────────────────────────────────────────

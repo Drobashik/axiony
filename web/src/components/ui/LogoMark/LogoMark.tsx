@@ -27,7 +27,14 @@ export const LogoMark = ({ size = 28, className, glow }: LogoMarkProps) => (
           <stop offset="0.72" stopColor="#3b34d7" />
           <stop offset="1" stopColor="#6a22e8" />
         </linearGradient>
-        <radialGradient id="axiGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(22 13) rotate(54) scale(55 48)">
+        <radialGradient
+          id="axiGlow"
+          cx="0"
+          cy="0"
+          r="1"
+          gradientUnits="userSpaceOnUse"
+          gradientTransform="translate(22 13) rotate(54) scale(55 48)"
+        >
           <stop stopColor="white" stopOpacity="0.34" />
           <stop offset="0.45" stopColor="white" stopOpacity="0.08" />
           <stop offset="1" stopColor="white" stopOpacity="0" />

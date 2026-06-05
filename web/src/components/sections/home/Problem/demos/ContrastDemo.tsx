@@ -25,10 +25,12 @@ export const ContrastDemo = () => {
           BILLING
         </span>
         <p className={styles.contrastText} style={{ color: textColor }}>
-          Your free trial ends in 2 days. Renew now to keep your reports and
-          team history.
+          Your free trial ends in 2 days. Renew now to keep your reports and team history.
         </p>
-        <span className={styles.contrastButton} style={{ color: textColor, borderColor: textColor }}>
+        <span
+          className={styles.contrastButton}
+          style={{ color: textColor, borderColor: textColor }}
+        >
           Renew plan
         </span>
       </div>
@@ -38,12 +40,7 @@ export const ContrastDemo = () => {
           <strong className={passes ? styles.readout_pass : styles.readout_fail}>
             {ratio.toFixed(2)}:1
           </strong>
-          <span
-            className={cn(
-              styles.verdict,
-              passes ? styles.verdict_pass : styles.verdict_fail,
-            )}
-          >
+          <span className={cn(styles.verdict, passes ? styles.verdict_pass : styles.verdict_fail)}>
             {passes ? "Passes AA" : "Fails AA"}
           </span>
         </div>
@@ -71,8 +68,8 @@ export const ContrastDemo = () => {
       </div>
 
       <p className={styles.takeaway}>
-        Below <strong>4.5 : 1</strong>, this copy is invisible to many users —
-        and it&apos;s the #1 issue found on the web today.
+        Below <strong>4.5 : 1</strong>, this copy is invisible to many users — and it&apos;s the #1
+        issue found on the web today.
       </p>
     </div>
   );

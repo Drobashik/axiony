@@ -50,9 +50,7 @@ export const ColorDemo = () => {
               )}
               <span className={styles.statusName}>{service.name}</span>
               {labelled && (
-                <span className={styles.statusWord}>
-                  {service.up ? "Operational" : "Down"}
-                </span>
+                <span className={styles.statusWord}>{service.up ? "Operational" : "Down"}</span>
               )}
             </div>
           ))}
@@ -69,8 +67,8 @@ export const ColorDemo = () => {
       </div>
 
       <p className={styles.takeaway}>
-        About <strong>1 in 12 men</strong> can&apos;t reliably tell red from
-        green. With colour alone, “up” and “down” look identical.
+        About <strong>1 in 12 men</strong> can&apos;t reliably tell red from green. With colour
+        alone, “up” and “down” look identical.
       </p>
     </div>
   );

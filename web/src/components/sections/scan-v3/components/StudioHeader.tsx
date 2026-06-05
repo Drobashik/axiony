@@ -13,8 +13,8 @@ export const StudioHeader = () => (
     </h1>
 
     <p className={styles.subtitle}>
-      Paste a URL to preview the Axiony Cloud scanner — get an accessibility score,
-      severity breakdown, plain-English fixes, and a baseline your team can track.
+      Paste a URL to preview the Axiony Cloud scanner — get an accessibility score, severity
+      breakdown, plain-English fixes, and a baseline your team can track.
     </p>
 
     <p className={styles.note}>

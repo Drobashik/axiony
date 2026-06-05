@@ -9,11 +9,7 @@ interface TierCardProps {
 
 export const TierCard = ({ tier }: TierCardProps) => (
   <article
-    className={cn(
-      styles.card,
-      styles[`card_${tier.accent}`],
-      tier.featured && styles.featured,
-    )}
+    className={cn(styles.card, styles[`card_${tier.accent}`], tier.featured && styles.featured)}
   >
     {tier.featured && <span className={styles.popular}>Most popular</span>}
 

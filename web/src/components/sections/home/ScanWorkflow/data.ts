@@ -58,9 +58,30 @@ export const HISTORY = [
 ] as const;
 
 export const STORED = [
-  { sev: "critical", rule: "color-contrast", where: ".cta-banner", status: "Open", tone: "open", ai: true },
-  { sev: "serious", rule: "link-name", where: "footer nav", status: "Assigned", tone: "assigned", ai: true },
-  { sev: "moderate", rule: "heading-order", where: "/pricing", status: "Snoozed", tone: "snoozed", ai: false },
+  {
+    sev: "critical",
+    rule: "color-contrast",
+    where: ".cta-banner",
+    status: "Open",
+    tone: "open",
+    ai: true,
+  },
+  {
+    sev: "serious",
+    rule: "link-name",
+    where: "footer nav",
+    status: "Assigned",
+    tone: "assigned",
+    ai: true,
+  },
+  {
+    sev: "moderate",
+    rule: "heading-order",
+    where: "/pricing",
+    status: "Snoozed",
+    tone: "snoozed",
+    ai: false,
+  },
 ] as const;
 
 export const TEAM_OPTS = [

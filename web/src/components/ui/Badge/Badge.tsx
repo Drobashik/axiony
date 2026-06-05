@@ -13,7 +13,5 @@ export interface BadgeProps {
 // label text (children, or the severity name) is what conveys meaning, so
 // it never relies on colour alone.
 export const Badge = ({ severity, className, children }: BadgeProps) => (
-  <span className={cn(styles.badge, styles[severity], className)}>
-    {children ?? severity}
-  </span>
+  <span className={cn(styles.badge, styles[severity], className)}>{children ?? severity}</span>
 );
