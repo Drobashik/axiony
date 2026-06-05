@@ -2,9 +2,11 @@
 
 import { useRef, useState } from "react";
 import { Container } from "@/components/ui";
+import { ScanNav } from "@/components/layout";
 import cn from "classnames";
 import { useReveal } from "@/lib/hooks/useReveal";
 import { ReportView } from "./components/ReportView";
+import { ResetScanDialog } from "./components/ResetScanDialog";
 import { ScanStage } from "./components/ScanStage";
 import { StudioCta } from "./components/StudioCta";
 import { StudioHeader } from "./components/StudioHeader";
@@ -18,6 +20,8 @@ export const ScanStudio = () => {
   const engine = useScanEngine();
   const [query, setQuery] = useState("");
   const [level, setLevel] = useState<WcagLevel>("AA");
+  const [focusSignal, setFocusSignal] = useState(0);
+  const [resetDialog, setResetDialog] = useState<"report" | "scanning" | null>(null);
   const topRef = useRef<HTMLElement>(null);
 
   const busy = engine.status === "scanning";
@@ -39,6 +43,60 @@ export const ScanStudio = () => {
     scrollToTop();
   };
 
+  const focusUrlConsole = () => {
+    scrollToTop();
+    setFocusSignal((value) => value + 1);
+  };
+
+  const clearForNewScan = () => {
+    setResetDialog(null);
+    engine.reset();
+    setQuery("");
+    scrollToTop();
+    setFocusSignal((value) => value + 1);
+  };
+
+  const requestNewScan = () => {
+    if (engine.status === "results" && engine.report) {
+      setResetDialog("report");
+      return;
+    }
+
+    if (engine.status === "scanning") {
+      setResetDialog("scanning");
+      return;
+    }
+
+    if (engine.status === "idle") {
+      focusUrlConsole();
+      return;
+    }
+
+    clearForNewScan();
+  };
+
+  const rescanCurrent = () => {
+    const target = engine.url || engine.report?.url || query;
+    if (!target) {
+      focusUrlConsole();
+      return;
+    }
+
+    setResetDialog(null);
+    setQuery(target);
+    engine.start(target, level);
+    scrollToTop();
+  };
+
+  const stopScan = () => {
+    const target = engine.url;
+    setResetDialog(null);
+    engine.reset();
+    setQuery(target);
+    scrollToTop();
+    setFocusSignal((value) => value + 1);
+  };
+
   // The URL form lives at the top while idle, then docks below the report
   // once there's a result (so the result is what the user sees first).
   const consoleBlock = (
@@ -50,6 +108,7 @@ export const ScanStudio = () => {
         busy={busy}
         onUrlChange={setQuery}
         onLevelChange={setLevel}
+        focusSignal={focusSignal}
         onScan={runScan}
       />
     </div>
@@ -57,7 +116,19 @@ export const ScanStudio = () => {
 
   return (
     <>
-      <section ref={topRef} className={cn(styles.top, active && styles.topActive)}>
+      <ScanNav
+        status={engine.status}
+        currentUrl={engine.url}
+        progress={engine.progress}
+        score={engine.report?.score}
+        issueCount={engine.report?.issues.length}
+        onFocusUrl={focusUrlConsole}
+        onNewScan={requestNewScan}
+        onRescan={rescanCurrent}
+        onStop={stopScan}
+      />
+
+      <section id="scanner" ref={topRef} className={cn(styles.top, active && styles.topActive)}>
         <div className={styles.grid} aria-hidden="true" />
         <div className={styles.glow} aria-hidden="true" />
 
@@ -75,20 +146,45 @@ export const ScanStudio = () => {
             </div>
           )}
 
+          {engine.status === "failed" && (
+            <>
+              <div className={styles.runner}>
+                <p className={styles.srOnly} role="alert">
+                  {engine.error ?? "Scan failed."}
+                </p>
+                <ScanStage
+                  url={engine.url}
+                  progress={engine.progress}
+                  lines={engine.lines}
+                  reduce={engine.reduce}
+                  status="failed"
+                />
+              </div>
+              <div className={styles.consoleSlot}>
+                <p className={styles.dockTitle}>Try another site</p>
+                <UrlConsole
+                  url={query}
+                  level={level}
+                  busy={busy}
+                  onUrlChange={setQuery}
+                  onLevelChange={setLevel}
+                  focusSignal={focusSignal}
+                  onScan={runScan}
+                />
+              </div>
+            </>
+          )}
+
           {engine.status === "results" && engine.report && (
             <>
               <div className={styles.runner}>
                 <p className={styles.srOnly} role="status">
-                  Scan complete. Showing a sample accessibility report.
+                  Scan complete. Showing the accessibility report.
                 </p>
                 <ReportView
                   report={engine.report}
                   reduce={engine.reduce}
-                  onRescan={() => {
-                    setQuery(engine.url);
-                    engine.reset();
-                    scrollToTop();
-                  }}
+                  onRescan={rescanCurrent}
                 />
               </div>
               {consoleBlock}
@@ -98,6 +194,15 @@ export const ScanStudio = () => {
       </section>
 
       <StudioCta />
+
+      {resetDialog && (
+        <ResetScanDialog
+          mode={resetDialog}
+          url={engine.url || engine.report?.url || query}
+          onCancel={() => setResetDialog(null)}
+          onConfirm={clearForNewScan}
+        />
+      )}
     </>
   );
 };

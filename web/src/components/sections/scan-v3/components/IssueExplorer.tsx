@@ -43,7 +43,10 @@ export const IssueExplorer = ({ issues, counts, filter, onFilter }: IssueExplore
       return (
         issue.title.toLowerCase().includes(q) ||
         issue.rule.toLowerCase().includes(q) ||
-        issue.description.toLowerCase().includes(q)
+        issue.description.toLowerCase().includes(q) ||
+        issue.fix.toLowerCase().includes(q) ||
+        issue.wcag.some((tag) => tag.toLowerCase().includes(q)) ||
+        issue.nodes.some((node) => node.toLowerCase().includes(q))
       );
     });
     return sortIssues(matched, sort);

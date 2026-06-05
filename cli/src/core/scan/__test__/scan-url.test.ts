@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer, type IncomingMessage, type Server } from 'node:http';
 import { scanUrl } from '../scan-url';
-import { POSSIBLE_CHALLENGE_PAGE_WARNING } from '../page-readiness';
+import { BLOCKED_SCAN_PAGE_ERROR, POSSIBLE_CHALLENGE_PAGE_WARNING } from '../page-readiness';
 
 const listen = async (html: string): Promise<{ server: Server; url: string }> => {
   return listenWithHandler(() => html);
@@ -110,6 +110,28 @@ test('retries when the first URL scan response is a refresh page', async () => {
       result.issues.some((issue) => issue.id === 'label'),
       true,
     );
+  } finally {
+    await closeServer(server);
+  }
+});
+
+test('fails clearly when a URL scan lands on an access-denied page', async () => {
+  const { server, url } = await listen(`
+    <!doctype html>
+    <html lang="en">
+      <head><title>Access Denied</title></head>
+      <body>
+        <h1>Access Denied</h1>
+        You don't have permission to access "http://www.tui.co.uk/" on this server.
+        <p>https://errors.edgesuite.net/18.example</p>
+      </body>
+    </html>
+  `);
+
+  try {
+    await assert.rejects(() => scanUrl(url), {
+      message: BLOCKED_SCAN_PAGE_ERROR,
+    });
   } finally {
     await closeServer(server);
   }

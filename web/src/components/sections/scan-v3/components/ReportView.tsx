@@ -23,7 +23,7 @@ interface ReportViewProps {
 const buildSummary = (report: ScanReport): string => {
   const grade = scoreGrade(report.score);
   const lines = [
-    `Axiony cloud scan (preview) — ${report.url}`,
+    `Axiony cloud scan — ${report.url}`,
     `Score: ${report.score}/100 (${grade.letter} · ${grade.label}) · WCAG ${report.level}`,
     `${report.issues.length} issues found:`,
     ...SEVERITY_ORDER.map((s) => `  • ${report.counts[s]} ${SEVERITY_LABEL[s]}`),
@@ -45,7 +45,7 @@ export const ReportView = ({ report, reduce, onRescan }: ReportViewProps) => {
       score: report.score,
       total,
       counts: report.counts,
-      issues: report.issues.map(({ id, severity, title, description, rule, wcag, nodes, fix }) => ({
+      issues: report.issues.map(({
         id,
         severity,
         title,
@@ -54,6 +54,25 @@ export const ReportView = ({ report, reduce, onRescan }: ReportViewProps) => {
         wcag,
         nodes,
         fix,
+        whatHappened,
+        whyItMatters,
+        suggestedFix,
+        beforeCode,
+        afterCode,
+      }) => ({
+        id,
+        severity,
+        title,
+        description,
+        rule,
+        wcag,
+        nodes,
+        fix,
+        whatHappened,
+        whyItMatters,
+        suggestedFix,
+        beforeCode,
+        afterCode,
       })),
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
@@ -70,7 +89,7 @@ export const ReportView = ({ report, reduce, onRescan }: ReportViewProps) => {
         <div className={styles.reportTarget}>
           <span className={styles.reportKicker}>
             Accessibility report
-            <span className={styles.sampleBadge}>Sample data</span>
+            <span className={styles.sampleBadge}>Live scan</span>
           </span>
           <span className={styles.reportUrl}>{report.url}</span>
           <span className={styles.reportMeta}>

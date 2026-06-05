@@ -2,7 +2,7 @@ import type { Issue, SeverityCounts } from "@/lib/scan/issues";
 
 export type WcagLevel = "A" | "AA" | "AAA";
 
-export type StudioState = "idle" | "scanning" | "results";
+export type StudioState = "idle" | "scanning" | "results" | "failed";
 
 export interface ScanPhase {
   key: string;

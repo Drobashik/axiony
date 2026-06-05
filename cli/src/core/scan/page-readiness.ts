@@ -12,6 +12,9 @@ import {
 export const POSSIBLE_CHALLENGE_PAGE_WARNING =
   'The page appears to be a bot challenge or refresh page. Results may not represent the intended target page.';
 
+export const BLOCKED_SCAN_PAGE_ERROR =
+  'The target site blocked the scanner with an access-denied or bot-protection page. Try the CLI from a network the site trusts, or scan a staging URL that allows automated accessibility checks.';
+
 const CHALLENGE_URL_PATTERNS = ['__cf_chl_rt_tk', '/cdn-cgi/challenge-platform/', 'challenge'];
 
 const CHALLENGE_TEXT_PATTERNS = [
@@ -21,10 +24,27 @@ const CHALLENGE_TEXT_PATTERNS = [
   'verify you are human',
 ];
 
+const BLOCKED_URL_PATTERNS = ['errors.edgesuite.net', '/cdn-cgi/access-denied'];
+
+const BLOCKED_TEXT_PATTERNS = [
+  'access denied',
+  "you don't have permission to access",
+  'you do not have permission to access',
+  'request blocked',
+  'the request could not be satisfied',
+  'forbidden',
+];
+
 const looksLikeChallengeUrl = (url: string): boolean => {
   const normalizedUrl = url.toLowerCase();
 
   return CHALLENGE_URL_PATTERNS.some((pattern) => normalizedUrl.includes(pattern));
+};
+
+const looksLikeBlockedUrl = (url: string): boolean => {
+  const normalizedUrl = url.toLowerCase();
+
+  return BLOCKED_URL_PATTERNS.some((pattern) => normalizedUrl.includes(pattern));
 };
 
 const delay = async (timeout: number): Promise<void> => {
@@ -125,6 +145,36 @@ export const detectPageWarnings = async (page: Page): Promise<string[]> => {
   }
 
   return [];
+};
+
+export const detectBlockedScanPage = async (
+  page: Page,
+  status?: number,
+): Promise<string | undefined> => {
+  const blockedSignals = await page
+    .evaluate((blockedTextPatterns) => {
+      const pageText = `${document.title} ${document.body?.innerText ?? ''}`
+        .toLowerCase()
+        .slice(0, 5_000);
+      const hasBlockedText = blockedTextPatterns.some((pattern) => pageText.includes(pattern));
+
+      return {
+        hasBlockedText,
+      };
+    }, BLOCKED_TEXT_PATTERNS)
+    .catch(() => ({ hasBlockedText: false }));
+
+  const blockedStatus = status === 401 || status === 403 || status === 429;
+
+  if (
+    blockedSignals.hasBlockedText ||
+    looksLikeBlockedUrl(page.url()) ||
+    (blockedStatus && looksLikeChallengeUrl(page.url()))
+  ) {
+    return BLOCKED_SCAN_PAGE_ERROR;
+  }
+
+  return undefined;
 };
 
 export const waitForChallengeResolution = async (page: Page): Promise<void> => {
