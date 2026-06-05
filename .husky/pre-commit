@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+set -eu
+
+repo_root="$(git rev-parse --show-toplevel)"
+web_dir="$repo_root/web"
+
+if ! git diff --cached --name-only --diff-filter=ACMR -- web | grep -q .; then
+  exit 0
+fi
+
+PATH="$web_dir/node_modules/.bin:$PATH" "$web_dir/node_modules/.bin/lint-staged" \
+  --cwd "$web_dir" \
+  --config "$web_dir/lint-staged.config.mjs" \
+  --relative

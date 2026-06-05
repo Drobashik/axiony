@@ -14,6 +14,10 @@ export const CLI_COMMAND = "npx axiony-cli scan https://your-site.com";
 export const SCAN_PHASES: readonly ScanPhase[] = [
   { key: "connect", label: "Connecting", detail: "Opening your URL in a headless browser" },
   { key: "render", label: "Rendering page", detail: "Letting client-side rendering settle" },
-  { key: "rules", label: "Running WCAG rules", detail: "Checking against WCAG 2.2 success criteria" },
+  {
+    key: "rules",
+    label: "Running WCAG rules",
+    detail: "Checking against WCAG 2.2 success criteria",
+  },
   { key: "score", label: "Scoring & report", detail: "Weighting findings and grading the page" },
 ];

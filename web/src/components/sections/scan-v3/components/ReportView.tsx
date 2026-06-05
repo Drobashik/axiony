@@ -45,35 +45,37 @@ export const ReportView = ({ report, reduce, onRescan }: ReportViewProps) => {
       score: report.score,
       total,
       counts: report.counts,
-      issues: report.issues.map(({
-        id,
-        severity,
-        title,
-        description,
-        rule,
-        wcag,
-        nodes,
-        fix,
-        whatHappened,
-        whyItMatters,
-        suggestedFix,
-        beforeCode,
-        afterCode,
-      }) => ({
-        id,
-        severity,
-        title,
-        description,
-        rule,
-        wcag,
-        nodes,
-        fix,
-        whatHappened,
-        whyItMatters,
-        suggestedFix,
-        beforeCode,
-        afterCode,
-      })),
+      issues: report.issues.map(
+        ({
+          id,
+          severity,
+          title,
+          description,
+          rule,
+          wcag,
+          nodes,
+          fix,
+          whatHappened,
+          whyItMatters,
+          suggestedFix,
+          beforeCode,
+          afterCode,
+        }) => ({
+          id,
+          severity,
+          title,
+          description,
+          rule,
+          wcag,
+          nodes,
+          fix,
+          whatHappened,
+          whyItMatters,
+          suggestedFix,
+          beforeCode,
+          afterCode,
+        }),
+      ),
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const link = document.createElement("a");
@@ -117,7 +119,12 @@ export const ReportView = ({ report, reduce, onRescan }: ReportViewProps) => {
 
       <StatTiles counts={report.counts} total={total} filter={filter} onFilter={setFilter} />
 
-      <IssueExplorer issues={report.issues} counts={report.counts} filter={filter} onFilter={setFilter} />
+      <IssueExplorer
+        issues={report.issues}
+        counts={report.counts}
+        filter={filter}
+        onFilter={setFilter}
+      />
 
       <BaselineCallout total={total} />
     </div>

@@ -28,11 +28,7 @@ export const BaselineDemo = () => {
         <span className={styles.stageTier}>{step.tag}</span>
       </div>
 
-      <div
-        className={styles.steps}
-        role="group"
-        aria-label="Walk through the Axiony workflow"
-      >
+      <div className={styles.steps} role="group" aria-label="Walk through the Axiony workflow">
         {steps.map((item, index) => {
           const isActive = index === active;
 

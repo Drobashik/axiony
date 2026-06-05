@@ -101,7 +101,10 @@ const markComplete = (job: MutableScanJob, result: CliScanResult) => {
   job.status = "complete";
   job.progress = 100;
   job.report = toScanReportPayload(result, job.level);
-  pushLine(job, `✓ Scan complete · ${job.report.issues.length} issue${job.report.issues.length === 1 ? "" : "s"} found`);
+  pushLine(
+    job,
+    `✓ Scan complete · ${job.report.issues.length} issue${job.report.issues.length === 1 ? "" : "s"} found`,
+  );
 };
 
 const cleanupJobs = () => {

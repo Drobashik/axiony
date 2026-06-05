@@ -1,10 +1,5 @@
 import type { Severity } from "@/types";
-import {
-  computeScore,
-  countBySeverity,
-  SEVERITY_ORDER,
-  type Issue,
-} from "@/lib/scan/issues";
+import { computeScore, countBySeverity, SEVERITY_ORDER, type Issue } from "@/lib/scan/issues";
 import { resolveAxeRepair } from "@/lib/scan/repair-templates";
 import type { CliScanIssue, CliScanResult, ScanReportPayload, WcagLevel } from "./types";
 
@@ -49,9 +44,7 @@ const formatWcagTag = (tag: string): string | null => {
 };
 
 const mapWcag = (tags: string[], helpUrl: string): string[] => {
-  const wcag = tags
-    .map(formatWcagTag)
-    .filter((tag): tag is string => Boolean(tag));
+  const wcag = tags.map(formatWcagTag).filter((tag): tag is string => Boolean(tag));
 
   if (wcag.length > 0) return Array.from(new Set(wcag));
   return helpUrl ? [helpUrl] : ["axe-core"];
@@ -60,7 +53,9 @@ const mapWcag = (tags: string[], helpUrl: string): string[] => {
 const mapIssue = (issue: CliScanIssue, index: number, manual = false): Issue => {
   const nodes = issue.snippets?.length ? issue.snippets : issue.selectors;
   const repair = resolveAxeRepair(issue, manual);
-  const title = manual ? `Manual check: ${repair.title}` : repair.title || issue.help || titleCaseRule(issue.id);
+  const title = manual
+    ? `Manual check: ${repair.title}`
+    : repair.title || issue.help || titleCaseRule(issue.id);
   const firstNode = nodes[0] ?? "No affected element selector was reported.";
 
   return {
@@ -82,13 +77,12 @@ const mapIssue = (issue: CliScanIssue, index: number, manual = false): Issue => 
   };
 };
 
-export const toScanReportPayload = (
-  result: CliScanResult,
-  level: WcagLevel,
-): ScanReportPayload => {
+export const toScanReportPayload = (result: CliScanResult, level: WcagLevel): ScanReportPayload => {
   const issues = [
     ...result.issues.map((issue, index) => mapIssue(issue, index)),
-    ...result.manualChecks.map((issue, index) => mapIssue(issue, result.issues.length + index, true)),
+    ...result.manualChecks.map((issue, index) =>
+      mapIssue(issue, result.issues.length + index, true),
+    ),
   ];
 
   return {

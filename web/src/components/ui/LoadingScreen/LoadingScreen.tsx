@@ -19,10 +19,7 @@ const statusForProgress = (progress: number): string => {
   return "Ready";
 };
 
-export const LoadingScreen = ({
-  onDone,
-  durationMs = 2000,
-}: LoadingScreenProps) => {
+export const LoadingScreen = ({ onDone, durationMs = 2000 }: LoadingScreenProps) => {
   const [phase, setPhase] = useState<Phase>("enter");
   const [progress, setProgress] = useState(0);
 

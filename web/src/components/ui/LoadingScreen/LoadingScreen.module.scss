@@ -39,16 +39,19 @@
   width: 500px;
   height: 500px;
   border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    oklch(0.62 0.22 240 / 0.10) 0%,
-    transparent 70%
-  );
+  background: radial-gradient(circle, oklch(0.62 0.22 240 / 0.1) 0%, transparent 70%);
 }
 
 @keyframes ringPulse {
-  0%, 100% { transform: translate(-50%, -50%) scale(1);    opacity: 1; }
-  50%      { transform: translate(-50%, -50%) scale(1.08); opacity: 0.4; }
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.08);
+    opacity: 0.4;
+  }
 }
 
 // ── Logo ────────────────────────────────────────────────────────────

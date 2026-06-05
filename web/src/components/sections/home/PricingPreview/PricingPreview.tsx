@@ -12,8 +12,8 @@ export const PricingPreview = () => (
         <SectionEyebrow>Pricing</SectionEyebrow>
         <h2>Start free. Upgrade when the team grows.</h2>
         <p className={styles.lead}>
-          The CLI is free and open-source today. The cloud tiers below are
-          planned — no credit card to get started.
+          The CLI is free and open-source today. The cloud tiers below are planned — no credit card
+          to get started.
         </p>
       </div>
 

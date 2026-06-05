@@ -19,10 +19,9 @@ export const Problem = () => {
           <SectionEyebrow>Problem</SectionEyebrow>
           <h2>Most accessibility problems are invisible — until you feel them.</h2>
           <p className={styles.lead}>
-            Over a billion people navigate software with a disability, and the
-            barriers they hit rarely surface in a design review. So try four of
-            the most common ones yourself — each is a real issue Axiony helps
-            teams catch.
+            Over a billion people navigate software with a disability, and the barriers they hit
+            rarely surface in a design review. So try four of the most common ones yourself — each
+            is a real issue Axiony helps teams catch.
           </p>
         </div>
 

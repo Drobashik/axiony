@@ -41,9 +41,7 @@ export const ScreenReaderDemo = () => {
 
         <div className={styles.srReader} aria-hidden="true">
           <span className={styles.srReaderLabel}>Screen reader announces</span>
-          <strong className={named ? styles.srGood : styles.srBad}>
-            “{announced}”
-          </strong>
+          <strong className={named ? styles.srGood : styles.srBad}>“{announced}”</strong>
         </div>
       </div>
 
@@ -59,8 +57,8 @@ export const ScreenReaderDemo = () => {
       </div>
 
       <p className={styles.takeaway}>
-        A screen reader reads the code, not the icon. Without a name, every
-        control is just <strong>“button”</strong> — impossible to tell apart.
+        A screen reader reads the code, not the icon. Without a name, every control is just{" "}
+        <strong>“button”</strong> — impossible to tell apart.
       </p>
     </div>
   );

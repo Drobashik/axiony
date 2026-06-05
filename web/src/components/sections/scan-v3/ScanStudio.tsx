@@ -142,7 +142,12 @@ export const ScanStudio = () => {
 
           {engine.status === "scanning" && (
             <div className={styles.runner}>
-              <ScanStage url={engine.url} progress={engine.progress} lines={engine.lines} reduce={engine.reduce} />
+              <ScanStage
+                url={engine.url}
+                progress={engine.progress}
+                lines={engine.lines}
+                reduce={engine.reduce}
+              />
             </div>
           )}
 

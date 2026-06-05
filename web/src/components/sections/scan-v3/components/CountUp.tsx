@@ -8,4 +8,6 @@ interface CountUpProps {
 }
 
 /** Renders a number that animates from 0 → value (reduced-motion aware). */
-export const CountUp = ({ value, durationMs }: CountUpProps) => <>{useCountUp(value, durationMs)}</>;
+export const CountUp = ({ value, durationMs }: CountUpProps) => (
+  <>{useCountUp(value, durationMs)}</>
+);

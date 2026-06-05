@@ -2,11 +2,7 @@
 
 import { useMemo, useState } from "react";
 import cn from "classnames";
-import {
-  SEVERITY_LABEL,
-  SEVERITY_ORDER,
-  sortIssues,
-} from "@/lib/scan/issues";
+import { SEVERITY_LABEL, SEVERITY_ORDER, sortIssues } from "@/lib/scan/issues";
 import type { FilterValue, Issue, SeverityCounts, SortValue } from "@/lib/scan/issues";
 import { IssueRow } from "./IssueRow";
 import { SearchIcon } from "./icons";
@@ -52,13 +48,11 @@ export const IssueExplorer = ({ issues, counts, filter, onFilter }: IssueExplore
     return sortIssues(matched, sort);
   }, [issues, filter, search, sort]);
 
-  const filterCount = (id: FilterValue): number =>
-    id === "all" ? issues.length : counts[id];
+  const filterCount = (id: FilterValue): number => (id === "all" ? issues.length : counts[id]);
 
   const allOpen = visible.length > 0 && visible.every((i) => openIds.has(i.id));
 
-  const toggleAll = () =>
-    setOpenIds(allOpen ? new Set() : new Set(visible.map((i) => i.id)));
+  const toggleAll = () => setOpenIds(allOpen ? new Set() : new Set(visible.map((i) => i.id)));
 
   const toggleOne = (id: string) =>
     setOpenIds((prev) => {
@@ -90,11 +84,18 @@ export const IssueExplorer = ({ issues, counts, filter, onFilter }: IssueExplore
           onChange={(e) => setSort(e.target.value as SortValue)}
         >
           {SORTS.map((s) => (
-            <option key={s.id} value={s.id}>{s.label}</option>
+            <option key={s.id} value={s.id}>
+              {s.label}
+            </option>
           ))}
         </select>
 
-        <button type="button" className={styles.expandAll} onClick={toggleAll} disabled={visible.length === 0}>
+        <button
+          type="button"
+          className={styles.expandAll}
+          onClick={toggleAll}
+          disabled={visible.length === 0}
+        >
           {allOpen ? "Collapse all" : "Expand all"}
         </button>
       </div>
@@ -117,12 +118,19 @@ export const IssueExplorer = ({ issues, counts, filter, onFilter }: IssueExplore
       <div className={styles.issueList}>
         {visible.length === 0 ? (
           <div className={styles.emptyState}>
-            <span className={styles.emptyMark} aria-hidden="true">✓</span>
+            <span className={styles.emptyMark} aria-hidden="true">
+              ✓
+            </span>
             No issues match the current filter.
           </div>
         ) : (
           visible.map((issue) => (
-            <IssueRow key={issue.id} issue={issue} open={openIds.has(issue.id)} onToggle={toggleOne} />
+            <IssueRow
+              key={issue.id}
+              issue={issue}
+              open={openIds.has(issue.id)}
+              onToggle={toggleOne}
+            />
           ))
         )}
       </div>

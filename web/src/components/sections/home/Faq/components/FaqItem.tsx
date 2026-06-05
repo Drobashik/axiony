@@ -27,12 +27,7 @@ const ChevronIcon = () => (
 
 export const FaqItem = ({ item, isOpen, onToggle }: FaqItemProps) => (
   <li className={cn(styles.item, isOpen && styles.item_open)}>
-    <button
-      type="button"
-      className={styles.question}
-      aria-expanded={isOpen}
-      onClick={onToggle}
-    >
+    <button type="button" className={styles.question} aria-expanded={isOpen} onClick={onToggle}>
       <span>{item.q}</span>
       <ChevronIcon />
     </button>

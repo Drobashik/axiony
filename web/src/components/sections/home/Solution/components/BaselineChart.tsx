@@ -21,7 +21,9 @@ export const BaselineChart = ({ points, regressKey, mergeKey }: BaselineChartPro
   const y = (score: number) => PAD.t + (1 - (score - SMIN) / (SMAX - SMIN)) * plotH;
 
   const coords = points.map((score, index) => [x(index), y(score)] as const);
-  const line = coords.map(([cx, cy], index) => `${index ? "L" : "M"}${cx.toFixed(1)} ${cy.toFixed(1)}`).join(" ");
+  const line = coords
+    .map(([cx, cy], index) => `${index ? "L" : "M"}${cx.toFixed(1)} ${cy.toFixed(1)}`)
+    .join(" ");
   const area = `${line} L${x(n - 1).toFixed(1)} ${(H - PAD.b).toFixed(1)} L${x(0).toFixed(1)} ${(H - PAD.b).toFixed(1)} Z`;
 
   const last = points[n - 1];
@@ -29,7 +31,12 @@ export const BaselineChart = ({ points, regressKey, mergeKey }: BaselineChartPro
   const regressionY = y(Math.max(SMIN, last - 18));
 
   return (
-    <svg className={styles.chart} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Accessibility score, currently ${last} out of 100`}>
+    <svg
+      className={styles.chart}
+      viewBox={`0 0 ${W} ${H}`}
+      role="img"
+      aria-label={`Accessibility score, currently ${last} out of 100`}
+    >
       <g className={styles.grid}>
         {[60, 75, 90].map((score) => (
           <line key={score} x1={PAD.l} y1={y(score)} x2={W - PAD.r} y2={y(score)} />

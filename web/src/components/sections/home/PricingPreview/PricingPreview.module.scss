@@ -39,16 +39,20 @@
   }
 }
 
-.card_green { @include accent("green"); }
-.card_blue { @include accent("blue"); }
-.card_violet { @include accent("violet"); }
+.card_green {
+  @include accent("green");
+}
+.card_blue {
+  @include accent("blue");
+}
+.card_violet {
+  @include accent("violet");
+}
 
 // Featured tier — lifted, accent border + glow.
 .featured {
   border-color: var(--accent-border);
-  background:
-    linear-gradient(180deg, var(--accent-dim), transparent 42%),
-    var(--bg-surface);
+  background: linear-gradient(180deg, var(--accent-dim), transparent 42%), var(--bg-surface);
   box-shadow: 0 22px 60px oklch(0 0 0 / 0.34);
 
   @media (min-width: 901px) {

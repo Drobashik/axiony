@@ -29,9 +29,15 @@
   background: var(--bg-base);
 }
 
-.accent_green { @include accent("green"); }
-.accent_blue { @include accent("blue"); }
-.accent_violet { @include accent("violet"); }
+.accent_green {
+  @include accent("green");
+}
+.accent_blue {
+  @include accent("blue");
+}
+.accent_violet {
+  @include accent("violet");
+}
 
 .stepHead {
   display: flex;

@@ -83,26 +83,35 @@ const replaceTag = (snippet: string, tagName: string, replacement: string): stri
 };
 
 const getTagName = (snippet: string): string | null =>
-  snippet.trim().match(/^<([a-zA-Z][\w:-]*)\b/)?.[1]?.toLowerCase() ?? null;
+  snippet
+    .trim()
+    .match(/^<([a-zA-Z][\w:-]*)\b/)?.[1]
+    ?.toLowerCase() ?? null;
 
 const readAttribute = (snippet: string, attributeName: string): string | null => {
   const match = snippet
     .trim()
     .match(new RegExp(`\\s${attributeName}(?:=(?:"([^"]*)"|'([^']*)'|([^\\s>]+)))?`, "i"));
 
-  return match ? match[1] ?? match[2] ?? match[3] ?? "" : null;
+  return match ? (match[1] ?? match[2] ?? match[3] ?? "") : null;
 };
 
 const setAttribute = (snippet: string, attributeName: string, value: string): string => {
   const trimmed = snippet.trim();
   if (!trimmed.startsWith("<")) return `<element ${attributeName}="${value}">...</element>`;
 
-  const existingPattern = new RegExp(`(\\s${attributeName})(?:=(?:"[^"]*"|'[^']*'|[^\\s>]+))?`, "i");
+  const existingPattern = new RegExp(
+    `(\\s${attributeName})(?:=(?:"[^"]*"|'[^']*'|[^\\s>]+))?`,
+    "i",
+  );
   if (existingPattern.test(trimmed)) {
     return trimmed.replace(existingPattern, `$1="${value}"`);
   }
 
-  return trimmed.replace(/^<([a-zA-Z][\w:-]*)([^>]*?)(\s*\/?)>/, `<$1$2 ${attributeName}="${value}"$3>`);
+  return trimmed.replace(
+    /^<([a-zA-Z][\w:-]*)([^>]*?)(\s*\/?)>/,
+    `<$1$2 ${attributeName}="${value}"$3>`,
+  );
 };
 
 const stripTags = (value: string): string =>
@@ -174,7 +183,12 @@ const completeHtmlElement = (snippet: string): string => {
   const trimmed = snippet.trim();
   const tag = getTagName(trimmed);
 
-  if (!tag || voidHtmlTags.has(tag) || /\/>$/.test(trimmed) || new RegExp(`</${tag}>`, "i").test(trimmed)) {
+  if (
+    !tag ||
+    voidHtmlTags.has(tag) ||
+    /\/>$/.test(trimmed) ||
+    new RegExp(`</${tag}>`, "i").test(trimmed)
+  ) {
     return trimmed;
   }
 
@@ -282,7 +296,10 @@ const buildDuplicateIdFix = (context: TemplateContext): string => {
   }
 
   if (id) {
-    const suffix = slug(deriveName(context.before, tag ? `${tag} element` : "element"), tag ?? "element");
+    const suffix = slug(
+      deriveName(context.before, tag ? `${tag} element` : "element"),
+      tag ?? "element",
+    );
     return setAttribute(context.before, "id", `${id}-${suffix}`);
   }
 
@@ -291,7 +308,8 @@ const buildDuplicateIdFix = (context: TemplateContext): string => {
 
 const buildLandmarkUniqueFix = (context: TemplateContext): string => {
   const tag = getTagName(context.before);
-  const currentLabel = readAttribute(context.before, "aria-label") ?? readAttribute(context.before, "title");
+  const currentLabel =
+    readAttribute(context.before, "aria-label") ?? readAttribute(context.before, "title");
   const action = readAttribute(context.before, "action");
   const className = readAttribute(context.before, "class");
   let label = currentLabel ? titleCase(currentLabel) : deriveName(context.before, "Page region");
@@ -398,11 +416,19 @@ const buildRegionFix = (context: TemplateContext): string => {
   if (tag === "html" || tag === "body") return buildMainLandmarkFix(context);
 
   if (tag === "nav") {
-    return setAttribute(context.before, "aria-label", deriveName(context.before, "Section navigation"));
+    return setAttribute(
+      context.before,
+      "aria-label",
+      deriveName(context.before, "Section navigation"),
+    );
   }
 
   if (tag === "aside") {
-    return setAttribute(context.before, "aria-label", deriveName(context.before, "Related content"));
+    return setAttribute(
+      context.before,
+      "aria-label",
+      deriveName(context.before, "Related content"),
+    );
   }
 
   return `<main id="main">
@@ -412,7 +438,8 @@ ${indent(completeHtmlElement(context.before))}
 
 const exact = (value: string): RepairTemplate => ({
   title: value,
-  whatHappened: "The affected element failed this axe rule and needs a targeted accessibility repair.",
+  whatHappened:
+    "The affected element failed this axe rule and needs a targeted accessibility repair.",
   whyItMatters:
     "When this pattern is left as-is, assistive technology can expose incomplete, confusing, or unusable information.",
   suggestedFix:
@@ -504,8 +531,7 @@ const repairTemplates: Record<string, RepairTemplate> = {
   },
   "area-alt": {
     title: "Image map area is missing alt text",
-    whatHappened:
-      "An active area inside an image map does not describe its destination or action.",
+    whatHappened: "An active area inside an image map does not describe its destination or action.",
     whyItMatters:
       "Image map links are otherwise announced only as unlabeled regions, which makes navigation impossible without sight.",
     suggestedFix:
@@ -567,7 +593,7 @@ const repairTemplates: Record<string, RepairTemplate> = {
   "aria-hidden-body": ariaTemplate(
     "The document body is hidden from assistive technology",
     'The <body> element has aria-hidden="true", which hides the entire page from the accessibility tree.',
-    'Remove aria-hidden from <body>. If you need to hide background content behind a modal, apply inert/aria-hidden only to the app shell outside the active dialog.',
+    "Remove aria-hidden from <body>. If you need to hide background content behind a modal, apply inert/aria-hidden only to the app shell outside the active dialog.",
     `<body>
   <div id="app" inert>
     <!-- Background content while modal is open -->
@@ -654,7 +680,7 @@ const repairTemplates: Record<string, RepairTemplate> = {
 </nav>`,
   ),
   "aria-text": ariaTemplate(
-    "role=\"text\" contains focusable content",
+    'role="text" contains focusable content',
     'An element with role="text" contains links, buttons, inputs, or another focusable descendant.',
     'Remove role="text" or move interactive descendants outside of it. Do not flatten content that users need to focus.',
     `<p>
@@ -737,10 +763,8 @@ const repairTemplates: Record<string, RepairTemplate> = {
     "Remove blinking content. If the content is important, render it as normal text and use a non-motion visual treatment.",
     `<strong class="status-alert">Payment failed</strong>`,
   ),
-  "button-name": nameTemplate(
-    "Button has no accessible name",
-    "A button",
-    ({ before }) => addAttribute(before, `aria-label="${deriveName(before, "Describe this action")}"`),
+  "button-name": nameTemplate("Button has no accessible name", "A button", ({ before }) =>
+    addAttribute(before, `aria-label="${deriveName(before, "Describe this action")}"`),
   ),
   bypass: landmarkTemplate(
     "Page has no way to bypass repeated navigation",
@@ -810,8 +834,7 @@ const repairTemplates: Record<string, RepairTemplate> = {
   },
   dlitem: {
     title: "Definition item is outside a definition list",
-    whatHappened:
-      "A <dt> or <dd> element appears without a parent <dl>.",
+    whatHappened: "A <dt> or <dd> element appears without a parent <dl>.",
     whyItMatters:
       "Definition terms and descriptions only have meaning when grouped inside a definition list.",
     suggestedFix:
@@ -823,12 +846,10 @@ const repairTemplates: Record<string, RepairTemplate> = {
   },
   "document-title": {
     title: "Document title is missing or empty",
-    whatHappened:
-      "The page does not expose a meaningful <title> element.",
+    whatHappened: "The page does not expose a meaningful <title> element.",
     whyItMatters:
       "The document title is the first page identity announced by screen readers and is used in browser tabs, history, bookmarks, and search results.",
-    suggestedFix:
-      "Add a concise, unique title that identifies the current page and product.",
+    suggestedFix: "Add a concise, unique title that identifies the current page and product.",
     beforeCode: `<head>
   <title></title>
 </head>`,
@@ -838,8 +859,7 @@ const repairTemplates: Record<string, RepairTemplate> = {
   },
   "duplicate-id": {
     title: "Duplicate id value is present",
-    whatHappened:
-      "Multiple elements share the same id value.",
+    whatHappened: "Multiple elements share the same id value.",
     whyItMatters:
       "IDs are used by labels, ARIA relationships, fragment links, and scripts. Duplicates can point assistive technology to the wrong element.",
     suggestedFix: ({ before }) =>
@@ -848,8 +868,7 @@ const repairTemplates: Record<string, RepairTemplate> = {
   },
   "duplicate-id-active": {
     title: "Interactive element has a duplicate id",
-    whatHappened:
-      "An active/focusable element shares its id with another element.",
+    whatHappened: "An active/focusable element shares its id with another element.",
     whyItMatters:
       "Duplicate IDs on controls can break labels, focus handling, validation messages, and automated tests.",
     suggestedFix: ({ before }) =>
@@ -858,8 +877,7 @@ const repairTemplates: Record<string, RepairTemplate> = {
   },
   "duplicate-id-aria": {
     title: "ARIA or label reference points to duplicate IDs",
-    whatHappened:
-      "An id used by a label or ARIA relationship is duplicated on the page.",
+    whatHappened: "An id used by a label or ARIA relationship is duplicated on the page.",
     whyItMatters:
       "When aria-labelledby, aria-describedby, or for points to a duplicate id, assistive technology may read the wrong label or description.",
     suggestedFix:
@@ -868,8 +886,7 @@ const repairTemplates: Record<string, RepairTemplate> = {
   },
   "empty-heading": {
     title: "Heading is empty",
-    whatHappened:
-      "A heading element exists in the page outline but has no readable text.",
+    whatHappened: "A heading element exists in the page outline but has no readable text.",
     whyItMatters:
       "Screen reader users often jump by headings. Empty headings create confusing stops with no context.",
     suggestedFix:
@@ -894,8 +911,7 @@ const repairTemplates: Record<string, RepairTemplate> = {
   },
   "form-field-multiple-labels": {
     title: "Form field has multiple labels",
-    whatHappened:
-      "One form field is associated with more than one <label> element.",
+    whatHappened: "One form field is associated with more than one <label> element.",
     whyItMatters:
       "Multiple labels can produce repeated or conflicting accessible names, especially in complex forms.",
     suggestedFix:
@@ -906,8 +922,7 @@ const repairTemplates: Record<string, RepairTemplate> = {
   },
   "frame-focusable-content": {
     title: "Frame with focusable content is removed from tab order",
-    whatHappened:
-      "An iframe/frame contains focusable content but uses tabindex=-1.",
+    whatHappened: "An iframe/frame contains focusable content but uses tabindex=-1.",
     whyItMatters:
       "Keyboard users may be unable to enter the embedded content even when it contains usable controls.",
     suggestedFix:
@@ -927,10 +942,8 @@ const repairTemplates: Record<string, RepairTemplate> = {
   title="Customer support chat"
 ></iframe>`,
   },
-  "frame-title": nameTemplate(
-    "Frame has no accessible name",
-    "An iframe or frame",
-    ({ before }) => addAttribute(before, 'title="Payment details"'),
+  "frame-title": nameTemplate("Frame has no accessible name", "An iframe or frame", ({ before }) =>
+    addAttribute(before, 'title="Payment details"'),
   ),
   "frame-title-unique": {
     title: "Frame title is not unique",
@@ -938,15 +951,13 @@ const repairTemplates: Record<string, RepairTemplate> = {
       "Multiple frames expose the same title, so users cannot distinguish their purpose.",
     whyItMatters:
       "Screen reader users navigate frames by title. Repeated titles make it hard to pick the right embedded area.",
-    suggestedFix:
-      "Give each frame a unique title that describes its specific content or task.",
+    suggestedFix: "Give each frame a unique title that describes its specific content or task.",
     afterCode: `<iframe src="/billing-card" title="Saved payment card"></iframe>
 <iframe src="/billing-address" title="Billing address form"></iframe>`,
   },
   "heading-order": {
     title: "Heading levels skip in the page outline",
-    whatHappened:
-      "A heading jumps more than one level from the previous heading.",
+    whatHappened: "A heading jumps more than one level from the previous heading.",
     whyItMatters:
       "Headings are the page outline for screen reader users. Skipped levels make sections feel disconnected or incorrectly nested.",
     suggestedFix:
@@ -972,8 +983,7 @@ const repairTemplates: Record<string, RepairTemplate> = {
   },
   "html-has-lang": {
     title: "Page language is not declared",
-    whatHappened:
-      "The root <html> element does not have a lang attribute.",
+    whatHappened: "The root <html> element does not have a lang attribute.",
     whyItMatters:
       "Screen readers use the page language to choose pronunciation rules, voice, punctuation behavior, and translation hints.",
     suggestedFix:
@@ -983,8 +993,7 @@ const repairTemplates: Record<string, RepairTemplate> = {
   },
   "html-lang-valid": {
     title: "Page language value is invalid",
-    whatHappened:
-      "The <html lang> value is missing, misspelled, or not a valid language tag.",
+    whatHappened: "The <html lang> value is missing, misspelled, or not a valid language tag.",
     whyItMatters:
       "Invalid language tags prevent assistive technology from selecting the right pronunciation and localization behavior.",
     suggestedFix: ({ before }) =>
@@ -993,8 +1002,7 @@ const repairTemplates: Record<string, RepairTemplate> = {
   },
   "html-xml-lang-mismatch": {
     title: "html lang and xml:lang do not match",
-    whatHappened:
-      "The page declares different base languages in lang and xml:lang.",
+    whatHappened: "The page declares different base languages in lang and xml:lang.",
     whyItMatters:
       "Conflicting language metadata can cause inconsistent pronunciation and parsing across assistive technologies.",
     suggestedFix:
@@ -1007,15 +1015,13 @@ const repairTemplates: Record<string, RepairTemplate> = {
       "Multiple links have the same accessible name but go to different destinations or perform different actions.",
     whyItMatters:
       "When links are listed out of context, users expect identical names to have identical purpose.",
-    suggestedFix:
-      "Make the visible text or aria-label unique enough to describe each destination.",
+    suggestedFix: "Make the visible text or aria-label unique enough to describe each destination.",
     afterCode: `<a href="/blog/accessibility-testing">Read accessibility testing guide</a>
 <a href="/blog/wcag-checklist">Read WCAG checklist</a>`,
   },
   "image-alt": {
     title: "Image is missing alternative text",
-    whatHappened:
-      "An image does not expose text that describes its content or purpose.",
+    whatHappened: "An image does not expose text that describes its content or purpose.",
     whyItMatters:
       "Screen reader users cannot perceive the image unless the alternative text communicates the same meaning or the image is marked decorative.",
     suggestedFix:
@@ -1024,10 +1030,8 @@ const repairTemplates: Record<string, RepairTemplate> = {
   },
   "image-redundant-alt": {
     title: "Image alt repeats nearby text",
-    whatHappened:
-      "The image alternative text duplicates visible text next to the image.",
-    whyItMatters:
-      "Repeated content creates noisy, inefficient screen reader output.",
+    whatHappened: "The image alternative text duplicates visible text next to the image.",
+    whyItMatters: "Repeated content creates noisy, inefficient screen reader output.",
     suggestedFix:
       'If the nearby text already communicates the image meaning, mark the image decorative with alt="". Otherwise rewrite the alt so it adds missing information.',
     afterCode: ({ before }) => addAttribute(before, 'alt=""'),
@@ -1039,8 +1043,7 @@ const repairTemplates: Record<string, RepairTemplate> = {
   ),
   "input-image-alt": {
     title: "Image submit button is missing alt text",
-    whatHappened:
-      "An <input type=\"image\"> control does not describe the action it performs.",
+    whatHappened: 'An <input type="image"> control does not describe the action it performs.',
     whyItMatters:
       "The image input behaves like a button. Without alt text, users cannot tell what action they are submitting.",
     suggestedFix:
@@ -1049,8 +1052,7 @@ const repairTemplates: Record<string, RepairTemplate> = {
   },
   label: {
     title: "Form field is missing a label",
-    whatHappened:
-      "A form control does not have a programmatically associated label.",
+    whatHappened: "A form control does not have a programmatically associated label.",
     whyItMatters:
       "Labels tell screen reader users what information to enter, and they increase the clickable target for mouse and touch users.",
     suggestedFix: ({ before }) =>
@@ -1059,8 +1061,7 @@ const repairTemplates: Record<string, RepairTemplate> = {
   },
   "label-content-name-mismatch": {
     title: "Accessible name does not include visible text",
-    whatHappened:
-      "A control's visible text is not part of its accessible name.",
+    whatHappened: "A control's visible text is not part of its accessible name.",
     whyItMatters:
       'Voice-control users speak the visible label to activate controls. If the accessible name differs, commands like "click Save" may fail.',
     suggestedFix:
@@ -1133,7 +1134,7 @@ const repairTemplates: Record<string, RepairTemplate> = {
     "Page has multiple contentinfo landmarks",
     "More than one top-level footer/contentinfo landmark exists.",
     "Keep one page footer. Use section-level footers only inside sectioning content and avoid role=contentinfo on them.",
-`<main>...</main>
+    `<main>...</main>
 <footer>
   <p>Copyright Axiony</p>
 </footer>`,
@@ -1152,7 +1153,7 @@ const repairTemplates: Record<string, RepairTemplate> = {
     "The document does not have a <main> element or role=main landmark.",
     ({ before }) =>
       getTagName(before) === "html" || getTagName(before) === "body"
-        ? "Add one <main id=\"main\"> inside this document's body and move the primary content into it."
+        ? 'Add one <main id="main"> inside this document\'s body and move the primary content into it.'
         : `Wrap this ${getTagName(before) ?? "content block"} in one <main id="main"> landmark, or move it into the existing main landmark if the page already has one.`,
     buildMainLandmarkFix,
   ),
@@ -1177,11 +1178,7 @@ const repairTemplates: Record<string, RepairTemplate> = {
   text-underline-offset: 0.16em;
 }`,
   },
-  "link-name": nameTemplate(
-    "Link has no accessible name",
-    "A link",
-    buildLinkNameFix,
-  ),
+  "link-name": nameTemplate("Link has no accessible name", "A link", buildLinkNameFix),
   list: {
     title: "List contains invalid direct children",
     whatHappened:
@@ -1194,10 +1191,8 @@ const repairTemplates: Record<string, RepairTemplate> = {
   },
   listitem: {
     title: "List item is outside a list",
-    whatHappened:
-      "An <li> element is not contained in a <ul> or <ol>.",
-    whyItMatters:
-      "A list item only has useful semantics when it belongs to a list.",
+    whatHappened: "An <li> element is not contained in a <ul> or <ol>.",
+    whyItMatters: "A list item only has useful semantics when it belongs to a list.",
     suggestedFix:
       "Wrap this exact <li> in the parent <ul>/<ol>, or replace <li> with a normal element if it is not actually a list item.",
     afterCode: buildListItemFix,
@@ -1223,8 +1218,7 @@ const repairTemplates: Record<string, RepairTemplate> = {
   ),
   "meta-viewport": {
     title: "Viewport disables zooming",
-    whatHappened:
-      "The viewport meta tag prevents users from zooming or scaling text.",
+    whatHappened: "The viewport meta tag prevents users from zooming or scaling text.",
     whyItMatters:
       "Many low-vision users rely on pinch-zoom or browser zoom to read and operate pages.",
     suggestedFix:
@@ -1243,8 +1237,7 @@ const repairTemplates: Record<string, RepairTemplate> = {
   },
   "nested-interactive": {
     title: "Interactive controls are nested",
-    whatHappened:
-      "A focusable control contains another focusable control.",
+    whatHappened: "A focusable control contains another focusable control.",
     whyItMatters:
       "Nested interactions create confusing focus behavior and can hide inner controls from assistive technology.",
     suggestedFix:
@@ -1261,8 +1254,7 @@ const repairTemplates: Record<string, RepairTemplate> = {
   ),
   "object-alt": {
     title: "Object element is missing alternative text",
-    whatHappened:
-      "An <object> embeds content without a text alternative.",
+    whatHappened: "An <object> embeds content without a text alternative.",
     whyItMatters:
       "If the embedded object cannot be accessed or loaded, users still need an equivalent description or fallback.",
     suggestedFix:
@@ -1273,8 +1265,7 @@ const repairTemplates: Record<string, RepairTemplate> = {
   },
   "p-as-heading": {
     title: "Paragraph is styled like a heading",
-    whatHappened:
-      "Text visually looks like a heading but is marked up as a paragraph.",
+    whatHappened: "Text visually looks like a heading but is marked up as a paragraph.",
     whyItMatters:
       "Screen reader users navigating by headings will miss the section because it is not in the document outline.",
     suggestedFix:
@@ -1283,10 +1274,8 @@ const repairTemplates: Record<string, RepairTemplate> = {
   },
   "page-has-heading-one": {
     title: "Page has no h1",
-    whatHappened:
-      "The page does not contain a top-level heading.",
-    whyItMatters:
-      "The h1 gives users a fast confirmation of the page purpose after navigation.",
+    whatHappened: "The page does not contain a top-level heading.",
+    whyItMatters: "The h1 gives users a fast confirmation of the page purpose after navigation.",
     suggestedFix: ({ before }) =>
       getTagName(before) === "html" || getTagName(before) === "body"
         ? "Add one clear h1 at the start of the primary <main> content. Use the real page name, not a generic heading."
@@ -1295,7 +1284,7 @@ const repairTemplates: Record<string, RepairTemplate> = {
   },
   "presentation-role-conflict": ariaTemplate(
     "Presentational role conflicts with interactive semantics",
-    "An element marked role=\"presentation\" or role=\"none\" still has ARIA, focus, or interaction that should be exposed.",
+    'An element marked role="presentation" or role="none" still has ARIA, focus, or interaction that should be exposed.',
     "Remove the presentational role from meaningful or focusable elements. Use role=presentation only for decorative wrapper/table/list markup.",
     `<button type="button">
   Save changes
@@ -1309,9 +1298,8 @@ const repairTemplates: Record<string, RepairTemplate> = {
     buildRegionFix,
   ),
   "role-img-alt": {
-    title: "Element with role=\"img\" is missing alternative text",
-    whatHappened:
-      "A custom image-like element has role=\"img\" but no accessible name.",
+    title: 'Element with role="img" is missing alternative text',
+    whatHappened: 'A custom image-like element has role="img" but no accessible name.',
     whyItMatters:
       "Assistive technology treats the element as an image and needs text describing what the visual communicates.",
     suggestedFix:
@@ -1321,7 +1309,7 @@ const repairTemplates: Record<string, RepairTemplate> = {
   "scope-attr-valid": tableTemplate(
     "Table scope attribute is invalid",
     "A table header uses scope incorrectly.",
-    "Use scope=\"col\" for column headers and scope=\"row\" for row headers. Avoid scope on normal <td> cells.",
+    'Use scope="col" for column headers and scope="row" for row headers. Avoid scope on normal <td> cells.',
     `<table>
   <thead>
     <tr><th scope="col">Plan</th><th scope="col">Price</th></tr>
@@ -1333,13 +1321,13 @@ const repairTemplates: Record<string, RepairTemplate> = {
   ),
   "scrollable-region-focusable": {
     title: "Scrollable region is not keyboard accessible",
-    whatHappened:
-      "A scrollable container cannot receive keyboard focus.",
+    whatHappened: "A scrollable container cannot receive keyboard focus.",
     whyItMatters:
       "Keyboard users, especially in Safari, may be unable to scroll inside the region and reach hidden content.",
     suggestedFix:
-      "Give the scrollable region tabindex=\"0\" and an accessible name, or redesign so the page itself scrolls.",
-    afterCode: ({ before }) => addAttribute(addAttribute(before, 'tabindex="0"'), 'aria-label="Activity log"'),
+      'Give the scrollable region tabindex="0" and an accessible name, or redesign so the page itself scrolls.',
+    afterCode: ({ before }) =>
+      addAttribute(addAttribute(before, 'tabindex="0"'), 'aria-label="Activity log"'),
   },
   "select-name": nameTemplate(
     "Select field has no accessible name",
@@ -1381,12 +1369,11 @@ const repairTemplates: Record<string, RepairTemplate> = {
   ),
   "svg-img-alt": {
     title: "SVG image is missing accessible text",
-    whatHappened:
-      "An SVG with image semantics does not expose a text alternative.",
+    whatHappened: "An SVG with image semantics does not expose a text alternative.",
     whyItMatters:
       "Screen reader users need the same meaning conveyed by the SVG, especially for icons, charts, logos, and status graphics.",
     suggestedFix:
-      "For informative SVGs, use role=\"img\" with aria-labelledby and a <title>/<desc>. For decorative SVGs, set aria-hidden=\"true\".",
+      'For informative SVGs, use role="img" with aria-labelledby and a <title>/<desc>. For decorative SVGs, set aria-hidden="true".',
     afterCode: `<svg role="img" aria-labelledby="chart-title chart-desc" viewBox="0 0 120 80">
   <title id="chart-title">Revenue trend</title>
   <desc id="chart-desc">Revenue increased from January through March.</desc>
@@ -1395,12 +1382,11 @@ const repairTemplates: Record<string, RepairTemplate> = {
   },
   tabindex: {
     title: "Positive tabindex changes focus order",
-    whatHappened:
-      "An element uses tabindex greater than 0.",
+    whatHappened: "An element uses tabindex greater than 0.",
     whyItMatters:
       "Positive tabindex creates a custom focus order that often differs from the visual and DOM order, which disorients keyboard users.",
     suggestedFix:
-      "Remove positive tabindex values. Use the DOM order for focus order, and use tabindex=\"0\" only for custom widgets that must be focusable.",
+      'Remove positive tabindex values. Use the DOM order for focus order, and use tabindex="0" only for custom widgets that must be focusable.',
     afterCode: ({ before }) => removeAttribute(before, "tabindex"),
   },
   "table-duplicate-name": tableTemplate(
@@ -1439,7 +1425,7 @@ const repairTemplates: Record<string, RepairTemplate> = {
   "td-has-header": tableTemplate(
     "Data cell is not associated with a header",
     "A non-empty table cell in a larger table has no header relationship.",
-    "Use clear <th scope=\"col\"> and <th scope=\"row\"> headers. For complex tables, connect cells with headers/id.",
+    'Use clear <th scope="col"> and <th scope="row"> headers. For complex tables, connect cells with headers/id.',
     `<table>
   <thead>
     <tr><th scope="col">Month</th><th scope="col">Revenue</th></tr>
@@ -1452,7 +1438,7 @@ const repairTemplates: Record<string, RepairTemplate> = {
   "td-headers-attr": tableTemplate(
     "Table headers attribute references invalid cells",
     "A td headers attribute points to an element that is not a header in the same table.",
-    "Make each headers value point to existing <th id=\"...\"> cells in the same table, or simplify with scope where possible.",
+    'Make each headers value point to existing <th id="..."> cells in the same table, or simplify with scope where possible.',
     `<table>
   <tr>
     <th id="plan">Plan</th>
@@ -1479,10 +1465,8 @@ const repairTemplates: Record<string, RepairTemplate> = {
   ),
   "valid-lang": {
     title: "Language attribute value is invalid",
-    whatHappened:
-      "A lang attribute on an element contains an invalid language code.",
-    whyItMatters:
-      "Screen readers switch pronunciation based on language changes inside the page.",
+    whatHappened: "A lang attribute on an element contains an invalid language code.",
+    whyItMatters: "Screen readers switch pronunciation based on language changes inside the page.",
     suggestedFix:
       "Use a valid BCP 47 language tag on the element whose language differs from the page.",
     afterCode: `<p lang="fr">Bonjour</p>`,
@@ -1490,7 +1474,7 @@ const repairTemplates: Record<string, RepairTemplate> = {
   "video-caption": mediaTemplate(
     "Video is missing captions",
     "A video element does not provide captions for spoken audio.",
-    "Add a captions track with kind=\"captions\" and srclang, and make sure captions include meaningful sound cues.",
+    'Add a captions track with kind="captions" and srclang, and make sure captions include meaningful sound cues.',
     `<video controls>
   <source src="/demo.mp4" type="video/mp4" />
   <track kind="captions" src="/demo.en.vtt" srclang="en" label="English" default />
@@ -1531,8 +1515,7 @@ const categoryTemplates: Array<[(issue: AxeIssueLike) => boolean, RepairTemplate
     (issue) => issue.tags.includes("cat.forms"),
     {
       title: "Form control needs accessible labeling",
-      whatHappened:
-        "A form control is missing a clear label, instruction, or valid browser hint.",
+      whatHappened: "A form control is missing a clear label, instruction, or valid browser hint.",
       whyItMatters:
         "Accessible form markup helps users understand what to enter, recover from errors, and use autofill reliably.",
       suggestedFix:
@@ -1546,8 +1529,7 @@ const categoryTemplates: Array<[(issue: AxeIssueLike) => boolean, RepairTemplate
     (issue) => issue.tags.includes("cat.text-alternatives"),
     {
       title: "Text alternative needs repair",
-      whatHappened:
-        "Non-text content does not expose an equivalent text alternative.",
+      whatHappened: "Non-text content does not expose an equivalent text alternative.",
       whyItMatters:
         "Users who cannot perceive the visual or audio content need a text equivalent to understand the same information.",
       suggestedFix:
@@ -1559,8 +1541,7 @@ const categoryTemplates: Array<[(issue: AxeIssueLike) => boolean, RepairTemplate
     (issue) => issue.tags.includes("cat.keyboard"),
     {
       title: "Keyboard accessibility needs repair",
-      whatHappened:
-        "The affected element creates a keyboard navigation or operation problem.",
+      whatHappened: "The affected element creates a keyboard navigation or operation problem.",
       whyItMatters:
         "Keyboard access is essential for users who cannot use a mouse and for many assistive technologies.",
       suggestedFix:
@@ -1579,8 +1560,7 @@ const categoryTemplates: Array<[(issue: AxeIssueLike) => boolean, RepairTemplate
     (issue) => issue.tags.includes("cat.language"),
     {
       title: "Language metadata needs repair",
-      whatHappened:
-        "The page or element language is missing, invalid, or inconsistent.",
+      whatHappened: "The page or element language is missing, invalid, or inconsistent.",
       whyItMatters:
         "Correct language metadata helps screen readers pronounce content with the right voice and rules.",
       suggestedFix:
@@ -1595,7 +1575,9 @@ const getTemplate = (issue: AxeIssueLike): RepairTemplate => {
   const direct = repairTemplates[id];
   if (direct) return direct;
 
-  return categoryTemplates.find(([matches]) => matches(issue))?.[1] ?? exact(issue.help || issue.id);
+  return (
+    categoryTemplates.find(([matches]) => matches(issue))?.[1] ?? exact(issue.help || issue.id)
+  );
 };
 
 const readTemplateValue = (value: TemplateValue, context: TemplateContext): string =>

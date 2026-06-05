@@ -116,9 +116,7 @@ const formatHtmlSnippet = (value: string): string => {
       const openMatch = line.match(/^<([a-zA-Z][\w:-]*)\b/);
       const tagName = openMatch?.[1]?.toLowerCase();
       const selfClosing =
-        /\/>$/.test(line) ||
-        /^<!/.test(line) ||
-        (tagName ? VOID_HTML_TAGS.has(tagName) : false);
+        /\/>$/.test(line) || /^<!/.test(line) || (tagName ? VOID_HTML_TAGS.has(tagName) : false);
       const closesOnSameLine = tagName ? new RegExp(`</${tagName}>$`, "i").test(line) : false;
 
       if (openMatch && !selfClosing && !closesOnSameLine) {
@@ -314,17 +312,26 @@ export const IssueRow = ({ issue, open, onToggle }: IssueRowProps) => {
             <span className={styles.issueRule}>{issue.rule}</span>
             {primaryWcag && (
               <span className={styles.issueWcagMini}>
-                {primaryWcag.criterion ? `${primaryWcag.prefix} ${primaryWcag.criterion}` : primaryWcag.label}
+                {primaryWcag.criterion
+                  ? `${primaryWcag.prefix} ${primaryWcag.criterion}`
+                  : primaryWcag.label}
                 {primaryWcag.level && <span>{primaryWcag.level}</span>}
               </span>
             )}
-            <span>{issue.nodes.length} occurrence{issue.nodes.length !== 1 ? "s" : ""}</span>
+            <span>
+              {issue.nodes.length} occurrence{issue.nodes.length !== 1 ? "s" : ""}
+            </span>
           </span>
         </span>
         <ChevronIcon className={cn(styles.issueChevron, open && styles.issueChevronOpen)} />
       </button>
 
-      <div id={bodyId} className={styles.issueBody} style={{ maxHeight: open ? 3200 : 0 }} aria-hidden={!open}>
+      <div
+        id={bodyId}
+        className={styles.issueBody}
+        style={{ maxHeight: open ? 3200 : 0 }}
+        aria-hidden={!open}
+      >
         <div className={styles.issueBodyInner}>
           <div className={styles.issueBriefGrid}>
             <section className={styles.issueBriefCard}>
@@ -376,7 +383,9 @@ export const IssueRow = ({ issue, open, onToggle }: IssueRowProps) => {
                   <span className={styles.codePaneNote}>Current failing pattern</span>
                 </div>
                 <pre className={cn(styles.issueCode, styles.issueCodeBefore)}>
-                  <code><HtmlSnippet value={details.beforeCode} /></code>
+                  <code>
+                    <HtmlSnippet value={details.beforeCode} />
+                  </code>
                 </pre>
               </div>
 
@@ -386,7 +395,9 @@ export const IssueRow = ({ issue, open, onToggle }: IssueRowProps) => {
                   <span className={styles.codePaneNote}>Suggested direction</span>
                 </div>
                 <pre className={cn(styles.issueCode, styles.issueCodeAfter)}>
-                  <code><HtmlSnippet value={details.afterCode} /></code>
+                  <code>
+                    <HtmlSnippet value={details.afterCode} />
+                  </code>
                 </pre>
               </div>
             </div>
@@ -407,7 +418,9 @@ export const IssueRow = ({ issue, open, onToggle }: IssueRowProps) => {
                     return (
                       <span key={w} className={styles.wcagChip}>
                         <span className={styles.wcagPrefix}>{tag.prefix}</span>
-                        {tag.criterion && <span className={styles.wcagCriterion}>{tag.criterion}</span>}
+                        {tag.criterion && (
+                          <span className={styles.wcagCriterion}>{tag.criterion}</span>
+                        )}
                         <span className={styles.wcagLabel}>{tag.label}</span>
                         {tag.level && <span className={styles.wcagLevel}>{tag.level}</span>}
                       </span>

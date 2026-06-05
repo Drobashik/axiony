@@ -4,8 +4,7 @@ export const PROBLEMS: readonly ProblemItem[] = [
   {
     number: "01",
     title: "Text you can barely read",
-    description:
-      "Low-contrast text is one of the most common accessibility failures on the web.",
+    description: "Low-contrast text is one of the most common accessibility failures on the web.",
     headline: "Can you actually read this?",
     spec: "color-contrast",
     demo: "contrast",
@@ -22,8 +21,7 @@ export const PROBLEMS: readonly ProblemItem[] = [
   {
     number: "03",
     title: "Things you can't reach without a mouse",
-    description:
-      "Custom controls that keyboard users tab straight past and can never operate.",
+    description: "Custom controls that keyboard users tab straight past and can never operate.",
     headline: "Reach 'Pay' using only the keyboard.",
     spec: "focus-order",
     demo: "keyboard",
@@ -31,8 +29,7 @@ export const PROBLEMS: readonly ProblemItem[] = [
   {
     number: "04",
     title: "Meaning hidden in colour",
-    description:
-      "Status shown only through red and green disappears for colour-blind users.",
+    description: "Status shown only through red and green disappears for colour-blind users.",
     headline: "Which of these services are down?",
     spec: "WCAG 1.4.1",
     demo: "color",

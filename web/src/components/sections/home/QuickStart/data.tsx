@@ -31,8 +31,8 @@ export const STEPS: QuickStep[] = [
     accent: "violet",
     note: (
       <>
-        Exits non-zero on new issues (anything not in your baseline), so the
-        build fails before regressions ship.
+        Exits non-zero on new issues (anything not in your baseline), so the build fails before
+        regressions ship.
       </>
     ),
   },

@@ -49,9 +49,7 @@
   &:focus-visible,
   &.item_active {
     border-color: var(--blue-border);
-    background:
-      linear-gradient(90deg, var(--blue-dim), transparent 70%),
-      var(--bg-elevated);
+    background: linear-gradient(90deg, var(--blue-dim), transparent 70%), var(--bg-elevated);
     transform: translateX(4px);
 
     .number {
@@ -142,9 +140,15 @@
   animation: panelReveal 0.45s $ease-out both;
 }
 
-.panelHeader { animation-delay: 0.02s; }
-.headline    { animation-delay: 0.08s; }
-.demo        { animation-delay: 0.14s; }
+.panelHeader {
+  animation-delay: 0.02s;
+}
+.headline {
+  animation-delay: 0.08s;
+}
+.demo {
+  animation-delay: 0.14s;
+}
 
 .panelHeader {
   display: flex;
@@ -405,8 +409,12 @@
   }
 }
 
-.readout_pass { color: var(--green); }
-.readout_fail { color: var(--severity-critical); }
+.readout_pass {
+  color: var(--green);
+}
+.readout_fail {
+  color: var(--severity-critical);
+}
 
 .verdict {
   font-size: 0.64rem;
@@ -415,8 +423,12 @@
   text-transform: uppercase;
 }
 
-.verdict_pass { color: var(--green); }
-.verdict_fail { color: var(--severity-critical); }
+.verdict_pass {
+  color: var(--green);
+}
+.verdict_fail {
+  color: var(--severity-critical);
+}
 
 .sliderRow {
   display: grid;
@@ -436,7 +448,12 @@
     width: 100%;
     height: 6px;
     border-radius: 99px;
-    background: linear-gradient(90deg, var(--severity-critical), var(--severity-serious) 55%, var(--green));
+    background: linear-gradient(
+      90deg,
+      var(--severity-critical),
+      var(--severity-serious) 55%,
+      var(--green)
+    );
     cursor: pointer;
 
     &::-webkit-slider-thumb {
@@ -541,8 +558,12 @@
   text-transform: uppercase;
 }
 
-.srBad { color: var(--severity-critical); }
-.srGood { color: var(--green); }
+.srBad {
+  color: var(--severity-critical);
+}
+.srGood {
+  color: var(--green);
+}
 
 // ── Demo 03 · keyboard ───────────────────────────────────────────────
 .kbForm {
@@ -662,8 +683,12 @@
   height: 12px;
   border-radius: 50%;
 
-  &.statusDot_up { background: #22c55e; }
-  &.statusDot_down { background: #ef4444; }
+  &.statusDot_up {
+    background: #22c55e;
+  }
+  &.statusDot_down {
+    background: #ef4444;
+  }
 }
 
 .statusIcon {
@@ -673,8 +698,12 @@
   font-size: 0.9rem;
   font-weight: 900;
 
-  &.statusIcon_up { color: #22c55e; }
-  &.statusIcon_down { color: #ef4444; }
+  &.statusIcon_up {
+    color: #22c55e;
+  }
+  &.statusIcon_down {
+    color: #ef4444;
+  }
 }
 
 .statusName {
@@ -694,13 +723,24 @@
 
 // ── Keyframes ────────────────────────────────────────────────────────
 @keyframes panelReveal {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes tryPulse {
-  0%, 100% { box-shadow: 0 0 0 0 oklch(0.72 0.18 145 / 0.5); }
-  50%      { box-shadow: 0 0 0 5px oklch(0.72 0.18 145 / 0); }
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 oklch(0.72 0.18 145 / 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 5px oklch(0.72 0.18 145 / 0);
+  }
 }
 
 // ── Reduced motion ───────────────────────────────────────────────────

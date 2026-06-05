@@ -31,8 +31,16 @@ export const SearchIcon = ({ className, size = 15 }: IconProps) => (
 
 export const SparkleIcon = ({ className, size = 14 }: IconProps) => (
   <svg {...base(size)} className={className}>
-    <path d="M12 3l1.6 5.1L19 9.7l-5.4 1.6L12 16l-1.6-4.7L5 9.7l5.4-1.6L12 3z" strokeWidth="1.5" strokeLinejoin="round" />
-    <path d="M19 15l.7 2.2L22 18l-2.3.8L19 21l-.7-2.2L16 18l2.3-.8L19 15z" strokeWidth="1.3" strokeLinejoin="round" />
+    <path
+      d="M12 3l1.6 5.1L19 9.7l-5.4 1.6L12 16l-1.6-4.7L5 9.7l5.4-1.6L12 3z"
+      strokeWidth="1.5"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M19 15l.7 2.2L22 18l-2.3.8L19 21l-.7-2.2L16 18l2.3-.8L19 15z"
+      strokeWidth="1.3"
+      strokeLinejoin="round"
+    />
   </svg>
 );
 
@@ -44,27 +52,51 @@ export const LockIcon = ({ className, size = 14 }: IconProps) => (
 );
 
 export const RefreshIcon = ({ className, size = 15 }: IconProps) => (
-  <svg {...base(size)} className={className} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    {...base(size)}
+    className={className}
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <path d="M1 4v6h6M23 20v-6h-6" />
     <path d="M20.49 9A9 9 0 005.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 013.51 15" />
   </svg>
 );
 
 export const DownloadIcon = ({ className, size = 15 }: IconProps) => (
-  <svg {...base(size)} className={className} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    {...base(size)}
+    className={className}
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
   </svg>
 );
 
 export const CopyIcon = ({ className, size = 14 }: IconProps) => (
-  <svg {...base(size)} className={className} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    {...base(size)}
+    className={className}
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <rect x="9" y="9" width="11" height="11" rx="2" />
     <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
   </svg>
 );
 
 export const ChevronIcon = ({ className, size = 16 }: IconProps) => (
-  <svg {...base(size)} className={className} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    {...base(size)}
+    className={className}
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <path d="M6 9l6 6 6-6" />
   </svg>
 );

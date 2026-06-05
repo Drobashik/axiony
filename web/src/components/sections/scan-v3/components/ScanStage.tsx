@@ -17,7 +17,13 @@ interface ScanStageProps {
 const RADIUS = 32;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
-export const ScanStage = ({ url, progress, lines, reduce, status = "scanning" }: ScanStageProps) => {
+export const ScanStage = ({
+  url,
+  progress,
+  lines,
+  reduce,
+  status = "scanning",
+}: ScanStageProps) => {
   const phase = phaseForProgress(progress);
   const offset = CIRCUMFERENCE * (1 - progress / 100);
   const failed = status === "failed";
@@ -69,7 +75,11 @@ export const ScanStage = ({ url, progress, lines, reduce, status = "scanning" }:
               aria-current={active ? "step" : undefined}
             >
               <span className={styles.phaseIcon} aria-hidden="true">
-                {done ? <Icon name="check" size={13} /> : <span className={styles.phaseNum}>{index + 1}</span>}
+                {done ? (
+                  <Icon name="check" size={13} />
+                ) : (
+                  <span className={styles.phaseNum}>{index + 1}</span>
+                )}
               </span>
               <span className={styles.phaseText}>
                 <strong>{item.label}</strong>

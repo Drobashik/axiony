@@ -11,9 +11,7 @@ export const QuickStart = () => (
       <div className={cn(styles.intro, "reveal")}>
         <SectionEyebrow>Quick start</SectionEyebrow>
         <h2>Your first scan, in under a minute.</h2>
-        <p className={styles.lead}>
-          Free, open-source, no account. Copy, paste, scan.
-        </p>
+        <p className={styles.lead}>Free, open-source, no account. Copy, paste, scan.</p>
       </div>
 
       <div className={cn(styles.grid, "reveal")}>

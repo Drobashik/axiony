@@ -7,13 +7,21 @@
 // ── Responsive breakpoints (mobile-first style, max-width queries) ──
 @mixin breakpoint-down($size) {
   @if $size == sm {
-    @media (max-width: $bp-sm) { @content; }
+    @media (max-width: $bp-sm) {
+      @content;
+    }
   } @else if $size == md {
-    @media (max-width: $bp-md) { @content; }
+    @media (max-width: $bp-md) {
+      @content;
+    }
   } @else if $size == lg {
-    @media (max-width: $bp-lg) { @content; }
+    @media (max-width: $bp-lg) {
+      @content;
+    }
   } @else if $size == xl {
-    @media (max-width: $bp-xl) { @content; }
+    @media (max-width: $bp-xl) {
+      @content;
+    }
   }
 }
 
@@ -44,10 +52,7 @@
 }
 
 // ── Shared elevated panel shell ──
-@mixin elevated-panel(
-  $radius: var(--radius-xl),
-  $shadow: 0 24px 70px oklch(0 0 0 / 0.34)
-) {
+@mixin elevated-panel($radius: var(--radius-xl), $shadow: 0 24px 70px oklch(0 0 0 / 0.34)) {
   border: 1px solid var(--border-default);
   border-radius: $radius;
   background:
