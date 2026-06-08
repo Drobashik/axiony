@@ -122,6 +122,26 @@
   }
 }
 
+.signIn {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 12px;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    color 160ms ease,
+    background 160ms ease;
+
+  &:hover {
+    color: var(--text-primary);
+    background: oklch(1 0 0 / 0.05);
+    text-decoration: none;
+  }
+}
+
 // ── Hamburger (mobile) ───────────────────────────────────────────────
 .menuToggle {
   display: none;
