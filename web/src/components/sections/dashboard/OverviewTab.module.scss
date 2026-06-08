@@ -1,0 +1,364 @@
+// ── Stat row ──
+.statRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+
+  @include breakpoint-down(lg) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.tile {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  // Each tile fades + slides up on mount, with a stagger driven by
+  // its index in the grid. See `.tile:nth-child(n)` below.
+  opacity: 0;
+  transform: translateY(8px);
+  animation: tileIn 0.5s $ease-out forwards;
+
+  &:nth-child(1) {
+    animation-delay: 0.05s;
+  }
+  &:nth-child(2) {
+    animation-delay: 0.12s;
+  }
+  &:nth-child(3) {
+    animation-delay: 0.19s;
+  }
+  &:nth-child(4) {
+    animation-delay: 0.26s;
+  }
+}
+
+@keyframes tileIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tileCritical {
+  border-color: oklch(0.62 0.22 20 / 0.25);
+}
+.tileResolved {
+  border-color: var(--green-dim);
+}
+
+.tileLabel {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.tileValue {
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--text-primary);
+}
+
+.tileUnit {
+  font-size: 1rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.delta {
+  font-size: 0.78rem;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.deltaUp {
+  color: oklch(0.72 0.2 20);
+}
+.deltaDown {
+  color: var(--green);
+}
+
+// ── Chart card ──
+.chartCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 20px;
+  opacity: 0;
+  transform: translateY(8px);
+  animation: tileIn 0.5s $ease-out 0.32s forwards;
+}
+
+.chartHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.chartTitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.legend {
+  display: flex;
+  gap: 16px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.legendDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+// ── Two-column ──
+.twoCol {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+  opacity: 0;
+  transform: translateY(8px);
+  animation: tileIn 0.5s $ease-out 0.45s forwards;
+
+  @include breakpoint-down(lg) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.sectionTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.viewAll {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+}
+
+// ── Table ──
+.tableCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th {
+    text-align: left;
+    padding: 8px 12px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid var(--border-default);
+    font-family: var(--font-mono);
+  }
+
+  td {
+    padding: 11px 12px;
+    border-bottom: 1px solid var(--border-subtle);
+    font-size: 0.855rem;
+    vertical-align: middle;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+  tr:hover td {
+    background: var(--bg-elevated);
+  }
+}
+
+.projectName {
+  font-weight: 500;
+  font-size: 0.855rem;
+}
+
+.url {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-primary);
+}
+
+.urlHost {
+  color: var(--text-muted);
+}
+
+.scoreWrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.scoreBg {
+  flex: 1;
+  height: 5px;
+  background: var(--border-default);
+  border-radius: 99px;
+  overflow: hidden;
+  max-width: 80px;
+}
+
+.scoreFill {
+  height: 100%;
+  border-radius: 99px;
+}
+
+.scoreVal {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.issueCount {
+  font-size: 0.8rem;
+}
+
+.critical {
+  color: oklch(0.72 0.2 20);
+  font-weight: 600;
+}
+
+.divider {
+  color: var(--text-muted);
+}
+
+// ── Status pills ──
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78rem;
+
+  &::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+}
+
+.status_passing {
+  color: var(--green);
+}
+.status_warning {
+  color: oklch(0.75 0.15 80);
+}
+.status_failing {
+  color: oklch(0.72 0.2 20);
+}
+.status_scanning {
+  color: var(--blue);
+}
+
+// ── Activity feed ──
+.activityCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+}
+
+.activityItem {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-subtle);
+  align-items: flex-start;
+  opacity: 0;
+  animation: activityIn 0.4s $ease-out forwards;
+
+  // Stagger so items cascade in one after another.
+  @for $i from 1 through 8 {
+    &:nth-child(#{$i}) {
+      animation-delay: #{0.55 + ($i - 1) * 0.07}s;
+    }
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+@keyframes activityIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.activityIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+}
+
+.activityText {
+  font-size: 0.835rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+
+  strong {
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+}
+
+.activityTime {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 3px;
+  font-family: var(--font-mono);
+}
