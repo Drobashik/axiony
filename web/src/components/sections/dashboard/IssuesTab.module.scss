@@ -1,0 +1,229 @@
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 7px 12px;
+  flex: 1;
+  max-width: 280px;
+
+  input {
+    background: none;
+    border: none;
+    outline: none;
+    font-family: var(--font-sans);
+    font-size: 0.835rem;
+    color: var(--text-primary);
+    width: 100%;
+
+    &::placeholder {
+      color: var(--text-muted);
+    }
+  }
+}
+
+.chips {
+  display: flex;
+  gap: 4px;
+}
+
+.chip {
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: 99px;
+  border: 1px solid var(--border-default);
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  transition: all 0.15s;
+}
+
+.chipActive {
+  background: var(--blue-dim);
+  border-color: var(--blue-border);
+  color: var(--blue);
+}
+
+.summary {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+// ── Table ──
+.tableCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.tableHeader,
+.row {
+  // `.row` is a <button>, which shrink-wraps to its content instead of
+  // filling its container the way the <div> header does — so without an
+  // explicit width the rows render narrower than the header and look
+  // cropped. Force both to span the full table width.
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 120px 90px 90px 32px;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.tableHeader {
+  background: transparent;
+}
+
+.tableHeaderCell {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-family: var(--font-mono);
+}
+
+.row {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border-subtle);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  transition: background 0.12s;
+
+  &:hover {
+    background: var(--bg-elevated);
+  }
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+// Severity dot sits inline against the issue title (not in its own
+// column) so it reads as a label for the title rather than a detached
+// bullet. `margin-top` nudges it onto the title's first line.
+.issue {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.issueText {
+  min-width: 0;
+}
+
+.dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  margin-top: 6px;
+  border-radius: 50%;
+}
+
+.dot_critical {
+  background: var(--severity-critical);
+}
+.dot_serious {
+  background: var(--severity-serious);
+}
+.dot_moderate {
+  background: var(--severity-moderate);
+}
+.dot_minor {
+  background: var(--severity-minor);
+}
+
+.title {
+  font-size: 0.855rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.rule {
+  font-size: 0.775rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  margin-top: 2px;
+}
+
+.project {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  @include truncate;
+}
+
+.assignee {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.assigneeEmpty {
+  background: var(--border-subtle);
+  color: var(--text-muted);
+}
+
+.chevron {
+  justify-self: end;
+  display: inline-flex;
+  color: var(--text-muted);
+}
+
+.statusTag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid;
+  font-weight: 500;
+}
+
+.statusTag_open {
+  background: var(--bg-muted);
+  color: var(--text-secondary);
+  border-color: var(--border-default);
+}
+
+.statusTag_in-progress {
+  background: var(--blue-dim);
+  color: var(--blue);
+  border-color: var(--blue-border);
+}
+
+.statusTag_resolved {
+  background: var(--green-dim);
+  color: var(--green);
+  border-color: oklch(0.72 0.18 145 / 0.3);
+}
+
+.empty {
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}

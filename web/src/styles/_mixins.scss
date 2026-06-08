@@ -101,3 +101,10 @@
     --accent-dim: var(--violet-dim);
   }
 }
+
+// ── Single-line ellipsis truncation ──
+@mixin truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

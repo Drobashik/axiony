@@ -1,0 +1,23 @@
+.spark {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 28px;
+}
+
+.bar {
+  width: 5px;
+  border-radius: 2px;
+  background: var(--border-default);
+  transition: background 0.15s;
+}
+
+.bad {
+  background: oklch(0.62 0.22 20 / 0.7);
+}
+.ok {
+  background: oklch(0.72 0.18 50 / 0.7);
+}
+.good {
+  background: var(--green-dim);
+}

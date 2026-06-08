@@ -1,0 +1,46 @@
+.svg {
+  width: 100%;
+  overflow: visible;
+}
+
+// ── Animated polyline ─────────────────────────────────────────────────
+// `strokeDasharray` and `strokeDashoffset` are set inline by JS using
+// each path's measured length, so the line traces itself exactly.
+// The transition is applied via inline style only after the initial
+// dash-offset has been committed — that's what makes the draw visible.
+
+// ── Area gradient fades in alongside its polyline ────────────────────
+.area {
+  opacity: 0;
+  animation: fadeArea 1s cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+@keyframes fadeArea {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// ── Data dots pop in once the line has finished drawing ──────────────
+// `--dot-opacity` is set per-circle so historical dots can settle on
+// 0.45 while the latest point ends at full opacity.
+.dot {
+  opacity: 0;
+  animation: dotIn 0.3s ease both;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes dotIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: var(--dot-opacity, 1);
+    transform: scale(1);
+  }
+}

@@ -1,0 +1,32 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  gap: 12px;
+}
+
+.icon {
+  width: 48px;
+  height: 48px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+}
+
+.title {
+  margin-bottom: 6px;
+  text-transform: capitalize;
+  text-align: center;
+}
+
+.lead {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  text-align: center;
+}
