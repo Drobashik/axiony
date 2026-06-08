@@ -51,6 +51,9 @@ export const Nav = () => {
             <GitHubIcon />
             GitHub
           </a>
+          <Link href="/login" className={styles.signIn}>
+            Log in
+          </Link>
           <Button href="/scan" size="sm">
             <ScanIcon />
             Start scanning
@@ -92,6 +95,9 @@ export const Nav = () => {
           >
             GitHub
           </a>
+          <Link href="/login" className={styles.mobileLink} onClick={close}>
+            Log in
+          </Link>
         </nav>
         <Button href="/scan" size="lg" block onClick={close}>
           Start scanning free

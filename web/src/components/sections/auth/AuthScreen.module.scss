@@ -1,0 +1,749 @@
+// =====================================================================
+// Auth experience (/login, /signup) — split value-panel + form card.
+// Shared module for every auth sub-component (mirrors ScanStudio).
+// =====================================================================
+
+.card {
+  width: 100%;
+  max-width: 1040px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.02fr 1fr;
+  overflow: hidden;
+  @include elevated-panel(var(--radius-2xl), 0 30px 80px oklch(0 0 0 / 0.45));
+  animation: scaleIn 0.5s $ease-out both;
+}
+
+// ── Value panel (left) ───────────────────────────────────────────────
+.aside {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  padding: 48px 42px;
+  border-right: 1px solid var(--border-subtle);
+  background: linear-gradient(165deg, oklch(0.22 0.05 266 / 0.5), oklch(0.12 0.02 262 / 0.15));
+}
+
+.asideGrid {
+  @include absolute-fill;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--text-primary) 1px, transparent 1px),
+    linear-gradient(90deg, var(--text-primary) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse 78% 70% at 28% 18%, black, transparent 74%);
+  opacity: 0.04;
+}
+
+.asideGlow {
+  position: absolute;
+  inset: auto -22% -34% -22%;
+  height: 62%;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 32% 100%, oklch(0.62 0.22 240 / 0.22), transparent 70%);
+  filter: blur(30px);
+}
+
+.asideInner {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  width: 100%;
+}
+
+.eyebrow {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--blue-border);
+  border-radius: 99px;
+  padding: 5px 12px;
+  background: var(--blue-dim);
+  color: var(--blue);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.asideTitle {
+  margin: 0;
+  font-size: clamp(1.7rem, 2.4vw, 2.1rem);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+
+.asideSub {
+  margin: 0;
+  max-width: 42ch;
+  color: var(--text-secondary);
+  font-size: 0.98rem;
+  line-height: 1.6;
+}
+
+.points {
+  display: grid;
+  gap: 16px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.point {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+}
+
+.pointIcon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  color: var(--blue);
+}
+
+.pointBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pointTitle {
+  color: var(--text-primary);
+  font-size: 0.94rem;
+  font-weight: 600;
+}
+
+.pointDesc {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin: auto 0 0;
+  padding-top: 22px;
+  border-top: 1px solid var(--border-subtle);
+  list-style: none;
+}
+
+.trustItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 500;
+
+  svg {
+    flex-shrink: 0;
+    color: var(--green);
+  }
+}
+
+// ── Form panel (right) ───────────────────────────────────────────────
+.panel {
+  display: flex;
+  min-width: 0;
+  padding: 48px 44px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 384px;
+  margin: auto;
+}
+
+.formBody {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.formHead {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.formTitle {
+  margin: 0;
+  font-size: 1.55rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.formSub {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+}
+
+// ── OAuth ────────────────────────────────────────────────────────────
+.oauthGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.oauthRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.oauthBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-width: 0;
+  padding: 11px 14px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color var(--transition),
+    background var(--transition),
+    transform var(--transition);
+
+  span {
+    @include truncate;
+  }
+
+  svg {
+    flex-shrink: 0;
+  }
+
+  &:hover:not(:disabled) {
+    border-color: var(--border-strong);
+    background: var(--bg-muted);
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+.oauthBtnWide {
+  width: 100%;
+}
+
+.oauthBtnBusy {
+  pointer-events: none;
+}
+
+// ── Divider ──────────────────────────────────────────────────────────
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-muted);
+
+  &::before,
+  &::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--border-subtle);
+  }
+
+  span {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+}
+
+// ── Form-level error banner ──────────────────────────────────────────
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 13px;
+  border: 1px solid oklch(0.72 0.2 20 / 0.32);
+  border-radius: var(--radius-md);
+  background: oklch(0.72 0.2 20 / 0.1);
+  color: oklch(0.82 0.13 22);
+  font-size: 0.85rem;
+  font-weight: 500;
+  animation: fadeUp 0.3s $ease-out both;
+
+  svg {
+    flex-shrink: 0;
+    color: var(--severity-critical);
+  }
+}
+
+// ── Fields ───────────────────────────────────────────────────────────
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.labelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.label {
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.linkBtn {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--blue);
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+.inputWrap {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--bg-base);
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition);
+
+  &:focus-within {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px var(--blue-dim);
+  }
+}
+
+.inputWrapError {
+  border-color: var(--severity-critical);
+
+  &:focus-within {
+    border-color: var(--severity-critical);
+    box-shadow: 0 0 0 3px oklch(0.72 0.2 20 / 0.18);
+  }
+}
+
+.leadingIcon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding-left: 13px;
+  color: var(--text-muted);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 14px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+
+  &::placeholder {
+    color: var(--text-muted);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+  }
+
+  // Keep autofill on-brand instead of the default white slab.
+  &:-webkit-autofill,
+  &:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--text-primary);
+    -webkit-box-shadow: 0 0 0 1000px var(--bg-base) inset;
+    caret-color: var(--text-primary);
+    transition: background-color 9999s ease-in-out 0s;
+  }
+}
+
+.reveal {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  flex-shrink: 0;
+  padding: 0 13px;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition);
+
+  &:hover {
+    color: var(--text-primary);
+  }
+
+  &:focus-visible {
+    @include focus-ring($offset: -2px);
+  }
+}
+
+.fieldError {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--severity-critical);
+  font-size: 0.8rem;
+  font-weight: 500;
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+.fieldHint {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+// ── Password strength meter ──────────────────────────────────────────
+.meter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.meterTrack {
+  display: flex;
+  flex: 1;
+  gap: 4px;
+}
+
+.meterSeg {
+  flex: 1;
+  height: 4px;
+  border-radius: 99px;
+  background: var(--border-default);
+  transition: background var(--transition);
+}
+
+.meterSegOn {
+  background: var(--blue);
+}
+
+.meterLabel {
+  min-width: 46px;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 600;
+  text-align: right;
+}
+
+// ── Checkbox ─────────────────────────────────────────────────────────
+.checkboxField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkboxInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.checkboxBox {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  border: 1px solid var(--border-strong);
+  border-radius: 5px;
+  background: var(--bg-base);
+  color: #fff;
+  transition:
+    background var(--transition),
+    border-color var(--transition);
+
+  svg {
+    opacity: 0;
+    transform: scale(0.6);
+    transition:
+      opacity var(--transition),
+      transform var(--transition);
+  }
+
+  .checkboxInput:checked + & {
+    background: var(--blue);
+    border-color: var(--blue);
+
+    svg {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .checkboxInput:focus-visible + & {
+    @include focus-ring;
+  }
+}
+
+.checkboxBoxError {
+  border-color: var(--severity-critical);
+}
+
+.checkboxLabel {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.inlineLink {
+  color: var(--blue);
+  font-weight: 500;
+}
+
+// ── Submit + switch ──────────────────────────────────────────────────
+.submit {
+  margin-top: 4px;
+}
+
+.switch {
+  margin: 22px 0 0;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+}
+
+.switchLink {
+  color: var(--blue);
+  font-weight: 600;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 6px;
+  margin-bottom: 22px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color var(--transition);
+
+  &:hover {
+    color: var(--text-primary);
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+// ── Result states (success / reset sent) ─────────────────────────────
+.result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin: auto;
+  max-width: 360px;
+  padding: 8px 0;
+  text-align: center;
+  outline: none;
+  animation: scaleIn 0.4s $ease-out both;
+}
+
+.resultIcon {
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+
+  &[data-tone="success"] {
+    border: 1px solid $green-border;
+    background: var(--green-dim);
+    color: var(--green);
+    box-shadow: var(--shadow-glow-green);
+  }
+
+  &[data-tone="info"] {
+    border: 1px solid var(--blue-border);
+    background: var(--blue-dim);
+    color: var(--blue);
+    box-shadow: var(--shadow-glow-blue);
+  }
+}
+
+.resultTitle {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.resultText {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  line-height: 1.55;
+
+  strong {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+}
+
+.resultBar {
+  width: 100%;
+  max-width: 220px;
+  height: 4px;
+  margin-top: 4px;
+  border-radius: 99px;
+  background: var(--border-default);
+  overflow: hidden;
+
+  span {
+    display: block;
+    width: 8%;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--green);
+    animation: authBarFill 1s $ease-out forwards;
+  }
+}
+
+.resultLink {
+  margin-top: 2px;
+}
+
+// ── Spinner ──────────────────────────────────────────────────────────
+.spin {
+  animation: authSpin 0.8s linear infinite;
+}
+
+@keyframes authSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes authBarFill {
+  from {
+    width: 8%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+// ── Responsive ───────────────────────────────────────────────────────
+@include breakpoint-down(lg) {
+  .card {
+    max-width: 460px;
+    grid-template-columns: 1fr;
+  }
+
+  .aside {
+    padding: 34px 32px;
+    border-right: none;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .panel {
+    padding: 34px 32px;
+  }
+
+  .form {
+    max-width: none;
+  }
+}
+
+@include breakpoint-down(sm) {
+  .aside {
+    padding: 28px 24px;
+  }
+
+  .panel {
+    padding: 28px 24px;
+  }
+
+  .points {
+    display: none;
+  }
+
+  .oauthRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .result {
+    animation: none;
+  }
+}
