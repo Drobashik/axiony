@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { completeAuth } from "@/lib/workspace";
 import { getPasswordStrength, isEmail } from "./validation";
 import type { AuthFieldName, AuthMode, AuthStatus, AuthView, OAuthProvider } from "./types";
 
@@ -16,6 +17,15 @@ const REDIRECT_TO = "/dashboard";
 // reachable in the mock. Documented in the implementation summary.
 const ERROR_EMAIL = "error@axiony.dev"; // login → invalid credentials
 const TAKEN_EMAIL = "taken@axiony.dev"; // signup → email already in use
+
+// Stand-in profiles returned by the mock OAuth providers, so a social
+// sign-in still produces a believable account. Swap for the real profile
+// from the provider callback later.
+const OAUTH_IDENTITY: Record<OAuthProvider["id"], { name: string; email: string }> = {
+  google: { name: "Alex Rivera", email: "alex.rivera@gmail.com" },
+  github: { name: "Sam Carter", email: "sam@users.noreply.github.com" },
+  gitlab: { name: "Priya Nair", email: "priya@gitlab-mail.com" },
+};
 
 interface Fields {
   name: string;
@@ -155,6 +165,8 @@ export function useAuthForm(mode: AuthMode) {
         return;
       }
 
+      // Create/refresh the workspace — turns a pending scan into a baseline.
+      completeAuth({ name: fields.name, email });
       persistMockSession({ email, mode });
       setStatus("success");
       schedule(() => router.push(REDIRECT_TO), REDIRECT_MS);
@@ -165,6 +177,7 @@ export function useAuthForm(mode: AuthMode) {
     if (oauthPending || status === "submitting") return;
     setOauthPending(id);
     schedule(() => {
+      completeAuth(OAUTH_IDENTITY[id]);
       persistMockSession({ provider: id, mode });
       router.push(REDIRECT_TO);
     }, OAUTH_MS);

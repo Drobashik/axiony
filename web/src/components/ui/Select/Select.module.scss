@@ -1,0 +1,157 @@
+.root {
+  position: relative;
+  display: inline-block;
+}
+
+.block {
+  display: block;
+  width: 100%;
+}
+
+// ── Trigger ──────────────────────────────────────────────────────────
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    border-color var(--transition),
+    background var(--transition);
+
+  &:hover {
+    border-color: var(--border-strong);
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+.triggerOpen {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-dim);
+}
+
+.sm {
+  padding: 6px 10px;
+  font-size: 0.82rem;
+}
+
+.md {
+  padding: 8px 12px;
+  font-size: 0.88rem;
+}
+
+.triggerLabel {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  @include truncate;
+}
+
+.glyph {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.chevron {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: transform var(--transition);
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+// ── Menu ─────────────────────────────────────────────────────────────
+.menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 50;
+  min-width: 100%;
+  max-height: 280px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 5px;
+  list-style: none;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  box-shadow: 0 16px 40px oklch(0 0 0 / 0.5);
+  animation: selectIn 0.14s $ease-out both;
+}
+
+.menuEnd {
+  left: auto;
+  right: 0;
+}
+
+@keyframes selectIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.optionActive {
+  background: var(--border-subtle);
+  color: var(--text-primary);
+}
+
+.optionSelected {
+  color: var(--text-primary);
+}
+
+.optionLabel {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  flex: 1;
+  min-width: 0;
+}
+
+.optionHint {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+}
+
+.check {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--blue);
+}

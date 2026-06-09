@@ -54,6 +54,29 @@
   margin-bottom: 8px;
 }
 
+.scopeControls {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 8px;
+}
+
+.pageScope {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.scopeLabel {
+  padding-inline: 2px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .item {
   display: flex;
   align-items: center;
@@ -149,4 +172,32 @@
 .userPlan {
   font-size: 0.72rem;
   color: var(--text-muted);
+}
+
+.signOut {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    background 0.15s,
+    border-color 0.15s;
+
+  &:hover {
+    color: var(--text-primary);
+    background: var(--border-subtle);
+    border-color: var(--border-default);
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
 }

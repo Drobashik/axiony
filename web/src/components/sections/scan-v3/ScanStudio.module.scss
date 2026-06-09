@@ -1581,6 +1581,55 @@
   }
 }
 
+.baselineContext {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  margin-bottom: 10px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  @include truncate;
+}
+
+.baselineContextDot {
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 3px var(--green-dim);
+}
+
+.baselineLogin {
+  padding: 6px 2px;
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 0.86rem;
+  cursor: pointer;
+
+  span {
+    color: var(--blue);
+    font-weight: 600;
+  }
+
+  &:hover span {
+    text-decoration: underline;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
 .baselineStats {
   display: flex;
   align-items: center;

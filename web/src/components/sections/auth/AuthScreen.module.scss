@@ -84,6 +84,98 @@
   color: var(--text-secondary);
   font-size: 0.98rem;
   line-height: 1.6;
+
+  strong {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+}
+
+// ── Scan context (signup arriving from a scan) ───────────────────────
+.scanCard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: oklch(0.12 0.012 260 / 0.6);
+}
+
+.scanCardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.scanCardLabel {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.scanCardHost {
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  @include truncate;
+}
+
+.scanCardScore {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.scanScore {
+  font-size: 2.2rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.scanScoreUnit {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.scanScoreMeta {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+}
+
+.scanSeverities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.sevChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border: 1px solid var(--border-default);
+  border-radius: 99px;
+  background: var(--bg-base);
+  color: var(--text-secondary);
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.sevDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
 }
 
 .points {

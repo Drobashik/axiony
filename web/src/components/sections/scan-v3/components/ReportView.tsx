@@ -18,6 +18,9 @@ interface ReportViewProps {
   report: ScanReport;
   reduce: boolean;
   onRescan: () => void;
+  /** In the dashboard the scan is auto-saved, so the in-report "save
+   * baseline" callout is hidden (the dashboard shows its own confirmation). */
+  embedded?: boolean;
 }
 
 const buildSummary = (report: ScanReport): string => {
@@ -31,7 +34,7 @@ const buildSummary = (report: ScanReport): string => {
   return lines.join("\n");
 };
 
-export const ReportView = ({ report, reduce, onRescan }: ReportViewProps) => {
+export const ReportView = ({ report, reduce, onRescan, embedded }: ReportViewProps) => {
   const [filter, setFilter] = useState<FilterValue>("all");
 
   const total = report.issues.length;
@@ -126,7 +129,7 @@ export const ReportView = ({ report, reduce, onRescan }: ReportViewProps) => {
         onFilter={setFilter}
       />
 
-      <BaselineCallout total={total} />
+      {!embedded && <BaselineCallout report={report} />}
     </div>
   );
 };
