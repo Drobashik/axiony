@@ -6,5 +6,6 @@ export * from "./LoadingScreen";
 export * from "./LogoMark";
 export * from "./Pill";
 export * from "./SectionEyebrow";
+export * from "./Select";
 export * from "./Tag";
 export * from "./Terminal";

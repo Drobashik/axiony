@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui";
+import { readPendingScan } from "@/lib/workspace";
 import { useAuthForm } from "./useAuthForm";
 import { AuthField } from "./AuthField";
 import { Checkbox } from "./Checkbox";
@@ -67,6 +68,11 @@ export const AuthForm = ({ mode }: { mode: AuthMode }) => {
 
   const copy = COPY[mode];
   const resultRef = useRef<HTMLDivElement>(null);
+
+  // Captured once (lazy init) because the pending scan is consumed the
+  // moment auth completes — we still want to celebrate it on success.
+  const [hadScan] = useState(() => readPendingScan() !== null);
+  const savedBaseline = mode === "signup" && hadScan;
 
   const submitting = status === "submitting";
   const locked = submitting || oauthPending !== null;
@@ -148,12 +154,18 @@ export const AuthForm = ({ mode }: { mode: AuthMode }) => {
             <CheckIcon size={28} />
           </span>
           <h1 className={styles.resultTitle}>
-            {mode === "signup" ? "Workspace created" : "You're signed in"}
+            {savedBaseline
+              ? "Baseline saved"
+              : mode === "signup"
+                ? "Workspace created"
+                : "You're signed in"}
           </h1>
           <p className={styles.resultText}>
-            {mode === "signup"
-              ? "Taking you to your dashboard to save your first scan and lock a baseline."
-              : "Taking you to your dashboard — your baselines and history are loading."}
+            {savedBaseline
+              ? "We saved your scan as a baseline. Taking you to your dashboard to see your tracked debt and regression protection."
+              : mode === "signup"
+                ? "Taking you to your dashboard to run your first scan and lock a baseline."
+                : "Taking you to your dashboard — your baselines and history are loading."}
           </p>
           <div className={styles.resultBar} aria-hidden="true">
             <span />

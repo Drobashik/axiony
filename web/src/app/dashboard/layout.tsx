@@ -1,16 +1,21 @@
 import { Metadata } from "next";
 import { ReactNode } from "react";
+import { DashboardShell } from "@/components/sections/dashboard";
 
 export const metadata: Metadata = {
-  title: "Dashboard preview",
+  title: {
+    default: "Dashboard",
+    template: "%s — Axiony Dashboard",
+  },
   description:
-    "Explore an interactive preview of the Axiony dashboard — project scores, accessibility issue trends, and team activity, running on sample data.",
+    "Your Axiony workspace — accessibility score, tracked debt, scan history, and team activity. The public route runs on sample data.",
 };
 
 /**
- * Bare layout for the dashboard route — intentionally has no marketing
- * nav/footer because the dashboard provides its own shell.
+ * Dashboard layout. Renders the persistent shell (sidebar + topbar) once; the
+ * routed tab pages under /dashboard/* fill the content area. No marketing
+ * nav/footer — the dashboard brings its own chrome.
  */
 export default function DashboardLayout({ children }: { children: ReactNode }) {
-  return <>{children}</>;
+  return <DashboardShell>{children}</DashboardShell>;
 }

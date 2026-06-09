@@ -16,6 +16,8 @@ interface UrlConsoleProps {
   onUrlChange: (value: string) => void;
   onLevelChange: (level: WcagLevel) => void;
   focusSignal?: number;
+  /** Show the "Try: …" example sites. Off inside the dashboard. */
+  showQuickLinks?: boolean;
   /** Called with a normalised, validated URL. */
   onScan: (url: string) => void;
 }
@@ -27,6 +29,7 @@ export const UrlConsole = ({
   onUrlChange,
   onLevelChange,
   focusSignal = 0,
+  showQuickLinks = true,
   onScan,
 }: UrlConsoleProps) => {
   const inputId = useId();
@@ -127,28 +130,30 @@ export const UrlConsole = ({
           </div>
         </fieldset>
 
-        <div className={styles.quick}>
-          <span className={styles.quickLabel}>Try:</span>
-          {QUICK_URLS.map((q) => (
+        {showQuickLinks && (
+          <div className={styles.quick}>
+            <span className={styles.quickLabel}>Try:</span>
+            {QUICK_URLS.map((q) => (
+              <button
+                key={q}
+                type="button"
+                className={styles.quickChip}
+                onClick={() => scanShortcut(q)}
+                disabled={busy}
+              >
+                {q}
+              </button>
+            ))}
             <button
-              key={q}
               type="button"
-              className={styles.quickChip}
-              onClick={() => scanShortcut(q)}
+              className={styles.exampleLink}
+              onClick={() => scanShortcut(normalizeUrl(EXAMPLE_URL))}
               disabled={busy}
             >
-              {q}
+              example scan →
             </button>
-          ))}
-          <button
-            type="button"
-            className={styles.exampleLink}
-            onClick={() => scanShortcut(normalizeUrl(EXAMPLE_URL))}
-            disabled={busy}
-          >
-            example scan →
-          </button>
-        </div>
+          </div>
+        )}
       </div>
     </form>
   );

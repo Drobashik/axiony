@@ -1,10 +1,12 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Container } from "@/components/ui";
 import { ScanNav } from "@/components/layout";
 import cn from "classnames";
 import { useReveal } from "@/lib/hooks/useReveal";
+import { useWorkspace } from "@/lib/workspace";
 import { ReportView } from "./components/ReportView";
 import { ResetScanDialog } from "./components/ResetScanDialog";
 import { ScanStage } from "./components/ScanStage";
@@ -17,7 +19,9 @@ import styles from "./ScanStudio.module.scss";
 
 export const ScanStudio = () => {
   useReveal();
+  const router = useRouter();
   const engine = useScanEngine();
+  const { workspace } = useWorkspace();
   const [query, setQuery] = useState("");
   const [level, setLevel] = useState<WcagLevel>("AA");
   const [focusSignal, setFocusSignal] = useState(0);
@@ -26,6 +30,12 @@ export const ScanStudio = () => {
 
   const busy = engine.status === "scanning";
   const active = engine.status !== "idle";
+
+  // Signed-in users scan inside the dashboard shell (clean tool, no
+  // marketing) — send them there instead of the public studio.
+  useEffect(() => {
+    if (workspace) router.replace("/dashboard/scan");
+  }, [workspace, router]);
 
   // Bring the scan view to the top so the stage/results are visible without
   // the user having to scroll (e.g. after a "scan another" from the bottom).
@@ -113,6 +123,9 @@ export const ScanStudio = () => {
       />
     </div>
   );
+
+  // Avoid flashing the public studio while the redirect above runs.
+  if (workspace) return null;
 
   return (
     <>

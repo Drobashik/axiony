@@ -5,9 +5,27 @@ import styles from "./Topbar.module.scss";
 
 export interface TopbarProps {
   activeTab: DashboardTab;
+  /** In-dashboard scan → switch to the scan tab instead of linking to /scan. */
+  onNewScan?: () => void;
 }
 
-export function Topbar({ activeTab }: TopbarProps) {
+const SCAN_ICON = (
+  <svg
+    width="13"
+    height="13"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    aria-hidden="true"
+  >
+    <circle cx="11" cy="11" r="8" />
+    <path d="M21 21l-4.35-4.35" />
+  </svg>
+);
+
+export function Topbar({ activeTab, onNewScan }: TopbarProps) {
   return (
     <div className={styles.topbar}>
       <nav className={styles.breadcrumb} aria-label="Breadcrumb">
@@ -32,22 +50,17 @@ export function Topbar({ activeTab }: TopbarProps) {
           </svg>
           <span className={styles.dot} />
         </button>
-        <Button href="/scan" size="sm">
-          <svg
-            width="13"
-            height="13"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            aria-hidden="true"
-          >
-            <circle cx="11" cy="11" r="8" />
-            <path d="M21 21l-4.35-4.35" />
-          </svg>
-          New scan
-        </Button>
+        {onNewScan ? (
+          <Button size="sm" onClick={onNewScan}>
+            {SCAN_ICON}
+            New scan
+          </Button>
+        ) : (
+          <Button href="/scan" size="sm">
+            {SCAN_ICON}
+            New scan
+          </Button>
+        )}
       </div>
     </div>
   );

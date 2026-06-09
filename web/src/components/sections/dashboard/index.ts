@@ -1,4 +1,6 @@
 export { ComingSoon } from "./ComingSoon";
+export { DashboardShell } from "./DashboardShell";
+export { DashboardTabView } from "./DashboardTabView";
 export { IssuesTab } from "./IssuesTab";
 export { OverviewTab } from "./OverviewTab";
 export { PreviewBanner } from "./PreviewBanner";

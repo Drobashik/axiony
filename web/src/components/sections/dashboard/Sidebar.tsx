@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { LogoMark } from "@/components/ui";
+import { LogoMark, Select } from "@/components/ui";
 import cn from "classnames";
 import { DashboardTab } from "@/lib/data/dashboard";
 import styles from "./Sidebar.module.scss";
@@ -15,13 +15,6 @@ interface NavItem {
   href?: string;
   green?: boolean;
 }
-
-const PRIMARY: NavItem[] = [
-  { id: "overview", label: "Overview" },
-  { id: "projects", label: "Projects" },
-  { id: "issues", label: "Issues", badge: 12 },
-  { id: "scan", label: "New scan", href: "/scan", green: true },
-];
 
 const SECONDARY: NavItem[] = [
   { id: "reports", label: "Reports" },
@@ -153,9 +146,52 @@ const ICONS: Record<DashboardTab, ReactNode> = {
 export interface SidebarProps {
   activeTab: DashboardTab;
   onTabChange(tab: DashboardTab): void;
+  /** Workspace + account identity. Defaults keep the public preview's
+   * sample persona; the real workspace passes the signed-in user's. */
+  workspaceName?: string;
+  userName?: string;
+  userInitials?: string;
+  userPlan?: string;
+  issuesBadge?: number;
+  /** Render "New scan" as an in-dashboard tab instead of a link to /scan. */
+  inlineScan?: boolean;
+  onSignOut?: () => void;
+  /** Workspace mode: project switcher that scopes the dashboard. */
+  projects?: { id: string; host: string }[];
+  pages?: { path: string; openIssues: number }[];
+  selectedProjectId?: string | null;
+  selectedPagePath?: string | null;
+  onSelectProject?: (id: string | null) => void;
+  onSelectPage?: (path: string | null) => void;
 }
 
-export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
+const ALL_PROJECTS = "__all__";
+const ALL_PAGES = "__all_pages__";
+
+export function Sidebar({
+  activeTab,
+  onTabChange,
+  workspaceName = "Acme Corp",
+  userName = "Jamie Doe",
+  userInitials = "JD",
+  userPlan = "Pro plan",
+  issuesBadge = 12,
+  inlineScan = false,
+  onSignOut,
+  projects,
+  pages,
+  selectedProjectId = null,
+  selectedPagePath = null,
+  onSelectProject,
+  onSelectPage,
+}: SidebarProps) {
+  const primary: NavItem[] = [
+    { id: "overview", label: "Overview" },
+    { id: "projects", label: "Projects" },
+    { id: "issues", label: "Issues", badge: issuesBadge },
+    { id: "scan", label: "New scan", href: inlineScan ? undefined : "/scan", green: true },
+  ];
+
   const renderNavItem = (item: NavItem) => {
     if (item.href) {
       return (
@@ -178,6 +214,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
         key={item.id}
         type="button"
         className={cn(styles.item, activeTab === item.id && styles.itemActive)}
+        style={item.green ? { color: "var(--green)" } : undefined}
         onClick={() => onTabChange(item.id)}
       >
         {ICONS[item.id]} {item.label}
@@ -194,12 +231,46 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       </Link>
 
       <div className={styles.section}>
-        <div className={styles.label}>Workspace</div>
-        <select className={styles.workspace}>
-          <option>Acme Corp</option>
-          <option>Personal</option>
-        </select>
-        {PRIMARY.map(renderNavItem)}
+        <div className={styles.label}>{projects ? "Project" : "Workspace"}</div>
+        {projects ? (
+          <div className={styles.scopeControls}>
+            <Select
+              block
+              ariaLabel="Select project"
+              value={selectedProjectId ?? ALL_PROJECTS}
+              options={[
+                { value: ALL_PROJECTS, label: "All projects" },
+                ...projects.map((p) => ({ value: p.id, label: p.host })),
+              ]}
+              onChange={(v) => onSelectProject?.(v === ALL_PROJECTS ? null : v)}
+            />
+            {selectedProjectId && pages && pages.length > 0 && (
+              <div className={styles.pageScope}>
+                <div className={styles.scopeLabel}>Page</div>
+                <Select
+                  block
+                  ariaLabel="Select page"
+                  value={selectedPagePath ?? ALL_PAGES}
+                  options={[
+                    { value: ALL_PAGES, label: "All pages" },
+                    ...pages.map((page) => ({
+                      value: page.path,
+                      label: page.path,
+                      hint: `${page.openIssues} open`,
+                    })),
+                  ]}
+                  onChange={(v) => onSelectPage?.(v === ALL_PAGES ? null : v)}
+                />
+              </div>
+            )}
+          </div>
+        ) : (
+          <select className={styles.workspace} aria-label="Workspace">
+            <option>{workspaceName}</option>
+            <option>Personal</option>
+          </select>
+        )}
+        {primary.map(renderNavItem)}
       </div>
 
       <div className={styles.section}>
@@ -209,23 +280,47 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
 
       <div className={styles.footer}>
         <div className={styles.user}>
-          <div className={styles.avatar}>JD</div>
+          <div className={styles.avatar}>{userInitials}</div>
           <div className={styles.userInfo}>
-            <div className={styles.userName}>Jamie Doe</div>
-            <div className={styles.userPlan}>Pro plan</div>
+            <div className={styles.userName}>{userName}</div>
+            <div className={styles.userPlan}>{userPlan}</div>
           </div>
-          <svg
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="var(--text-muted)"
-            strokeWidth="2"
-            strokeLinecap="round"
-            aria-hidden="true"
-          >
-            <path d="M6 9l6 6 6-6" />
-          </svg>
+          {onSignOut ? (
+            <button
+              type="button"
+              className={styles.signOut}
+              onClick={onSignOut}
+              aria-label="Sign out"
+              title="Sign out"
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
+              </svg>
+            </button>
+          ) : (
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="var(--text-muted)"
+              strokeWidth="2"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          )}
         </div>
       </div>
     </aside>
