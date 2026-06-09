@@ -12,6 +12,9 @@ interface IssueDetailProps {
   located: LocatedIssue;
   onClose: () => void;
   onStatus: (status: IssueStatus) => void;
+  canControlIssues: boolean;
+  detailsLocked: boolean;
+  onUpgrade: () => void;
 }
 
 interface HtmlToken {
@@ -260,7 +263,14 @@ const CloseIcon = () => (
   </svg>
 );
 
-export const IssueDetail = ({ located, onClose, onStatus }: IssueDetailProps) => {
+export const IssueDetail = ({
+  located,
+  onClose,
+  onStatus,
+  canControlIssues,
+  detailsLocked,
+  onUpgrade,
+}: IssueDetailProps) => {
   const { host, path, issue } = located;
   const template = getIssueTemplate(issue.templateId ?? issue.id);
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -354,109 +364,137 @@ export const IssueDetail = ({ located, onClose, onStatus }: IssueDetailProps) =>
           </div>
           <div className={styles.dialogMetaStatus}>
             <span className={styles.dialogMetaLabel}>Status</span>
-            <Select
-              size="sm"
-              value={issue.status}
-              options={STATUS_OPTIONS}
-              onChange={(v) => onStatus(v as IssueStatus)}
-              ariaLabel="Issue status"
-            />
+            {canControlIssues ? (
+              <Select
+                size="sm"
+                value={issue.status}
+                options={STATUS_OPTIONS}
+                onChange={(v) => onStatus(v as IssueStatus)}
+                ariaLabel="Issue status"
+              />
+            ) : (
+              <button type="button" className={styles.issueLockedStatus} onClick={onUpgrade}>
+                Upgrade to triage
+              </button>
+            )}
           </div>
         </div>
 
-        <div className={styles.dialogBody}>
-          <div className={styles.dialogBriefGrid}>
-            <section className={styles.dialogBriefCard}>
-              <h4 className={styles.dialogSubhead}>What happened</h4>
-              <p className={styles.dialogText}>{whatHappened}</p>
-            </section>
-
-            <section className={styles.dialogBriefCard}>
-              <h4 className={styles.dialogSubhead}>Why it matters</h4>
-              <p className={styles.dialogText}>{whyItMatters}</p>
+        {detailsLocked ? (
+          <div className={styles.dialogBody}>
+            <section className={styles.dialogLockedPanel}>
+              <span className={styles.dialogLockedKicker}>Pro details</span>
+              <h4>Unlock full issue details</h4>
+              <p>
+                Free shows the issue summary and priority details. Upgrade to view affected
+                elements, suggested fixes, repair previews, WCAG tags, and copyable code for this
+                issue.
+              </p>
+              <div className={styles.dialogLockedMeta}>
+                <span>{occurrenceCount} affected elements</span>
+                <span>{issue.rule}</span>
+                {primaryWcag && <span>{primaryWcag}</span>}
+              </div>
+              <button type="button" className={styles.dialogLockedAction} onClick={onUpgrade}>
+                Unlock all issue details
+              </button>
             </section>
           </div>
+        ) : (
+          <div className={styles.dialogBody}>
+            <div className={styles.dialogBriefGrid}>
+              <section className={styles.dialogBriefCard}>
+                <h4 className={styles.dialogSubhead}>What happened</h4>
+                <p className={styles.dialogText}>{whatHappened}</p>
+              </section>
 
-          {nodes.length > 0 && (
-            <section className={styles.dialogSectionCard}>
-              <div className={styles.dialogSectionHead}>
-                <h4 className={styles.dialogSubhead}>Where</h4>
-                <span className={styles.dialogCountTag}>
-                  {nodes.length} element{nodes.length === 1 ? "" : "s"}
-                </span>
-              </div>
-              <ul className={styles.dialogNodes}>
-                {nodes.map((node, i) => (
-                  <li key={`${node}-${i}`} className={styles.dialogNodeRow}>
-                    <span className={styles.dialogNodeIndex}>{i + 1}</span>
-                    <code className={styles.dialogNodeCode}>
-                      <CodeSnippet value={node} />
-                    </code>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
+              <section className={styles.dialogBriefCard}>
+                <h4 className={styles.dialogSubhead}>Why it matters</h4>
+                <p className={styles.dialogText}>{whyItMatters}</p>
+              </section>
+            </div>
 
-          <section className={styles.dialogFixCard}>
-            <div className={styles.dialogFixIcon} aria-hidden="true">
-              +
-            </div>
-            <div>
-              <h4 className={styles.dialogSubhead}>Suggested fix</h4>
-              <p className={styles.dialogText}>{suggestedFix}</p>
-            </div>
-          </section>
-
-          <section className={styles.dialogSectionCard}>
-            <div className={styles.dialogDiffHead}>
-              <div>
-                <h4 className={styles.dialogSubhead}>Repair preview</h4>
-                <p className={styles.dialogHelper}>
-                  Formatted preview of the failing pattern and suggested direction.
-                </p>
-              </div>
-              <CopyButton text={afterCode} label="Copy fix" />
-            </div>
-            <div className={styles.dialogDiff}>
-              <div className={styles.dialogDiffCol}>
-                <div className={styles.dialogDiffLabel} data-tone="before">
-                  <span>Before</span>
-                  <span className={styles.dialogDiffNote}>Current failing pattern</span>
-                </div>
-                <pre className={styles.dialogCode}>
-                  <code>
-                    <CodeSnippet value={beforeCode} lineNumbers />
-                  </code>
-                </pre>
-              </div>
-              <div className={styles.dialogDiffCol}>
-                <div className={styles.dialogDiffLabel} data-tone="after">
-                  <span>After</span>
-                  <span className={styles.dialogDiffNote}>Suggested direction</span>
-                </div>
-                <pre className={styles.dialogCode}>
-                  <code>
-                    <CodeSnippet value={afterCode} lineNumbers />
-                  </code>
-                </pre>
-              </div>
-            </div>
-          </section>
-
-          {wcag.length > 0 && (
-            <section className={styles.dialogSectionCard}>
-              <h4 className={styles.dialogSubhead}>WCAG success criteria</h4>
-              <div className={styles.dialogTags}>
-                {wcag.map((w) => (
-                  <span key={w} className={styles.dialogTag}>
-                    {w}
+            {nodes.length > 0 && (
+              <section className={styles.dialogSectionCard}>
+                <div className={styles.dialogSectionHead}>
+                  <h4 className={styles.dialogSubhead}>Where</h4>
+                  <span className={styles.dialogCountTag}>
+                    {nodes.length} element{nodes.length === 1 ? "" : "s"}
                   </span>
-                ))}
+                </div>
+                <ul className={styles.dialogNodes}>
+                  {nodes.map((node, i) => (
+                    <li key={`${node}-${i}`} className={styles.dialogNodeRow}>
+                      <span className={styles.dialogNodeIndex}>{i + 1}</span>
+                      <code className={styles.dialogNodeCode}>
+                        <CodeSnippet value={node} />
+                      </code>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            <section className={styles.dialogFixCard}>
+              <div className={styles.dialogFixIcon} aria-hidden="true">
+                +
+              </div>
+              <div>
+                <h4 className={styles.dialogSubhead}>Suggested fix</h4>
+                <p className={styles.dialogText}>{suggestedFix}</p>
               </div>
             </section>
-          )}
-        </div>
+
+            <section className={styles.dialogSectionCard}>
+              <div className={styles.dialogDiffHead}>
+                <div>
+                  <h4 className={styles.dialogSubhead}>Repair preview</h4>
+                  <p className={styles.dialogHelper}>
+                    Formatted preview of the failing pattern and suggested direction.
+                  </p>
+                </div>
+                <CopyButton text={afterCode} label="Copy fix" />
+              </div>
+              <div className={styles.dialogDiff}>
+                <div className={styles.dialogDiffCol}>
+                  <div className={styles.dialogDiffLabel} data-tone="before">
+                    <span>Before</span>
+                    <span className={styles.dialogDiffNote}>Current failing pattern</span>
+                  </div>
+                  <pre className={styles.dialogCode}>
+                    <code>
+                      <CodeSnippet value={beforeCode} lineNumbers />
+                    </code>
+                  </pre>
+                </div>
+                <div className={styles.dialogDiffCol}>
+                  <div className={styles.dialogDiffLabel} data-tone="after">
+                    <span>After</span>
+                    <span className={styles.dialogDiffNote}>Suggested direction</span>
+                  </div>
+                  <pre className={styles.dialogCode}>
+                    <code>
+                      <CodeSnippet value={afterCode} lineNumbers />
+                    </code>
+                  </pre>
+                </div>
+              </div>
+            </section>
+
+            {wcag.length > 0 && (
+              <section className={styles.dialogSectionCard}>
+                <h4 className={styles.dialogSubhead}>WCAG success criteria</h4>
+                <div className={styles.dialogTags}>
+                  {wcag.map((w) => (
+                    <span key={w} className={styles.dialogTag}>
+                      {w}
+                    </span>
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

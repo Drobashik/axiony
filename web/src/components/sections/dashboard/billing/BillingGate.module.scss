@@ -1,0 +1,116 @@
+.gate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 62vh;
+  gap: 12px;
+  padding: 28px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  background:
+    radial-gradient(100% 120% at 50% 0%, var(--blue-dim), transparent 58%), var(--bg-surface);
+  text-align: center;
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border: 1px solid var(--blue-border);
+  border-radius: var(--radius-lg);
+  background: var(--blue-dim);
+  color: var(--blue);
+}
+
+.kicker {
+  color: var(--blue);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.gate h2 {
+  max-width: 620px;
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.gate p {
+  max-width: 58ch;
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.features {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  max-width: 720px;
+  margin: 4px 0 6px;
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border: 1px solid var(--border-default);
+    border-radius: 99px;
+    background: var(--bg-base);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  svg {
+    color: var(--green);
+  }
+}
+
+.scannerCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 16px 18px;
+  border: 1px solid var(--blue-border);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(90% 120% at 100% 0%, var(--blue-dim), transparent 60%), var(--bg-surface);
+
+  h3 {
+    margin: 3px 0 4px;
+    color: var(--text-primary);
+    font-size: 1rem;
+  }
+
+  p {
+    max-width: 62ch;
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.84rem;
+    line-height: 1.5;
+  }
+}
+
+.scannerActions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+@include breakpoint-down(md) {
+  .scannerCard {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

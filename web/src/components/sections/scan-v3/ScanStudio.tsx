@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { Container } from "@/components/ui";
 import { ScanNav } from "@/components/layout";
 import cn from "classnames";
+import { UpgradeDialog } from "@/components/sections/dashboard/billing";
+import { useBilling } from "@/lib/billing";
+import type { BillingPlan } from "@/lib/billing";
 import { useReveal } from "@/lib/hooks/useReveal";
 import { useWorkspace } from "@/lib/workspace";
 import { ReportView } from "./components/ReportView";
@@ -22,10 +25,12 @@ export const ScanStudio = () => {
   const router = useRouter();
   const engine = useScanEngine();
   const { workspace } = useWorkspace();
+  const { billing } = useBilling();
   const [query, setQuery] = useState("");
   const [level, setLevel] = useState<WcagLevel>("AA");
   const [focusSignal, setFocusSignal] = useState(0);
   const [resetDialog, setResetDialog] = useState<"report" | "scanning" | null>(null);
+  const [upgradePlan, setUpgradePlan] = useState<Exclude<BillingPlan, "free"> | null>(null);
   const topRef = useRef<HTMLElement>(null);
 
   const busy = engine.status === "scanning";
@@ -106,6 +111,8 @@ export const ScanStudio = () => {
     scrollToTop();
     setFocusSignal((value) => value + 1);
   };
+
+  const openUpgrade = (plan: Exclude<BillingPlan, "free"> = "pro") => setUpgradePlan(plan);
 
   // The URL form lives at the top while idle, then docks below the report
   // once there's a result (so the result is what the user sees first).
@@ -203,6 +210,8 @@ export const ScanStudio = () => {
                   report={engine.report}
                   reduce={engine.reduce}
                   onRescan={rescanCurrent}
+                  freePreview={billing.plan === "free"}
+                  onUpgrade={() => openUpgrade("pro")}
                 />
               </div>
               {consoleBlock}
@@ -219,6 +228,14 @@ export const ScanStudio = () => {
           url={engine.url || engine.report?.url || query}
           onCancel={() => setResetDialog(null)}
           onConfirm={clearForNewScan}
+        />
+      )}
+
+      {upgradePlan && (
+        <UpgradeDialog
+          currentPlan={billing.plan}
+          initialPlan={upgradePlan}
+          onClose={() => setUpgradePlan(null)}
         />
       )}
     </>

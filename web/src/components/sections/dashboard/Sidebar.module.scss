@@ -77,6 +77,54 @@
   text-transform: uppercase;
 }
 
+.upgradeCard {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 11px;
+  margin-bottom: 8px;
+  border: 1px solid var(--blue-border);
+  border-radius: var(--radius-md);
+  background:
+    radial-gradient(100% 140% at 100% 0%, var(--blue-dim), transparent 58%), var(--bg-elevated);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--transition),
+    background var(--transition);
+
+  &:hover {
+    border-color: var(--blue);
+    background: var(--bg-elevated);
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+.upgradeKicker {
+  color: var(--blue);
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.upgradeTitle {
+  color: var(--text-primary);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.upgradeText {
+  color: var(--text-muted);
+  font-size: 0.74rem;
+}
+
 .item {
   display: flex;
   align-items: center;

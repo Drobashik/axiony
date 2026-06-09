@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
+import { entitlementsForPlan, readBilling, recordScanUsage } from "@/lib/billing";
+import type { BillingState } from "@/lib/billing";
 import type { Severity } from "@/types";
 import { countsFromIssues, initialsFromName, scoreFromIssues } from "./derive";
 import type {
@@ -32,6 +34,16 @@ const VERSION = 3;
 const isBrowser = (): boolean => typeof window !== "undefined";
 const now = (): string => new Date().toISOString();
 const randomId = (): string => Math.random().toString(36).slice(2, 9);
+
+const canSavePendingScan = (
+  workspace: Workspace,
+  pending: PendingScan,
+  billing: BillingState = readBilling(),
+): boolean => {
+  const existingProject = workspace.projects.some((project) => project.host === pending.host);
+  if (existingProject) return true;
+  return workspace.projects.length < entitlementsForPlan(billing.plan).domainLimit;
+};
 
 function safeParse<T>(raw: string | null): T | null {
   if (!raw) return null;
@@ -276,6 +288,8 @@ export function completeAuth(identity: AuthIdentity): Workspace {
 
   const pending = readPendingScan();
   const existing = readWorkspace();
+  const billing = readBilling();
+  if (pending) recordScanUsage(pending.host);
 
   if (!existing) {
     const ws = createWorkspace(account, pending);
@@ -284,10 +298,10 @@ export function completeAuth(identity: AuthIdentity): Workspace {
   }
 
   existing.account = { ...existing.account, ...account, createdAt: existing.account.createdAt };
-  if (pending) {
+  if (pending && canSavePendingScan(existing, pending, billing)) {
     applyScan(existing, pending);
-    clearPendingScan();
   }
+  if (pending) clearPendingScan();
   return writeWorkspace(existing);
 }
 
@@ -295,7 +309,26 @@ export function completeAuth(identity: AuthIdentity): Workspace {
 export function saveScan(pending: PendingScan): Workspace | null {
   const ws = readWorkspace();
   if (!ws) return null;
+  if (!canSavePendingScan(ws, pending)) return null;
   applyScan(ws, pending);
+  return writeWorkspace(ws);
+}
+
+export function removeProject(projectId: string): Workspace | null {
+  const ws = readWorkspace();
+  if (!ws) return null;
+
+  const nextProjects = ws.projects.filter((project) => project.id !== projectId);
+  if (nextProjects.length === ws.projects.length) return ws;
+
+  ws.projects = nextProjects;
+  if (
+    ws.onboarding.justCreated?.kind === "project" &&
+    !nextProjects.some((project) => project.host === ws.onboarding.justCreated?.host)
+  ) {
+    ws.onboarding.justCreated = null;
+  }
+
   return writeWorkspace(ws);
 }
 

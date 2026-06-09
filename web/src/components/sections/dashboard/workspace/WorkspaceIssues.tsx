@@ -12,6 +12,7 @@ import { IssueDetail } from "./IssueDetail";
 import styles from "./Workspace.module.scss";
 
 const pageLabel = (host: string, path: string) => `${host}${path === "/" ? "" : path}`;
+const FREE_DETAIL_LIMIT = 6;
 
 type Filter = "open" | "resolved" | "all";
 
@@ -29,6 +30,36 @@ interface DetailKey {
   path: string;
   issueId: string;
 }
+
+type LocatedIssues = ReturnType<typeof aggregateOpenIssues>;
+
+const issueKey = (host: string, path: string, issueId: string) => `${host}::${path}::${issueId}`;
+
+const freeDetailKeys = (located: LocatedIssues): Set<string> => {
+  const selected: LocatedIssues = [];
+  const selectedKeys = new Set<string>();
+
+  for (const severity of ["critical", "serious"] as const) {
+    for (const item of located.filter(({ issue }) => issue.severity === severity).slice(0, 3)) {
+      const key = issueKey(item.host, item.path, item.issue.id);
+      if (selectedKeys.has(key)) continue;
+      selected.push(item);
+      selectedKeys.add(key);
+    }
+  }
+
+  if (selected.length < FREE_DETAIL_LIMIT) {
+    for (const item of located) {
+      const key = issueKey(item.host, item.path, item.issue.id);
+      if (selectedKeys.has(key)) continue;
+      selected.push(item);
+      selectedKeys.add(key);
+      if (selected.length >= FREE_DETAIL_LIMIT) break;
+    }
+  }
+
+  return selectedKeys;
+};
 
 const OpenIcon = () => (
   <svg
@@ -62,12 +93,23 @@ const SearchIcon = () => (
   </svg>
 );
 
-export const WorkspaceIssues = ({ workspace }: { workspace: Workspace }) => {
+interface WorkspaceIssuesProps {
+  workspace: Workspace;
+  canControlIssues: boolean;
+  onUpgrade: (plan?: "pro" | "team") => void;
+}
+
+export const WorkspaceIssues = ({
+  workspace,
+  canControlIssues,
+  onUpgrade,
+}: WorkspaceIssuesProps) => {
   const issues = aggregateOpenIssues(workspace);
   const [filter, setFilter] = useState<Filter>("open");
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>("all");
   const [search, setSearch] = useState("");
   const [detailKey, setDetailKey] = useState<DetailKey | null>(null);
+  const unlockedDetailKeys = canControlIssues ? null : freeDetailKeys(issues);
 
   const statusFiltered = issues.filter(({ issue }) => {
     if (filter === "open" && (issue.status === "resolved" || issue.status === "ignored")) {
@@ -85,6 +127,9 @@ export const WorkspaceIssues = ({ workspace }: { workspace: Workspace }) => {
 
     const project = pageLabel(host, path);
     const status = statusMeta(issue.status).label;
+    const detailsLocked = Boolean(
+      unlockedDetailKeys && !unlockedDetailKeys.has(issueKey(host, path, issue.id)),
+    );
     const haystack = [
       issue.title,
       issue.rule,
@@ -93,7 +138,7 @@ export const WorkspaceIssues = ({ workspace }: { workspace: Workspace }) => {
       status,
       isRegression ? "new regression" : "",
       ...(issue.wcag ?? []),
-      ...(issue.nodes ?? []),
+      ...(detailsLocked ? [] : (issue.nodes ?? [])),
     ]
       .join(" ")
       .toLowerCase();
@@ -108,8 +153,10 @@ export const WorkspaceIssues = ({ workspace }: { workspace: Workspace }) => {
         l.host === detailKey.host && l.path === detailKey.path && l.issue.id === detailKey.issueId,
     );
 
-  const changeStatus = (host: string, path: string, issueId: string, status: IssueStatus) =>
+  const changeStatus = (host: string, path: string, issueId: string, status: IssueStatus) => {
+    if (!canControlIssues) return;
     setIssueStatus(host, path, issueId, status);
+  };
 
   return (
     <div className={styles.tabWrap}>
@@ -201,6 +248,9 @@ export const WorkspaceIssues = ({ workspace }: { workspace: Workspace }) => {
             {filtered.map(({ host, path, issue, isRegression }) => {
               const project = pageLabel(host, path);
               const assignedToCurrentUser = issue.status === "in-progress";
+              const detailsLocked = Boolean(
+                unlockedDetailKeys && !unlockedDetailKeys.has(issueKey(host, path, issue.id)),
+              );
 
               return (
                 <li key={`${host}${path}-${issue.id}`} className={styles.issueTableRow}>
@@ -221,6 +271,9 @@ export const WorkspaceIssues = ({ workspace }: { workspace: Workspace }) => {
                       <span className={styles.issueTableTitleLine}>
                         <span className={styles.issueTableTitle}>{issue.title}</span>
                         {isRegression && <span className={styles.newPill}>New</span>}
+                        {detailsLocked && (
+                          <span className={styles.issueProDetailsPill}>Pro details</span>
+                        )}
                       </span>
                       <span className={styles.issueTableRule}>
                         {issue.rule} · {issue.count} occurrence{issue.count === 1 ? "" : "s"}
@@ -239,14 +292,24 @@ export const WorkspaceIssues = ({ workspace }: { workspace: Workspace }) => {
                   </div>
 
                   <div className={styles.issueStatusCell}>
-                    <Select
-                      size="sm"
-                      align="end"
-                      value={issue.status}
-                      options={STATUS_OPTIONS}
-                      ariaLabel={`Status for ${issue.title}`}
-                      onChange={(v) => changeStatus(host, path, issue.id, v as IssueStatus)}
-                    />
+                    {canControlIssues ? (
+                      <Select
+                        size="sm"
+                        align="end"
+                        value={issue.status}
+                        options={STATUS_OPTIONS}
+                        ariaLabel={`Status for ${issue.title}`}
+                        onChange={(v) => changeStatus(host, path, issue.id, v as IssueStatus)}
+                      />
+                    ) : (
+                      <button
+                        type="button"
+                        className={styles.issueLockedStatus}
+                        onClick={() => onUpgrade("pro")}
+                      >
+                        Upgrade to triage
+                      </button>
+                    )}
                   </div>
 
                   <button
@@ -271,6 +334,12 @@ export const WorkspaceIssues = ({ workspace }: { workspace: Workspace }) => {
           onStatus={(status) =>
             changeStatus(detailLoc.host, detailLoc.path, detailLoc.issue.id, status)
           }
+          canControlIssues={canControlIssues}
+          detailsLocked={Boolean(
+            unlockedDetailKeys &&
+            !unlockedDetailKeys.has(issueKey(detailLoc.host, detailLoc.path, detailLoc.issue.id)),
+          )}
+          onUpgrade={() => onUpgrade("pro")}
         />
       )}
     </div>

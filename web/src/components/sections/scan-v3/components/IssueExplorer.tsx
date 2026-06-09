@@ -13,6 +13,9 @@ interface IssueExplorerProps {
   counts: SeverityCounts;
   filter: FilterValue;
   onFilter: (filter: FilterValue) => void;
+  previewIssueIds?: string[];
+  lockedIssueCount?: number;
+  onUpgrade?: () => void;
 }
 
 const FILTERS: ReadonlyArray<{ id: FilterValue; label: string }> = [
@@ -26,27 +29,40 @@ const SORTS: ReadonlyArray<{ id: SortValue; label: string }> = [
   { id: "occurrences", label: "Sort: Occurrences" },
 ];
 
-export const IssueExplorer = ({ issues, counts, filter, onFilter }: IssueExplorerProps) => {
+export const IssueExplorer = ({
+  issues,
+  counts,
+  filter,
+  onFilter,
+  previewIssueIds,
+  lockedIssueCount = 0,
+  onUpgrade,
+}: IssueExplorerProps) => {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortValue>("severity");
   const [openIds, setOpenIds] = useState<Set<string>>(new Set());
+  const previewSet = useMemo(
+    () => (previewIssueIds ? new Set(previewIssueIds) : null),
+    [previewIssueIds],
+  );
 
   const visible = useMemo(() => {
     const q = search.trim().toLowerCase();
     const matched = issues.filter((issue) => {
       if (filter !== "all" && issue.severity !== filter) return false;
       if (!q) return true;
-      return (
-        issue.title.toLowerCase().includes(q) ||
-        issue.rule.toLowerCase().includes(q) ||
-        issue.description.toLowerCase().includes(q) ||
-        issue.fix.toLowerCase().includes(q) ||
-        issue.wcag.some((tag) => tag.toLowerCase().includes(q)) ||
-        issue.nodes.some((node) => node.toLowerCase().includes(q))
-      );
+      const locked = previewSet ? !previewSet.has(issue.id) : false;
+      const searchable = [
+        issue.title,
+        issue.rule,
+        issue.description,
+        ...issue.wcag,
+        ...(locked ? [] : [issue.fix, ...issue.nodes]),
+      ];
+      return searchable.filter(Boolean).join(" ").toLowerCase().includes(q);
     });
     return sortIssues(matched, sort);
-  }, [issues, filter, search, sort]);
+  }, [issues, filter, previewSet, search, sort]);
 
   const filterCount = (id: FilterValue): number => (id === "all" ? issues.length : counts[id]);
 
@@ -115,6 +131,24 @@ export const IssueExplorer = ({ issues, counts, filter, onFilter }: IssueExplore
         ))}
       </div>
 
+      {previewSet && lockedIssueCount > 0 && (
+        <div className={styles.freePreviewNotice}>
+          <div>
+            <span className={styles.freePreviewKicker}>Free scan preview</span>
+            <p>
+              Full score, severity counts, and issue list are visible. Detailed affected elements,
+              repair previews, and copyable fixes are unlocked for {previewSet.size} priority
+              issues.
+            </p>
+          </div>
+          {onUpgrade && (
+            <button type="button" className={styles.freePreviewAction} onClick={onUpgrade}>
+              Unlock all details
+            </button>
+          )}
+        </div>
+      )}
+
       <div className={styles.issueList}>
         {visible.length === 0 ? (
           <div className={styles.emptyState}>
@@ -130,6 +164,8 @@ export const IssueExplorer = ({ issues, counts, filter, onFilter }: IssueExplore
               issue={issue}
               open={openIds.has(issue.id)}
               onToggle={toggleOne}
+              locked={previewSet ? !previewSet.has(issue.id) : false}
+              onUpgrade={onUpgrade}
             />
           ))
         )}

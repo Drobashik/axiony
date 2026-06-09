@@ -141,10 +141,12 @@ export const WorkspaceOverview = ({ workspace, onTab }: WorkspaceOverviewProps) 
               <span className={styles.headRingSub}>across {summary.pageCount} pages</span>
             </div>
           </div>
-          <Button size="md" onClick={() => onTab("scan")}>
-            <Icon name="scan" size={15} />
-            Run a scan
-          </Button>
+          <div className={styles.headActions}>
+            <Button size="md" variant="secondary" onClick={() => onTab("projects")}>
+              <Icon name="globe" size={15} />
+              Review projects
+            </Button>
+          </div>
         </div>
       </section>
 

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui";
+import type { BillingPlan } from "@/lib/billing";
 import { DashboardTab } from "@/lib/data/dashboard";
 import styles from "./Topbar.module.scss";
 
@@ -7,6 +8,9 @@ export interface TopbarProps {
   activeTab: DashboardTab;
   /** In-dashboard scan → switch to the scan tab instead of linking to /scan. */
   onNewScan?: () => void;
+  onHome?: () => void;
+  billingPlan?: BillingPlan;
+  onUpgrade?: (plan?: Exclude<BillingPlan, "free">) => void;
 }
 
 const SCAN_ICON = (
@@ -25,16 +29,34 @@ const SCAN_ICON = (
   </svg>
 );
 
-export function Topbar({ activeTab, onNewScan }: TopbarProps) {
+export function Topbar({ activeTab, onNewScan, onHome, billingPlan, onUpgrade }: TopbarProps) {
   return (
     <div className={styles.topbar}>
       <nav className={styles.breadcrumb} aria-label="Breadcrumb">
-        <Link href="/">Axiony</Link>
+        <Link
+          href="/"
+          onClick={(event) => {
+            if (!onHome) return;
+            event.preventDefault();
+            onHome();
+          }}
+        >
+          Axiony
+        </Link>
         <span className={styles.sep}>/</span>
         <span className={styles.current}>{activeTab}</span>
       </nav>
 
       <div className={styles.actions}>
+        {billingPlan && billingPlan !== "team" && onUpgrade && (
+          <button
+            type="button"
+            className={styles.upgrade}
+            onClick={() => onUpgrade(billingPlan === "free" ? "pro" : "team")}
+          >
+            {billingPlan === "free" ? "Upgrade" : "Team upgrade"}
+          </button>
+        )}
         <button type="button" className={styles.notif} aria-label="Notifications">
           <svg
             width="14"

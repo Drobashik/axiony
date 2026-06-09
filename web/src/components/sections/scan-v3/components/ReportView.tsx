@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui";
-import { SEVERITY_LABEL, SEVERITY_ORDER, scoreGrade } from "@/lib/scan/issues";
+import { SEVERITY_LABEL, SEVERITY_ORDER, scoreGrade, sortIssues } from "@/lib/scan/issues";
 import type { FilterValue } from "@/lib/scan/issues";
 import type { ScanReport } from "../types";
 import { BaselineCallout } from "./BaselineCallout";
@@ -21,7 +21,29 @@ interface ReportViewProps {
   /** In the dashboard the scan is auto-saved, so the in-report "save
    * baseline" callout is hidden (the dashboard shows its own confirmation). */
   embedded?: boolean;
+  freePreview?: boolean;
+  onUpgrade?: () => void;
 }
+
+const FREE_DETAIL_LIMIT = 6;
+
+const freePreviewIssueIds = (report: ScanReport): string[] => {
+  const critical = report.issues.filter((issue) => issue.severity === "critical").slice(0, 3);
+  const serious = report.issues.filter((issue) => issue.severity === "serious").slice(0, 3);
+  const selected = [...critical, ...serious];
+  const selectedIds = new Set(selected.map((issue) => issue.id));
+
+  if (selected.length < FREE_DETAIL_LIMIT) {
+    for (const issue of sortIssues(report.issues, "severity")) {
+      if (selectedIds.has(issue.id)) continue;
+      selected.push(issue);
+      selectedIds.add(issue.id);
+      if (selected.length >= FREE_DETAIL_LIMIT) break;
+    }
+  }
+
+  return selected.map((issue) => issue.id);
+};
 
 const buildSummary = (report: ScanReport): string => {
   const grade = scoreGrade(report.score);
@@ -34,10 +56,24 @@ const buildSummary = (report: ScanReport): string => {
   return lines.join("\n");
 };
 
-export const ReportView = ({ report, reduce, onRescan, embedded }: ReportViewProps) => {
+export const ReportView = ({
+  report,
+  reduce,
+  onRescan,
+  embedded,
+  freePreview,
+  onUpgrade,
+}: ReportViewProps) => {
   const [filter, setFilter] = useState<FilterValue>("all");
 
   const total = report.issues.length;
+  const previewIssueIds = useMemo(
+    () => (freePreview ? freePreviewIssueIds(report) : undefined),
+    [freePreview, report],
+  );
+  const lockedIssueCount = previewIssueIds
+    ? Math.max(0, report.issues.length - previewIssueIds.length)
+    : 0;
 
   const exportJson = () => {
     if (typeof window === "undefined") return;
@@ -103,10 +139,17 @@ export const ReportView = ({ report, reduce, onRescan, embedded }: ReportViewPro
         </div>
 
         <div className={styles.reportActions}>
-          <Button variant="secondary" size="sm" onClick={exportJson}>
-            <DownloadIcon size={14} />
-            Export JSON
-          </Button>
+          {freePreview && onUpgrade ? (
+            <Button variant="secondary" size="sm" onClick={onUpgrade}>
+              <DownloadIcon size={14} />
+              Unlock export
+            </Button>
+          ) : (
+            <Button variant="secondary" size="sm" onClick={exportJson}>
+              <DownloadIcon size={14} />
+              Export JSON
+            </Button>
+          )}
           <CopyButton text={buildSummary(report)} label="Copy summary" />
           <Button variant="ghost" size="sm" onClick={onRescan}>
             <RefreshIcon size={14} />
@@ -127,6 +170,9 @@ export const ReportView = ({ report, reduce, onRescan, embedded }: ReportViewPro
         counts={report.counts}
         filter={filter}
         onFilter={setFilter}
+        previewIssueIds={previewIssueIds}
+        lockedIssueCount={lockedIssueCount}
+        onUpgrade={onUpgrade}
       />
 
       {!embedded && <BaselineCallout report={report} />}
