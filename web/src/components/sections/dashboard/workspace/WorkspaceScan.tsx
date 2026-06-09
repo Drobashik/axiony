@@ -2,12 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Button, Icon } from "@/components/ui";
-import { ReportView } from "@/components/sections/scan-v3/components/ReportView";
-import { ScanStage } from "@/components/sections/scan-v3/components/ScanStage";
-import { UrlConsole } from "@/components/sections/scan-v3/components/UrlConsole";
-import { RefreshIcon } from "@/components/sections/scan-v3/components/icons";
-import { useScanEngine } from "@/components/sections/scan-v3/hooks/useScanEngine";
-import type { WcagLevel } from "@/components/sections/scan-v3/types";
+import { ReportView } from "@/components/sections/scan/components/ReportView";
+import { ScanStage } from "@/components/sections/scan/components/ScanStage";
+import { UrlConsole } from "@/components/sections/scan/components/UrlConsole";
+import { RefreshIcon } from "@/components/sections/scan/components/icons";
+import { useScanEngine } from "@/components/sections/scan/hooks/useScanEngine";
+import type { WcagLevel } from "@/components/sections/scan/types";
 import {
   canManageIssues,
   entitlementsForPlan,
@@ -21,7 +21,7 @@ import { hostFromUrl, pageLabel, pathFromUrl, pendingFromReport, saveScan } from
 import type { Workspace } from "@/lib/workspace";
 import type { DashboardTab } from "@/lib/data/dashboard";
 import { ScannerUpgradeCard } from "../billing";
-import scanStyles from "@/components/sections/scan-v3/ScanStudio.module.scss";
+import scanStyles from "@/components/sections/scan/ScanStudio.module.scss";
 import styles from "./Workspace.module.scss";
 
 interface WorkspaceScanProps {

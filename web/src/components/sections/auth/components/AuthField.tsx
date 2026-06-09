@@ -3,8 +3,8 @@
 import { useId, useState } from "react";
 import type { InputHTMLAttributes, ReactNode } from "react";
 import cn from "classnames";
+import styles from "../screen/AuthScreen.module.scss";
 import { AlertIcon, EyeIcon, EyeOffIcon } from "./icons";
-import styles from "./AuthScreen.module.scss";
 
 interface AuthFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "id" | "className"> {
   label: string;

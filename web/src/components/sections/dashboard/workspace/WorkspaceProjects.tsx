@@ -11,8 +11,8 @@ import {
   runFollowupScan,
 } from "@/lib/workspace";
 import type { Project, Workspace } from "@/lib/workspace";
-import { RefreshIcon } from "@/components/sections/scan-v3/components/icons";
-import { ScoreRing, colorForScore } from "../ScoreRing";
+import { RefreshIcon } from "@/components/sections/scan/components/icons";
+import { ScoreRing, colorForScore } from "../shared/ScoreRing";
 import styles from "./Workspace.module.scss";
 
 const ProjectCard = ({

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { colorForScore } from "../ScoreRing";
+import { colorForScore } from "../shared/ScoreRing";
 import styles from "./Workspace.module.scss";
 
 interface ScoreTrendProps {

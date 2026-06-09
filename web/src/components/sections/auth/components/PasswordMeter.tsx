@@ -1,8 +1,8 @@
 "use client";
 
 import cn from "classnames";
-import { getPasswordStrength } from "./validation";
-import styles from "./AuthScreen.module.scss";
+import { getPasswordStrength } from "../lib/validation";
+import styles from "../screen/AuthScreen.module.scss";
 
 const SEGMENTS = [1, 2, 3, 4];
 

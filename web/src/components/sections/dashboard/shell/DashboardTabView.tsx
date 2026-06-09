@@ -1,11 +1,11 @@
 "use client";
 
 import type { DashboardTab } from "@/lib/data/dashboard";
-import { ComingSoon } from "./ComingSoon";
-import { IssuesTab } from "./IssuesTab";
-import { OverviewTab } from "./OverviewTab";
-import { ProjectsTab } from "./ProjectsTab";
-import { WorkspaceContent } from "./workspace";
+import { IssuesTab } from "../preview/IssuesTab";
+import { OverviewTab } from "../preview/OverviewTab";
+import { ProjectsTab } from "../preview/ProjectsTab";
+import { ComingSoon } from "../shared/ComingSoon";
+import { WorkspaceContent } from "../workspace";
 import { useDashboardWorkspace } from "./dashboard-workspace-context";
 
 /**

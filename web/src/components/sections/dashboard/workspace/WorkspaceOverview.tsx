@@ -14,7 +14,7 @@ import {
   workspaceSummary,
 } from "@/lib/workspace";
 import type { JustCreated, OnboardingStepId, Workspace } from "@/lib/workspace";
-import { ScoreRing, colorForScore } from "../ScoreRing";
+import { ScoreRing, colorForScore } from "../shared/ScoreRing";
 import { ScoreTrend } from "./ScoreTrend";
 import styles from "./Workspace.module.scss";
 

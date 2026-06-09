@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { Badge, Select } from "@/components/ui";
 import { SEVERITY_LABEL, getIssueTemplate } from "@/lib/scan/issues";
 import { formatHtmlSnippet, looksLikeHtml, tokenizeHtmlLine } from "@/lib/scan/html-snippet";
-import { CopyButton } from "@/components/sections/scan-v3/components/CopyButton";
+import { CopyButton } from "@/components/sections/scan/components/CopyButton";
 import type { IssueStatus, LocatedIssue } from "@/lib/workspace";
 import { pageLabel } from "@/lib/workspace";
 import { STATUS_OPTIONS } from "./issue-status";

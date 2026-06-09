@@ -3,10 +3,10 @@
 import { SEVERITY_COLOR, SEVERITY_LABEL, SEVERITY_ORDER } from "@/lib/scan/issues";
 import { usePendingScan } from "@/lib/workspace";
 import type { PendingScan } from "@/lib/workspace";
-import { AUTH_COPY } from "./data";
-import type { AuthMode, AuthValuePoint } from "./types";
+import { AUTH_COPY } from "../lib/data";
+import type { AuthMode, AuthValuePoint } from "../lib/types";
+import styles from "../screen/AuthScreen.module.scss";
 import { BaselineIcon, CheckIcon, GitIcon, SparkIcon, TeamIcon, TrendIcon } from "./icons";
-import styles from "./AuthScreen.module.scss";
 
 const POINT_ICON: Record<AuthValuePoint["icon"], typeof BaselineIcon> = {
   baseline: BaselineIcon,

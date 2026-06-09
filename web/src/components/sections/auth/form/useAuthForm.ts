@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { completeAuth } from "@/lib/workspace";
-import { getPasswordStrength, isEmail } from "./validation";
-import type { AuthFieldName, AuthMode, AuthStatus, AuthView, OAuthProvider } from "./types";
+import { getPasswordStrength, isEmail } from "../lib/validation";
+import type { AuthFieldName, AuthMode, AuthStatus, AuthView, OAuthProvider } from "../lib/types";
 
 // ── Mock timing + destination ────────────────────────────────────────
 const SUBMIT_MS = 1300;
