@@ -16,22 +16,6 @@ import styles from "./Workspace.module.scss";
 
 const COMING_SOON: DashboardTab[] = ["reports", "alerts", "team", "settings"];
 
-const PLACEHOLDER_ICON = (
-  <svg
-    width="22"
-    height="22"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    aria-hidden="true"
-  >
-    <rect x="4" y="4" width="16" height="16" rx="2" />
-    <path d="M4 9h16M9 4v16" />
-  </svg>
-);
-
 // Per-tab "scan first" empty states for a brand-new workspace.
 const EMPTY_COPY: Partial<Record<DashboardTab, { title: string; text: string }>> = {
   overview: {
@@ -65,27 +49,114 @@ const ScanEmpty = ({ tab, onScan }: { tab: DashboardTab; onScan: () => void }) =
   );
 };
 
-interface WorkspaceContentProps {
-  workspace: Workspace;
-  selectedProjectId: string | null;
-  selectedPagePath: string | null;
-  tab: DashboardTab;
-  onTab: (tab: DashboardTab) => void;
-  onSelectProject: (id: string | null) => void;
-  onSelectPage: (path: string | null) => void;
-  billing: BillingState;
-  onUpgrade: (plan?: Exclude<BillingPlan, "free">) => void;
-  setNavigationGuard: (guard: (() => boolean) | null) => void;
-}
-
-interface FeaturePageProps {
+interface FeatureCard {
+  icon: IconName;
   title: string;
-  kicker: string;
   text: string;
-  cards: Array<{ icon: IconName; title: string; text: string }>;
 }
 
-const FeaturePage = ({ title, kicker, text, cards }: FeaturePageProps) => (
+interface GatedTabConfig {
+  requiredPlan: Exclude<BillingPlan, "free">;
+  gate: { title: string; text: string; features: string[] };
+  unlocked: { kicker: string; title: string; text: string; cards: FeatureCard[] };
+}
+
+// Mock product tabs behind a plan: below the plan they sell the upgrade,
+// at/above it they show what the unlocked feature will look like.
+const GATED_TABS: Partial<Record<DashboardTab, GatedTabConfig>> = {
+  reports: {
+    requiredPlan: "pro",
+    gate: {
+      title: "Export polished accessibility reports",
+      text: "Turn scans into stakeholder-ready reports with history, issue details, and shareable summaries.",
+      features: ["Exportable reports", "Full scan history", "Comparison snapshots"],
+    },
+    unlocked: {
+      kicker: "Pro reports",
+      title: "Reports are unlocked",
+      text: "Generate mock report packs from your saved projects, scan history, and tracked issues.",
+      cards: [
+        {
+          icon: "report",
+          title: "Executive summary",
+          text: "Score, debt, regressions, and trend context ready for stakeholders.",
+        },
+        {
+          icon: "bolt",
+          title: "Issue appendix",
+          text: "Every issue keeps its affected elements, suggested fix, and WCAG reference.",
+        },
+        {
+          icon: "ci",
+          title: "Before / after",
+          text: "Compare follow-up scans to baseline without losing triage state.",
+        },
+      ],
+    },
+  },
+  alerts: {
+    requiredPlan: "pro",
+    gate: {
+      title: "Catch regressions with alerts",
+      text: "Pro unlocks scheduled scans and email alerts when new accessibility issues appear.",
+      features: ["Scheduled scans", "Email alerts", "Regression-only notifications"],
+    },
+    unlocked: {
+      kicker: "Pro alerts",
+      title: "Alerts are unlocked",
+      text: "Mock alert rules show how Axiony will notify your team when a page regresses.",
+      cards: [
+        {
+          icon: "scan",
+          title: "Daily scheduled scan",
+          text: "Run every morning across tracked project pages.",
+        },
+        {
+          icon: "bolt",
+          title: "Regression alerts",
+          text: "Only notify when a new issue appears outside the baseline.",
+        },
+        {
+          icon: "report",
+          title: "Weekly digest",
+          text: "Summarize score movement, resolved issues, and open debt.",
+        },
+      ],
+    },
+  },
+  team: {
+    requiredPlan: "team",
+    gate: {
+      title: "Bring the team into accessibility",
+      text: "Team unlocks collaboration, ownership, integrations, and review workflows for product and engineering.",
+      features: ["Members and roles", "PR/MR comments", "Shared baselines", "Slack alerts"],
+    },
+    unlocked: {
+      kicker: "Team workspace",
+      title: "Team collaboration is unlocked",
+      text: "Mock team controls show how shared ownership, review comments, and routing will work.",
+      cards: [
+        {
+          icon: "team",
+          title: "Members and roles",
+          text: "Invite product, QA, design, and engineering to one workspace.",
+        },
+        {
+          icon: "ci",
+          title: "PR checks",
+          text: "Route new issues into review without blocking known baseline debt.",
+        },
+        {
+          icon: "bolt",
+          title: "Ownership routing",
+          text: "Assign issues by project, page, severity, or code owner.",
+        },
+      ],
+    },
+  },
+};
+
+const FeaturePage = ({ kicker, title, text, cards }: GatedTabConfig["unlocked"]) => (
   <div className={styles.featurePage}>
     <header className={styles.featureHero}>
       <span className={styles.scanKicker}>{kicker}</span>
@@ -105,6 +176,19 @@ const FeaturePage = ({ title, kicker, text, cards }: FeaturePageProps) => (
     </div>
   </div>
 );
+
+interface WorkspaceContentProps {
+  workspace: Workspace;
+  selectedProjectId: string | null;
+  selectedPagePath: string | null;
+  tab: DashboardTab;
+  onTab: (tab: DashboardTab) => void;
+  onSelectProject: (id: string | null) => void;
+  onSelectPage: (path: string | null) => void;
+  billing: BillingState;
+  onUpgrade: (plan?: Exclude<BillingPlan, "free">) => void;
+  setNavigationGuard: (guard: (() => boolean) | null) => void;
+}
 
 export const WorkspaceContent = ({
   workspace,
@@ -168,123 +252,20 @@ export const WorkspaceContent = ({
         onUpgrade={onUpgrade}
       />
     );
-  if (tab === "reports") {
-    if (!canAccessPlan(billing.plan, "pro")) {
-      return (
-        <BillingGate
-          requiredPlan="pro"
-          title="Export polished accessibility reports"
-          text="Turn scans into stakeholder-ready reports with history, issue details, and shareable summaries."
-          features={["Exportable reports", "Full scan history", "Comparison snapshots"]}
-          onUpgrade={onUpgrade}
-        />
-      );
-    }
-    return (
-      <FeaturePage
-        kicker="Pro reports"
-        title="Reports are unlocked"
-        text="Generate mock report packs from your saved projects, scan history, and tracked issues."
-        cards={[
-          {
-            icon: "report",
-            title: "Executive summary",
-            text: "Score, debt, regressions, and trend context ready for stakeholders.",
-          },
-          {
-            icon: "bolt",
-            title: "Issue appendix",
-            text: "Every issue keeps its affected elements, suggested fix, and WCAG reference.",
-          },
-          {
-            icon: "ci",
-            title: "Before / after",
-            text: "Compare follow-up scans to baseline without losing triage state.",
-          },
-        ]}
-      />
-    );
-  }
 
-  if (tab === "alerts") {
-    if (!canAccessPlan(billing.plan, "pro")) {
+  const gated = GATED_TABS[tab];
+  if (gated) {
+    if (!canAccessPlan(billing.plan, gated.requiredPlan)) {
       return (
-        <BillingGate
-          requiredPlan="pro"
-          title="Catch regressions with alerts"
-          text="Pro unlocks scheduled scans and email alerts when new accessibility issues appear."
-          features={["Scheduled scans", "Email alerts", "Regression-only notifications"]}
-          onUpgrade={onUpgrade}
-        />
+        <BillingGate requiredPlan={gated.requiredPlan} {...gated.gate} onUpgrade={onUpgrade} />
       );
     }
-    return (
-      <FeaturePage
-        kicker="Pro alerts"
-        title="Alerts are unlocked"
-        text="Mock alert rules show how Axiony will notify your team when a page regresses."
-        cards={[
-          {
-            icon: "scan",
-            title: "Daily scheduled scan",
-            text: "Run every morning across tracked project pages.",
-          },
-          {
-            icon: "bolt",
-            title: "Regression alerts",
-            text: "Only notify when a new issue appears outside the baseline.",
-          },
-          {
-            icon: "report",
-            title: "Weekly digest",
-            text: "Summarize score movement, resolved issues, and open debt.",
-          },
-        ]}
-      />
-    );
-  }
-
-  if (tab === "team") {
-    if (!canAccessPlan(billing.plan, "team")) {
-      return (
-        <BillingGate
-          requiredPlan="team"
-          title="Bring the team into accessibility"
-          text="Team unlocks collaboration, ownership, integrations, and review workflows for product and engineering."
-          features={["Members and roles", "PR/MR comments", "Shared baselines", "Slack alerts"]}
-          onUpgrade={onUpgrade}
-        />
-      );
-    }
-    return (
-      <FeaturePage
-        kicker="Team workspace"
-        title="Team collaboration is unlocked"
-        text="Mock team controls show how shared ownership, review comments, and routing will work."
-        cards={[
-          {
-            icon: "team",
-            title: "Members and roles",
-            text: "Invite product, QA, design, and engineering to one workspace.",
-          },
-          {
-            icon: "ci",
-            title: "PR checks",
-            text: "Route new issues into review without blocking known baseline debt.",
-          },
-          {
-            icon: "bolt",
-            title: "Ownership routing",
-            text: "Assign issues by project, page, severity, or code owner.",
-          },
-        ]}
-      />
-    );
+    return <FeaturePage {...gated.unlocked} />;
   }
 
   if (tab === "settings")
     return <BillingSettings billing={billing} workspace={workspace} onUpgrade={onUpgrade} />;
-  if (COMING_SOON.includes(tab)) return <ComingSoon title={tab} icon={PLACEHOLDER_ICON} />;
+  if (COMING_SOON.includes(tab)) return <ComingSoon title={tab} />;
 
   return <WorkspaceOverview workspace={scoped} onTab={onTab} />;
 };

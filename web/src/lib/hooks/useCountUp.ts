@@ -1,31 +1,50 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { usePrefersReducedMotion } from "@/lib/hooks/usePrefersReducedMotion";
 
-/**
- * Eases a numeric counter from 0 to `target` over `duration` ms.
- * Used for stat tiles in the dashboard so totals animate in smoothly.
- */
-export function useCountUp(target: number, duration = 900, ready = true): number {
-  const [value, setValue] = useState(0);
+// Animates a number from 0 → target with an ease-out curve. Honours
+// reduced-motion and is resilient when requestAnimationFrame is throttled
+// (e.g. a background tab): a timeout fallback guarantees the value always
+// lands on the target, so it can never get stuck mid-count.
+export const useCountUp = (target: number, durationMs = 900, active = true): number => {
+  const reduce = usePrefersReducedMotion();
+  const [value, setValue] = useState(active && !reduce ? 0 : target);
+  const raf = useRef<number | null>(null);
+  const lastValue = useRef(value);
+
+  const commit = (next: number) => {
+    if (lastValue.current === next) return;
+    lastValue.current = next;
+    setValue(next);
+  };
 
   useEffect(() => {
-    if (!ready) return;
+    // No animation needed — show the final value immediately.
+    if (!active || reduce || (typeof document !== "undefined" && document.hidden)) {
+      const immediate = window.setTimeout(() => commit(target), 0);
+      return () => window.clearTimeout(immediate);
+    }
 
-    let frame = 0;
-    let start: number | null = null;
+    let startTs: number | null = null;
 
-    const tick = (timestamp: number) => {
-      if (start === null) start = timestamp;
-      const progress = Math.min((timestamp - start) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
-      setValue(Math.round(eased * target));
-      if (progress < 1) frame = requestAnimationFrame(tick);
+    const tick = (ts: number) => {
+      if (startTs === null) startTs = ts;
+      const progress = Math.min((ts - startTs) / durationMs, 1);
+      const eased = 1 - (1 - progress) ** 3; // easeOutCubic
+      commit(Math.round(target * eased));
+      if (progress < 1) raf.current = requestAnimationFrame(tick);
     };
 
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [target, duration, ready]);
+    raf.current = requestAnimationFrame(tick);
+    // Safety net: if rAF is paused/throttled, still land on the target.
+    const fallback = window.setTimeout(() => commit(target), durationMs + 150);
+
+    return () => {
+      if (raf.current !== null) cancelAnimationFrame(raf.current);
+      window.clearTimeout(fallback);
+    };
+  }, [target, durationMs, active, reduce]);
 
   return value;
-}
+};

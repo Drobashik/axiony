@@ -1,9 +1,8 @@
 "use client";
 
-import { SEVERITY_LABEL, SEVERITY_ORDER } from "@/lib/scan/issues";
+import { SEVERITY_COLOR, SEVERITY_LABEL, SEVERITY_ORDER } from "@/lib/scan/issues";
 import { usePendingScan } from "@/lib/workspace";
 import type { PendingScan } from "@/lib/workspace";
-import type { Severity } from "@/types";
 import { AUTH_COPY } from "./data";
 import type { AuthMode, AuthValuePoint } from "./types";
 import { BaselineIcon, CheckIcon, GitIcon, SparkIcon, TeamIcon, TrendIcon } from "./icons";
@@ -15,13 +14,6 @@ const POINT_ICON: Record<AuthValuePoint["icon"], typeof BaselineIcon> = {
   git: GitIcon,
   spark: SparkIcon,
   team: TeamIcon,
-};
-
-const SEVERITY_COLOR: Record<Severity, string> = {
-  critical: "var(--severity-critical)",
-  serious: "var(--severity-serious)",
-  moderate: "var(--severity-moderate)",
-  minor: "var(--severity-minor)",
 };
 
 const scoreColor = (score: number): string => {

@@ -7,8 +7,8 @@ import cn from "classnames";
 import { WorkflowStage } from "./components/WorkflowStage";
 import { WorkflowStepper } from "./components/WorkflowStepper";
 import { STEP_MS, STEPS } from "./data";
+import { usePrefersReducedMotion } from "@/lib/hooks/usePrefersReducedMotion";
 import { useInViewOnce } from "./hooks/useInViewOnce";
-import { usePrefersReducedMotion } from "./hooks/usePrefersReducedMotion";
 import styles from "./ScanWorkflow.module.scss";
 
 export const ScanWorkflow = () => {

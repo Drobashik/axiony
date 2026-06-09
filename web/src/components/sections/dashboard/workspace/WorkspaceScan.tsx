@@ -17,7 +17,7 @@ import {
 } from "@/lib/billing";
 import type { BillingPlan, BillingState } from "@/lib/billing";
 import { normalizeUrl } from "@/lib/scan/url";
-import { hostFromUrl, pathFromUrl, pendingFromReport, saveScan } from "@/lib/workspace";
+import { hostFromUrl, pageLabel, pathFromUrl, pendingFromReport, saveScan } from "@/lib/workspace";
 import type { Workspace } from "@/lib/workspace";
 import type { DashboardTab } from "@/lib/data/dashboard";
 import { ScannerUpgradeCard } from "../billing";
@@ -33,7 +33,6 @@ interface WorkspaceScanProps {
 }
 
 const lastScanAt = (scans: { scannedAt: string }[]) => scans[scans.length - 1]?.scannedAt ?? "";
-const pageLabel = (host: string, path: string) => `${host}${path === "/" ? "" : path}`;
 const normalizeDomain = (host: string): string =>
   host
     .trim()

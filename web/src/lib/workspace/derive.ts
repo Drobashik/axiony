@@ -39,6 +39,10 @@ export const pathFromUrl = (url: string): string => {
   return path.length > 1 ? path.replace(/\/+$/, "") : "/";
 };
 
+/** Compact display label for a tracked page, e.g. "example.com/pricing". */
+export const pageLabel = (host: string, path: string): string =>
+  `${host}${path === "/" ? "" : path}`;
+
 export const initialsFromName = (name: string): string => {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "AX";

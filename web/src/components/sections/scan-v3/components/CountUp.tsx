@@ -1,6 +1,6 @@
 "use client";
 
-import { useCountUp } from "../hooks/useCountUp";
+import { useCountUp } from "@/lib/hooks/useCountUp";
 
 interface CountUpProps {
   value: number;

@@ -8,6 +8,7 @@ import {
   aggregateOpenIssues,
   latestScannedPage,
   markCreatedSeen,
+  pageLabel,
   pageModel,
   setOnboardingStep,
   workspaceSummary,
@@ -33,8 +34,6 @@ const DeltaBadge = ({ delta }: { delta: number }) => {
     </span>
   );
 };
-
-const pageLabel = (host: string, path: string) => `${host}${path === "/" ? "" : path}`;
 
 const Celebration = ({ created, onDismiss }: { created: JustCreated; onDismiss: () => void }) => (
   <section className={styles.celebrate}>
