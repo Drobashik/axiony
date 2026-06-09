@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { LogoMark, Select } from "@/components/ui";
 import cn from "classnames";
+import type { BillingPlan } from "@/lib/billing";
 import { DashboardTab } from "@/lib/data/dashboard";
 import styles from "./Sidebar.module.scss";
 
@@ -155,7 +156,10 @@ export interface SidebarProps {
   issuesBadge?: number;
   /** Render "New scan" as an in-dashboard tab instead of a link to /scan. */
   inlineScan?: boolean;
+  onHome?: () => void;
   onSignOut?: () => void;
+  billingPlan?: BillingPlan;
+  onUpgrade?: (plan?: Exclude<BillingPlan, "free">) => void;
   /** Workspace mode: project switcher that scopes the dashboard. */
   projects?: { id: string; host: string }[];
   pages?: { path: string; openIssues: number }[];
@@ -177,7 +181,10 @@ export function Sidebar({
   userPlan = "Pro plan",
   issuesBadge = 12,
   inlineScan = false,
+  onHome,
   onSignOut,
+  billingPlan,
+  onUpgrade,
   projects,
   pages,
   selectedProjectId = null,
@@ -225,7 +232,15 @@ export function Sidebar({
 
   return (
     <aside className={styles.sidebar}>
-      <Link href="/" className={styles.logo}>
+      <Link
+        href="/"
+        className={styles.logo}
+        onClick={(event) => {
+          if (!onHome) return;
+          event.preventDefault();
+          onHome();
+        }}
+      >
         <LogoMark size={22} />
         Axiony
       </Link>
@@ -269,6 +284,13 @@ export function Sidebar({
             <option>{workspaceName}</option>
             <option>Personal</option>
           </select>
+        )}
+        {billingPlan === "pro" && onUpgrade && (
+          <button type="button" className={styles.upgradeCard} onClick={() => onUpgrade("team")}>
+            <span className={styles.upgradeKicker}>Pro plan</span>
+            <span className={styles.upgradeTitle}>Unlock Team</span>
+            <span className={styles.upgradeText}>Members, roles, PR checks</span>
+          </button>
         )}
         {primary.map(renderNavItem)}
       </div>

@@ -3,7 +3,13 @@
 import { useState } from "react";
 import cn from "classnames";
 import { SEVERITY_LABEL, SEVERITY_ORDER } from "@/lib/scan/issues";
-import { pageModel, projectModel, relativeTime, runFollowupScan } from "@/lib/workspace";
+import {
+  pageModel,
+  projectModel,
+  relativeTime,
+  removeProject,
+  runFollowupScan,
+} from "@/lib/workspace";
 import type { Project, Workspace } from "@/lib/workspace";
 import type { Severity } from "@/types";
 import { RefreshIcon } from "@/components/sections/scan-v3/components/icons";
@@ -21,10 +27,12 @@ const ProjectCard = ({
   project,
   onOpen,
   onOpenPage,
+  onRequestRemove,
 }: {
   project: Project;
   onOpen: () => void;
   onOpenPage: (path: string) => void;
+  onRequestRemove: () => void;
 }) => {
   const [scanning, setScanning] = useState<string | null>(null);
   const pm = projectModel(project);
@@ -40,20 +48,32 @@ const ProjectCard = ({
 
   return (
     <article className={styles.projectCard}>
-      <button type="button" className={cn(styles.projectTop, styles.projectOpen)} onClick={onOpen}>
-        <span className={styles.projectId}>
-          <span className={styles.projectName}>
-            {project.host}
-            <span className={styles.projectArrow} aria-hidden="true">
-              →
+      <div className={styles.projectTop}>
+        <button type="button" className={styles.projectIdentityButton} onClick={onOpen}>
+          <span className={styles.projectId}>
+            <span className={styles.projectName}>
+              {project.host}
+              <span className={styles.projectArrow} aria-hidden="true">
+                →
+              </span>
+            </span>
+            <span className={styles.projectUrl}>
+              {pm.pageCount} {pm.pageCount === 1 ? "page" : "pages"} · {pm.openIssues} open
             </span>
           </span>
-          <span className={styles.projectUrl}>
-            {pm.pageCount} {pm.pageCount === 1 ? "page" : "pages"} · {pm.openIssues} open
-          </span>
-        </span>
-        <ScoreRing score={pm.avgScore} size={50} />
-      </button>
+        </button>
+        <div className={styles.projectActions}>
+          <ScoreRing score={pm.avgScore} size={50} />
+          <button
+            type="button"
+            className={styles.projectRemove}
+            onClick={onRequestRemove}
+            aria-label={`Remove ${project.host}`}
+          >
+            <TrashIcon />
+          </button>
+        </div>
+      </div>
 
       <div className={styles.projectSeverities}>
         {SEVERITY_ORDER.map((s) => (
@@ -101,6 +121,25 @@ const ProjectCard = ({
   );
 };
 
+const TrashIcon = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M3 6h18" />
+    <path d="M8 6V4h8v2" />
+    <path d="M19 6l-1 14H6L5 6" />
+    <path d="M10 11v5M14 11v5" />
+  </svg>
+);
+
 interface WorkspaceProjectsProps {
   workspace: Workspace;
   onTab: (tab: "overview") => void;
@@ -114,6 +153,7 @@ export const WorkspaceProjects = ({
   onSelectProject,
   onSelectPage,
 }: WorkspaceProjectsProps) => {
+  const [projectToRemove, setProjectToRemove] = useState<Project | null>(null);
   if (workspace.projects.length === 0) return null;
 
   const openProject = (id: string) => {
@@ -126,6 +166,14 @@ export const WorkspaceProjects = ({
     onSelectProject(projectId);
     onSelectPage(path);
     onTab("overview");
+  };
+
+  const confirmRemove = () => {
+    if (!projectToRemove) return;
+    removeProject(projectToRemove.id);
+    setProjectToRemove(null);
+    onSelectProject(null);
+    onSelectPage(null);
   };
 
   return (
@@ -150,9 +198,47 @@ export const WorkspaceProjects = ({
             project={project}
             onOpen={() => openProject(project.id)}
             onOpenPage={(path) => openPage(project.id, path)}
+            onRequestRemove={() => setProjectToRemove(project)}
           />
         ))}
       </div>
+
+      {projectToRemove && (
+        <div
+          className={styles.confirmOverlay}
+          role="presentation"
+          onClick={() => setProjectToRemove(null)}
+        >
+          <div
+            className={styles.confirmDialog}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="remove-project-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <span className={styles.confirmIcon} aria-hidden="true">
+              <TrashIcon />
+            </span>
+            <h3 id="remove-project-title">Remove {projectToRemove.host}?</h3>
+            <p>
+              This removes the domain project, all saved pages, scan history, and every issue
+              attached to it.
+            </p>
+            <div className={styles.confirmActions}>
+              <button
+                type="button"
+                className={styles.confirmCancel}
+                onClick={() => setProjectToRemove(null)}
+              >
+                Cancel
+              </button>
+              <button type="button" className={styles.confirmDanger} onClick={confirmRemove}>
+                Remove project
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

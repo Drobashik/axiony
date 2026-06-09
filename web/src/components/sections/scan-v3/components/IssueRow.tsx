@@ -13,6 +13,8 @@ interface IssueRowProps {
   issue: Issue;
   open: boolean;
   onToggle: (id: string) => void;
+  locked?: boolean;
+  onUpgrade?: () => void;
 }
 
 interface FormattedWcagTag {
@@ -291,7 +293,7 @@ const repairDetails = (issue: Issue) => {
   };
 };
 
-export const IssueRow = ({ issue, open, onToggle }: IssueRowProps) => {
+export const IssueRow = ({ issue, open, onToggle, locked, onUpgrade }: IssueRowProps) => {
   const bodyId = useId();
   const details = repairDetails(issue);
   const primaryWcag = issue.wcag[0] ? formatWcagTag(issue.wcag[0]) : null;
@@ -321,6 +323,7 @@ export const IssueRow = ({ issue, open, onToggle }: IssueRowProps) => {
             <span>
               {issue.nodes.length} occurrence{issue.nodes.length !== 1 ? "s" : ""}
             </span>
+            {locked && <span className={styles.issueLockedPill}>Pro details</span>}
           </span>
         </span>
         <ChevronIcon className={cn(styles.issueChevron, open && styles.issueChevronOpen)} />
@@ -333,103 +336,126 @@ export const IssueRow = ({ issue, open, onToggle }: IssueRowProps) => {
         aria-hidden={!open}
       >
         <div className={styles.issueBodyInner}>
-          <div className={styles.issueBriefGrid}>
-            <section className={styles.issueBriefCard}>
-              <div className={styles.issueSection}>What happened</div>
-              <p className={styles.issueDesc}>{details.whatHappened}</p>
+          {locked ? (
+            <section className={styles.issueLockedPanel}>
+              <span className={styles.issueLockedKicker}>Detailed fix locked</span>
+              <h3>{issue.title}</h3>
+              <p>
+                Upgrade to view affected elements, formatted code, suggested repair previews, and
+                copyable fixes for this issue.
+              </p>
+              <div className={styles.issueLockedMeta}>
+                <span>{issue.nodes.length} affected elements</span>
+                <span>{issue.rule}</span>
+                {issue.wcag[0] && <span>{issue.wcag[0]}</span>}
+              </div>
+              {onUpgrade && (
+                <button type="button" className={styles.issueLockedAction} onClick={onUpgrade}>
+                  Unlock all issue details
+                </button>
+              )}
             </section>
+          ) : (
+            <>
+              <div className={styles.issueBriefGrid}>
+                <section className={styles.issueBriefCard}>
+                  <div className={styles.issueSection}>What happened</div>
+                  <p className={styles.issueDesc}>{details.whatHappened}</p>
+                </section>
 
-            <section className={styles.issueBriefCard}>
-              <div className={styles.issueSection}>Why it matters</div>
-              <p className={styles.issueDesc}>{details.whyItMatters}</p>
-            </section>
-          </div>
-
-          <section className={styles.issueWhere}>
-            <div className={styles.issueSection}>Where</div>
-            <div className={styles.issueNodes}>
-              {issue.nodes.map((node, i) => (
-                <div key={`${node}-${i}`} className={styles.issueNodeRow}>
-                  <span className={styles.issueNodeIndex}>{i + 1}</span>
-                  <code className={styles.issueNode}>
-                    <HtmlSnippet value={node} />
-                  </code>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section>
-            <div className={styles.issueSection}>Suggested fix</div>
-            <div className={styles.issueFix}>
-              <SparkleIcon />
-              <p>{details.suggestedFix}</p>
-            </div>
-          </section>
-
-          <section className={styles.issueRepair}>
-            <div className={styles.issueCodeHead}>
-              <span className={styles.aiBadge}>
-                <SparkleIcon />
-                Repair preview
-              </span>
-              <CopyButton text={details.afterCode} label="Copy fix" />
-            </div>
-
-            <div className={styles.codeCompare}>
-              <div className={styles.codePane}>
-                <div className={styles.codePaneHead}>
-                  <span>Before</span>
-                  <span className={styles.codePaneNote}>Current failing pattern</span>
-                </div>
-                <pre className={cn(styles.issueCode, styles.issueCodeBefore)}>
-                  <code>
-                    <HtmlSnippet value={details.beforeCode} />
-                  </code>
-                </pre>
+                <section className={styles.issueBriefCard}>
+                  <div className={styles.issueSection}>Why it matters</div>
+                  <p className={styles.issueDesc}>{details.whyItMatters}</p>
+                </section>
               </div>
 
-              <div className={styles.codePane}>
-                <div className={styles.codePaneHead}>
-                  <span>After</span>
-                  <span className={styles.codePaneNote}>Suggested direction</span>
+              <section className={styles.issueWhere}>
+                <div className={styles.issueSection}>Where</div>
+                <div className={styles.issueNodes}>
+                  {issue.nodes.map((node, i) => (
+                    <div key={`${node}-${i}`} className={styles.issueNodeRow}>
+                      <span className={styles.issueNodeIndex}>{i + 1}</span>
+                      <code className={styles.issueNode}>
+                        <HtmlSnippet value={node} />
+                      </code>
+                    </div>
+                  ))}
                 </div>
-                <pre className={cn(styles.issueCode, styles.issueCodeAfter)}>
-                  <code>
-                    <HtmlSnippet value={details.afterCode} />
-                  </code>
-                </pre>
-              </div>
-            </div>
-          </section>
+              </section>
 
-          <section className={styles.issueReferences}>
-            <div>
-              <div className={styles.issueSection}>Rule ID</div>
-              <code className={styles.ruleChip}>{issue.rule}</code>
-            </div>
-            {issue.wcag.length > 0 && (
-              <div>
-                <div className={styles.issueSection}>WCAG tags</div>
-                <div className={styles.wcagRow}>
-                  {issue.wcag.map((w) => {
-                    const tag = formatWcagTag(w);
-
-                    return (
-                      <span key={w} className={styles.wcagChip}>
-                        <span className={styles.wcagPrefix}>{tag.prefix}</span>
-                        {tag.criterion && (
-                          <span className={styles.wcagCriterion}>{tag.criterion}</span>
-                        )}
-                        <span className={styles.wcagLabel}>{tag.label}</span>
-                        {tag.level && <span className={styles.wcagLevel}>{tag.level}</span>}
-                      </span>
-                    );
-                  })}
+              <section>
+                <div className={styles.issueSection}>Suggested fix</div>
+                <div className={styles.issueFix}>
+                  <SparkleIcon />
+                  <p>{details.suggestedFix}</p>
                 </div>
-              </div>
-            )}
-          </section>
+              </section>
+
+              <section className={styles.issueRepair}>
+                <div className={styles.issueCodeHead}>
+                  <span className={styles.aiBadge}>
+                    <SparkleIcon />
+                    Repair preview
+                  </span>
+                  <CopyButton text={details.afterCode} label="Copy fix" />
+                </div>
+
+                <div className={styles.codeCompare}>
+                  <div className={styles.codePane}>
+                    <div className={styles.codePaneHead}>
+                      <span>Before</span>
+                      <span className={styles.codePaneNote}>Current failing pattern</span>
+                    </div>
+                    <pre className={cn(styles.issueCode, styles.issueCodeBefore)}>
+                      <code>
+                        <HtmlSnippet value={details.beforeCode} />
+                      </code>
+                    </pre>
+                  </div>
+
+                  <div className={styles.codePane}>
+                    <div className={styles.codePaneHead}>
+                      <span>After</span>
+                      <span className={styles.codePaneNote}>Suggested direction</span>
+                    </div>
+                    <pre className={cn(styles.issueCode, styles.issueCodeAfter)}>
+                      <code>
+                        <HtmlSnippet value={details.afterCode} />
+                      </code>
+                    </pre>
+                  </div>
+                </div>
+              </section>
+
+              <section className={styles.issueReferences}>
+                <div>
+                  <div className={styles.issueSection}>Rule ID</div>
+                  <code className={styles.ruleChip}>{issue.rule}</code>
+                </div>
+                {issue.wcag.length > 0 && (
+                  <div>
+                    <div className={styles.issueSection}>WCAG tags</div>
+                    <div className={styles.wcagRow}>
+                      {issue.wcag.map((w) => {
+                        const tag = formatWcagTag(w);
+
+                        return (
+                          <span key={w} className={styles.wcagChip}>
+                            <span className={styles.wcagPrefix}>{tag.prefix}</span>
+                            {tag.criterion && (
+                              <span className={styles.wcagCriterion}>{tag.criterion}</span>
+                            )}
+                            <span className={styles.wcagLabel}>{tag.label}</span>
+                            {tag.level && <span className={styles.wcagLevel}>{tag.level}</span>}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </section>
+            </>
+          )}
         </div>
       </div>
     </div>

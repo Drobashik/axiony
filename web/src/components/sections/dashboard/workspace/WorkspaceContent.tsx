@@ -2,8 +2,12 @@
 
 import { Button, Icon } from "@/components/ui";
 import type { DashboardTab } from "@/lib/data/dashboard";
+import { canAccessPlan, canManageIssues } from "@/lib/billing";
+import type { BillingPlan, BillingState } from "@/lib/billing";
 import type { Workspace } from "@/lib/workspace";
+import type { IconName } from "@/types";
 import { ComingSoon } from "../ComingSoon";
+import { BillingGate, BillingSettings } from "../billing";
 import { WorkspaceOverview } from "./WorkspaceOverview";
 import { WorkspaceProjects } from "./WorkspaceProjects";
 import { WorkspaceIssues } from "./WorkspaceIssues";
@@ -69,7 +73,38 @@ interface WorkspaceContentProps {
   onTab: (tab: DashboardTab) => void;
   onSelectProject: (id: string | null) => void;
   onSelectPage: (path: string | null) => void;
+  billing: BillingState;
+  onUpgrade: (plan?: Exclude<BillingPlan, "free">) => void;
+  setNavigationGuard: (guard: (() => boolean) | null) => void;
 }
+
+interface FeaturePageProps {
+  title: string;
+  kicker: string;
+  text: string;
+  cards: Array<{ icon: IconName; title: string; text: string }>;
+}
+
+const FeaturePage = ({ title, kicker, text, cards }: FeaturePageProps) => (
+  <div className={styles.featurePage}>
+    <header className={styles.featureHero}>
+      <span className={styles.scanKicker}>{kicker}</span>
+      <h2>{title}</h2>
+      <p>{text}</p>
+    </header>
+    <div className={styles.featureGrid}>
+      {cards.map((card) => (
+        <article key={card.title} className={styles.valueCard}>
+          <span className={styles.valueIcon} data-tone="blue">
+            <Icon name={card.icon} size={17} />
+          </span>
+          <span className={styles.valueTitle}>{card.title}</span>
+          <span className={styles.valueText}>{card.text}</span>
+        </article>
+      ))}
+    </div>
+  </div>
+);
 
 export const WorkspaceContent = ({
   workspace,
@@ -79,16 +114,26 @@ export const WorkspaceContent = ({
   onTab,
   onSelectProject,
   onSelectPage,
+  billing,
+  onUpgrade,
+  setNavigationGuard,
 }: WorkspaceContentProps) => {
   // The scanner sees the full workspace (scanning isn't scoped).
   if (tab === "scan") {
-    return <WorkspaceScan workspace={workspace} onTab={onTab} />;
+    return (
+      <WorkspaceScan
+        workspace={workspace}
+        onTab={onTab}
+        billing={billing}
+        onUpgrade={onUpgrade}
+        setNavigationGuard={setNavigationGuard}
+      />
+    );
   }
 
   // No projects yet → data tabs show a "scan first" empty state with a link
-  // to the scanner; the coming-soon tabs keep their own placeholder.
-  if (workspace.projects.length === 0) {
-    if (COMING_SOON.includes(tab)) return <ComingSoon title={tab} icon={PLACEHOLDER_ICON} />;
+  // to the scanner; subscription/product tabs still render useful gated content.
+  if (workspace.projects.length === 0 && !COMING_SOON.includes(tab)) {
     return <ScanEmpty tab={tab} onScan={() => onTab("scan")} />;
   }
 
@@ -115,7 +160,130 @@ export const WorkspaceContent = ({
         onSelectPage={onSelectPage}
       />
     );
-  if (tab === "issues") return <WorkspaceIssues workspace={scoped} />;
+  if (tab === "issues")
+    return (
+      <WorkspaceIssues
+        workspace={scoped}
+        canControlIssues={canManageIssues(billing)}
+        onUpgrade={onUpgrade}
+      />
+    );
+  if (tab === "reports") {
+    if (!canAccessPlan(billing.plan, "pro")) {
+      return (
+        <BillingGate
+          requiredPlan="pro"
+          title="Export polished accessibility reports"
+          text="Turn scans into stakeholder-ready reports with history, issue details, and shareable summaries."
+          features={["Exportable reports", "Full scan history", "Comparison snapshots"]}
+          onUpgrade={onUpgrade}
+        />
+      );
+    }
+    return (
+      <FeaturePage
+        kicker="Pro reports"
+        title="Reports are unlocked"
+        text="Generate mock report packs from your saved projects, scan history, and tracked issues."
+        cards={[
+          {
+            icon: "report",
+            title: "Executive summary",
+            text: "Score, debt, regressions, and trend context ready for stakeholders.",
+          },
+          {
+            icon: "bolt",
+            title: "Issue appendix",
+            text: "Every issue keeps its affected elements, suggested fix, and WCAG reference.",
+          },
+          {
+            icon: "ci",
+            title: "Before / after",
+            text: "Compare follow-up scans to baseline without losing triage state.",
+          },
+        ]}
+      />
+    );
+  }
+
+  if (tab === "alerts") {
+    if (!canAccessPlan(billing.plan, "pro")) {
+      return (
+        <BillingGate
+          requiredPlan="pro"
+          title="Catch regressions with alerts"
+          text="Pro unlocks scheduled scans and email alerts when new accessibility issues appear."
+          features={["Scheduled scans", "Email alerts", "Regression-only notifications"]}
+          onUpgrade={onUpgrade}
+        />
+      );
+    }
+    return (
+      <FeaturePage
+        kicker="Pro alerts"
+        title="Alerts are unlocked"
+        text="Mock alert rules show how Axiony will notify your team when a page regresses."
+        cards={[
+          {
+            icon: "scan",
+            title: "Daily scheduled scan",
+            text: "Run every morning across tracked project pages.",
+          },
+          {
+            icon: "bolt",
+            title: "Regression alerts",
+            text: "Only notify when a new issue appears outside the baseline.",
+          },
+          {
+            icon: "report",
+            title: "Weekly digest",
+            text: "Summarize score movement, resolved issues, and open debt.",
+          },
+        ]}
+      />
+    );
+  }
+
+  if (tab === "team") {
+    if (!canAccessPlan(billing.plan, "team")) {
+      return (
+        <BillingGate
+          requiredPlan="team"
+          title="Bring the team into accessibility"
+          text="Team unlocks collaboration, ownership, integrations, and review workflows for product and engineering."
+          features={["Members and roles", "PR/MR comments", "Shared baselines", "Slack alerts"]}
+          onUpgrade={onUpgrade}
+        />
+      );
+    }
+    return (
+      <FeaturePage
+        kicker="Team workspace"
+        title="Team collaboration is unlocked"
+        text="Mock team controls show how shared ownership, review comments, and routing will work."
+        cards={[
+          {
+            icon: "team",
+            title: "Members and roles",
+            text: "Invite product, QA, design, and engineering to one workspace.",
+          },
+          {
+            icon: "ci",
+            title: "PR checks",
+            text: "Route new issues into review without blocking known baseline debt.",
+          },
+          {
+            icon: "bolt",
+            title: "Ownership routing",
+            text: "Assign issues by project, page, severity, or code owner.",
+          },
+        ]}
+      />
+    );
+  }
+
+  if (tab === "settings")
+    return <BillingSettings billing={billing} workspace={workspace} onUpgrade={onUpgrade} />;
   if (COMING_SOON.includes(tab)) return <ComingSoon title={tab} icon={PLACEHOLDER_ICON} />;
 
   return <WorkspaceOverview workspace={scoped} onTab={onTab} />;

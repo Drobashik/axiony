@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import type { DashboardTab } from "@/lib/data/dashboard";
 import { ComingSoon } from "./ComingSoon";
 import { IssuesTab } from "./IssuesTab";
@@ -31,13 +30,16 @@ const PLACEHOLDER_ICON = (
  * workspace via context, so this stays in sync without re-reading storage.
  */
 export function DashboardTabView({ tab }: { tab: DashboardTab }) {
-  const router = useRouter();
   const {
     workspace,
     selectedProjectId,
     setSelectedProjectId,
     selectedPagePath,
     setSelectedPagePath,
+    billing,
+    openUpgrade,
+    navigateTab,
+    setNavigationGuard,
   } = useDashboardWorkspace();
 
   if (workspace) {
@@ -47,9 +49,12 @@ export function DashboardTabView({ tab }: { tab: DashboardTab }) {
         selectedProjectId={selectedProjectId}
         selectedPagePath={selectedPagePath}
         tab={tab}
-        onTab={(next) => router.push(`/dashboard/${next}`)}
+        onTab={navigateTab}
         onSelectProject={setSelectedProjectId}
         onSelectPage={setSelectedPagePath}
+        billing={billing}
+        onUpgrade={openUpgrade}
+        setNavigationGuard={setNavigationGuard}
       />
     );
   }
