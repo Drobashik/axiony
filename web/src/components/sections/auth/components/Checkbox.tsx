@@ -3,8 +3,8 @@
 import { useId } from "react";
 import type { ReactNode } from "react";
 import cn from "classnames";
+import styles from "../screen/AuthScreen.module.scss";
 import { CheckIcon } from "./icons";
-import styles from "./AuthScreen.module.scss";
 
 interface CheckboxProps {
   checked: boolean;

@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { Button, LogoMark } from "@/components/ui";
-import type { StudioState } from "@/components/sections/scan-v3/types";
-import { RefreshIcon, SearchIcon } from "@/components/sections/scan-v3/components/icons";
+import type { StudioState } from "@/components/sections/scan/types";
+import { RefreshIcon, SearchIcon } from "@/components/sections/scan/components/icons";
 import cn from "classnames";
 import styles from "./ScanNav.module.scss";
 

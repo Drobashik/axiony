@@ -1,10 +1,10 @@
 "use client";
 
 import cn from "classnames";
-import { OAUTH_PROVIDERS } from "./data";
-import type { AuthMode, OAuthProvider } from "./types";
+import { OAUTH_PROVIDERS } from "../lib/data";
+import type { AuthMode, OAuthProvider } from "../lib/types";
+import styles from "../screen/AuthScreen.module.scss";
 import { GitHubIcon, GitLabIcon, GoogleIcon, Spinner } from "./icons";
-import styles from "./AuthScreen.module.scss";
 
 const PROVIDER_ICON: Record<OAuthProvider["id"], typeof GitHubIcon> = {
   google: GoogleIcon,

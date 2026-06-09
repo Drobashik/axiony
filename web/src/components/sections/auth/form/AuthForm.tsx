@@ -4,12 +4,10 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui";
 import { readPendingScan } from "@/lib/workspace";
-import { useAuthForm } from "./useAuthForm";
-import { AuthField } from "./AuthField";
-import { Checkbox } from "./Checkbox";
-import { PasswordMeter } from "./PasswordMeter";
-import { OAuthRow } from "./OAuthRow";
-import type { AuthMode } from "./types";
+import { AuthField } from "../components/AuthField";
+import { Checkbox } from "../components/Checkbox";
+import { OAuthRow } from "../components/OAuthRow";
+import { PasswordMeter } from "../components/PasswordMeter";
 import {
   AlertIcon,
   ArrowRightIcon,
@@ -19,8 +17,10 @@ import {
   MailIcon,
   Spinner,
   UserIcon,
-} from "./icons";
-import styles from "./AuthScreen.module.scss";
+} from "../components/icons";
+import type { AuthMode } from "../lib/types";
+import styles from "../screen/AuthScreen.module.scss";
+import { useAuthForm } from "./useAuthForm";
 
 const COPY = {
   login: {

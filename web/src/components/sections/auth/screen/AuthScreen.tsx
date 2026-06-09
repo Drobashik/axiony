@@ -1,6 +1,6 @@
-import { AuthAside } from "./AuthAside";
-import { AuthForm } from "./AuthForm";
-import type { AuthMode } from "./types";
+import { AuthAside } from "../components/AuthAside";
+import { AuthForm } from "../form/AuthForm";
+import type { AuthMode } from "../lib/types";
 import styles from "./AuthScreen.module.scss";
 
 /**

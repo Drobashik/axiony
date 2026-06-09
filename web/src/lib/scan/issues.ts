@@ -392,6 +392,14 @@ export const SEVERITY_LABEL: Record<Severity, string> = {
   minor: "Minor",
 };
 
+/** CSS custom-property color per severity (defined in styles/_variables.scss). */
+export const SEVERITY_COLOR: Record<Severity, string> = {
+  critical: "var(--severity-critical)",
+  serious: "var(--severity-serious)",
+  moderate: "var(--severity-moderate)",
+  minor: "var(--severity-minor)",
+};
+
 const SEVERITY_RANK: Record<Severity, number> = {
   critical: 0,
   serious: 1,

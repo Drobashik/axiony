@@ -1,2 +1,2 @@
-export { AuthScreen } from "./AuthScreen";
-export type { AuthMode } from "./types";
+export { AuthScreen } from "./screen/AuthScreen";
+export type { AuthMode } from "./lib/types";

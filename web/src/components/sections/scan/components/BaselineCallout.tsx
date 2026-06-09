@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Icon } from "@/components/ui";
 import {
+  pageLabel,
   pendingFromReport,
   previewSave,
   readWorkspace,
@@ -20,8 +21,6 @@ interface BaselineCalloutProps {
   /** Embedded in the dashboard → run this after saving instead of navigating. */
   onSaved?: () => void;
 }
-
-const pageLabel = (host: string, path: string) => `${host}${path === "/" ? "" : path}`;
 
 /**
  * The save moment, adapted to who's looking and what they scanned:

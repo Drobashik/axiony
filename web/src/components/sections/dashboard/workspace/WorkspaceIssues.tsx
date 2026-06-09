@@ -4,14 +4,13 @@ import { useState } from "react";
 import cn from "classnames";
 import { Select } from "@/components/ui";
 import { SEVERITY_LABEL } from "@/lib/scan/issues";
-import { aggregateOpenIssues, setIssueStatus } from "@/lib/workspace";
+import { aggregateOpenIssues, pageLabel, setIssueStatus } from "@/lib/workspace";
 import type { IssueStatus, Workspace } from "@/lib/workspace";
 import type { Severity } from "@/types";
 import { STATUS_OPTIONS, statusMeta } from "./issue-status";
 import { IssueDetail } from "./IssueDetail";
 import styles from "./Workspace.module.scss";
 
-const pageLabel = (host: string, path: string) => `${host}${path === "/" ? "" : path}`;
 const FREE_DETAIL_LIMIT = 6;
 
 type Filter = "open" | "resolved" | "all";

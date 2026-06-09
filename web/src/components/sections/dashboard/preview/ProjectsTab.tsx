@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui";
 import cn from "classnames";
 import { PROJECTS } from "@/lib/data/dashboard";
-import { ScoreRing } from "./ScoreRing";
+import { ScoreRing } from "../shared/ScoreRing";
 import { Sparkline } from "./Sparkline";
 import styles from "./ProjectsTab.module.scss";
 

@@ -3,7 +3,7 @@
 import cn from "classnames";
 import { ACTIVITY, PROJECTS, TREND_DATASETS } from "@/lib/data/dashboard";
 import { useCountUp } from "@/lib/hooks/useCountUp";
-import { colorForScore } from "./ScoreRing";
+import { colorForScore } from "../shared/ScoreRing";
 import { TrendChart } from "./TrendChart";
 import styles from "./OverviewTab.module.scss";
 

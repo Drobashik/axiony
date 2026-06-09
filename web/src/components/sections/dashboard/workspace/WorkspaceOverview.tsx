@@ -8,12 +8,13 @@ import {
   aggregateOpenIssues,
   latestScannedPage,
   markCreatedSeen,
+  pageLabel,
   pageModel,
   setOnboardingStep,
   workspaceSummary,
 } from "@/lib/workspace";
 import type { JustCreated, OnboardingStepId, Workspace } from "@/lib/workspace";
-import { ScoreRing, colorForScore } from "../ScoreRing";
+import { ScoreRing, colorForScore } from "../shared/ScoreRing";
 import { ScoreTrend } from "./ScoreTrend";
 import styles from "./Workspace.module.scss";
 
@@ -33,8 +34,6 @@ const DeltaBadge = ({ delta }: { delta: number }) => {
     </span>
   );
 };
-
-const pageLabel = (host: string, path: string) => `${host}${path === "/" ? "" : path}`;
 
 const Celebration = ({ created, onDismiss }: { created: JustCreated; onDismiss: () => void }) => (
   <section className={styles.celebrate}>

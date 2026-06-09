@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import cn from "classnames";
-import { SEVERITY_LABEL, SEVERITY_ORDER } from "@/lib/scan/issues";
+import { SEVERITY_COLOR, SEVERITY_LABEL, SEVERITY_ORDER } from "@/lib/scan/issues";
 import {
   pageModel,
   projectModel,
@@ -11,17 +11,9 @@ import {
   runFollowupScan,
 } from "@/lib/workspace";
 import type { Project, Workspace } from "@/lib/workspace";
-import type { Severity } from "@/types";
-import { RefreshIcon } from "@/components/sections/scan-v3/components/icons";
-import { ScoreRing, colorForScore } from "../ScoreRing";
+import { RefreshIcon } from "@/components/sections/scan/components/icons";
+import { ScoreRing, colorForScore } from "../shared/ScoreRing";
 import styles from "./Workspace.module.scss";
-
-const SEVERITY_COLOR: Record<Severity, string> = {
-  critical: "var(--severity-critical)",
-  serious: "var(--severity-serious)",
-  moderate: "var(--severity-moderate)",
-  minor: "var(--severity-minor)",
-};
 
 const ProjectCard = ({
   project,

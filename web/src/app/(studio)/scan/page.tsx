@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ScanStudio } from "@/components/sections/scan-v3";
+import { ScanStudio } from "@/components/sections/scan";
 
 export const metadata: Metadata = {
   title: "Cloud Scanner Studio",
