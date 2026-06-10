@@ -79,6 +79,9 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   text-wrap: pretty;
+  // Off-screen reveal transforms and decorative glows must never make the
+  // page horizontally scrollable on touch devices.
+  overflow-x: clip;
 }
 
 // ── Scrollbar ────────────────────────────────────────────────────────
@@ -148,6 +151,18 @@ code {
 }
 pre {
   font-family: var(--font-mono);
+}
+
+// ── Forms on small screens ───────────────────────────────────────────
+// iOS Safari auto-zooms into focused controls rendered below 16px.
+// Component modules style inputs at 12–15px, so force a floor here;
+// `!important` is deliberate — it must beat the module class styles.
+@media (max-width: $bp-md) {
+  input,
+  select,
+  textarea {
+    font-size: max(16px, 1em) !important;
+  }
 }
 
 // ── Scroll-reveal helpers ────────────────────────────────────────────

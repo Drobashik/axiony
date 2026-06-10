@@ -263,7 +263,8 @@
 }
 
 // ── Mobile menu panel ────────────────────────────────────────────────
-.mobile {
+.mobile,
+.scrim {
   display: none;
 }
 
@@ -277,6 +278,20 @@
     display: grid;
   }
 
+  // Dimmed, click-to-close backdrop under the open menu. Starts below
+  // the bar itself so the toggle stays reachable.
+  .scrim {
+    display: block;
+    position: fixed;
+    inset: var(--nav-height) 0 0;
+    border: none;
+    padding: 0;
+    background: oklch(0 0 0 / 0.55);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    cursor: pointer;
+  }
+
   .mobile {
     display: grid;
     position: absolute;
@@ -285,6 +300,8 @@
     right: 0;
     gap: 4px;
     padding: 12px 24px 24px;
+    max-height: calc(100dvh - var(--nav-height));
+    overflow-y: auto;
     background: oklch(0.08 0.006 260 / 0.97);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);

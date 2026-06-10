@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { planDefinition, useBilling } from "@/lib/billing";
@@ -46,9 +46,23 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const [selectedPagePath, setSelectedPagePath] = useState<string | null>(null);
   const [upgradePlan, setUpgradePlan] = useState<Exclude<BillingPlan, "free"> | null>(null);
   const [navigationGuard, setNavigationGuardValue] = useState<NavigationGuard | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { ready, workspace } = state;
   const { ready: billingReady, billing } = billingState;
   const tab = tabFromPath(pathname);
+
+  const closeSidebar = useCallback(() => setSidebarOpen(false), []);
+
+  useEffect(() => {
+    if (!sidebarOpen) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setSidebarOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [sidebarOpen]);
 
   const canNavigate = useCallback(
     () => (navigationGuard ? navigationGuard() : true),
@@ -59,6 +73,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   }, []);
   const go = useCallback(
     (next: DashboardTab) => {
+      setSidebarOpen(false);
       if (next === tab) return;
       if (!canNavigate()) return;
       router.push(`/dashboard/${next}`);
@@ -125,7 +140,17 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         {!workspace && <PreviewBanner />}
 
         <div className={styles.shell}>
+          {sidebarOpen && (
+            <button
+              type="button"
+              className={styles.scrim}
+              aria-label="Close menu"
+              onClick={closeSidebar}
+            />
+          )}
+
           <Sidebar
+            open={sidebarOpen}
             activeTab={tab}
             onTabChange={go}
             onHome={goHome}
@@ -155,6 +180,8 @@ export function DashboardShell({ children }: { children: ReactNode }) {
               onNewScan={workspace ? () => go("scan") : undefined}
               billingPlan={workspace ? billing.plan : undefined}
               onUpgrade={workspace ? openUpgrade : undefined}
+              menuOpen={sidebarOpen}
+              onMenuToggle={() => setSidebarOpen((open) => !open)}
             />
             <div className={styles.content}>{children}</div>
           </div>

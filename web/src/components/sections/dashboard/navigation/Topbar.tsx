@@ -11,6 +11,9 @@ export interface TopbarProps {
   onHome?: () => void;
   billingPlan?: BillingPlan;
   onUpgrade?: (plan?: Exclude<BillingPlan, "free">) => void;
+  /** Mobile: state + toggle for the off-canvas sidebar drawer. */
+  menuOpen?: boolean;
+  onMenuToggle?: () => void;
 }
 
 const SCAN_ICON = (
@@ -29,9 +32,41 @@ const SCAN_ICON = (
   </svg>
 );
 
-export function Topbar({ activeTab, onNewScan, onHome, billingPlan, onUpgrade }: TopbarProps) {
+export function Topbar({
+  activeTab,
+  onNewScan,
+  onHome,
+  billingPlan,
+  onUpgrade,
+  menuOpen = false,
+  onMenuToggle,
+}: TopbarProps) {
   return (
     <div className={styles.topbar}>
+      {onMenuToggle && (
+        <button
+          type="button"
+          className={styles.menuBtn}
+          aria-label={menuOpen ? "Close navigation" : "Open navigation"}
+          aria-expanded={menuOpen}
+          aria-controls="dashboard-sidebar"
+          onClick={onMenuToggle}
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            aria-hidden="true"
+          >
+            <path d="M3 6h18M3 12h18M3 18h18" />
+          </svg>
+        </button>
+      )}
+
       <nav className={styles.breadcrumb} aria-label="Breadcrumb">
         <Link
           href="/"

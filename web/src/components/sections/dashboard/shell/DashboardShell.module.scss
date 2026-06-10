@@ -2,6 +2,8 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
+  // Mobile browsers: track the dynamic toolbar so nothing hides behind it.
+  height: 100dvh;
   overflow: hidden;
   background: var(--bg-base);
 }
@@ -25,4 +27,26 @@
   flex: 1;
   overflow-y: auto;
   padding: 24px;
+
+  @include breakpoint-down(md) {
+    padding: 16px;
+  }
+}
+
+// Backdrop behind the off-canvas sidebar (mobile only).
+.scrim {
+  display: none;
+
+  @include breakpoint-down(lg) {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 205;
+    border: none;
+    padding: 0;
+    background: oklch(0 0 0 / 0.55);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    cursor: pointer;
+  }
 }

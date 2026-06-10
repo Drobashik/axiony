@@ -23,6 +23,17 @@ export const Nav = () => {
     };
   }, [menuOpen]);
 
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [menuOpen]);
+
   const close = () => setMenuOpen(false);
 
   return (
@@ -73,6 +84,10 @@ export const Nav = () => {
           <span className={styles.bar} />
         </button>
       </div>
+
+      {menuOpen && (
+        <button type="button" className={styles.scrim} aria-label="Close menu" onClick={close} />
+      )}
 
       <div id="mobile-navigation" className={cn(styles.mobile, menuOpen && styles.mobileOpen)}>
         <nav className={styles.mobileLinks} aria-label="Mobile">

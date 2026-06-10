@@ -78,11 +78,49 @@
   // cropped. Force both to span the full table width.
   width: 100%;
   display: grid;
-  grid-template-columns: 1fr 120px 90px 90px 32px;
+  grid-template-columns: minmax(0, 1fr) 120px 90px 90px 32px;
   align-items: center;
   gap: 12px;
   padding: 11px 14px;
   border-bottom: 1px solid var(--border-subtle);
+}
+
+// Mobile: two-line cards — title + chevron, then project / status / assignee.
+@include breakpoint-down(md) {
+  .tableHeader {
+    display: none;
+  }
+
+  .row {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      "issue issue chevron"
+      "project status assignee";
+    row-gap: 10px;
+    padding: 12px 14px;
+  }
+
+  .issue {
+    grid-area: issue;
+  }
+
+  .project {
+    grid-area: project;
+  }
+
+  .chevron {
+    grid-area: chevron;
+  }
+
+  .row > div:nth-child(3) {
+    grid-area: assignee;
+    justify-self: end;
+  }
+
+  .row > div:nth-child(4) {
+    grid-area: status;
+    justify-self: start;
+  }
 }
 
 .tableHeader {

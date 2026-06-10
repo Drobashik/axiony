@@ -85,7 +85,12 @@ export const ScanNav = ({
           ) : (
             <>
               {status === "results" && (
-                <Button variant="secondary" size="sm" onClick={onRescan}>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className={styles.rescanAction}
+                  onClick={onRescan}
+                >
                   <RefreshIcon size={14} />
                   Rescan
                 </Button>
