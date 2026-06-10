@@ -982,6 +982,10 @@
   color: var(--text-secondary);
   font-size: 0.82rem;
   line-height: 1.45;
+
+  &:focus {
+    @include focus-ring;
+  }
 }
 
 @include breakpoint-down(sm) {
@@ -2178,7 +2182,7 @@
 .confirmOverlay {
   position: fixed;
   inset: 0;
-  z-index: 80;
+  z-index: 260;
   display: grid;
   place-items: center;
   padding: 18px;
@@ -2209,6 +2213,17 @@
     font-size: 0.9rem;
     line-height: 1.55;
   }
+}
+
+.confirmUrl {
+  margin-bottom: 8px !important;
+  overflow: hidden;
+  color: var(--text-primary) !important;
+  font-family: var(--font-mono);
+  font-size: 0.82rem !important;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .confirmIcon {

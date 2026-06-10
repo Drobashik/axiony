@@ -3,6 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import {
+  authenticateMockAccount,
+  registerMockAccount,
+  upsertMockOAuthAccount,
+} from "@/lib/auth/mock-store";
 import { completeAuth } from "@/lib/workspace";
 import { getPasswordStrength, isEmail } from "../lib/validation";
 import type { AuthFieldName, AuthMode, AuthStatus, AuthView, OAuthProvider } from "../lib/types";
@@ -12,11 +17,6 @@ const SUBMIT_MS = 1300;
 const REDIRECT_MS = 1000;
 const OAUTH_MS = 1200;
 const REDIRECT_TO = "/dashboard";
-
-// Reserved addresses that force the error state, so every state is
-// reachable in the mock. Documented in the implementation summary.
-const ERROR_EMAIL = "error@axiony.dev"; // login → invalid credentials
-const TAKEN_EMAIL = "taken@axiony.dev"; // signup → email already in use
 
 // Stand-in profiles returned by the mock OAuth providers, so a social
 // sign-in still produces a believable account. Swap for the real profile
@@ -152,21 +152,31 @@ export function useAuthForm(mode: AuthMode) {
 
     schedule(() => {
       const email = fields.email.trim().toLowerCase();
+      const authResult =
+        mode === "signup"
+          ? registerMockAccount({
+              name: fields.name,
+              email,
+              password: fields.password,
+            })
+          : authenticateMockAccount({
+              email,
+              password: fields.password,
+            });
 
-      if (mode === "login" && email === ERROR_EMAIL) {
+      if (!authResult.ok) {
         setStatus("error");
-        setFormError("We couldn't find an account with those credentials.");
-        return;
-      }
-      if (mode === "signup" && email === TAKEN_EMAIL) {
-        setStatus("error");
-        setErrors({ email: "An account with this email already exists." });
-        focusFirstInvalid();
+        if (authResult.field) {
+          setErrors({ [authResult.field]: authResult.message });
+          focusFirstInvalid();
+        } else {
+          setFormError(authResult.message);
+        }
         return;
       }
 
       // Create/refresh the workspace — turns a pending scan into a baseline.
-      completeAuth({ name: fields.name, email });
+      completeAuth(authResult.identity);
       persistMockSession({ email, mode });
       setStatus("success");
       schedule(() => router.push(REDIRECT_TO), REDIRECT_MS);
@@ -177,7 +187,8 @@ export function useAuthForm(mode: AuthMode) {
     if (oauthPending || status === "submitting") return;
     setOauthPending(id);
     schedule(() => {
-      completeAuth(OAUTH_IDENTITY[id]);
+      const identity = upsertMockOAuthAccount(OAUTH_IDENTITY[id], id);
+      completeAuth(identity);
       persistMockSession({ provider: id, mode });
       router.push(REDIRECT_TO);
     }, OAUTH_MS);

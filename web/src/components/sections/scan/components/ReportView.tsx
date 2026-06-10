@@ -25,24 +25,11 @@ interface ReportViewProps {
   onUpgrade?: () => void;
 }
 
-const FREE_DETAIL_LIMIT = 6;
-
 const freePreviewIssueIds = (report: ScanReport): string[] => {
-  const critical = report.issues.filter((issue) => issue.severity === "critical").slice(0, 3);
-  const serious = report.issues.filter((issue) => issue.severity === "serious").slice(0, 3);
-  const selected = [...critical, ...serious];
-  const selectedIds = new Set(selected.map((issue) => issue.id));
-
-  if (selected.length < FREE_DETAIL_LIMIT) {
-    for (const issue of sortIssues(report.issues, "severity")) {
-      if (selectedIds.has(issue.id)) continue;
-      selected.push(issue);
-      selectedIds.add(issue.id);
-      if (selected.length >= FREE_DETAIL_LIMIT) break;
-    }
-  }
-
-  return selected.map((issue) => issue.id);
+  const sorted = sortIssues(report.issues, "severity");
+  return SEVERITY_ORDER.map(
+    (severity) => sorted.find((issue) => issue.severity === severity)?.id,
+  ).filter((id): id is string => Boolean(id));
 };
 
 const buildSummary = (report: ScanReport): string => {

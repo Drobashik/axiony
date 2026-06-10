@@ -11,8 +11,6 @@ import { STATUS_OPTIONS, statusMeta } from "./issue-status";
 import { IssueDetail } from "./IssueDetail";
 import styles from "./Workspace.module.scss";
 
-const FREE_DETAIL_LIMIT = 6;
-
 type Filter = "open" | "resolved" | "all";
 
 const FILTERS: ReadonlyArray<{ id: Filter; label: string }> = [
@@ -33,27 +31,21 @@ interface DetailKey {
 type LocatedIssues = ReturnType<typeof aggregateOpenIssues>;
 
 const issueKey = (host: string, path: string, issueId: string) => `${host}::${path}::${issueId}`;
+const pageKey = (host: string, path: string) => `${host}::${path}`;
 
 const freeDetailKeys = (located: LocatedIssues): Set<string> => {
-  const selected: LocatedIssues = [];
   const selectedKeys = new Set<string>();
+  const byPage = new Map<string, LocatedIssues>();
 
-  for (const severity of ["critical", "serious"] as const) {
-    for (const item of located.filter(({ issue }) => issue.severity === severity).slice(0, 3)) {
-      const key = issueKey(item.host, item.path, item.issue.id);
-      if (selectedKeys.has(key)) continue;
-      selected.push(item);
-      selectedKeys.add(key);
-    }
+  for (const item of located) {
+    const key = pageKey(item.host, item.path);
+    byPage.set(key, [...(byPage.get(key) ?? []), item]);
   }
 
-  if (selected.length < FREE_DETAIL_LIMIT) {
-    for (const item of located) {
-      const key = issueKey(item.host, item.path, item.issue.id);
-      if (selectedKeys.has(key)) continue;
-      selected.push(item);
-      selectedKeys.add(key);
-      if (selected.length >= FREE_DETAIL_LIMIT) break;
+  for (const pageIssues of byPage.values()) {
+    for (const severity of SEVERITIES) {
+      const item = pageIssues.find(({ issue }) => issue.severity === severity);
+      if (item) selectedKeys.add(issueKey(item.host, item.path, item.issue.id));
     }
   }
 
