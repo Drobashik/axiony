@@ -1,45 +1,49 @@
 import { Section } from "@/components/layout";
-import { Button, Container, SectionEyebrow } from "@/components/ui";
+import { Button, Container } from "@/components/ui";
 import cn from "classnames";
-import { BaselineDemo } from "./components/BaselineDemo";
-import { LayerCard } from "./components/LayerCard";
-import { SOLUTION_LAYERS } from "./data";
+import { ReleaseSim } from "./components/ReleaseSim";
+import { SOLUTION_STEPS } from "./data";
 import styles from "./Solution.module.scss";
 
 export const Solution = () => (
   <Section>
     <Container>
       <div className={cn(styles.intro, "reveal")}>
-        <SectionEyebrow>Solution</SectionEyebrow>
-        <h2>Stop treating accessibility like a cleanup project.</h2>
+        <span className={styles.eyebrow}>{"// the fix"}</span>
+        <h2 className={styles.heading}>
+          Your score gets one new rule:
+          <br />
+          <em className={styles.headingAccent}>it only goes up.</em>
+        </h2>
         <p className={styles.lead}>
-          Most tools hand you a 500-issue report and wish you luck. Axiony makes accessibility a{" "}
-          <strong>continuous workflow</strong> instead. Your first scan becomes a{" "}
-          <strong>baseline</strong> — existing issues are tracked as known debt, never blocking a
-          release. From there, every <em>new</em> issue is flagged before it merges, and the whole
-          team watches the score climb, release after release.
+          The first scan locks today as your baseline — old issues become tracked debt, new ones
+          don&apos;t merge. Below are the same ten releases shipped twice, with the gate and
+          without. Press the button and watch them drift apart.
         </p>
       </div>
 
-      <div className={cn(styles.stageWrap, "reveal")}>
-        <BaselineDemo />
+      <div className="reveal">
+        <ReleaseSim />
       </div>
 
-      <div className={cn(styles.layers, "reveal")}>
-        {SOLUTION_LAYERS.map((layer, index) => (
-          <LayerCard key={layer.name} layer={layer} index={index} />
+      <ol className={cn(styles.steps, "reveal")} aria-label="How the baseline works">
+        {SOLUTION_STEPS.map((step) => (
+          <li key={step.tag} className={styles.step}>
+            <code className={styles.stepTag}>{step.tag}</code>
+            <span className={styles.stepText}>{step.text}</span>
+          </li>
         ))}
-      </div>
+      </ol>
 
       <div className={cn(styles.cta, "reveal")}>
         <p>
-          Start free with the CLI. Add the cloud when you want it to remember, track, and protect
-          what your team has fixed.
+          The CLI is free and runs anywhere. The cloud remembers — history, trends, and the gate in
+          every pull request.
         </p>
         <div className={styles.ctaButtons}>
-          <Button href="/docs">Start cloud scanning</Button>
+          <Button href="/scan">Lock your baseline</Button>
           <Button href="/pricing" variant="secondary">
-            See cloud pricing
+            See pricing
           </Button>
         </div>
       </div>

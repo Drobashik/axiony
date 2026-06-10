@@ -1,19 +1,19 @@
 // =====================================================================
-// Hero — benefit copy + CTAs on the left, an animated "live scan
-// result" card on the right. Mounted after the BootGate loader clears,
-// so animations fire on first paint.
+// Hero — opinionated headline with a lint-style squiggle + blinking
+// terminal caret on the left; a live demo terminal on the right that
+// "runs" a scan (typed command, streamed output, PR-blocked card).
+// Mounted after the BootGate loader clears, so animations fire on
+// first paint.
 // =====================================================================
 
 .hero {
   position: relative;
   overflow: hidden;
-  padding: 92px 0 84px;
+  padding: 84px 0 104px;
   isolation: isolate;
 }
 
-// ── Background grid + accent glow ────────────────────────────────────
-// Soft dot texture — far gentler behind text than a line grid, and the
-// alpha lives in the dot colour so the entrance fade can't blow it out.
+// ── Background: dot grid, two asymmetric glows, film grain ──────────
 .grid {
   @include absolute-fill;
   pointer-events: none;
@@ -25,14 +25,34 @@
 
 .glow {
   position: absolute;
-  top: -12%;
-  right: -8%;
-  width: 62%;
-  height: 92%;
+  top: -14%;
+  right: -10%;
+  width: 58%;
+  height: 88%;
   pointer-events: none;
-  background: radial-gradient(ellipse at center, oklch(0.62 0.22 240 / 0.12), transparent 66%);
-  filter: blur(26px);
+  background: radial-gradient(ellipse at center, oklch(0.62 0.22 240 / 0.13), transparent 64%);
+  filter: blur(28px);
   animation: heroFadeIn 1.3s $ease-out both;
+}
+
+.glowAlt {
+  position: absolute;
+  bottom: -28%;
+  left: -12%;
+  width: 46%;
+  height: 70%;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, oklch(0.62 0.2 290 / 0.08), transparent 62%);
+  filter: blur(30px);
+  animation: heroFadeIn 1.6s $ease-out both;
+}
+
+// Barely-there grain so large dark areas don't read as flat vector fill.
+.noise {
+  @include absolute-fill;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.04;
 }
 
 @keyframes heroFadeIn {
@@ -49,8 +69,8 @@
   position: relative;
   z-index: 2;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 0.94fr);
-  gap: 52px;
+  grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
+  gap: 56px;
   align-items: center;
 }
 
@@ -58,38 +78,78 @@
   text-align: left;
 }
 
-// ── Eyebrow pill ─────────────────────────────────────────────────────
-.label {
+// ── Eyebrow: the eternal TODO comment, finally resolved ──────────────
+// "later" gets struck through in red, then "today." is handwritten in —
+// a tiny story that replaces the usual version-badge boilerplate.
+.todo {
   display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 24px;
-  border: 1px solid var(--blue-border);
-  border-radius: 99px;
-  padding: 5px 13px;
-  background: var(--blue-dim);
-  color: var(--blue);
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 7px;
+  margin-bottom: 20px;
   font-family: var(--font-mono);
-  font-size: 0.76rem;
-  font-weight: 600;
+  font-size: 0.8rem;
+  font-weight: 500;
   animation: fadeUp 0.5s $ease-out both;
 }
 
-.labelDot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--blue);
-  box-shadow: 0 0 0 0 var(--blue);
-  animation: labelPulse 2s ease-in-out infinite;
+.todoComment {
+  color: var(--text-muted);
 }
 
-// ── Title with per-character illumination ───────────────────────────
+.todoLater {
+  position: relative;
+  color: var(--text-muted);
+  text-decoration: none;
+
+  // Self-drawing red strike — the correction happens in front of you.
+  &::after {
+    content: "";
+    position: absolute;
+    top: 52%;
+    left: -2px;
+    right: -2px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--severity-critical);
+    transform: scaleX(0);
+    transform-origin: left center;
+    animation: todoStrike 0.3s $ease-out 1.45s both;
+  }
+}
+
+.todoToday {
+  display: inline-block;
+  color: var(--green);
+  font-family: var(--font-hand);
+  font-size: 1.3rem;
+  line-height: 1;
+  animation: todoToday 0.4s cubic-bezier(0.3, 1.4, 0.4, 1) 1.8s both;
+}
+
+@keyframes todoStrike {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes todoToday {
+  from {
+    opacity: 0;
+    transform: rotate(-7deg) translateY(5px) scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-2deg) translateY(0) scale(1);
+  }
+}
+
+// ── Title: per-char reveal, lint squiggle, blinking caret ────────────
 .title {
-  margin: 0 0 20px;
-  font-size: clamp(2.2rem, 4.2vw, 3.5rem);
-  line-height: 1.08;
-  letter-spacing: -0.02em;
+  margin: 0 0 18px;
+  font-size: clamp(1.95rem, 2.6vw + 0.9rem, 3.15rem);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
 }
 
 .titleAccent {
@@ -128,12 +188,130 @@
   }
 }
 
-// ── Subtitle / value chips / actions ────────────────────────────────
+// The flagged word — a red editor-lint squiggle draws itself underneath.
+.squiggleWrap {
+  position: relative;
+  display: inline-block;
+}
+
+.squiggle {
+  position: absolute;
+  left: -0.03em;
+  bottom: -0.12em;
+  width: calc(100% + 0.12em);
+  height: 0.24em;
+  overflow: visible;
+  opacity: 0;
+  pointer-events: none;
+  animation: squiggleWake 0.01s linear 1.64s both;
+
+  path {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+}
+
+.squiggleMask {
+  transform: scaleX(0);
+  transform-box: fill-box;
+  transform-origin: 0 50%;
+  animation: squiggleReveal 0.7s cubic-bezier(0.2, 0, 0, 1) 1.66s both;
+}
+
+.squiggleGlow {
+  opacity: 0.3;
+  stroke: oklch(0.72 0.2 20 / 0.34);
+  stroke-width: 5.4;
+  animation: squiggleGlowSettle 0.62s ease-out 2.04s both;
+}
+
+.squiggleMain {
+  stroke: var(--severity-critical);
+  stroke-width: 2.15;
+  animation: squiggleSettle 0.52s ease-out 2.16s both;
+}
+
+@keyframes squiggleWake {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes squiggleReveal {
+  0% {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes squiggleGlowSettle {
+  0% {
+    opacity: 0.44;
+  }
+  100% {
+    opacity: 0.28;
+  }
+}
+
+@keyframes squiggleSettle {
+  0% {
+    filter: drop-shadow(0 0 0 oklch(0.72 0.2 20 / 0));
+  }
+  45% {
+    filter: drop-shadow(0 0 7px oklch(0.72 0.2 20 / 0.45));
+  }
+  100% {
+    filter: drop-shadow(0 0 0 oklch(0.72 0.2 20 / 0));
+  }
+}
+
+// Block caret after the last line — the headline ends mid-terminal.
+.titleCaret {
+  display: inline-block;
+  width: 0.48ch;
+  height: 0.74em;
+  margin-left: 0.14em;
+  background: var(--blue);
+  transform: translateY(0.06em);
+  animation:
+    caretIn 0.25s $ease-out 2.12s both,
+    caretBlink 1.15s linear 2.42s infinite;
+}
+
+@keyframes caretIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes caretBlink {
+  0%,
+  46% {
+    opacity: 1;
+  }
+  50%,
+  96% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+// ── Subtitle / value checks / actions / install ──────────────────────
 .subtitle {
-  max-width: 540px;
-  margin: 0 0 22px;
+  max-width: 530px;
+  margin: 0 0 20px;
   color: var(--text-secondary);
-  font-size: 1.1rem;
+  font-size: 1.08rem;
   line-height: 1.65;
   animation: fadeUp 0.6s $ease-out 0.5s both;
 }
@@ -141,21 +319,25 @@
 .valuePoints {
   display: flex;
   flex-wrap: wrap;
-  gap: 9px;
+  gap: 10px 22px;
   margin: 0 0 30px;
-  animation: fadeUp 0.6s $ease-out 0.58s both;
+  padding: 0;
+  list-style: none;
+  animation: fadeUp 0.6s $ease-out 0.62s both;
 
-  span {
+  li {
     display: inline-flex;
-    min-height: 32px;
     align-items: center;
-    border: 1px solid var(--border-default);
-    border-radius: 99px;
-    padding: 0 13px;
-    background: oklch(0.18 0.02 250 / 0.72);
+    gap: 7px;
     color: var(--text-secondary);
-    font-size: 0.84rem;
-    font-weight: 700;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 500;
+
+    svg {
+      flex: none;
+      color: var(--green);
+    }
   }
 }
 
@@ -163,7 +345,54 @@
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
-  animation: fadeUp 0.6s $ease-out 0.66s both;
+  margin-bottom: 16px;
+  animation: fadeUp 0.6s $ease-out 0.72s both;
+}
+
+.install {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px dashed var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 8px 14px;
+  background: oklch(0.15 0.015 250 / 0.55);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition:
+    border-color var(--transition),
+    color var(--transition);
+  animation: fadeUp 0.6s $ease-out 0.82s both;
+
+  code {
+    color: var(--text-code);
+    font-size: inherit;
+  }
+
+  &:hover {
+    border-color: var(--border-strong);
+    color: var(--text-primary);
+  }
+}
+
+.installPrompt {
+  color: var(--green);
+}
+
+.installCopy {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 4px;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.installCopied {
+  color: var(--green);
 }
 
 @keyframes fadeUp {
@@ -177,22 +406,65 @@
   }
 }
 
-@keyframes labelPulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 oklch(0.62 0.22 240 / 0.5);
-  }
-  50% {
-    box-shadow: 0 0 0 5px oklch(0.62 0.22 240 / 0);
+// ── Live terminal ────────────────────────────────────────────────────
+.terminalWrap {
+  position: relative;
+}
+
+// Handwritten aside — the one deliberately imperfect thing on the page.
+.annotation {
+  position: absolute;
+  top: -54px;
+  right: 16px;
+  z-index: 3;
+  color: var(--text-secondary);
+  font-family: var(--font-hand);
+  font-size: 1.22rem;
+  line-height: 1.15;
+  transform: rotate(-2deg);
+  animation: fadeUp 0.7s $ease-out 2s both;
+}
+
+// The arrow hangs off the note's left edge and swoops down-left, stopping
+// just above the terminal window — pointing at it, not into it.
+.annotationArrow {
+  position: absolute;
+  top: 12px;
+  right: calc(100% - -15px);
+  width: 104px;
+  height: 38px;
+
+  path {
+    fill: none;
+    stroke: var(--text-muted);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 }
 
-// ── Scan result card ─────────────────────────────────────────────────
-.card {
+.annotationCurve {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: annotationDraw 0.35s ease-out 2.4s both;
+}
+
+.annotationHead {
+  opacity: 0;
+  animation: caretIn 0.2s ease-out 2.72s both;
+}
+
+@keyframes annotationDraw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.terminal {
   position: relative;
   @include elevated-panel(var(--radius-xl), 0 30px 80px oklch(0 0 0 / 0.42));
   overflow: hidden;
-  animation: cardIn 0.7s $ease-out 0.3s both;
+  animation: cardIn 0.7s $ease-out 0.25s both;
 }
 
 @keyframes cardIn {
@@ -206,12 +478,12 @@
   }
 }
 
-.cardHead {
+.termHead {
   display: flex;
   align-items: center;
   gap: 12px;
   border-bottom: 1px solid var(--border-subtle);
-  padding: 12px 16px;
+  padding: 11px 16px;
   background: oklch(0.16 0.018 250 / 0.6);
 }
 
@@ -237,190 +509,190 @@
   }
 }
 
-.cardCmd {
+.termTitle {
   flex: 1;
   min-width: 0;
-  overflow: hidden;
-  color: var(--text-secondary);
+  @include truncate;
+  color: var(--text-muted);
   font-family: var(--font-mono);
-  font-size: 0.8rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: 0.76rem;
 }
 
-.cardStatus {
-  display: inline-flex;
-  align-items: center;
-  border: 1px solid #{$green-border};
-  border-radius: 99px;
-  padding: 3px 10px;
-  background: var(--green-dim);
-  color: var(--green);
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.cardBody {
-  position: relative;
-  display: grid;
-  gap: 16px;
-  padding: 20px;
-  overflow: hidden;
-}
-
-.cardBeam {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 2px;
-  z-index: 3;
-  pointer-events: none;
-  background: linear-gradient(90deg, transparent, oklch(0.62 0.22 240 / 0.9), transparent);
-  box-shadow: 0 0 14px oklch(0.62 0.22 240 / 0.7);
-  animation: cardSweep 1s cubic-bezier(0.65, 0, 0.35, 1) 0.5s both;
-}
-
-@keyframes cardSweep {
-  0% {
-    top: 0;
-    opacity: 0;
-  }
-  15% {
-    opacity: 1;
-  }
-  85% {
-    opacity: 1;
-  }
-  100% {
-    top: 100%;
-    opacity: 0;
-  }
-}
-
-// Score
-.scoreRow {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-}
-
-.ring {
-  position: relative;
-  width: 84px;
-  height: 84px;
-  flex: none;
-
-  svg {
-    width: 100%;
-    height: 100%;
-  }
-}
-
-.ringTrack {
-  fill: none;
-  stroke: oklch(1 0 0 / 0.1);
-  stroke-width: 7;
-}
-
-.ringFill {
-  fill: none;
-  stroke: var(--green);
-  stroke-width: 7;
-  stroke-linecap: round;
-  transform: rotate(-90deg);
-  transform-origin: 50% 50%;
-  stroke-dasharray: 214;
-  stroke-dashoffset: 214;
-  animation: ringDraw 1.1s $ease-out 0.7s both;
-}
-
-@keyframes ringDraw {
-  to {
-    stroke-dashoffset: 17;
-  }
-}
-
-.ringVal {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  color: var(--green);
-  font-family: var(--font-mono);
-  font-size: 1.7rem;
-  font-weight: 900;
-}
-
-.scoreMeta {
-  display: grid;
-  gap: 6px;
-
-  strong {
-    color: var(--text-primary);
-    font-size: 0.98rem;
-  }
-}
-
-.baselinePill {
+.termLive {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  width: fit-content;
-  border: 1px solid #{$green-border};
-  border-radius: 99px;
-  padding: 3px 10px;
-  background: var(--green-dim);
   color: var(--green);
   font-family: var(--font-mono);
   font-size: 0.7rem;
-  font-weight: 800;
-}
-
-.scoreSub {
-  color: var(--text-muted);
-  font-size: 0.76rem;
   font-weight: 600;
-}
 
-// Findings
-.issues {
-  display: grid;
-  gap: 7px;
-}
-
-.issueRow {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 9px 12px;
-  background: var(--bg-base);
-  opacity: 0;
-  animation: rowIn 0.4s $ease-out both;
-  animation-delay: calc(1s + var(--i) * 0.13s);
-
-  code {
-    color: var(--text-code);
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
+  i {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: livePulse 1.1s ease-in-out infinite;
   }
 }
 
-.issueWhere {
-  margin-left: auto;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: 0.76rem;
+@keyframes livePulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
 }
 
-.sev {
+.termReplay {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--border-default);
+  border-radius: 99px;
+  padding: 3px 11px;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    color var(--transition),
+    border-color var(--transition);
+  animation: fadeUp 0.3s $ease-out both;
+
+  &:hover {
+    color: var(--text-primary);
+    border-color: var(--border-strong);
+  }
+}
+
+// ── Terminal body ────────────────────────────────────────────────────
+.termBody {
+  padding: 18px 18px 16px;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.7;
+  // Final height of the full script — keeps the card from growing as
+  // lines stream in (and the page from shifting under the cursor).
+  min-height: 26em;
+}
+
+.termLine {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  animation: termIn 0.22s $ease-out both;
+
+  & + & {
+    margin-top: 2px;
+  }
+}
+
+@keyframes termIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.termPrompt {
   flex: none;
-  width: 9px;
-  height: 9px;
+  color: var(--green);
+  font-weight: 600;
+}
+
+.termCmd {
+  color: var(--text-primary);
+  word-break: break-all;
+}
+
+.termCaret {
+  display: inline-block;
+  width: 7px;
+  height: 1em;
+  margin-left: 2px;
+  background: var(--blue);
+  vertical-align: text-bottom;
+  animation: caretBlink 1.05s linear infinite;
+}
+
+.termMark {
+  flex: none;
+  width: 14px;
+  text-align: center;
+  color: var(--text-muted);
+  font-style: normal;
+}
+
+.mark_success {
+  color: var(--green);
+}
+
+.mark_error,
+.mark_exit {
+  color: var(--severity-critical);
+}
+
+.termText {
+  color: var(--text-secondary);
+}
+
+.exitText {
+  color: var(--severity-critical);
+  font-weight: 700;
+}
+
+.exitAside {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.termAside {
+  margin-left: auto;
+  padding-left: 12px;
+  color: var(--text-muted);
+  font-size: 0.74rem;
+}
+
+.termSection {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 9px 0 5px;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  animation: termIn 0.22s $ease-out both;
+
+  &::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--border-subtle);
+  }
+}
+
+.termRule {
+  color: var(--text-code);
+  font-family: var(--font-mono);
+  font-size: inherit;
+}
+
+.sevDot {
+  display: block;
+  width: 8px;
+  height: 8px;
+  margin-inline: auto;
   border-radius: 50%;
 }
 
@@ -434,51 +706,132 @@
   background: var(--severity-moderate);
 }
 
-@keyframes rowIn {
-  from {
-    opacity: 0;
-    transform: translateX(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+.sevName {
+  flex: none;
+  width: 64px;
+  font-size: 0.76rem;
 }
 
-.cardFoot {
+.sevText_critical {
+  color: var(--severity-critical);
+}
+.sevText_serious {
+  color: var(--severity-serious);
+}
+.sevText_moderate {
+  color: var(--severity-moderate);
+}
+
+// ── PR-blocked card (pops over the terminal's corner) ────────────────
+.prCard {
+  position: absolute;
+  right: -16px;
+  bottom: -30px;
+  z-index: 3;
+  width: min(300px, 88%);
+  @include elevated-panel(var(--radius-lg), 0 18px 50px oklch(0 0 0 / 0.5));
+  display: grid;
+  gap: 9px;
+  padding: 12px 14px;
+  opacity: 0;
+  transform: translateY(14px) scale(0.95);
+  pointer-events: none;
+  transition:
+    opacity 0.4s $ease-out,
+    transform 0.5s cubic-bezier(0.3, 1.4, 0.4, 1);
+}
+
+.prCardVisible {
+  opacity: 1;
+  transform: translateY(0) rotate(-1.2deg);
+}
+
+.prTop {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  border-top: 1px solid var(--border-subtle);
-  padding-top: 14px;
+  gap: 8px;
   color: var(--text-muted);
   font-family: var(--font-mono);
-  font-size: 0.76rem;
-  font-weight: 700;
-  opacity: 0;
-  animation: rowIn 0.4s $ease-out 1.45s both;
+  font-size: 0.72rem;
+
+  svg {
+    flex: none;
+    color: var(--violet);
+  }
 }
 
-.blocked {
+.prRef {
+  @include truncate;
+}
+
+.prBadge {
+  flex: none;
+  margin-left: auto;
+  border: 1px solid oklch(0.72 0.2 20 / 0.35);
+  border-radius: 99px;
+  padding: 1px 8px;
+  background: oklch(0.72 0.2 20 / 0.12);
   color: var(--severity-critical);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.prRow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  code {
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+  }
+}
+
+.prX {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 17px;
+  height: 17px;
+  border: 1px solid oklch(0.72 0.2 20 / 0.4);
+  border-radius: 50%;
+  background: oklch(0.72 0.2 20 / 0.14);
+  color: var(--severity-critical);
+  font-size: 0.66rem;
+  font-weight: 800;
+}
+
+.prMsg {
+  margin-left: auto;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
 }
 
 // ── Reduced motion ───────────────────────────────────────────────────
+// (The terminal itself renders its finished state via JS when the user
+// prefers reduced motion — see LiveTerminal.)
 @media (prefers-reduced-motion: reduce) {
   .grid,
   .glow,
-  .label,
-  .labelDot,
+  .glowAlt,
+  .todo,
   .char,
+  .titleCaret,
   .subtitle,
   .valuePoints,
   .actions,
-  .card,
-  .cardBeam,
-  .ringFill,
-  .issueRow,
-  .cardFoot {
+  .install,
+  .annotation,
+  .annotationHead,
+  .terminal,
+  .termLine,
+  .termSection,
+  .termLive i,
+  .termReplay {
     animation: none !important;
     opacity: 1;
     transform: none;
@@ -486,56 +839,147 @@
     text-shadow: none;
   }
 
-  .cardBeam {
-    display: none;
+  .annotation {
+    transform: rotate(-2deg);
   }
-  .ringFill {
-    stroke-dashoffset: 17;
+
+  .todoLater::after {
+    animation: none !important;
+    transform: scaleX(1);
+  }
+
+  .todoToday {
+    animation: none !important;
+    opacity: 1;
+    transform: rotate(-2deg);
+  }
+
+  .squiggle path,
+  .squiggle,
+  .squiggleMask,
+  .annotationCurve {
+    animation: none !important;
+  }
+
+  .squiggle {
+    opacity: 1;
+  }
+
+  .squiggleMask {
+    transform: scaleX(1);
+  }
+
+  .squiggleGlow {
+    opacity: 0.28;
+  }
+
+  .squiggleMain {
+    filter: none;
+  }
+
+  .termCaret {
+    animation: none !important;
+  }
+
+  .prCard {
+    transition: none;
   }
 }
 
 // ── Responsive ───────────────────────────────────────────────────────
 @media (max-width: 980px) {
+  .hero {
+    padding: 68px 0 96px;
+  }
+
   .container {
     grid-template-columns: 1fr;
-    gap: 40px;
-    max-width: 560px;
+    gap: 44px;
+    max-width: 620px;
     margin-inline: auto;
   }
 
-  .copy {
-    text-align: center;
-  }
-
-  .subtitle {
-    margin-inline: auto;
-  }
-
-  .valuePoints,
-  .actions {
-    justify-content: center;
+  .annotation {
+    display: none;
   }
 }
 
 @media (max-width: 640px) {
   .hero {
-    padding: 72px 0 64px;
+    padding: 56px 0 84px;
   }
 
-  .valuePoints span {
-    font-size: 0.78rem;
+  .subtitle {
+    font-size: 1rem;
   }
 
-  .cardBody {
-    padding: 16px;
+  .valuePoints {
+    gap: 9px 16px;
+
+    li {
+      font-size: 0.76rem;
+    }
   }
 
-  .scoreRow {
-    gap: 14px;
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+
+    > * {
+      width: 100%;
+      justify-content: center;
+    }
   }
 
-  .ring {
-    width: 72px;
-    height: 72px;
+  .install {
+    width: 100%;
+
+    code {
+      @include truncate;
+    }
+  }
+
+  .installCopy {
+    margin-left: auto;
+  }
+
+  .todo {
+    font-size: 0.74rem;
+
+    .todoToday {
+      font-size: 1.2rem;
+    }
+  }
+
+  .termBody {
+    padding: 14px;
+    font-size: 0.76rem;
+  }
+
+  // In flow on small screens — overlapping the terminal would hide its
+  // last lines (the "exit 1" punchline) behind the card.
+  .prCard {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    margin: -14px 8px 0 auto;
+
+    code {
+      font-size: 0.76rem;
+    }
+  }
+
+  .prMsg {
+    font-size: 0.68rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .termAside {
+    display: none;
+  }
+
+  .sevName {
+    width: auto;
   }
 }

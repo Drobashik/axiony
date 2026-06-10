@@ -1,608 +1,469 @@
+// =====================================================================
+// Solution — the ratchet, demonstrated. One button ships the same ten
+// releases through two pipelines: unprotected main drifts down, the
+// Axiony-gated main only climbs. Below it, the mechanism in three
+// verbs and a light CTA.
+// =====================================================================
+
 .intro {
   max-width: 760px;
-  margin: 0 auto 40px;
+  margin: 0 auto 48px;
   text-align: center;
+}
+
+// Comment-style eyebrow — same voice as the hero's "// TODO" line.
+.eyebrow {
+  display: block;
+  margin-bottom: 14px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.heading {
+  margin: 0;
+}
+
+.headingAccent {
+  font-style: normal;
+  color: var(--blue);
 }
 
 .lead {
   margin-top: 14px;
-  max-width: 660px;
+  max-width: 640px;
   margin-inline: auto;
   color: var(--text-secondary);
   font-size: 1.05rem;
   line-height: 1.75;
-
-  strong {
-    color: var(--text-primary);
-    font-weight: 700;
-  }
-
-  em {
-    color: var(--blue);
-    font-style: normal;
-    font-weight: 700;
-  }
 }
 
-// ── Interactive centerpiece ──────────────────────────────────────────
-.stageWrap {
-  max-width: 860px;
-  margin: 0 auto 56px;
-}
-
-.stage {
+// ── Simulator shell ──────────────────────────────────────────────────
+.sim {
   position: relative;
+  max-width: 880px;
+  margin-inline: auto;
   @include elevated-panel;
-  @include grid-overlay(
-    46px,
-    0.04,
-    radial-gradient(ellipse 70% 60% at 50% 24%, black, transparent)
-  );
-  padding: 22px 24px 24px;
+  @include grid-overlay(44px, 0.04);
+  padding: 20px 22px 22px;
   overflow: hidden;
-
-  > * {
-    position: relative;
-  }
 }
 
-.stageHeader {
+.simHead {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.simLabel {
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.simLabelDim {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.simCount {
+  flex: none;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+}
+
+// ── The two tracks ───────────────────────────────────────────────────
+.tracks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 14px;
+}
+
+.track {
+  // Let the column shrink below the chart's 300px viewBox width.
+  min-width: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 14px 14px 12px;
+  background: oklch(0.13 0.014 250 / 0.6);
+}
+
+.track_gated {
+  border-color: var(--blue-border);
+  background:
+    linear-gradient(180deg, oklch(0.62 0.22 240 / 0.05), transparent 55%),
+    oklch(0.13 0.014 250 / 0.6);
+}
+
+.trackHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
   margin-bottom: 6px;
 }
 
-.stageLabel {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--text-secondary);
+.trackName {
+  min-width: 0;
+  color: var(--text-muted);
   font-family: var(--font-mono);
   font-size: 0.74rem;
-  font-weight: 700;
+  @include truncate;
 }
 
-.stageTier {
-  border: 1px solid var(--violet-border);
-  border-radius: 99px;
-  padding: 3px 10px;
-  background: var(--violet-dim);
-  color: var(--violet);
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.03em;
+.track_gated .trackName {
+  color: var(--blue);
 }
 
-.stageTitle {
-  margin-bottom: 8px;
+// Full / short variants swap per breakpoint; display:none keeps the
+// hidden one out of the accessibility tree.
+.trackNameShort {
+  display: none;
+}
+
+.score {
+  flex: none;
   color: var(--text-primary);
-  font-size: 1.32rem;
+  font-family: var(--font-mono);
+  font-size: 1.55rem;
   font-weight: 700;
-  letter-spacing: -0.01em;
+  line-height: 1;
+  animation: scorePop 0.3s $ease-out both;
 }
 
-// ── Chart ────────────────────────────────────────────────────────────
+.score_bad {
+  color: var(--severity-critical);
+}
+
+.score_good {
+  color: var(--green);
+}
+
+@keyframes scorePop {
+  from {
+    opacity: 0.4;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ── Charts ───────────────────────────────────────────────────────────
 .chart {
   display: block;
   width: 100%;
   height: auto;
-  overflow: visible;
 }
 
-.grid {
-  line {
-    stroke: oklch(1 0 0 / 0.06);
-    stroke-width: 1;
-  }
+.chartRef {
+  stroke: oklch(1 0 0 / 0.14);
+  stroke-width: 1;
+  stroke-dasharray: 4 5;
 }
 
-.baseLine {
-  stroke: var(--blue);
-  stroke-width: 1.5;
-  stroke-dasharray: 3 5;
-  opacity: 0.5;
+// The full line exists from the start; each release peels the
+// clip-path back to reveal the next segment.
+.chartDraw {
+  transition: clip-path 450ms $ease-out;
 }
 
-.area {
-  fill: oklch(0.72 0.18 145 / 0.12);
-}
-
-.line {
+.chartLine {
   fill: none;
-  stroke: var(--green);
-  stroke-width: 3;
+  stroke-width: 2.4;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
-.node {
-  fill: var(--green);
-  opacity: 0.85;
+.chartArea {
+  opacity: 0.1;
 }
 
-.headDot {
-  fill: var(--green);
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: headPop 0.42s $ease-out;
-}
-
-.headPulse {
-  fill: var(--green);
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: headRing 2.1s ease-in-out infinite;
-}
-
-.headLabel {
-  fill: var(--green);
-  font-family: var(--font-mono);
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.ghost {
-  animation: ghostReject 1.25s $ease-out forwards;
-
-  line {
+.chart_drift {
+  .chartLine {
     stroke: var(--severity-critical);
-    stroke-width: 2.5;
-    stroke-dasharray: 3 3;
-    stroke-linecap: round;
   }
+  .chartArea {
+    fill: var(--severity-critical);
+  }
+}
+
+.chart_ratchet {
+  .chartLine {
+    stroke: var(--green);
+  }
+  .chartArea {
+    fill: var(--green);
+  }
+}
+
+.chartHead {
+  transition: transform 450ms $ease-out;
 
   circle {
-    fill: oklch(0.72 0.2 20 / 0.25);
-    stroke: var(--severity-critical);
-    stroke-width: 1.5;
+    stroke-width: 2;
   }
 }
 
-.ghostX {
-  stroke: var(--severity-critical);
-  stroke-width: 2;
-  stroke-linecap: round;
+.chartHead_drift circle {
+  fill: var(--severity-critical);
+  stroke: oklch(0.72 0.2 20 / 0.3);
 }
 
-// ── Status line ──────────────────────────────────────────────────────
-.statusLine {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  margin: 14px 0 16px;
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  padding: 11px 13px;
-  font-size: 0.88rem;
-  font-weight: 600;
-  transition:
-    border-color 200ms ease,
-    background 200ms ease,
-    color 200ms ease;
-
-  svg {
-    flex: none;
-  }
+.chartHead_ratchet circle {
+  fill: var(--green);
+  stroke: oklch(0.72 0.18 145 / 0.3);
 }
 
-.status_idle {
-  color: var(--text-secondary);
-}
-
-.status_merge {
-  border-color: $green-border;
-  background: var(--green-dim);
-  color: var(--green);
-}
-
-.status_block {
-  border-color: oklch(0.72 0.2 20 / 0.35);
-  background: oklch(0.72 0.2 20 / 0.1);
-  color: var(--severity-critical);
-}
-
-// ── Stats ────────────────────────────────────────────────────────────
-.stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 18px;
-}
-
-.stat {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1 1 auto;
-  min-width: 140px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 10px 12px;
-  background: oklch(0.16 0.018 250 / 0.7);
-  color: var(--text-muted);
-
-  svg {
-    flex: none;
-    color: var(--text-secondary);
-  }
-
-  strong {
-    color: var(--text-primary);
-    font-family: var(--font-mono);
-    font-size: 1.25rem;
-    line-height: 1;
-  }
-
-  span {
-    font-size: 0.74rem;
-    font-weight: 700;
-  }
-}
-
-.statCheck {
-  color: var(--green);
-}
-
-.debtDot {
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  border: 1px solid var(--severity-serious);
-  background: oklch(0.72 0.18 50 / 0.3);
-}
-
-// ── Step tabs ────────────────────────────────────────────────────────
-.steps {
-  display: flex;
-  gap: 8px;
-  margin: 14px 0 18px;
-}
-
-.stepCard {
-  display: flex;
-  flex: 1 1 0;
-  min-width: 0;
-  flex-direction: column;
-  gap: 3px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 10px 13px;
-  background: oklch(0.16 0.018 250 / 0.7);
-  text-align: left;
-  cursor: pointer;
-  transition:
-    border-color 160ms ease,
-    background 160ms ease,
-    transform 120ms ease;
-
-  &:hover {
-    border-color: var(--border-strong);
-  }
-
-  &:active {
-    transform: translateY(1px);
-  }
-
-  &:focus-visible {
-    @include focus-ring;
-  }
-}
-
-.stepCard_active {
-  border-color: $green-border;
-  background: var(--green-dim);
-
-  .stepNum {
-    color: var(--green);
-  }
-
-  .stepLabel {
-    color: var(--text-primary);
-  }
-}
-
-.stepNum {
+// ── Event lines ──────────────────────────────────────────────────────
+.event {
+  margin: 8px 0 0;
   color: var(--text-muted);
   font-family: var(--font-mono);
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
+  font-size: 0.73rem;
+  @include truncate;
 }
 
-.stepLabel {
+.event_bad {
+  color: oklch(0.72 0.2 20 / 0.85);
+}
+
+.event_good {
+  color: var(--green);
+}
+
+// ── Controls + verdict ───────────────────────────────────────────────
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  margin-top: 18px;
+}
+
+.shipBtn {
+  min-width: 150px;
+  justify-content: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.nudge {
   color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-family: var(--font-hand);
+  font-size: 1.15rem;
+  transform: rotate(-2deg);
+}
+
+.verdict {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 14px;
+  margin: 0;
+  animation: verdictIn 0.45s cubic-bezier(0.3, 1.4, 0.4, 1) both;
+}
+
+.verdictDelta {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
   font-weight: 700;
-  line-height: 1.25;
 }
 
-// ── Step panel copy ──────────────────────────────────────────────────
-.stageDetail {
-  margin-bottom: 16px;
+.verdictNote {
   color: var(--text-secondary);
-  font-size: 0.92rem;
-  line-height: 1.65;
+  font-family: var(--font-hand);
+  font-size: 1.18rem;
+  line-height: 1;
+  display: inline-block;
+  transform: rotate(-2deg);
 }
 
-.stageRole {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin-top: 2px;
-  color: var(--text-muted);
-  font-size: 0.86rem;
-  line-height: 1.5;
-}
-
-.roleTag {
-  border: 1px solid var(--border-default);
-  border-radius: 99px;
-  padding: 3px 10px;
-  background: var(--bg-base);
-  color: var(--text-secondary);
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-}
-
-// ── Product layers ───────────────────────────────────────────────────
-.layers {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  margin-bottom: 44px;
-}
-
-.layer {
-  display: flex;
-  flex-direction: column;
-  border: 1px solid var(--border-default);
-  border-top: 2px solid var(--accent);
-  border-radius: var(--radius-lg);
-  padding: 22px;
-  background: var(--bg-surface);
-  transition:
-    border-color 180ms ease,
-    transform 180ms ease,
-    box-shadow 180ms ease;
-
-  &:hover {
-    border-color: var(--accent-border);
-    transform: translateY(-3px);
-    box-shadow: 0 16px 44px oklch(0 0 0 / 0.3);
+@keyframes verdictIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-.layer_green {
-  @include accent("green");
-}
-.layer_blue {
-  @include accent("blue");
-}
-.layer_violet {
-  @include accent("violet");
-}
-
-.layerTop {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 14px;
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 
-.layerStep {
-  color: var(--text-muted);
+// ── The mechanism, in three verbs ────────────────────────────────────
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  max-width: 880px;
+  margin: 34px auto 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 7px;
+  padding-right: 26px;
+
+  // Hand-off arrows between the steps.
+  &:not(:last-child)::after {
+    content: "→";
+    position: absolute;
+    top: 0;
+    right: 4px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+  }
+}
+
+.stepTag {
+  color: var(--blue);
   font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 700;
 }
 
-.tier {
-  border: 1px solid var(--accent-border);
-  border-radius: 99px;
-  padding: 3px 11px;
-  background: var(--accent-dim);
-  color: var(--accent);
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  font-weight: 800;
-}
-
-.layerName {
-  margin-bottom: 4px;
-  font-size: 1.18rem;
-}
-
-.layerDesc {
-  margin-bottom: 14px;
+.stepText {
   color: var(--text-secondary);
   font-size: 0.9rem;
   line-height: 1.6;
 }
 
-.limit {
-  align-self: flex-start;
-  margin-bottom: 16px;
-  border: 1px solid var(--accent-border);
-  border-radius: 99px;
-  padding: 4px 12px;
-  background: var(--accent-dim);
-  color: var(--accent);
-  font-family: var(--font-mono);
-  font-size: 0.74rem;
-  font-weight: 800;
-}
-
-.inherits {
-  margin-bottom: 9px;
-  color: var(--text-primary);
-  font-size: 0.82rem;
-  font-weight: 800;
-}
-
-.command {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 14px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 9px 11px;
-  background: var(--bg-base);
-  color: var(--text-code);
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  overflow-x: auto;
-  white-space: nowrap;
-}
-
-.prompt {
-  color: var(--green);
-  font-weight: 800;
-}
-
-.points {
-  display: grid;
-  gap: 9px;
-  margin: auto 0 0;
-  padding: 0;
-  list-style: none;
-
-  li {
-    display: grid;
-    grid-template-columns: 18px 1fr;
-    gap: 9px;
-    align-items: start;
-    color: var(--text-secondary);
-    font-size: 0.86rem;
-    line-height: 1.45;
-  }
-}
-
-.pointCheck {
-  margin-top: 2px;
-  color: var(--accent);
-}
-
 // ── CTA ──────────────────────────────────────────────────────────────
 .cta {
+  margin-top: 40px;
   text-align: center;
 
   p {
-    max-width: 540px;
+    max-width: 560px;
     margin: 0 auto 18px;
     color: var(--text-secondary);
-    font-size: 0.96rem;
-    line-height: 1.65;
+    font-size: 0.98rem;
+    line-height: 1.7;
   }
 }
 
 .ctaButtons {
   display: flex;
-  flex-wrap: wrap;
   justify-content: center;
   gap: 12px;
-}
-
-// ── Keyframes ────────────────────────────────────────────────────────
-@keyframes headPop {
-  0% {
-    transform: scale(0.2);
-  }
-  60% {
-    transform: scale(1.35);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-@keyframes headRing {
-  0%,
-  100% {
-    opacity: 0.5;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0;
-    transform: scale(2.1);
-  }
-}
-
-@keyframes ghostReject {
-  0% {
-    opacity: 0;
-    transform: translateY(-6px);
-  }
-  22% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  40% {
-    transform: translateX(-2px);
-  }
-  52% {
-    transform: translateX(2px);
-  }
-  64% {
-    transform: translateX(0);
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(0);
-  }
+  flex-wrap: wrap;
 }
 
 // ── Reduced motion ───────────────────────────────────────────────────
 @media (prefers-reduced-motion: reduce) {
-  .headDot,
-  .headPulse,
-  .ghost,
-  .layer,
-  .statusLine {
-    animation: none !important;
+  .chartDraw,
+  .chartHead {
     transition: none !important;
   }
 
-  .layer:hover {
+  .score,
+  .verdict {
+    animation: none !important;
+    opacity: 1;
     transform: none;
+  }
+
+  .verdictNote,
+  .nudge {
+    transform: rotate(-2deg) !important;
   }
 }
 
 // ── Responsive ───────────────────────────────────────────────────────
-@media (max-width: 860px) {
-  .layers {
+@media (max-width: 980px) {
+  .steps {
+    max-width: 640px;
     grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .step {
+    padding-right: 0;
+
+    &:not(:last-child)::after {
+      content: none;
+    }
   }
 }
 
 @media (max-width: 640px) {
-  .stage {
-    padding: 18px 16px 20px;
+  .intro {
+    margin-bottom: 32px;
   }
 
-  .stats {
+  .lead {
+    font-size: 0.98rem;
+  }
+
+  .sim {
+    padding: 16px 14px 18px;
+  }
+
+  .simLabelDim {
+    display: none;
+  }
+
+  // Both tracks stay side by side — the divergence IS the demo.
+  .tracks {
     gap: 8px;
   }
 
-  .stat {
-    min-width: calc(50% - 4px);
+  .track {
+    padding: 10px 10px 9px;
   }
 
-  .steps {
-    gap: 6px;
+  .trackNameFull {
+    display: none;
   }
 
-  .stepCard {
-    padding: 9px 10px;
+  .trackNameShort {
+    display: inline;
+  }
+
+  .score {
+    font-size: 1.3rem;
+  }
+
+  .event {
+    font-size: 0.66rem;
+  }
+
+  .controls {
+    gap: 10px;
+  }
+
+  .shipBtn {
+    flex: 1;
+  }
+
+  .nudge {
+    font-size: 1.05rem;
+  }
+
+  .cta {
+    margin-top: 34px;
   }
 }

@@ -6,12 +6,14 @@ import type { ProblemDemo } from "../types";
 
 interface ProblemDemoViewProps {
   demo: ProblemDemo;
+  /** Called once the visitor flips the demo into its fixed state. */
+  onFixed: () => void;
 }
 
-export const ProblemDemoView = ({ demo }: ProblemDemoViewProps) => {
-  if (demo === "contrast") return <ContrastDemo />;
-  if (demo === "screenReader") return <ScreenReaderDemo />;
-  if (demo === "keyboard") return <KeyboardDemo />;
+export const ProblemDemoView = ({ demo, onFixed }: ProblemDemoViewProps) => {
+  if (demo === "contrast") return <ContrastDemo onFixed={onFixed} />;
+  if (demo === "screenReader") return <ScreenReaderDemo onFixed={onFixed} />;
+  if (demo === "keyboard") return <KeyboardDemo onFixed={onFixed} />;
 
-  return <ColorDemo />;
+  return <ColorDemo onFixed={onFixed} />;
 };

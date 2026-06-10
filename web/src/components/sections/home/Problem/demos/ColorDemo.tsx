@@ -12,9 +12,18 @@ const SERVICES = [
   { name: "search-index", up: false },
 ] as const;
 
-export const ColorDemo = () => {
+interface ColorDemoProps {
+  onFixed: () => void;
+}
+
+export const ColorDemo = ({ onFixed }: ColorDemoProps) => {
   const [simulate, setSimulate] = useState(false);
   const [labelled, setLabelled] = useState(false);
+
+  const setLabels = (value: boolean) => {
+    setLabelled(value);
+    if (value) onFixed();
+  };
 
   return (
     <div className={styles.demo}>
@@ -63,7 +72,7 @@ export const ColorDemo = () => {
           onChange={setSimulate}
           label="Simulate red–green colour blindness"
         />
-        <Toggle checked={labelled} onChange={setLabelled} label="Add icons & labels" />
+        <Toggle checked={labelled} onChange={setLabels} label="Add icons & labels" />
       </div>
 
       <p className={styles.takeaway}>
