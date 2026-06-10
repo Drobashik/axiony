@@ -18,7 +18,7 @@ export const StudioHeader = () => (
     </p>
 
     <p className={styles.note}>
-      Preview mode · results use sample data until cloud scanning is available.
+      Guest preview includes 1 live scan. Create a free account to save history and keep scanning.
     </p>
   </div>
 );

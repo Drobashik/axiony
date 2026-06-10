@@ -239,9 +239,11 @@ export const WorkspaceContent = ({
     return (
       <WorkspaceProjects
         workspace={workspace}
+        billing={billing}
         onTab={onTab}
         onSelectProject={onSelectProject}
         onSelectPage={onSelectPage}
+        onUpgrade={onUpgrade}
       />
     );
   if (tab === "issues")

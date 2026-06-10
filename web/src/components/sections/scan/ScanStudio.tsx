@@ -9,7 +9,9 @@ import { UpgradeDialog } from "@/components/sections/dashboard/billing";
 import { useBilling } from "@/lib/billing";
 import type { BillingPlan } from "@/lib/billing";
 import { useReveal } from "@/lib/hooks/useReveal";
-import { useWorkspace } from "@/lib/workspace";
+import { recordGuestScan, useGuestScanUsage } from "@/lib/scan/guest-usage";
+import { pendingFromReport, useWorkspace, writePendingScan } from "@/lib/workspace";
+import { GuestScanLimitDialog } from "./components/GuestScanLimitDialog";
 import { ReportView } from "./components/ReportView";
 import { ResetScanDialog } from "./components/ResetScanDialog";
 import { ScanStage } from "./components/ScanStage";
@@ -26,21 +28,36 @@ export const ScanStudio = () => {
   const engine = useScanEngine();
   const { workspace } = useWorkspace();
   const { billing } = useBilling();
+  const guestUsage = useGuestScanUsage();
   const [query, setQuery] = useState("");
   const [level, setLevel] = useState<WcagLevel>("AA");
   const [focusSignal, setFocusSignal] = useState(0);
   const [resetDialog, setResetDialog] = useState<"report" | "scanning" | null>(null);
+  const [guestLimitDialog, setGuestLimitDialog] = useState(false);
   const [upgradePlan, setUpgradePlan] = useState<Exclude<BillingPlan, "free"> | null>(null);
   const topRef = useRef<HTMLElement>(null);
+  const recordedGuestKey = useRef<string | null>(null);
 
   const busy = engine.status === "scanning";
   const active = engine.status !== "idle";
+  const guestScansLeft = guestUsage.remaining;
+  const guestLimitReached = guestScansLeft <= 0;
 
   // Signed-in users scan inside the dashboard shell (clean tool, no
   // marketing) — send them there instead of the public studio.
   useEffect(() => {
     if (workspace) router.replace("/dashboard/scan");
   }, [workspace, router]);
+
+  useEffect(() => {
+    if (workspace || engine.status !== "results" || !engine.report) return;
+
+    const resultKey = `${engine.report.url}@${engine.report.scannedAt.getTime()}`;
+    if (recordedGuestKey.current === resultKey) return;
+
+    recordedGuestKey.current = resultKey;
+    recordGuestScan(engine.report.url);
+  }, [engine.report, engine.status, workspace]);
 
   // Bring the scan view to the top so the stage/results are visible without
   // the user having to scroll (e.g. after a "scan another" from the bottom).
@@ -53,7 +70,23 @@ export const ScanStudio = () => {
     );
   };
 
+  const openGuestLimit = () => {
+    setResetDialog(null);
+    setGuestLimitDialog(true);
+    scrollToTop();
+  };
+
+  const routeGuestWithReport = (dest: "/signup" | "/login") => {
+    if (engine.report) writePendingScan(pendingFromReport(engine.report));
+    router.push(dest);
+  };
+
   const runScan = (url: string) => {
+    if (guestLimitReached) {
+      openGuestLimit();
+      return;
+    }
+
     engine.start(url, level);
     scrollToTop();
   };
@@ -72,6 +105,11 @@ export const ScanStudio = () => {
   };
 
   const requestNewScan = () => {
+    if (engine.status !== "scanning" && guestLimitReached) {
+      openGuestLimit();
+      return;
+    }
+
     if (engine.status === "results" && engine.report) {
       setResetDialog("report");
       return;
@@ -94,6 +132,11 @@ export const ScanStudio = () => {
     const target = engine.url || engine.report?.url || query;
     if (!target) {
       focusUrlConsole();
+      return;
+    }
+
+    if (guestLimitReached) {
+      openGuestLimit();
       return;
     }
 
@@ -228,6 +271,16 @@ export const ScanStudio = () => {
           url={engine.url || engine.report?.url || query}
           onCancel={() => setResetDialog(null)}
           onConfirm={clearForNewScan}
+        />
+      )}
+
+      {guestLimitDialog && (
+        <GuestScanLimitDialog
+          currentUrl={engine.report?.url || engine.url || query}
+          hasReport={Boolean(engine.report)}
+          onCancel={() => setGuestLimitDialog(false)}
+          onSignup={() => routeGuestWithReport("/signup")}
+          onLogin={() => routeGuestWithReport("/login")}
         />
       )}
 
