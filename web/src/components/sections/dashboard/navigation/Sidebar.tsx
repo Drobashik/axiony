@@ -27,6 +27,8 @@ const SECONDARY: NavItem[] = [
 export interface SidebarProps {
   activeTab: DashboardTab;
   onTabChange(tab: DashboardTab): void;
+  /** Mobile: the sidebar renders as an off-canvas drawer; `open` slides it in. */
+  open?: boolean;
   /** Workspace + account identity. Defaults keep the public preview's
    * sample persona; the real workspace passes the signed-in user's. */
   workspaceName?: string;
@@ -55,6 +57,7 @@ const ALL_PAGES = "__all_pages__";
 export function Sidebar({
   activeTab,
   onTabChange,
+  open = false,
   workspaceName = "Acme Corp",
   userName = "Jamie Doe",
   userInitials = "JD",
@@ -111,7 +114,7 @@ export function Sidebar({
   };
 
   return (
-    <aside className={styles.sidebar}>
+    <aside id="dashboard-sidebar" className={cn(styles.sidebar, open && styles.open)}>
       <Link
         href="/"
         className={styles.logo}

@@ -142,10 +142,26 @@
   }
 }
 
-@media (max-width: 420px) {
+@media (max-width: 560px) {
+  .inner {
+    gap: 10px;
+    padding-inline: 16px;
+  }
+
+  // The status pill carries the state; the product label is the first
+  // thing to go so the action buttons never overlap.
   .product {
-    max-width: 128px;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    display: none;
+  }
+
+  // Rescan lives in the report header too — drop the duplicate here.
+  .rescanAction {
+    display: none;
+  }
+}
+
+@media (max-width: 400px) {
+  .status {
+    display: none;
   }
 }

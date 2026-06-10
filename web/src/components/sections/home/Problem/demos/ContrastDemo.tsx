@@ -10,13 +10,25 @@ const CARD_BG: RGB = [246, 247, 249];
 const TEXT_LOW: RGB = [203, 206, 212];
 const TEXT_HIGH: RGB = [18, 19, 24];
 
-export const ContrastDemo = () => {
+const passesAt = (amount: number): boolean =>
+  contrastRatio(lerpRgb(TEXT_LOW, TEXT_HIGH, amount / 100), CARD_BG) >= 4.5;
+
+interface ContrastDemoProps {
+  onFixed: () => void;
+}
+
+export const ContrastDemo = ({ onFixed }: ContrastDemoProps) => {
   const [amount, setAmount] = useState(26);
   const t = amount / 100;
   const text = lerpRgb(TEXT_LOW, TEXT_HIGH, t);
   const ratio = contrastRatio(text, CARD_BG);
   const passes = ratio >= 4.5;
   const textColor = rgbCss(text);
+
+  const moveTo = (value: number) => {
+    setAmount(value);
+    if (passesAt(value)) onFixed();
+  };
 
   return (
     <div className={styles.demo}>
@@ -52,7 +64,7 @@ export const ContrastDemo = () => {
             min={0}
             max={100}
             value={amount}
-            onChange={(event) => setAmount(Number(event.target.value))}
+            onChange={(event) => moveTo(Number(event.target.value))}
             aria-label="Adjust the text contrast"
           />
         </label>
@@ -60,7 +72,7 @@ export const ContrastDemo = () => {
         <button
           type="button"
           className={styles.actionBtn}
-          onClick={() => setAmount(90)}
+          onClick={() => moveTo(90)}
           disabled={passes}
         >
           Fix it

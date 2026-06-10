@@ -178,11 +178,21 @@
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   overflow: hidden;
+
+  // Mobile: let the table keep its natural width and swipe inside the card.
+  @include breakpoint-down(md) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
+
+  @include breakpoint-down(md) {
+    min-width: 540px;
+  }
 
   th {
     text-align: left;

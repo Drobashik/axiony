@@ -2414,7 +2414,9 @@
 
 .savedText {
   flex: 1;
-  min-width: 0;
+  // A real floor (not 0) so the quick links wrap to their own row on
+  // narrow screens instead of squeezing this text one word per line.
+  min-width: 16ch;
   color: var(--text-primary);
   font-size: 0.88rem;
 

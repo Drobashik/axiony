@@ -158,7 +158,9 @@
 
 @media (max-width: 820px) {
   .grid {
-    grid-template-columns: 1fr;
+    // minmax(0, 1fr) so the nowrap command text can't widen the track
+    // past the container (it scrolls inside .cmdText instead).
+    grid-template-columns: minmax(0, 1fr);
     max-width: 460px;
   }
 }

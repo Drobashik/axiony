@@ -13,10 +13,19 @@ const SR_CONTROLS = [
   { id: "cart", label: "View cart", Icon: CartIcon },
 ] as const;
 
-export const ScreenReaderDemo = () => {
+interface ScreenReaderDemoProps {
+  onFixed: () => void;
+}
+
+export const ScreenReaderDemo = ({ onFixed }: ScreenReaderDemoProps) => {
   const [named, setNamed] = useState(false);
   const [cursor, setCursor] = useState(0);
   const announced = named ? SR_CONTROLS[cursor].label : "button";
+
+  const setNames = (value: boolean) => {
+    setNamed(value);
+    if (value) onFixed();
+  };
 
   return (
     <div className={styles.demo}>
@@ -53,7 +62,7 @@ export const ScreenReaderDemo = () => {
         >
           Tab&nbsp;⇥
         </button>
-        <Toggle checked={named} onChange={setNamed} label="Add accessible names" />
+        <Toggle checked={named} onChange={setNames} label="Add accessible names" />
       </div>
 
       <p className={styles.takeaway}>

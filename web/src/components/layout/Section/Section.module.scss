@@ -2,10 +2,18 @@
   padding: 96px 0;
   // Keep anchored sections clear of the fixed header on jump.
   scroll-margin-top: var(--nav-height);
+
+  @include breakpoint-down(md) {
+    padding: 64px 0;
+  }
 }
 
 .small {
   padding: 64px 0;
+
+  @include breakpoint-down(md) {
+    padding: 48px 0;
+  }
 }
 
 .surface {

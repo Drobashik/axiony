@@ -1,33 +1,11 @@
-import type { AccentColor } from "@/types";
-
-export interface SolutionLayer {
-  tier: "Free" | "Pro" | "Team";
-  name: string;
-  audience: string;
-  limit: string;
-  points: readonly string[];
-  inherits?: string;
-  command?: string;
-  accent: AccentColor;
+export interface SimRelease {
+  /** New issues this release tries to ship. */
+  ship: number;
+  /** Old debt the team pays down in the same release (gated side only). */
+  fix: number;
 }
 
-export type WorkflowStatusKind = "idle" | "block" | "merge";
-
-export interface WorkflowStep {
-  key: "scan" | "pr" | "improve";
-  n: string;
-  label: string;
+export interface SolutionStep {
   tag: string;
-  title: string;
-  detail: string;
-  roleLabel: string;
-  roleText: string;
-  points: number[];
-  statusKind: WorkflowStatusKind;
-  statusText: string;
-  stats: {
-    tracked: number;
-    flagged: number;
-    merged: number;
-  };
+  text: string;
 }

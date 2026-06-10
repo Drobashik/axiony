@@ -5,7 +5,11 @@ import cn from "classnames";
 import { Toggle } from "../components/Toggle";
 import styles from "../Problem.module.scss";
 
-export const KeyboardDemo = () => {
+interface KeyboardDemoProps {
+  onFixed: () => void;
+}
+
+export const KeyboardDemo = ({ onFixed }: KeyboardDemoProps) => {
   const [focusable, setFocusable] = useState(false);
   const order = focusable ? ["email", "country", "pay"] : ["email", "pay"];
   const [step, setStep] = useState(-1);
@@ -55,6 +59,7 @@ export const KeyboardDemo = () => {
           onChange={(value) => {
             setFocusable(value);
             setStep(-1);
+            if (value) onFixed();
           }}
           label="Make it focusable"
         />
