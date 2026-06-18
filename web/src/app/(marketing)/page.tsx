@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Faq,
   FinalCta,
@@ -11,24 +9,21 @@ import {
   Solution,
   TrustBar,
 } from "@/components/sections/home";
-import { useReveal } from "@/lib/hooks/useReveal";
+import { RevealController } from "./RevealController";
 
-const HomePage = () => {
-  useReveal();
-
-  return (
-    <>
-      <Hero />
-      <TrustBar />
-      <Problem />
-      <Solution />
-      <ScanWorkflow />
-      <QuickStart />
-      <PricingPreview />
-      <Faq />
-      <FinalCta />
-    </>
-  );
-};
+const HomePage = () => (
+  <>
+    <RevealController />
+    <Hero />
+    <TrustBar />
+    <Problem />
+    <Solution />
+    <ScanWorkflow />
+    <QuickStart />
+    <PricingPreview />
+    <Faq />
+    <FinalCta />
+  </>
+);
 
 export default HomePage;

@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useRef, useState } from "react";
 import cn from "classnames";
 import { INSTALL_COMMAND } from "../data";

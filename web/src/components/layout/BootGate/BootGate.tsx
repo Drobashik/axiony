@@ -28,6 +28,9 @@ export const BootGate = ({ disabled, durationMs = 2000, children }: BootGateProp
 
   return (
     <BootContext.Provider value={status}>
+      <div className={styles.app} data-boot-loaded={loaded ? "true" : "false"}>
+        {children}
+      </div>
       {!loaded && (
         <LoadingScreen
           durationMs={durationMs}
@@ -37,7 +40,6 @@ export const BootGate = ({ disabled, durationMs = 2000, children }: BootGateProp
           }}
         />
       )}
-      {loaded && <div className={styles.app}>{children}</div>}
     </BootContext.Provider>
   );
 };

@@ -1,5 +1,3 @@
-"use client";
-
 import { Button, Container } from "@/components/ui";
 import { ArrowRightIcon, CheckIcon } from "./components/icons";
 import { InstallCommand } from "./components/InstallCommand";
