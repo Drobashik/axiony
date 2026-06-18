@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
-import { createScanJob } from "@/server/scan/job-store";
 import { ScanRequestError, validateScanRequest } from "@/server/scan/security";
+import {
+  createRemoteScanJob,
+  hasScannerService,
+  requiresScannerService,
+  scannerServiceUnavailable,
+} from "@/server/scan/scanner-service";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -9,6 +14,18 @@ export const POST = async (request: Request) => {
   try {
     const body = await request.json();
     const { url, level } = await validateScanRequest(body);
+
+    if (hasScannerService()) {
+      const remoteJob = await createRemoteScanJob(url, level);
+      return NextResponse.json(remoteJob.body, { status: remoteJob.status });
+    }
+
+    if (requiresScannerService()) {
+      const unavailable = scannerServiceUnavailable();
+      return NextResponse.json(unavailable.body, { status: unavailable.status });
+    }
+
+    const { createScanJob } = await import("@/server/scan/job-store");
     const job = createScanJob(url, level);
 
     return NextResponse.json(job, { status: 202 });
