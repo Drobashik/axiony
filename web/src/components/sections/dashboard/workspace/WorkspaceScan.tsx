@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Button, Icon } from "@/components/ui";
 import { ReportView } from "@/components/sections/scan/components/ReportView";
 import { ScanStage } from "@/components/sections/scan/components/ScanStage";
@@ -32,6 +33,12 @@ interface WorkspaceScanProps {
   setNavigationGuard: (guard: (() => boolean) | null) => void;
 }
 
+interface PendingScanRequest {
+  url: string;
+  query?: string;
+  reason: "replace-report" | "rescan-history";
+}
+
 const lastScanAt = (scans: { scannedAt: string }[]) => scans[scans.length - 1]?.scannedAt ?? "";
 const normalizeDomain = (host: string): string =>
   host
@@ -45,6 +52,24 @@ const nextPlan = (plan: BillingPlan): Exclude<BillingPlan, "free"> | null => {
   if (plan === "pro") return "team";
   return null;
 };
+
+const WarningIcon = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M12 9v4" />
+    <path d="M12 17h.01" />
+    <path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z" />
+  </svg>
+);
 
 /**
  * The scan tool, embedded in the dashboard. A successful scan is saved
@@ -62,9 +87,13 @@ export const WorkspaceScan = ({
   const [query, setQuery] = useState("");
   const [level, setLevel] = useState<WcagLevel>("AA");
   const [quotaAlert, setQuotaAlert] = useState<string | null>(null);
+  const [quotaFocusSignal, setQuotaFocusSignal] = useState(0);
+  const [pendingScan, setPendingScan] = useState<PendingScanRequest | null>(null);
   // Dedupe usage and auto-save independently across re-renders.
   const recordedKey = useRef<string | null>(null);
   const savedKey = useRef<string | null>(null);
+  const quotaCardRef = useRef<HTMLElement | null>(null);
+  const quotaAlertRef = useRef<HTMLDivElement | null>(null);
 
   const busy = engine.status === "scanning";
   const hasProjects = workspace.projects.length > 0;
@@ -84,6 +113,7 @@ export const WorkspaceScan = ({
   const showQuotaCard = billing.plan === "free" || approachingScanLimit || quotaAlert !== null;
   const resultKey =
     engine.status === "results" && report ? `${report.url}@${report.scannedAt.getTime()}` : null;
+  const hasVisibleResult = engine.status === "results" && Boolean(report);
   const resultHost = report ? normalizeDomain(hostFromUrl(report.url)) : "";
   const resultIsNewDomainProject =
     Boolean(resultHost) &&
@@ -133,12 +163,33 @@ export const WorkspaceScan = ({
     return () => window.removeEventListener("beforeunload", onBeforeUnload);
   }, [unsavedResult]);
 
+  useEffect(() => {
+    if (quotaFocusSignal === 0) return;
+    const target = quotaAlertRef.current ?? quotaCardRef.current;
+
+    quotaCardRef.current?.scrollIntoView({
+      behavior: engine.reduce ? "auto" : "smooth",
+      block: "center",
+    });
+    target?.focus({ preventScroll: true });
+  }, [engine.reduce, quotaFocusSignal]);
+
   const recentPages = workspace.projects
     .flatMap((project) => project.pages.map((page) => ({ host: project.host, page })))
     .sort((a, b) => lastScanAt(b.page.scans).localeCompare(lastScanAt(a.page.scans)))
     .slice(0, 3);
 
-  const startScan = (rawUrl: string) => {
+  const showQuotaLimit = () => {
+    setQuotaAlert(
+      `${plan.name} includes ${entitlements.monthlyScans.toLocaleString()} scans per month. Upgrade to keep scanning this period.`,
+    );
+    setQuotaFocusSignal((value) => value + 1);
+  };
+
+  const executeScan = (rawUrl: string, nextQuery?: string) => {
+    setPendingScan(null);
+    if (nextQuery !== undefined) setQuery(nextQuery);
+
     const url = normalizeUrl(rawUrl);
     const host = normalizeDomain(hostFromUrl(url));
 
@@ -148,9 +199,7 @@ export const WorkspaceScan = ({
     }
 
     if (scansLeft <= 0) {
-      setQuotaAlert(
-        `${plan.name} includes ${entitlements.monthlyScans.toLocaleString()} scans per month. Upgrade to keep scanning this period.`,
-      );
+      showQuotaLimit();
       return;
     }
 
@@ -158,14 +207,40 @@ export const WorkspaceScan = ({
     engine.start(url, level);
   };
 
-  const runScan = (url: string) => startScan(url);
+  const requestScan = (
+    url: string,
+    nextQuery?: string,
+    reason: PendingScanRequest["reason"] = "replace-report",
+  ) => {
+    if (scansLeft <= 0) {
+      showQuotaLimit();
+      return;
+    }
+
+    if (hasVisibleResult || reason === "rescan-history") {
+      setPendingScan({
+        url,
+        query: nextQuery,
+        reason: hasVisibleResult ? "replace-report" : reason,
+      });
+      return;
+    }
+
+    executeScan(url, nextQuery);
+  };
+
+  const confirmPendingScan = () => {
+    if (!pendingScan) return;
+    executeScan(pendingScan.url, pendingScan.query);
+  };
+
+  const runScan = (url: string) => requestScan(url);
   const scanTarget = (url: string) => {
-    setQuery(url);
-    startScan(url);
+    requestScan(url, url, "rescan-history");
   };
   const rescan = () => {
     const target = report?.url || engine.url || query;
-    if (target) startScan(target);
+    if (target) requestScan(target);
   };
 
   const urlConsole = (
@@ -202,9 +277,11 @@ export const WorkspaceScan = ({
       {showQuotaCard && (
         <div className={styles.scanReveal}>
           <section
+            ref={quotaCardRef}
             className={styles.quotaCard}
             data-tone={scansLeft === 0 ? "danger" : scansLeft <= 2 ? "warn" : "default"}
             aria-label={`${plan.name} scan usage`}
+            tabIndex={quotaAlert ? -1 : undefined}
           >
             <div className={styles.quotaTopline}>
               <span className={styles.quotaKicker}>{plan.name} usage</span>
@@ -224,7 +301,7 @@ export const WorkspaceScan = ({
               </span>
             </div>
             {quotaAlert && (
-              <div className={styles.quotaAlert} role="alert">
+              <div ref={quotaAlertRef} className={styles.quotaAlert} role="alert" tabIndex={-1}>
                 <span>{quotaAlert}</span>
                 {upgradeTarget && (
                   <Button size="sm" onClick={() => onUpgrade(upgradeTarget)}>
@@ -359,6 +436,63 @@ export const WorkspaceScan = ({
           </div>
         </>
       )}
+
+      {pendingScan &&
+        createPortal(
+          <div
+            className={styles.confirmOverlay}
+            role="presentation"
+            onClick={() => setPendingScan(null)}
+          >
+            <div
+              className={styles.confirmDialog}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="discard-scan-title"
+              aria-describedby="discard-scan-copy"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <span className={styles.confirmIcon} aria-hidden="true">
+                <WarningIcon />
+              </span>
+              <h3 id="discard-scan-title">
+                {pendingScan.reason === "rescan-history"
+                  ? "Re-scan this URL?"
+                  : "Start another scan?"}
+              </h3>
+              <p className={styles.confirmUrl}>{pendingScan.url}</p>
+              {pendingScan.reason === "rescan-history" ? (
+                <p id="discard-scan-copy">
+                  This URL already has scan history. A new scan will be added as another history
+                  point.
+                </p>
+              ) : unsavedResult ? (
+                <p id="discard-scan-copy">
+                  This result was not saved to your workspace. Starting another scan will clear it
+                  from this screen.
+                </p>
+              ) : (
+                <p id="discard-scan-copy">
+                  The current report on this screen will be replaced. Export or copy anything you
+                  need before starting another scan.
+                </p>
+              )}
+              <div className={styles.confirmActions}>
+                <button
+                  type="button"
+                  className={styles.confirmCancel}
+                  onClick={() => setPendingScan(null)}
+                >
+                  {pendingScan.reason === "rescan-history" ? "Keep history" : "Keep report"}
+                </button>
+                <button type="button" className={styles.confirmDanger} onClick={confirmPendingScan}>
+                  {pendingScan.reason === "rescan-history" ? "Re-scan URL" : "Scan anyway"}
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 };
