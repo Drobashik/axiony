@@ -448,6 +448,7 @@
   font-family: var(--font-hand);
   font-size: 1.22rem;
   line-height: 1.15;
+  white-space: nowrap;
   transform: rotate(-2deg);
   animation: fadeUp 0.7s $ease-out 2s both;
 }
