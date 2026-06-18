@@ -8,6 +8,7 @@ const stylesPath = path.join(__dirname, "src/styles");
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  allowedDevOrigins: ["192.168.0.221"],
   sassOptions: {
     includePaths: [stylesPath],
     loadPaths: [stylesPath],
