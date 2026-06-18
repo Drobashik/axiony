@@ -1,6 +1,5 @@
-// Wrap the page in a brief fade-in once the loader clears, so the
-// transition between the two visual states feels smooth instead of
-// snapping.
+// Keep the actual page mounted from the initial static HTML response. The
+// boot loader is only a fixed overlay above it.
 .app {
   animation: appFadeIn 0.35s ease both;
 }

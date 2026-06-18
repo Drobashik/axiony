@@ -2,8 +2,8 @@
 // Hero — opinionated headline with a lint-style squiggle + blinking
 // terminal caret on the left; a live demo terminal on the right that
 // "runs" a scan (typed command, streamed output, PR-blocked card).
-// Mounted after the BootGate loader clears, so animations fire on
-// first paint.
+// The BootGate loader is an overlay, so this content remains present in
+// the initial static HTML.
 // =====================================================================
 
 .hero {
@@ -403,6 +403,34 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+// The page is mounted under the boot overlay for SEO/static HTML. Pause
+// first-paint hero animations until the overlay clears so visitors still
+// see the headline reveal.
+:global([data-boot-loaded="false"]) {
+  .grid,
+  .glow,
+  .glowAlt,
+  .todo,
+  .todoLater::after,
+  .todoToday,
+  .char,
+  .squiggle,
+  .squiggleMask,
+  .squiggleGlow,
+  .squiggleMain,
+  .titleCaret,
+  .subtitle,
+  .valuePoints,
+  .actions,
+  .install,
+  .annotation,
+  .annotationCurve,
+  .annotationHead,
+  .terminal {
+    animation-play-state: paused;
   }
 }
 
