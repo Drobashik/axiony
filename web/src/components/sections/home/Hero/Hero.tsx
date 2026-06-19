@@ -87,8 +87,8 @@ export const Hero = () => (
             Scan your site now
             <ArrowRightIcon />
           </Button>
-          <Button href="/dashboard" variant="secondary" size="lg">
-            Preview the dashboard
+          <Button href="/signup" variant="secondary" size="lg">
+            Create your workspace
           </Button>
         </div>
 

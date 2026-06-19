@@ -44,7 +44,7 @@ export const STEPS: readonly StepDef[] = [
     tag: "Cloud · Team",
     accent: "violet",
     caption:
-      "Connect GitHub and GitLab for CI/CD status checks and PR / MR comments, share baselines across branches, route issues to owners, and get AI PR comments plus Slack alerts.",
+      "One baseline, shared across every repo and branch. Axiony blocks new issues right in the pull request, suggests the fix, and pings the owner in Slack — so the whole team's score only goes up. Watch a week go by:",
   },
 ];
 
@@ -84,11 +84,68 @@ export const STORED = [
   },
 ] as const;
 
-export const TEAM_OPTS = [
-  "AI comments in pull requests",
-  "Shared baselines",
-  "Branch & commit tracking",
-  "Team members & roles",
-  "CI/CD status checks",
-  "Higher scan limits",
-] as const;
+// ── Step 3 · Shared team baseline ────────────────────────────────────
+// The team workspace, alive: three repos on one baseline, members with
+// roles, and a week of real activity (a blocked PR, an AI fix, a new
+// hire, a clean MR). Every score ratchets up — hand-tuned, same story
+// every play. See TeamViz.
+
+import type { TeamEvent, TeamMember, TeamRepo } from "./types";
+
+export const TEAM_REPOS: readonly TeamRepo[] = [
+  { name: "acme/web", branches: 4, from: 74, to: 82 },
+  { name: "acme/app", branches: 3, from: 80, to: 85 },
+  { name: "acme/docs", branches: 2, from: 69, to: 78 },
+];
+
+// Sofia is hired mid-week — she's the one the "joined" event reveals.
+export const TEAM_MEMBERS: readonly TeamMember[] = [
+  { initials: "MK", name: "Maria", role: "owner" },
+  { initials: "DV", name: "Dmytro", role: "admin" },
+  { initials: "LP", name: "Lev", role: "dev" },
+  { initials: "SO", name: "Sofia", role: "dev" },
+];
+
+export const TEAM_EVENTS: readonly TeamEvent[] = [
+  {
+    actor: "MK",
+    repo: "acme/web",
+    ref: "PR #128",
+    text: "Add checkout banner",
+    detail: "axiony · 2 new issues — merge blocked",
+    kind: "blocked",
+    slack: "#a11y",
+  },
+  {
+    actor: "DV",
+    repo: "acme/web",
+    ref: "PR #128",
+    text: "Applied AI fix · color-contrast",
+    detail: "resolved · merged to main — web ↑",
+    kind: "fixed",
+  },
+  {
+    actor: "SO",
+    repo: "workspace",
+    ref: "+ member",
+    text: "Sofia joined as dev",
+    detail: "shared baseline applied to all 3 repos",
+    kind: "joined",
+    slack: "#general",
+  },
+  {
+    actor: "LP",
+    repo: "acme/app",
+    ref: "MR !54",
+    text: "feat/onboarding",
+    detail: "checked vs shared baseline · 0 new — clean",
+    kind: "clean",
+  },
+];
+
+// The headline number: average team score before → after the week.
+export const TEAM_SCORE_FROM = 74;
+export const TEAM_SCORE_TO = 82;
+
+// Delay between feed events; the whole story fits inside one auto-play turn.
+export const TEAM_STEP_MS = 1000;

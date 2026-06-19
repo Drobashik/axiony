@@ -11,8 +11,22 @@
   top: calc(var(--nav-height) + 32px);
 
   h2 {
-    margin-top: 12px;
+    margin-top: 0;
   }
+}
+
+.eyebrow {
+  display: block;
+  margin-bottom: 14px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.headingAccent {
+  font-style: normal;
+  color: var(--blue);
 }
 
 .asideLead {
@@ -59,6 +73,10 @@
 
   &.item_open {
     border-bottom-color: var(--blue-border);
+
+    .question {
+      color: var(--blue);
+    }
 
     .chevron {
       transform: rotate(180deg);

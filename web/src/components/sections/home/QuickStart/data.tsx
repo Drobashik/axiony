@@ -1,5 +1,29 @@
 import type { QuickStep } from "./types";
 
+// ── Package managers ─────────────────────────────────────────────────
+// The install (step 01) and the no-install runner adapt to the dev's
+// tool of choice — the actual `axiony` commands are the same everywhere.
+export type PackageManager = "npm" | "pnpm" | "yarn" | "bun";
+
+export const PACKAGE_MANAGERS: readonly PackageManager[] = ["npm", "pnpm", "yarn", "bun"];
+
+const INSTALL: Record<PackageManager, string> = {
+  npm: "npm i -g axiony-cli",
+  pnpm: "pnpm add -g axiony-cli",
+  yarn: "yarn global add axiony-cli",
+  bun: "bun add -g axiony-cli",
+};
+
+const RUNNER: Record<PackageManager, string> = {
+  npm: "npx axiony-cli scan <url>",
+  pnpm: "pnpm dlx axiony-cli scan <url>",
+  yarn: "yarn dlx axiony-cli scan <url>",
+  bun: "bunx axiony-cli scan <url>",
+};
+
+export const installCommand = (pm: PackageManager): string => INSTALL[pm];
+export const runnerCommand = (pm: PackageManager): string => RUNNER[pm];
+
 export const STEPS: QuickStep[] = [
   {
     n: "01",
@@ -27,7 +51,7 @@ export const STEPS: QuickStep[] = [
   {
     n: "03",
     title: "Block it in CI",
-    command: "axiony scan <url> --ci",
+    command: "axiony scan https://your-site.com --ci",
     accent: "violet",
     note: (
       <>

@@ -42,7 +42,7 @@ export const Solution = () => (
         </p>
         <div className={styles.ctaButtons}>
           <Button href="/scan">Lock your baseline</Button>
-          <Button href="/pricing" variant="secondary">
+          <Button href="#pricing" variant="secondary">
             See pricing
           </Button>
         </div>

@@ -1,45 +1,70 @@
 import { Button, Icon } from "@/components/ui";
 import cn from "classnames";
+import type { BillingCycle } from "@/lib/billing";
 import type { PricingTier } from "../types";
 import styles from "../PricingPreview.module.scss";
 
 interface TierCardProps {
   tier: PricingTier;
+  cycle: BillingCycle;
 }
 
-export const TierCard = ({ tier }: TierCardProps) => (
-  <article
-    className={cn(styles.card, styles[`card_${tier.accent}`], tier.featured && styles.featured)}
-  >
-    {tier.featured && <span className={styles.popular}>Most popular</span>}
+const formatScans = (count: number) => (count >= 1000 ? `${count / 1000}k` : `${count}`);
 
-    <div className={styles.head}>
-      <span className={styles.name}>
-        {tier.name}
-        {tier.planned && <span className={styles.planned}>Planned</span>}
-      </span>
-      <span className={styles.audience}>{tier.audience}</span>
-    </div>
+export const TierCard = ({ tier, cycle }: TierCardProps) => {
+  const free = tier.priceMonthly === 0;
+  const annual = cycle === "annual";
 
-    <div className={styles.priceRow}>
-      <span className={styles.price}>{tier.price}</span>
-      <span className={styles.period}>{tier.period}</span>
-    </div>
+  // Always show a per-month figure — it's the most comparable; annual just
+  // shows the cheaper monthly-equivalent and how it's billed.
+  const perMonth = free ? 0 : annual ? Math.round(tier.priceAnnual / 12) : tier.priceMonthly;
+  const sub = free
+    ? "free forever · no card"
+    : annual
+      ? `billed $${tier.priceAnnual}/yr · save 17%`
+      : "billed monthly";
 
-    <span className={styles.limit}>{tier.limit}</span>
+  return (
+    <article
+      className={cn(styles.card, styles[`card_${tier.accent}`], tier.featured && styles.featured)}
+    >
+      <div className={styles.head}>
+        <span className={styles.name}>{tier.name}</span>
+        <span className={styles.audience}>{tier.audience}</span>
+      </div>
 
-    <Button href="/pricing" variant={tier.featured ? "primary" : "secondary"} block>
-      {tier.cta}
-    </Button>
+      <div className={styles.priceRow}>
+        <span className={styles.price}>${perMonth}</span>
+        <span className={styles.period}>{free ? "forever" : "/ mo"}</span>
+      </div>
+      <span className={styles.sub}>{sub}</span>
 
-    <ul className={styles.features}>
-      {tier.inherits && <li className={styles.inherits}>{tier.inherits}</li>}
-      {tier.features.map((feature) => (
-        <li key={feature}>
-          <Icon name="check" size={15} className={styles.check} />
-          <span>{feature}</span>
-        </li>
-      ))}
-    </ul>
-  </article>
-);
+      {/* The two things every plan meters — domains and scans, front and centre. */}
+      <div className={styles.meter}>
+        <span className={styles.meterItem}>
+          <strong>{tier.domains}</strong>
+          {tier.domains === 1 ? "domain" : "domains"}
+        </span>
+        <span className={styles.meterDivider} aria-hidden="true" />
+        <span className={styles.meterItem}>
+          <strong>{formatScans(tier.scans)}</strong>
+          scans / mo
+        </span>
+      </div>
+
+      <Button href={tier.href} variant={tier.featured ? "primary" : "secondary"} block>
+        {tier.cta}
+      </Button>
+
+      <ul className={styles.features}>
+        {tier.inherits && <li className={styles.inherits}>{tier.inherits}</li>}
+        {tier.highlights.map((highlight) => (
+          <li key={highlight}>
+            <Icon name="check" size={15} className={styles.check} />
+            <span>{highlight}</span>
+          </li>
+        ))}
+      </ul>
+    </article>
+  );
+};

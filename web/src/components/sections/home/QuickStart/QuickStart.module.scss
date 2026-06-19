@@ -4,6 +4,21 @@
   text-align: center;
 }
 
+// Comment-style eyebrow + blue accent — same voice as the other sections.
+.eyebrow {
+  display: block;
+  margin-bottom: 14px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.headingAccent {
+  font-style: normal;
+  color: var(--blue);
+}
+
 .lead {
   margin-top: 14px;
   color: var(--text-secondary);
@@ -14,12 +29,13 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: 20px;
   max-width: 1000px;
   margin: 0 auto;
 }
 
 .step {
+  position: relative;
   display: flex;
   flex-direction: column;
   border: 1px solid var(--border-default);
@@ -27,6 +43,22 @@
   border-radius: var(--radius-lg);
   padding: 20px;
   background: var(--bg-base);
+  transition: border-color 180ms ease;
+
+  &:hover {
+    border-color: var(--accent-border);
+  }
+
+  // Pipeline arrows between the steps — 01 → 02 → 03.
+  &:not(:last-child)::after {
+    content: "→";
+    position: absolute;
+    top: 50%;
+    right: -16px;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 1rem;
+  }
 }
 
 .accent_green {
@@ -136,6 +168,48 @@
   }
 }
 
+// ── Package manager picker ───────────────────────────────────────────
+// The useful bit: switches the install command (step 01) and the
+// no-install runner to npm / pnpm / yarn / bun.
+.pm {
+  display: flex;
+  gap: 4px;
+  width: fit-content;
+  margin: 0 auto 22px;
+  padding: 4px;
+  border: 1px solid var(--border-default);
+  border-radius: 99px;
+  background: var(--bg-base);
+}
+
+.pmBtn {
+  border: 0;
+  border-radius: 99px;
+  padding: 6px 16px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 150ms ease,
+    color 150ms ease;
+
+  &:hover {
+    color: var(--text-primary);
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+.pmActive {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
 .footer {
   display: flex;
   flex-wrap: wrap;
@@ -162,5 +236,22 @@
     // past the container (it scrolls inside .cmdText instead).
     grid-template-columns: minmax(0, 1fr);
     max-width: 460px;
+  }
+
+  // Arrows turn downward between stacked cards.
+  .step:not(:last-child)::after {
+    content: "↓";
+    top: auto;
+    right: auto;
+    bottom: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .step,
+  .pmBtn {
+    transition: none;
   }
 }

@@ -1,33 +1,26 @@
 import { Section } from "@/components/layout";
-import { Button, Container, SectionEyebrow } from "@/components/ui";
+import { Container } from "@/components/ui";
 import cn from "classnames";
-import { TierCard } from "./components/TierCard";
-import { PRICING_TIERS } from "./data";
+import { PricingPlans } from "./components/PricingPlans";
 import styles from "./PricingPreview.module.scss";
 
 export const PricingPreview = () => (
   <Section id="pricing">
     <Container>
       <div className={cn(styles.intro, "reveal")}>
-        <SectionEyebrow>Pricing</SectionEyebrow>
-        <h2>Start free. Upgrade when the team grows.</h2>
+        <span className={styles.eyebrow}>{"// pricing"}</span>
+        <h2>
+          Free to start.
+          <br />
+          <em className={styles.headingAccent}>Then pay by domains, not per seat.</em>
+        </h2>
         <p className={styles.lead}>
-          The CLI is free and open-source today. The cloud tiers below are planned — no credit card
-          to get started.
+          Every plan meters the same two things — domains you track and scans you run. The CLI is
+          free and open-source today; Pro and Team are landing soon, no card to start.
         </p>
       </div>
 
-      <div className={cn(styles.grid, "reveal")}>
-        {PRICING_TIERS.map((tier) => (
-          <TierCard key={tier.name} tier={tier} />
-        ))}
-      </div>
-
-      <div className={cn(styles.viewAll, "reveal")}>
-        <Button href="/pricing" variant="ghost">
-          See full pricing →
-        </Button>
-      </div>
+      <PricingPlans />
     </Container>
   </Section>
 );
