@@ -162,13 +162,21 @@ export function recordScanUsage(host: string): BillingState {
   });
 }
 
+// A single, stable reference React can reuse for the server render and the
+// first client paint — returning a fresh object each call makes
+// useSyncExternalStore think the store keeps changing (infinite-loop warning).
 const serverBillingSnapshot = freeState();
+
+// getServerSnapshot must return the *same* reference every call.
+function getServerBillingSnapshot(): BillingState {
+  return serverBillingSnapshot;
+}
 
 let billingRaw: string | null | undefined = undefined;
 let billingValue: BillingState = serverBillingSnapshot;
 
 function billingSnapshot(): BillingState {
-  if (!isBrowser()) return freeState();
+  if (!isBrowser()) return serverBillingSnapshot;
   const raw = localStorage.getItem(BILLING_KEY);
   if (raw !== billingRaw) {
     billingValue = normalizeBilling(safeParse<BillingState>(raw));
@@ -182,7 +190,7 @@ function billingSnapshot(): BillingState {
     }
     billingRaw = normalizedRaw;
   }
-  return billingValue ?? freeState();
+  return billingValue;
 }
 
 function subscribeBilling(callback: () => void): () => void {
@@ -201,7 +209,7 @@ export interface BillingHookState {
 }
 
 export function useBilling(): BillingHookState {
-  const billing = useSyncExternalStore(subscribeBilling, billingSnapshot, freeState);
+  const billing = useSyncExternalStore(subscribeBilling, billingSnapshot, getServerBillingSnapshot);
 
   return { ready: true, billing };
 }

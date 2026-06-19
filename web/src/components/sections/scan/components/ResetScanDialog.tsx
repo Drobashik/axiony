@@ -1,6 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui";
+import cn from "classnames";
+import { RefreshIcon } from "./icons";
 import styles from "../ScanStudio.module.scss";
 
 interface ResetScanDialogProps {
@@ -14,21 +16,29 @@ export const ResetScanDialog = ({ mode, url, onCancel, onConfirm }: ResetScanDia
   const title = mode === "report" ? "Start a new scan?" : "Stop this scan?";
   const body =
     mode === "report"
-      ? "Your current report will be cleared from this screen. Export or copy anything you need before starting over."
-      : "The scan in progress will be cancelled and the current progress will be cleared.";
+      ? "This clears the current report from the screen. Save or copy anything you need first."
+      : "The scan in progress will stop and the current progress will be cleared.";
   const cancelLabel = mode === "report" ? "Keep report" : "Keep scanning";
 
   return (
     <div className={styles.dialogLayer} role="presentation" onMouseDown={onCancel}>
       <section
-        className={styles.dialog}
+        className={cn(styles.dialog, styles.dialogConfirm)}
         role="dialog"
         aria-modal="true"
         aria-labelledby="reset-scan-title"
         onMouseDown={(event) => event.stopPropagation()}
       >
-        <div className={styles.dialogEyebrow}>Current target</div>
-        <p className={styles.dialogUrl}>{url || "No URL selected"}</p>
+        <div className={styles.dialogHero}>
+          <span className={cn(styles.dialogIcon, styles.dialogIconMuted)} aria-hidden="true">
+            <RefreshIcon size={18} />
+          </span>
+          <div className={styles.dialogHeroCopy}>
+            <div className={styles.dialogEyebrow}>Current target</div>
+            <p className={styles.dialogUrl}>{url || "No URL selected"}</p>
+          </div>
+        </div>
+
         <h2 id="reset-scan-title">{title}</h2>
         <p>{body}</p>
         <div className={styles.dialogActions}>

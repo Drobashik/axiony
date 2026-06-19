@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 import cn from "classnames";
+import { Select } from "@/components/ui";
+import type { SelectOption } from "@/components/ui";
 import { SEVERITY_LABEL, SEVERITY_ORDER, sortIssues } from "@/lib/scan/issues";
 import type { FilterValue, Issue, SeverityCounts, SortValue } from "@/lib/scan/issues";
 import { IssueRow } from "./IssueRow";
@@ -23,11 +25,26 @@ const FILTERS: ReadonlyArray<{ id: FilterValue; label: string }> = [
   ...SEVERITY_ORDER.map((id) => ({ id, label: SEVERITY_LABEL[id] })),
 ];
 
-const SORTS: ReadonlyArray<{ id: SortValue; label: string }> = [
-  { id: "severity", label: "Sort: Severity" },
-  { id: "rule", label: "Sort: Rule ID" },
-  { id: "occurrences", label: "Sort: Occurrences" },
-];
+const SORTS: SelectOption[] = [
+  {
+    value: "severity",
+    label: "Severity",
+    hint: "worst first",
+    color: "var(--severity-critical)",
+  },
+  {
+    value: "rule",
+    label: "Rule ID",
+    hint: "A-Z",
+    color: "var(--blue)",
+  },
+  {
+    value: "occurrences",
+    label: "Occurrences",
+    hint: "most nodes",
+    color: "var(--green)",
+  },
+] as const;
 
 export const IssueExplorer = ({
   issues,
@@ -93,18 +110,15 @@ export const IssueExplorer = ({
           />
         </div>
 
-        <select
+        <Select
           className={styles.sortSelect}
-          aria-label="Sort issues"
+          size="sm"
+          align="end"
           value={sort}
-          onChange={(e) => setSort(e.target.value as SortValue)}
-        >
-          {SORTS.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.label}
-            </option>
-          ))}
-        </select>
+          options={SORTS}
+          ariaLabel="Sort issues"
+          onChange={(value) => setSort(value as SortValue)}
+        />
 
         <button
           type="button"

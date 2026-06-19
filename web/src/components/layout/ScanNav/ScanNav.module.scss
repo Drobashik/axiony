@@ -123,6 +123,10 @@
   flex-shrink: 0;
 }
 
+.idleLogin {
+  color: var(--text-secondary);
+}
+
 @media (max-width: 720px) {
   .inner {
     gap: 12px;
@@ -156,6 +160,10 @@
 
   // Rescan lives in the report header too — drop the duplicate here.
   .rescanAction {
+    display: none;
+  }
+
+  .idleLogin {
     display: none;
   }
 }

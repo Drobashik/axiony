@@ -15,7 +15,6 @@ import { GuestScanLimitDialog } from "./components/GuestScanLimitDialog";
 import { ReportView } from "./components/ReportView";
 import { ResetScanDialog } from "./components/ResetScanDialog";
 import { ScanStage } from "./components/ScanStage";
-import { StudioCta } from "./components/StudioCta";
 import { StudioHeader } from "./components/StudioHeader";
 import { UrlConsole } from "./components/UrlConsole";
 import { useScanEngine } from "./hooks/useScanEngine";
@@ -169,6 +168,7 @@ export const ScanStudio = () => {
         onUrlChange={setQuery}
         onLevelChange={setLevel}
         focusSignal={focusSignal}
+        guestScansLeft={guestScansLeft}
         onScan={runScan}
       />
     </div>
@@ -185,7 +185,6 @@ export const ScanStudio = () => {
         progress={engine.progress}
         score={engine.report?.score}
         issueCount={engine.report?.issues.length}
-        onFocusUrl={focusUrlConsole}
         onNewScan={requestNewScan}
         onRescan={rescanCurrent}
         onStop={stopScan}
@@ -237,6 +236,7 @@ export const ScanStudio = () => {
                   onUrlChange={setQuery}
                   onLevelChange={setLevel}
                   focusSignal={focusSignal}
+                  guestScansLeft={guestScansLeft}
                   onScan={runScan}
                 />
               </div>
@@ -262,8 +262,6 @@ export const ScanStudio = () => {
           )}
         </Container>
       </section>
-
-      <StudioCta />
 
       {resetDialog && (
         <ResetScanDialog

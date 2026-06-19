@@ -18,6 +18,8 @@ interface UrlConsoleProps {
   focusSignal?: number;
   /** Show the "Try: …" example sites. Off inside the dashboard. */
   showQuickLinks?: boolean;
+  /** Anonymous public scanner allowance. Omitted inside the dashboard. */
+  guestScansLeft?: number;
   /** Called with a normalised, validated URL. */
   onScan: (url: string) => void;
 }
@@ -30,6 +32,7 @@ export const UrlConsole = ({
   onLevelChange,
   focusSignal = 0,
   showQuickLinks = true,
+  guestScansLeft,
   onScan,
 }: UrlConsoleProps) => {
   const inputId = useId();
@@ -39,6 +42,19 @@ export const UrlConsole = ({
 
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const hasGuestMeter = typeof guestScansLeft === "number";
+  const guestLimitReached = hasGuestMeter && guestScansLeft <= 0;
+  const scanWord = guestScansLeft === 1 ? "scan" : "scans";
+  const meta = hasGuestMeter
+    ? guestLimitReached
+      ? "0 scans left · sign up to continue"
+      : `${guestScansLeft} free ${scanWord} · sign up for more`
+    : "Workspace scan";
+  const help = hasGuestMeter
+    ? guestLimitReached
+      ? "You've used your free scan. Sign up to keep scanning and save reports."
+      : "Run one live scan now. Sign up to keep scanning and save reports."
+    : "Results save to your workspace automatically.";
 
   useEffect(() => {
     if (focusSignal > 0 && !busy) {
@@ -69,8 +85,18 @@ export const UrlConsole = ({
 
   return (
     <form className={styles.console} onSubmit={handleSubmit} noValidate>
+      <div className={styles.consoleHead}>
+        <span className={styles.consoleStatus}>
+          <span className={styles.consolePulse} aria-hidden="true" />
+          Live scan
+        </span>
+        <span className={cn(styles.consoleMeta, guestLimitReached && styles.consoleMetaEmpty)}>
+          {meta}
+        </span>
+      </div>
+
       <label className={styles.consoleLabel} htmlFor={inputId}>
-        Website URL
+        Public page URL
       </label>
 
       <div className={cn(styles.inputRow, error && styles.inputRowError)}>
@@ -97,7 +123,7 @@ export const UrlConsole = ({
         />
         <button type="submit" className={styles.scanBtn} disabled={busy || !url.trim()}>
           <SearchIcon size={15} />
-          {busy ? "Scanning…" : "Scan"}
+          {busy ? "Scanning…" : "Run scan"}
         </button>
       </div>
 
@@ -107,7 +133,7 @@ export const UrlConsole = ({
         </p>
       )}
       <p id={helpId} className={styles.help}>
-        No install needed. For production CI checks, use the free CLI.
+        {help}
       </p>
 
       <div className={styles.consoleRow}>
@@ -132,7 +158,7 @@ export const UrlConsole = ({
 
         {showQuickLinks && (
           <div className={styles.quick}>
-            <span className={styles.quickLabel}>Try:</span>
+            <span className={styles.quickLabel}>Try a demo:</span>
             {QUICK_URLS.map((q) => (
               <button
                 key={q}
@@ -150,7 +176,7 @@ export const UrlConsole = ({
               onClick={() => scanShortcut(normalizeUrl(EXAMPLE_URL))}
               disabled={busy}
             >
-              example scan →
+              scan demo →
             </button>
           </div>
         )}

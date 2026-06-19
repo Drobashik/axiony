@@ -7,9 +7,6 @@ export const QUICK_URLS = ["stripe.com", "github.com", "figma.com", "airbnb.com"
 
 export const WCAG_LEVELS: readonly WcagLevel[] = ["A", "AA", "AAA"];
 
-// `npx` form mirrors the home QuickStart so the command stays consistent.
-export const CLI_COMMAND = "npx axiony-cli scan https://your-site.com";
-
 // Drives the scan-stage checklist. Mapped onto scan progress in the engine.
 export const SCAN_PHASES: readonly ScanPhase[] = [
   { key: "connect", label: "Connecting", detail: "Opening your URL in a headless browser" },
