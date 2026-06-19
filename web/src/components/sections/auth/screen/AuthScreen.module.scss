@@ -4,11 +4,13 @@
 // =====================================================================
 
 .card {
+  position: relative;
   width: 100%;
   max-width: 1040px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1.02fr 1fr;
+  // The form column gets a little more room — it's the focus.
+  grid-template-columns: 0.92fr 1.08fr;
   overflow: hidden;
   @include elevated-panel(var(--radius-2xl), 0 30px 80px oklch(0 0 0 / 0.45));
   animation: scaleIn 0.5s $ease-out both;
@@ -21,8 +23,10 @@
   overflow: hidden;
   display: flex;
   padding: 48px 42px;
+  // Calmer + a touch darker than the form panel, so it reads as supporting
+  // context and the form is what stands out.
   border-right: 1px solid var(--border-subtle);
-  background: linear-gradient(165deg, oklch(0.22 0.05 266 / 0.5), oklch(0.12 0.02 262 / 0.15));
+  background: linear-gradient(165deg, oklch(0.17 0.03 266 / 0.45), oklch(0.1 0.014 262 / 0.12));
 }
 
 .asideGrid {
@@ -40,11 +44,11 @@
 .asideGlow {
   position: absolute;
   inset: auto -22% -34% -22%;
-  height: 62%;
+  height: 52%;
   z-index: -1;
   pointer-events: none;
-  background: radial-gradient(ellipse at 32% 100%, oklch(0.62 0.22 240 / 0.22), transparent 70%);
-  filter: blur(30px);
+  background: radial-gradient(ellipse at 32% 100%, oklch(0.62 0.22 240 / 0.13), transparent 70%);
+  filter: blur(32px);
 }
 
 .asideInner {
@@ -247,18 +251,35 @@
   }
 }
 
-// ── Form panel (right) ───────────────────────────────────────────────
+// ── Form panel (right) — the focus ───────────────────────────────────
+// Lifted, lighter surface with a soft focal glow and a brand scan-line
+// across the top, so the eye lands on the form, not the value panel.
 .panel {
+  position: relative;
   display: flex;
   min-width: 0;
-  padding: 48px 44px;
+  padding: 52px 46px;
+  background:
+    radial-gradient(125% 78% at 50% -8%, oklch(0.62 0.22 240 / 0.08), transparent 58%),
+    linear-gradient(180deg, oklch(1 0 0 / 0.032), oklch(1 0 0 / 0.012));
+}
+
+.panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--blue) 26%, var(--violet) 74%, transparent);
+  opacity: 0.85;
 }
 
 .form {
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 384px;
+  max-width: 400px;
   margin: auto;
 }
 
@@ -276,15 +297,16 @@
 
 .formTitle {
   margin: 0;
-  font-size: 1.55rem;
-  font-weight: 600;
+  font-size: 1.72rem;
+  font-weight: 650;
   letter-spacing: -0.02em;
 }
 
 .formSub {
   margin: 0;
   color: var(--text-secondary);
-  font-size: 0.92rem;
+  font-size: 0.94rem;
+  line-height: 1.5;
 }
 
 // ── OAuth ────────────────────────────────────────────────────────────
@@ -438,6 +460,20 @@
   &:focus-visible {
     @include focus-ring;
   }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// "Keep me signed in" on the left, "Forgot password?" on the right.
+.optionsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .inputWrap {
@@ -654,12 +690,16 @@
 }
 
 // ── Submit + switch ──────────────────────────────────────────────────
+// The primary action carries an accent glow so it's the obvious next step.
 .submit {
   margin-top: 4px;
+  box-shadow: 0 14px 34px oklch(0.62 0.22 240 / 0.28);
 }
 
 .switch {
-  margin: 22px 0 0;
+  margin: 24px 0 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-subtle);
   text-align: center;
   color: var(--text-secondary);
   font-size: 0.88rem;
