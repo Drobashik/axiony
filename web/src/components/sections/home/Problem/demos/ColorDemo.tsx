@@ -76,7 +76,7 @@ export const ColorDemo = ({ onFixed }: ColorDemoProps) => {
       </div>
 
       <p className={styles.takeaway}>
-        About <strong>1 in 12 men</strong> can&apos;t reliably tell red from green. With colour
+        About <strong>1 in 12 men</strong>&nbsp;can&apos;t reliably tell red from green. With colour
         alone, “up” and “down” look identical.
       </p>
     </div>
