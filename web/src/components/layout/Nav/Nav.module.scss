@@ -442,10 +442,18 @@
 
   // Dimmed, click-to-close backdrop under the open menu. Starts below
   // the bar itself so the toggle stays reachable.
+  //
+  // The nav's `backdrop-filter` makes this fixed element resolve against the
+  // 60px-tall header, so a `bottom: 0` would collapse it to zero height (and
+  // nothing would be clickable). Pin the top and give it an explicit
+  // viewport-based height instead, which is correct either way.
   .scrim {
     display: block;
     position: fixed;
-    inset: var(--nav-height) 0 0;
+    top: var(--nav-height);
+    left: 0;
+    right: 0;
+    height: calc(100dvh - var(--nav-height));
     border: none;
     padding: 0;
     background: oklch(0 0 0 / 0.55);

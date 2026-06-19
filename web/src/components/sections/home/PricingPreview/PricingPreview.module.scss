@@ -1,25 +1,102 @@
+// =====================================================================
+// Pricing — same voice as the rest of the page: a comment eyebrow, a blue
+// accent line, then three cards metered by the two numbers that matter
+// (domains + scans). A monthly / annual toggle mirrors the dashboard's
+// real billing model; nothing here changes height when you toggle, so the
+// page never jumps.
+// =====================================================================
+
 .intro {
   max-width: 700px;
-  margin: 0 auto 44px;
+  margin: 0 auto 32px;
   text-align: center;
+}
+
+.eyebrow {
+  display: block;
+  margin-bottom: 14px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.headingAccent {
+  font-style: normal;
+  color: var(--blue);
 }
 
 .lead {
   margin-top: 14px;
-  max-width: 560px;
+  max-width: 580px;
   margin-inline: auto;
   color: var(--text-secondary);
   font-size: 1.05rem;
   line-height: 1.7;
 }
 
+// ── Billing cycle toggle ─────────────────────────────────────────────
+.cycle {
+  display: flex;
+  gap: 4px;
+  width: fit-content;
+  margin: 0 auto 26px;
+  padding: 4px;
+  border: 1px solid var(--border-default);
+  border-radius: 99px;
+  background: var(--bg-base);
+}
+
+.cycleBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 99px;
+  padding: 7px 16px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 150ms ease,
+    color 150ms ease;
+
+  &:hover {
+    color: var(--text-primary);
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+.cycleActive {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+.save {
+  border-radius: 99px;
+  padding: 2px 7px;
+  background: var(--green-dim);
+  color: var(--green);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+// ── Cards ────────────────────────────────────────────────────────────
 .grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
   max-width: 1000px;
   margin: 0 auto;
-  align-items: start;
+  align-items: stretch;
 }
 
 .card {
@@ -60,24 +137,6 @@
   }
 }
 
-.popular {
-  position: absolute;
-  top: -11px;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 1px solid var(--accent-border);
-  border-radius: 99px;
-  padding: 4px 12px;
-  background: var(--bg-elevated);
-  color: var(--accent);
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
 .head {
   display: grid;
   gap: 6px;
@@ -85,24 +144,9 @@
 }
 
 .name {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
   color: var(--text-primary);
   font-size: 1.2rem;
   font-weight: 700;
-}
-
-.planned {
-  border: 1px solid var(--border-default);
-  border-radius: 99px;
-  padding: 2px 8px;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: 0.6rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
 }
 
 .audience {
@@ -111,11 +155,12 @@
   line-height: 1.5;
 }
 
+// ── Price (per-month figure; annual shows the cheaper equivalent) ─────
 .priceRow {
   display: flex;
   align-items: baseline;
   gap: 6px;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .price {
@@ -124,6 +169,7 @@
   font-size: 2.4rem;
   font-weight: 800;
   line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 
 .period {
@@ -132,19 +178,55 @@
   font-weight: 600;
 }
 
-.limit {
-  align-self: flex-start;
+// Single fixed line — toggling the cycle swaps the text but not the height.
+.sub {
+  display: block;
   margin-bottom: 18px;
-  border: 1px solid var(--accent-border);
-  border-radius: 99px;
-  padding: 4px 11px;
-  background: var(--accent-dim);
-  color: var(--accent);
+  color: var(--text-muted);
   font-family: var(--font-mono);
   font-size: 0.72rem;
-  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
+// ── The metered numbers: domains + scans ─────────────────────────────
+.meter {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-md);
+  background: var(--accent-dim);
+}
+
+.meterItem {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  line-height: 1.15;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+
+  strong {
+    color: var(--accent);
+    font-size: 1.2rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.meterDivider {
+  width: 1px;
+  align-self: stretch;
+  background: var(--accent-border);
+}
+
+// ── Feature list ─────────────────────────────────────────────────────
 .features {
   display: grid;
   gap: 10px;
@@ -174,11 +256,6 @@
 .check {
   margin-top: 2px;
   color: var(--accent);
-}
-
-.viewAll {
-  margin-top: 32px;
-  text-align: center;
 }
 
 @media (max-width: 900px) {

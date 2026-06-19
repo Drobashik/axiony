@@ -1,15 +1,20 @@
+import type { BillingPlan } from "@/lib/billing";
 import type { AccentColor } from "@/types";
 
 export interface PricingTier {
+  id: BillingPlan;
   name: string;
-  price: string;
-  period: string;
   audience: string;
-  limit: string;
-  features: readonly string[];
+  /** From the billing model — kept in sync with the product. */
+  priceMonthly: number;
+  priceAnnual: number;
+  domains: number;
+  scans: number;
+  /** What this tier adds on top of the one below it. */
   inherits?: string;
+  highlights: readonly string[];
   cta: string;
-  featured?: boolean;
-  planned?: boolean;
+  href: string;
   accent: AccentColor;
+  featured?: boolean;
 }

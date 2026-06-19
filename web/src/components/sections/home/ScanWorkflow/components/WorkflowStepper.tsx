@@ -18,7 +18,7 @@ export const WorkflowStepper = ({ active, onSelect, steps }: WorkflowStepperProp
         role="tab"
         id={`wf-tab-${index}`}
         aria-selected={index === active}
-        aria-controls="wf-panel"
+        aria-controls={`wf-panel-${index}`}
         className={cn(
           styles.step,
           styles[`step_${step.accent}`],

@@ -4,19 +4,28 @@ import { HISTORY, STORED } from "../data";
 import { ClockMark, SparkleMark } from "./marks";
 import styles from "../ScanWorkflow.module.scss";
 
+// The score the cloud keeps for you — taken from the latest run so the
+// headline number and the history table always agree.
+const latest = HISTORY[0];
+
 export const ScannerViz = () => (
   <div className={styles.scanner}>
-    <div className={styles.targetBar}>
-      <span className={styles.target}>
-        <Icon name="globe" size={15} />
-        acme.com
-        <span className={styles.pages}>47 pages</span>
-      </span>
-      <span className={styles.schedule}>
-        <ClockMark />
-        Daily · 02:00
-      </span>
-      <span className={styles.scanNow}>Scan now</span>
+    <div className={styles.scanTop}>
+      <div className={styles.scanTarget}>
+        <span className={styles.target}>
+          <Icon name="globe" size={15} />
+          acme.com
+          <span className={styles.pages}>47 pages</span>
+        </span>
+        <span className={styles.schedule}>
+          <ClockMark />
+          Daily · 02:00
+        </span>
+      </div>
+      <div className={styles.siteScore}>
+        <em>{latest.score}</em>
+        <span className={styles.siteScoreUp}>{latest.delta} today · site score</span>
+      </div>
     </div>
 
     <div className={styles.block}>
@@ -61,6 +70,14 @@ export const ScannerViz = () => (
           </div>
         ))}
       </div>
+    </div>
+
+    <div className={styles.scanFoot}>
+      <span className={styles.scanNow}>
+        <Icon name="scan" size={14} />
+        Scan now
+      </span>
+      <span className={cn(styles.handNote, styles.handNoteBlue)}>every run, remembered</span>
     </div>
   </div>
 );

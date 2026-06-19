@@ -16,7 +16,7 @@
 
   h2 {
     max-width: 640px;
-    margin: 12px auto 16px;
+    margin: 0 auto 16px;
   }
 
   p {
@@ -24,6 +24,22 @@
     font-size: 1.05rem;
     line-height: 1.75;
   }
+}
+
+// Comment-style eyebrow — same voice as the hero's "// TODO" and the
+// problem / fix sections.
+.eyebrow {
+  display: block;
+  margin-bottom: 14px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.headingAccent {
+  font-style: normal;
+  color: var(--blue);
 }
 
 // ── Stepper ──────────────────────────────────────────────────────────
@@ -155,12 +171,12 @@
 .stage {
   position: relative;
   max-width: 920px;
-  min-height: 388px;
   margin: 0 auto;
   @include elevated-panel;
   border-top: 2px solid var(--c);
   padding: 20px 22px 22px;
   overflow: hidden;
+  transition: border-color 0.4s $ease-out;
   animation: stageIn 0.55s $ease-out both;
 }
 
@@ -174,35 +190,144 @@
   --c: var(--violet);
 }
 
-.caption {
-  position: relative;
+// ── Stacked captions ─────────────────────────────────────────────────
+// All three captions share one grid cell, so the block is as tall as the
+// longest line and the visual below it never shifts between tabs.
+.captions {
+  display: grid;
   margin-bottom: 16px;
+}
+
+.caption {
+  grid-area: 1 / 1;
   color: var(--text-secondary);
   font-size: 0.92rem;
   line-height: 1.6;
-  animation: captionIn 0.4s $ease-out both;
+  opacity: 0;
+  visibility: hidden;
+  // Hold visibility until the fade-out finishes, so the outgoing text
+  // doesn't vanish before it has crossfaded.
+  transition:
+    opacity 0.3s $ease-out,
+    visibility 0s linear 0.3s;
 }
 
-.viz {
+.captionActive {
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity 0.3s $ease-out,
+    visibility 0s linear 0s;
+}
+
+// ── Stacked visuals ──────────────────────────────────────────────────
+// Same trick for the visuals: the deck is as tall as the biggest step, so
+// the panel height is fixed and switching tabs is a pure crossfade.
+.vizDeck {
   position: relative;
-  animation: vizIn 0.45s $ease-out both;
-  animation-delay: 0.05s;
+  display: grid;
+}
+
+.vizSlot {
+  grid-area: 1 / 1;
+  // Stretch the step's content to the full deck height so each panel fills
+  // the (fixed) box and its footer can sit at the bottom.
+  display: grid;
+  min-width: 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px);
+  // visibility is delayed so the outgoing panel stays painted (and the
+  // crossfade reads) but inactive panels still leave the tab order.
+  transition:
+    opacity 0.35s $ease-out,
+    transform 0.35s $ease-out,
+    visibility 0s linear 0.35s;
+}
+
+.vizSlotActive {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition:
+    opacity 0.35s $ease-out,
+    transform 0.35s $ease-out,
+    visibility 0s linear 0s;
+}
+
+// ── Step 1 · Free CLI ────────────────────────────────────────────────
+.cli {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+}
+
+// Live + ghost terminals share one cell; the hidden ghost (full output)
+// fixes the height so the live one can type without growing the panel.
+.cliTermStack {
+  display: grid;
+}
+
+.cliTerm {
+  grid-area: 1 / 1;
+  align-self: start;
+}
+
+.cliTermGhost {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.cliFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  // Pin the soul note to the bottom of the panel.
+  margin-top: auto;
+}
+
+.cliTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #{$green-border};
+  border-radius: 99px;
+  padding: 5px 12px;
+  background: var(--green-dim);
+  color: var(--green);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
 }
 
 // ── Step 2 · Hosted web scanner ──────────────────────────────────────
 .scanner {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 12px;
+  height: 100%;
 }
 
-.targetBar {
+.scanTop {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 11px 14px;
   background: oklch(0.16 0.018 250 / 0.7);
+}
+
+.scanTarget {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  min-width: 0;
 }
 
 .target {
@@ -230,7 +355,6 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-left: auto;
   border: 1px solid var(--blue-border);
   border-radius: 99px;
   padding: 4px 10px;
@@ -241,13 +365,56 @@
   font-weight: 700;
 }
 
+// The headline number for Pro — the site score the cloud keeps for you.
+.siteScore {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex: none;
+  line-height: 1;
+
+  em {
+    font-style: normal;
+    color: var(--blue);
+    font-family: var(--font-mono);
+    font-size: 1.9rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.siteScoreUp {
+  margin-top: 5px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+}
+
+.scanFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+
 .scanNow {
-  border: 1px solid var(--border-strong);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--blue-border);
   border-radius: var(--radius-md);
-  padding: 6px 12px;
-  color: var(--text-secondary);
+  padding: 7px 13px;
+  background: var(--blue-dim);
+  color: var(--blue);
   font-size: 0.78rem;
   font-weight: 800;
+
+  svg {
+    color: var(--blue);
+  }
 }
 
 .block {
@@ -422,24 +589,26 @@
   color: var(--text-muted);
 }
 
-// ── Step 3 · Team workspace ──────────────────────────────────────────
+// ── Step 3 · Shared team baseline ────────────────────────────────────
 .team {
-  display: grid;
-  gap: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  height: 100%;
 }
 
 .teamHead {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 14px;
+}
 
-  strong {
-    display: block;
-    margin-top: 3px;
-    color: var(--text-primary);
-    font-size: 1.02rem;
-  }
+.teamId strong {
+  display: block;
+  margin-top: 3px;
+  color: var(--text-primary);
+  font-size: 1.02rem;
 }
 
 .dashKicker {
@@ -448,6 +617,12 @@
   font-family: var(--font-mono);
   font-size: 0.72rem;
   text-transform: uppercase;
+}
+
+.teamMeta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .avatars {
@@ -473,98 +648,300 @@
   }
 }
 
-.avatarMore {
+// The new hire pops in, violet, the moment their "joined" event lands.
+.avatarNew {
+  border-color: #{$violet-border};
   background: var(--violet-dim);
   color: var(--violet);
+  animation: avatarPop 0.4s cubic-bezier(0.3, 1.4, 0.4, 1) both;
 }
 
-.integrations {
-  display: grid;
-  gap: 9px;
+@keyframes avatarPop {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
-.integration {
+// The headline number — the whole team's score, climbing.
+.teamScore {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1;
+
+  em {
+    font-style: normal;
+    color: var(--violet);
+    font-family: var(--font-mono);
+    font-size: 1.9rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.teamScoreUp {
+  margin-top: 5px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+}
+
+// ── The shared baseline — one line across every repo ─────────────────
+.repos {
+  position: relative;
   display: grid;
-  grid-template-columns: 34px minmax(0, 1fr) auto;
-  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  border: 1px solid #{$violet-border};
+  border-radius: var(--radius-md);
+  padding: 13px 12px 12px;
+  background:
+    linear-gradient(180deg, var(--violet-dim), transparent 60%), oklch(0.16 0.018 250 / 0.6);
+}
+
+.repo {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.repoName {
+  color: var(--text-code);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  @include truncate;
+}
+
+.repoBranches {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+}
+
+.repoScore {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 1.15rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.repoDelta {
+  color: var(--green);
+  font-size: 0.7rem;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.baselineTag {
+  position: absolute;
+  top: -9px;
+  left: 12px;
+  border: 1px solid #{$violet-border};
+  border-radius: 99px;
+  padding: 2px 9px;
+  background: var(--bg-elevated);
+  color: var(--violet);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+// ── The workspace, alive: a week of activity ─────────────────────────
+.feed {
+  display: grid;
+  gap: 6px;
+}
+
+// Rows live in the DOM from the first paint and only fade in — reserving
+// their height up front is what keeps the panel (and the page) from jumping.
+.feedRow {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) auto;
+  gap: 10px;
   align-items: center;
   border: 1px solid var(--border-subtle);
+  border-left: 2px solid var(--border-default);
   border-radius: var(--radius-md);
-  padding: 11px 13px;
-  background: oklch(0.16 0.018 250 / 0.6);
+  padding: 8px 11px;
+  background: var(--bg-base);
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 0.32s $ease-out,
+    transform 0.32s $ease-out;
 }
 
-.intLogo {
+.feedShown {
+  opacity: 1;
+  transform: none;
+}
+
+.fk_blocked {
+  border-left-color: var(--severity-critical);
+}
+.fk_fixed,
+.fk_clean {
+  border-left-color: var(--green);
+}
+.fk_joined {
+  border-left-color: var(--violet);
+}
+
+.feedActor {
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: var(--radius-md);
-  background: var(--bg-base);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--bg-muted);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 800;
 }
 
-.brand_gh {
-  color: var(--text-primary);
-}
-
-.intText {
+.feedBody {
   display: grid;
   gap: 1px;
   min-width: 0;
+}
 
-  strong {
-    color: var(--text-primary);
-    font-size: 0.9rem;
-  }
+.feedTop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
 
-  span {
-    color: var(--text-muted);
-    font-size: 0.78rem;
+.feedRef {
+  flex: none;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.feedText {
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  @include truncate;
+}
+
+.feedSlack {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+
+  svg {
+    width: 12px;
+    height: 12px;
   }
 }
 
-.connected {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border: 1px solid #{$green-border};
+.feedDetail {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  @include truncate;
+}
+
+.feedPill {
+  flex: none;
   border-radius: 99px;
-  padding: 4px 10px;
-  background: var(--green-dim);
-  color: var(--green);
-  font-size: 0.7rem;
+  padding: 3px 9px;
+  font-size: 0.66rem;
   font-weight: 800;
   white-space: nowrap;
 }
 
-.connDot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--green);
+.fp_blocked {
+  border: 1px solid oklch(0.72 0.2 20 / 0.3);
+  background: oklch(0.72 0.2 20 / 0.1);
+  color: var(--severity-critical);
+}
+.fp_fixed,
+.fp_clean {
+  border: 1px solid #{$green-border};
+  background: var(--green-dim);
+  color: var(--green);
+}
+.fp_joined {
+  border: 1px solid #{$violet-border};
+  background: var(--violet-dim);
+  color: var(--violet);
 }
 
-.teamOpts {
+// ── Footer: wired in + the hand-written soul note ────────────────────
+.teamFoot {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   flex-wrap: wrap;
-  gap: 8px;
+  margin-top: auto;
 }
 
-.opt {
+.wired {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 7px 11px;
-  background: oklch(0.16 0.018 250 / 0.5);
-  color: var(--text-secondary);
-  font-size: 0.8rem;
-  font-weight: 700;
+  gap: 8px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 600;
 }
 
-.optCheck {
+.wiredLogo {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--bg-base);
+  color: var(--text-secondary);
+
+  svg {
+    width: 15px;
+    height: 15px;
+  }
+}
+
+// The one deliberately imperfect thing — handwritten, like the hero. Each
+// step tints it to its own accent (green · blue · violet).
+.handNote {
   color: var(--violet);
+  font-family: var(--font-hand);
+  font-size: 1.15rem;
+  line-height: 1;
+  transform: rotate(-2deg);
+}
+
+.handNoteBlue {
+  color: var(--blue);
+}
+
+.handNoteGreen {
+  color: var(--green);
 }
 
 // ── Hint ─────────────────────────────────────────────────────────────
@@ -577,26 +954,6 @@
 }
 
 // ── Keyframes ────────────────────────────────────────────────────────
-@keyframes vizIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes captionIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
 @keyframes stageIn {
   from {
     opacity: 0;
@@ -614,9 +971,15 @@
   .stepNum,
   .stage,
   .caption,
-  .viz {
+  .vizSlot,
+  .feedRow,
+  .avatarNew {
     animation: none !important;
     transition: none !important;
+  }
+
+  .handNote {
+    transform: rotate(-2deg);
   }
 }
 
@@ -640,15 +1003,16 @@
 @media (max-width: 640px) {
   .stage {
     padding: 16px;
-    min-height: 0;
   }
 
-  .targetBar {
+  .scanTop {
     flex-wrap: wrap;
   }
 
-  .schedule {
-    margin-left: 0;
+  // Scores stay legible but step down so the headers don't crowd.
+  .siteScore em,
+  .teamScore em {
+    font-size: 1.55rem;
   }
 
   .histRow {
@@ -663,9 +1027,41 @@
     display: none;
   }
 
-  .intText span {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  // ── Team workspace ──
+  .teamHead {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .teamMeta {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  // Keep the shared baseline on one line — the "shared" is the point —
+  // but let the scores breathe.
+  .repos {
+    gap: 7px;
+    padding: 13px 9px 10px;
+  }
+
+  .repoBranches {
+    display: none;
+  }
+
+  .repoScore {
+    font-size: 1rem;
+  }
+
+  // The Slack ping and the trailing pill drop on narrow rows; the actor,
+  // action and detail still tell the whole story.
+  .feedSlack,
+  .feedPill {
+    display: none;
+  }
+
+  .handNote {
+    font-size: 1.05rem;
   }
 }

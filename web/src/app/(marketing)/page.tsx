@@ -7,7 +7,6 @@ import {
   QuickStart,
   ScanWorkflow,
   Solution,
-  TrustBar,
 } from "@/components/sections/home";
 import { RevealController } from "./RevealController";
 
@@ -15,7 +14,6 @@ const HomePage = () => (
   <>
     <RevealController />
     <Hero />
-    <TrustBar />
     <Problem />
     <Solution />
     <ScanWorkflow />

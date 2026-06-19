@@ -1,54 +1,61 @@
+import { PLAN_DEFINITIONS, PLAN_ENTITLEMENTS } from "@/lib/billing";
+import type { BillingPlan } from "@/lib/billing";
 import type { PricingTier } from "./types";
 
-export const PRICING_TIERS: readonly PricingTier[] = [
-  {
-    name: "Free",
-    price: "$0",
-    period: "forever",
-    audience: "For developers who want local checks.",
-    limit: "Unlimited local · 5 hosted / month",
-    features: [
-      "Open-source CLI",
-      "Local reports + baseline file",
-      "Plain-English explanations",
-      "Hosted scans to try the cloud",
+// Marketing-curated copy per plan. The numbers (price, domains, scans) come
+// straight from the billing model so this section can never drift from what
+// the dashboard actually grants.
+interface TierCopy {
+  audience: string;
+  inherits?: string;
+  highlights: readonly string[];
+  cta: string;
+  href: string;
+}
+
+const COPY: Record<BillingPlan, TierCopy> = {
+  free: {
+    audience: "Prove the workflow on one site.",
+    highlights: [
+      "Open-source CLI, unlimited local runs",
+      "A plain-English fix for every issue",
+      "Baseline file — new issues fail CI",
     ],
     cta: "Start free",
-    accent: "green",
+    href: "/scan",
   },
-  {
-    name: "Pro",
-    price: "$19",
-    period: "/ month",
-    audience: "For solo devs, QA & product teams.",
-    limit: "Up to 1,000 hosted scans / month",
-    features: [
-      "Hosted scanner + dashboard",
-      "Scheduled scans & full history",
-      "Scan comparison + email alerts",
-      "AI fix suggestions",
-      "Exportable reports",
+  pro: {
+    audience: "For solo devs, QA & product.",
+    inherits: "Everything in Free, plus",
+    highlights: [
+      "Scheduled scans with full history",
+      "Compare any two runs · email alerts",
+      "AI fix suggestions · exportable reports",
     ],
-    cta: "Join the waitlist",
-    featured: true,
-    planned: true,
-    accent: "blue",
+    cta: "Get early access",
+    href: "/signup",
   },
-  {
-    name: "Team",
-    price: "$79",
-    period: "/ month",
+  team: {
     audience: "For product & engineering teams.",
-    limit: "Higher scan limits",
     inherits: "Everything in Pro, plus",
-    features: [
-      "GitHub & GitLab + CI checks",
-      "PR / MR + AI comments",
-      "Shared baselines & branch tracking",
-      "Members, roles & Slack alerts",
+    highlights: [
+      "Members, roles & shared baselines",
+      "GitHub / GitLab checks + PR comments",
+      "Branch baselines · Slack alerts",
     ],
-    cta: "Join the waitlist",
-    planned: true,
-    accent: "violet",
+    cta: "Get early access",
+    href: "/signup",
   },
-];
+};
+
+export const PRICING_TIERS: readonly PricingTier[] = PLAN_DEFINITIONS.map((plan) => ({
+  id: plan.id,
+  name: plan.name,
+  accent: plan.accent,
+  featured: plan.featured,
+  priceMonthly: plan.priceMonthly,
+  priceAnnual: plan.priceAnnual,
+  domains: PLAN_ENTITLEMENTS[plan.id].domainLimit,
+  scans: PLAN_ENTITLEMENTS[plan.id].monthlyScans,
+  ...COPY[plan.id],
+}));

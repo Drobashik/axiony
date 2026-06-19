@@ -8,9 +8,9 @@ export const SUBTITLE =
   "Old ones become your to-do list. New ones? They don't merge.";
 
 export const VALUE_POINTS = [
-  "free & open-source CLI",
-  "one command in any CI",
-  "exit 1 on new issues",
+  "free & open-source to start",
+  "hosted scans + AI fixes",
+  "PR checks for your team",
 ] as const;
 
 export const INSTALL_COMMAND = "npm i -g axiony-cli";
