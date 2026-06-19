@@ -135,17 +135,14 @@ export const LiveTerminal = () => {
     <div className={styles.terminalWrap}>
       <div className={styles.annotation} aria-hidden="true">
         same command runs in your CI
-        {/* Hand-drawn arrow: a short swoop from the note that stops just
-            above the terminal window and points down at it */}
-        <svg className={styles.annotationArrow} viewBox="0 0 108 40" fill="none">
-          <path
-            className={styles.annotationCurve}
-            pathLength={1}
-            d="M100 5 C 72 14, 40 12, 16 34"
-          />
-          <path className={styles.annotationHead} d="M27 30 L16 34 L22 22" />
-        </svg>
       </div>
+
+      {/* Hand-drawn arrow — anchored to the terminal (not the note), so its
+          tip keeps pointing at the console at every window width. */}
+      <svg className={styles.annotationArrow} viewBox="0 0 116 46" fill="none" aria-hidden="true">
+        <path className={styles.annotationCurve} pathLength={1} d="M106 6 C 80 16, 54 14, 32 40" />
+        <path className={styles.annotationHead} d="M43 39 L31 43 L36 29" />
+      </svg>
 
       <div className={styles.terminal}>
         <div className={styles.termHead}>

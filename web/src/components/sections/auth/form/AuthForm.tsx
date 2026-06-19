@@ -252,22 +252,20 @@ export const AuthForm = ({ mode }: { mode: AuthMode }) => {
             disabled={locked}
             onChange={(e) => setField("password", e.target.value)}
             onBlur={() => handleBlur("password")}
-            trailing={
-              mode === "login" ? (
-                <button type="button" className={styles.linkBtn} onClick={enterReset}>
-                  Forgot password?
-                </button>
-              ) : undefined
-            }
           >
             {mode === "signup" && <PasswordMeter password={fields.password} />}
           </AuthField>
         </div>
 
         {mode === "login" ? (
-          <Checkbox checked={remember} onChange={setRemember} disabled={locked}>
-            Keep me signed in
-          </Checkbox>
+          <div className={styles.optionsRow}>
+            <Checkbox checked={remember} onChange={setRemember} disabled={locked}>
+              Keep me signed in
+            </Checkbox>
+            <button type="button" className={styles.linkBtn} onClick={enterReset} disabled={locked}>
+              Forgot password?
+            </button>
+          </div>
         ) : (
           <Checkbox
             checked={acceptTerms}

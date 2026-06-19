@@ -457,14 +457,17 @@
   animation: fadeUp 0.7s $ease-out 2s both;
 }
 
-// The arrow hangs off the note's left edge and swoops down-left, stopping
-// just above the terminal window — pointing at it, not into it.
+// Anchored to the terminal box (terminalWrap), not the note — so the tip
+// always lands on the same spot of the console no matter the window width.
+// It swoops down from under the note to just inside the terminal's top edge.
 .annotationArrow {
   position: absolute;
-  top: 12px;
-  right: calc(100% - -15px);
-  width: 104px;
-  height: 38px;
+  top: -30px;
+  right: 28px;
+  width: 116px;
+  height: 46px;
+  z-index: 3;
+  overflow: visible;
 
   path {
     fill: none;
@@ -893,6 +896,12 @@
     animation: none !important;
   }
 
+  // Without the draw animation, show the arrow line fully instead of leaving
+  // it as an undrawn dash.
+  .annotationCurve {
+    stroke-dashoffset: 0;
+  }
+
   .squiggle {
     opacity: 1;
   }
@@ -932,7 +941,8 @@
     margin-inline: auto;
   }
 
-  .annotation {
+  .annotation,
+  .annotationArrow {
     display: none;
   }
 }
