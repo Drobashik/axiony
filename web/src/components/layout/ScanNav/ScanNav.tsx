@@ -13,7 +13,6 @@ interface ScanNavProps {
   progress: number;
   score?: number;
   issueCount?: number;
-  onFocusUrl: () => void;
   onNewScan: () => void;
   onRescan: () => void;
   onStop: () => void;
@@ -43,7 +42,6 @@ export const ScanNav = ({
   progress,
   score,
   issueCount,
-  onFocusUrl,
   onNewScan,
   onRescan,
   onStop,
@@ -67,7 +65,7 @@ export const ScanNav = ({
 
         <div className={styles.context} aria-label="Scanner status">
           <span className={styles.divider} aria-hidden="true" />
-          <span className={styles.product}>Cloud scanner</span>
+          <span className={styles.product}>Scanner</span>
           <span className={cn(styles.status, styles[`status_${status}`])}>
             <span className={styles.statusDot} aria-hidden="true" />
             {statusLabel[status]}
@@ -82,6 +80,15 @@ export const ScanNav = ({
             <Button variant="secondary" size="sm" onClick={onStop}>
               Stop
             </Button>
+          ) : status === "idle" ? (
+            <>
+              <Button href="/login" variant="ghost" size="sm" className={styles.idleLogin}>
+                Log in
+              </Button>
+              <Button href="/signup" size="sm">
+                Sign up
+              </Button>
+            </>
           ) : (
             <>
               {status === "results" && (
@@ -103,13 +110,9 @@ export const ScanNav = ({
                 </Button>
               )}
 
-              <Button
-                variant={status === "idle" ? "primary" : "secondary"}
-                size="sm"
-                onClick={status === "idle" ? onFocusUrl : onNewScan}
-              >
+              <Button variant="secondary" size="sm" onClick={onNewScan}>
                 <SearchIcon size={14} />
-                {status === "idle" ? "Enter URL" : "New scan"}
+                New scan
               </Button>
             </>
           )}
