@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui";
 import cn from "classnames";
+import { usePrefersReducedMotion } from "@/lib/hooks/usePrefersReducedMotion";
 import { GATED_SCORES, RELEASES, START_SCORE, UNGATED_SCORES } from "../data";
 import styles from "../Solution.module.scss";
 
@@ -16,6 +17,9 @@ const SCORE_MAX = 100;
 const plotW = W - PAD.l - PAD.r;
 const plotH = H - PAD.t - PAD.b;
 const n = RELEASES.length; // 10 releases → 11 points
+
+// Delay between auto-shipped releases once the run has started.
+const AUTO_STEP_MS = 700;
 
 const x = (index: number) => PAD.l + (index / n) * plotW;
 const y = (score: number) => PAD.t + (1 - (score - SCORE_MIN) / (SCORE_MAX - SCORE_MIN)) * plotH;
@@ -85,7 +89,9 @@ const gatedEvent = (shipped: number): string => {
 };
 
 export const ReleaseSim = () => {
+  const reduce = usePrefersReducedMotion();
   const [shipped, setShipped] = useState(0);
+  const [running, setRunning] = useState(false);
 
   const done = shipped === n;
   const ungated = UNGATED_SCORES[shipped];
@@ -93,7 +99,29 @@ export const ReleaseSim = () => {
   const ungatedDelta = START_SCORE - UNGATED_SCORES[n];
   const gatedDelta = GATED_SCORES[n] - START_SCORE;
 
-  const ship = () => setShipped((count) => (count === n ? 0 : count + 1));
+  // Once started, ship the rest automatically — one release at a time —
+  // until the run reaches the end, where the button becomes Replay.
+  useEffect(() => {
+    if (!running || shipped >= n) return undefined;
+    const id = window.setTimeout(() => setShipped((count) => Math.min(count + 1, n)), AUTO_STEP_MS);
+    return () => window.clearTimeout(id);
+  }, [running, shipped]);
+
+  // First click ships v1.0, then the run takes over. Reduced motion skips
+  // the timed steps and jumps straight to the outcome.
+  const start = () => {
+    if (reduce) {
+      setShipped(n);
+      return;
+    }
+    setShipped(1);
+    setRunning(true);
+  };
+
+  const replay = () => {
+    setShipped(0);
+    setRunning(!reduce);
+  };
 
   return (
     <div className={styles.sim}>
@@ -141,10 +169,15 @@ export const ReleaseSim = () => {
       </div>
 
       <div className={styles.controls}>
-        <Button type="button" onClick={ship} className={styles.shipBtn}>
-          {done ? "Replay ↺" : `Ship v1.${shipped} →`}
+        <Button
+          type="button"
+          onClick={done ? replay : start}
+          disabled={running && !done}
+          className={styles.shipBtn}
+        >
+          {done ? "Replay ↺" : running ? "Shipping…" : "Ship v1.0 →"}
         </Button>
-        {shipped === 0 && <span className={styles.nudge}>go on — ship all ten</span>}
+        {shipped === 0 && !running && <span className={styles.nudge}>go on — ship all ten</span>}
         {done && (
           <p className={styles.verdict}>
             <span className={styles.verdictDelta}>
