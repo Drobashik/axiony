@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { planDefinition, useBilling } from "@/lib/billing";
 import type { BillingPlan } from "@/lib/billing";
 import { signOut, useWorkspace } from "@/lib/workspace";
+import { signOut as authSignOut } from "@/lib/auth-client";
 import type { DashboardTab } from "@/lib/data/dashboard";
 import { UpgradeDialog } from "../billing";
 import { Sidebar } from "../navigation/Sidebar";
@@ -92,9 +93,10 @@ export function DashboardShell({ children }: { children: ReactNode }) {
     (plan: Exclude<BillingPlan, "free"> = "pro") => setUpgradePlan(plan),
     [],
   );
-  const handleSignOut = useCallback(() => {
+  const handleSignOut = useCallback(async () => {
     if (!canNavigate()) return;
-    signOut();
+    await authSignOut(); // clear the BetterAuth server session (cookie)
+    signOut(); // clear the localStorage workspace (still mock this phase)
     router.push("/");
   }, [canNavigate, router]);
 

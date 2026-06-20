@@ -1,0 +1,82 @@
+// Prisma schema for the Axiony web app — Prisma 7 (driver-adapter mode).
+// Datasource: Neon serverless Postgres.
+//
+// Connection URLs live in `.env` (NOT in this schema — Prisma 7 forbids that):
+//   • DATABASE_URL — runtime connection, consumed by the Neon driver adapter
+//     in `src/lib/db.ts`. In production use Neon's *pooled* endpoint.
+//   • DIRECT_URL   — unpooled connection used by Prisma Migrate, wired through
+//     `prisma.config.ts` → datasource.url.
+//
+// Models are added per phase: BetterAuth (User/Session/Account/Verification)
+// lands first, then the domain tables (Project/Page/Scan/Issue) migrated off
+// the localStorage stores.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// BetterAuth — core tables (email/password). Field shapes mirror
+// @better-auth/core getAuthTables() for v1.6.x. BetterAuth supplies row ids
+// itself; @default(cuid()) is only a safety net.
+// ─────────────────────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  sessions      Session[]
+  accounts      Account[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String   @unique
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+}

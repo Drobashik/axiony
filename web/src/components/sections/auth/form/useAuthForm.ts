@@ -3,11 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import {
-  authenticateMockAccount,
-  registerMockAccount,
-  upsertMockOAuthAccount,
-} from "@/lib/auth/mock-store";
+import { signIn, signUp } from "@/lib/auth-client";
+import { upsertMockOAuthAccount } from "@/lib/auth/mock-store";
 import { completeAuth } from "@/lib/workspace";
 import { getPasswordStrength, isEmail } from "../lib/validation";
 import type { AuthFieldName, AuthMode, AuthStatus, AuthView, OAuthProvider } from "../lib/types";
@@ -37,9 +34,9 @@ type Errors = Partial<Record<AuthFieldName | "terms", string>>;
 
 /**
  * Owns all state for the auth form: field values, touched/error tracking,
- * and the mock submit lifecycle (idle → submitting → success/error) with a
- * logical redirect to the dashboard. No real backend — swap the timeouts in
- * `handleSubmit` / `handleOAuth` for API calls later.
+ * and the submit lifecycle (idle → submitting → success/error) with a redirect
+ * to the dashboard. Email/password go through BetterAuth (`@/lib/auth-client`);
+ * social sign-in is still mocked pending OAuth credentials.
  */
 export function useAuthForm(mode: AuthMode) {
   const router = useRouter();
@@ -134,7 +131,7 @@ export function useAuthForm(mode: AuthMode) {
     return Object.fromEntries(Object.entries(next).filter(([, v]) => v)) as Errors;
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (status === "submitting") return;
 
@@ -150,46 +147,43 @@ export function useAuthForm(mode: AuthMode) {
     setFormError(null);
     setStatus("submitting");
 
-    schedule(() => {
-      const email = fields.email.trim().toLowerCase();
-      const authResult =
-        mode === "signup"
-          ? registerMockAccount({
-              name: fields.name,
-              email,
-              password: fields.password,
-            })
-          : authenticateMockAccount({
-              email,
-              password: fields.password,
-            });
+    const email = fields.email.trim().toLowerCase();
+    const { data, error } =
+      mode === "signup"
+        ? await signUp.email({ name: fields.name.trim(), email, password: fields.password })
+        : await signIn.email({ email, password: fields.password, rememberMe: remember });
 
-      if (!authResult.ok) {
-        setStatus("error");
-        if (authResult.field) {
-          setErrors({ [authResult.field]: authResult.message });
-          focusFirstInvalid();
-        } else {
-          setFormError(authResult.message);
-        }
-        return;
+    if (error) {
+      setStatus("error");
+      const message = authErrorMessage(error, mode);
+      if (mode === "signup" && isDuplicateEmail(error)) {
+        setErrors({ email: message });
+        focusFirstInvalid();
+      } else {
+        setFormError(message);
       }
+      return;
+    }
 
-      // Create/refresh the workspace — turns a pending scan into a baseline.
-      completeAuth(authResult.identity);
-      persistMockSession({ email, mode });
-      setStatus("success");
-      schedule(() => router.push(REDIRECT_TO), REDIRECT_MS);
-    }, SUBMIT_MS);
+    // The real session is now set via an httpOnly cookie. Bootstrap/refresh the
+    // localStorage workspace (still mock in this phase) — this also turns a
+    // pending scan into the account's first baseline.
+    completeAuth({
+      name: data?.user?.name ?? fields.name.trim() ?? email,
+      email: data?.user?.email ?? email,
+    });
+    setStatus("success");
+    schedule(() => router.push(REDIRECT_TO), REDIRECT_MS);
   };
 
+  // TODO(auth): social sign-in is still mocked. Wire to
+  // `authClient.signIn.social({ provider })` once OAuth credentials exist.
   const handleOAuth = (id: OAuthProvider["id"]) => {
     if (oauthPending || status === "submitting") return;
     setOauthPending(id);
     schedule(() => {
       const identity = upsertMockOAuthAccount(OAUTH_IDENTITY[id], id);
       completeAuth(identity);
-      persistMockSession({ provider: id, mode });
       router.push(REDIRECT_TO);
     }, OAUTH_MS);
   };
@@ -251,10 +245,17 @@ export function useAuthForm(mode: AuthMode) {
   };
 }
 
-function persistMockSession(payload: Record<string, unknown>) {
-  try {
-    sessionStorage.setItem("axiony.auth.mock", JSON.stringify({ ...payload, at: Date.now() }));
-  } catch {
-    /* storage may be unavailable (private mode) — non-fatal for the mock */
-  }
+type AuthClientError = { code?: string; message?: string };
+
+function isDuplicateEmail(error: AuthClientError): boolean {
+  const code = error.code?.toUpperCase() ?? "";
+  const message = error.message?.toLowerCase() ?? "";
+  return code.includes("EXIST") || message.includes("already");
+}
+
+function authErrorMessage(error: AuthClientError, mode: AuthMode): string {
+  if (error.message) return error.message;
+  return mode === "signup"
+    ? "We couldn't create your account. Please try again."
+    : "We couldn't sign you in. Check your details and try again.";
 }

@@ -3,10 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": "22.x"
+    "node": "24.x"
   },
   "scripts": {
     "prepare": "cd .. && web/node_modules/.bin/husky",
+    "postinstall": "prisma generate",
     "predev": "npm --prefix ../cli run build",
     "dev": "next dev",
     "prebuild": "npm --prefix ../cli run build",
@@ -14,6 +15,7 @@
     "build:web": "next build --webpack",
     "prestart": "npm --prefix ../cli run build",
     "start": "next start",
+    "db:check": "node --env-file=.env scripts/db-check.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
@@ -22,6 +24,10 @@
     "verify": "npm run lint && npm run format:check && npm run type-check && npm run build:web"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
+    "@prisma/adapter-neon": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "better-auth": "^1.6.20",
     "classnames": "^2.5.1",
     "next": "^16.2.7",
     "react": "^19.2.7",
@@ -37,6 +43,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^17.0.7",
     "prettier": "^3.8.3",
+    "prisma": "^7.8.0",
     "sass": "^1.77.8",
     "typescript": "^5.5.3"
   }
