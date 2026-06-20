@@ -23,6 +23,6 @@ export default defineConfig({
     // DATABASE_URL so `prisma generate` on Vercel (which needs no migration
     // URL) doesn't require DIRECT_URL to be set — but still fail loudly if no
     // database URL exists at all.
-    url: process.env.DIRECT_URL ?? env("DATABASE_URL"),
+    url: process.env.DIRECT_URL || env("DATABASE_URL"),
   },
 });
