@@ -6,6 +6,7 @@ import { Container } from "@/components/ui";
 import { ScanNav } from "@/components/layout";
 import cn from "classnames";
 import { UpgradeDialog } from "@/components/sections/dashboard/billing";
+import { useSession } from "@/lib/auth-client";
 import { useBilling } from "@/lib/billing";
 import type { BillingPlan } from "@/lib/billing";
 import { useReveal } from "@/lib/hooks/useReveal";
@@ -25,6 +26,7 @@ export const ScanStudio = () => {
   useReveal();
   const router = useRouter();
   const engine = useScanEngine();
+  const { data: session } = useSession();
   const { workspace } = useWorkspace();
   const { billing } = useBilling();
   const guestUsage = useGuestScanUsage();
@@ -39,24 +41,26 @@ export const ScanStudio = () => {
 
   const busy = engine.status === "scanning";
   const active = engine.status !== "idle";
+  const signedIn = Boolean(session?.user);
+  const memberWorkspace = signedIn ? workspace : null;
   const guestScansLeft = guestUsage.remaining;
   const guestLimitReached = guestScansLeft <= 0;
 
   // Signed-in users scan inside the dashboard shell (clean tool, no
   // marketing) — send them there instead of the public studio.
   useEffect(() => {
-    if (workspace) router.replace("/dashboard/scan");
-  }, [workspace, router]);
+    if (memberWorkspace) router.replace("/dashboard/scan");
+  }, [memberWorkspace, router]);
 
   useEffect(() => {
-    if (workspace || engine.status !== "results" || !engine.report) return;
+    if (memberWorkspace || engine.status !== "results" || !engine.report) return;
 
     const resultKey = `${engine.report.url}@${engine.report.scannedAt.getTime()}`;
     if (recordedGuestKey.current === resultKey) return;
 
     recordedGuestKey.current = resultKey;
     recordGuestScan(engine.report.url);
-  }, [engine.report, engine.status, workspace]);
+  }, [engine.report, engine.status, memberWorkspace]);
 
   // Bring the scan view to the top so the stage/results are visible without
   // the user having to scroll (e.g. after a "scan another" from the bottom).
@@ -175,7 +179,7 @@ export const ScanStudio = () => {
   );
 
   // Avoid flashing the public studio while the redirect above runs.
-  if (workspace) return null;
+  if (memberWorkspace) return null;
 
   return (
     <>
@@ -253,7 +257,7 @@ export const ScanStudio = () => {
                   report={engine.report}
                   reduce={engine.reduce}
                   onRescan={rescanCurrent}
-                  freePreview={billing.plan === "free"}
+                  freePreview={!signedIn || billing.plan === "free"}
                   onUpgrade={() => openUpgrade("pro")}
                 />
               </div>

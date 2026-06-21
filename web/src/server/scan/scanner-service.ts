@@ -1,11 +1,19 @@
 import type { WcagLevel } from "./types";
 
 const SCANNER_API_URL = process.env.AXIONY_SCANNER_API_URL?.replace(/\/+$/, "");
+const SCANNER_API_KEY = process.env.AXIONY_SCANNER_API_KEY;
 
 interface ScannerProxyResult {
   body: unknown;
   status: number;
 }
+
+interface ScannerFetchOptions {
+  auth?: boolean;
+}
+
+const SCANNER_UNAVAILABLE_MESSAGE =
+  "Scanner service is unavailable. Start the scanner and try again.";
 
 const toJsonBody = (value: string): unknown => {
   if (!value) return {};
@@ -17,10 +25,23 @@ const toJsonBody = (value: string): unknown => {
   }
 };
 
-const scannerFetch = async (path: string, init?: RequestInit): Promise<ScannerProxyResult> => {
+const scannerFetch = async (
+  path: string,
+  init?: RequestInit,
+  options: ScannerFetchOptions = {},
+): Promise<ScannerProxyResult> => {
+  const { auth = true } = options;
+
   if (!SCANNER_API_URL) {
     return {
       body: { error: "Scanner service is not configured. Set AXIONY_SCANNER_API_URL." },
+      status: 503,
+    };
+  }
+
+  if (auth && !SCANNER_API_KEY) {
+    return {
+      body: { error: "Scanner service key is not configured. Set AXIONY_SCANNER_API_KEY." },
       status: 503,
     };
   }
@@ -33,14 +54,15 @@ const scannerFetch = async (path: string, init?: RequestInit): Promise<ScannerPr
       cache: "no-store",
       headers: {
         "Content-Type": "application/json",
+        ...(auth && SCANNER_API_KEY ? { Authorization: `Bearer ${SCANNER_API_KEY}` } : {}),
         ...init?.headers,
       },
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Scanner service request failed.";
+    console.error("Scanner service request failed", error instanceof Error ? error.message : error);
 
     return {
-      body: { error: `Scanner service request failed: ${message}` },
+      body: { error: SCANNER_UNAVAILABLE_MESSAGE },
       status: 502,
     };
   }
@@ -56,7 +78,10 @@ export const hasScannerService = (): boolean => Boolean(SCANNER_API_URL);
 export const requiresScannerService = (): boolean => process.env.VERCEL === "1";
 
 export const scannerServiceUnavailable = (): ScannerProxyResult => ({
-  body: { error: "Scanner service is not configured. Set AXIONY_SCANNER_API_URL." },
+  body: {
+    error:
+      "Scanner service is not configured. Set AXIONY_SCANNER_API_URL and AXIONY_SCANNER_API_KEY.",
+  },
   status: 503,
 });
 
@@ -68,3 +93,6 @@ export const createRemoteScanJob = (url: string, level: WcagLevel): Promise<Scan
 
 export const getRemoteScanJob = (jobId: string): Promise<ScannerProxyResult> =>
   scannerFetch(`/scans/${encodeURIComponent(jobId)}`);
+
+export const getRemoteScannerHealth = (): Promise<ScannerProxyResult> =>
+  scannerFetch("/health", { method: "GET" });

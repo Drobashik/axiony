@@ -48,6 +48,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const [selectedPagePath, setSelectedPagePath] = useState<string | null>(null);
   const [upgradePlan, setUpgradePlan] = useState<Exclude<BillingPlan, "free"> | null>(null);
   const [signOutOpen, setSignOutOpen] = useState(false);
+  const [signOutUserName, setSignOutUserName] = useState<string | null>(null);
   const [navigationGuard, setNavigationGuardValue] = useState<NavigationGuard | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { ready, workspace } = state;
@@ -107,14 +108,25 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   );
   const requestSignOut = useCallback(() => {
     if (!canNavigate()) return;
+    if (!workspace) return;
     setSidebarOpen(false);
+    setSignOutUserName(workspace.account.name || workspace.account.email);
     setSignOutOpen(true);
-  }, [canNavigate]);
+  }, [canNavigate, workspace]);
+  const closeSignOut = useCallback(() => {
+    setSignOutOpen(false);
+    setSignOutUserName(null);
+  }, []);
   const handleSignOut = useCallback(async () => {
-    await authSignOut(); // clear the BetterAuth server session (cookie)
-    signOut(); // clear the localStorage workspace (still mock this phase)
-    router.push("/");
-  }, [router]);
+    try {
+      await authSignOut(); // clear the BetterAuth server session (cookie)
+      signOut(); // clear the localStorage workspace (still mock this phase)
+      router.replace("/");
+    } catch (error) {
+      console.error("Unable to sign out", error);
+      closeSignOut();
+    }
+  }, [closeSignOut, router]);
 
   // First client tick before localStorage is read — keep it neutral so the
   // preview/workspace modes don't flash.
@@ -212,10 +224,10 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             onClose={() => setUpgradePlan(null)}
           />
         )}
-        {signOutOpen && workspace && (
+        {signOutOpen && signOutUserName && (
           <SignOutDialog
-            userName={workspace.account.name || workspace.account.email}
-            onClose={() => setSignOutOpen(false)}
+            userName={signOutUserName}
+            onClose={closeSignOut}
             onConfirm={handleSignOut}
           />
         )}
