@@ -1,4 +1,11 @@
 import { NextResponse } from "next/server";
+import { getServerUserId } from "@/server/auth/session";
+import {
+  getPersistedScanJob,
+  isScanJobSnapshot,
+  syncPersistedScanJob,
+  toClientScanJob,
+} from "@/server/scan/persistence";
 import {
   getRemoteScanJob,
   hasScannerService,
@@ -17,6 +24,26 @@ interface RouteContext {
 
 export const GET = async (_request: Request, { params }: RouteContext) => {
   const { jobId } = await params;
+  const userId = await getServerUserId();
+
+  if (userId) {
+    const persistedJob = await getPersistedScanJob(userId, jobId);
+
+    if (persistedJob) {
+      const active = persistedJob.status === "queued" || persistedJob.status === "scanning";
+
+      if (active && persistedJob.scannerJobId && hasScannerService()) {
+        const remoteJob = await getRemoteScanJob(persistedJob.scannerJobId);
+
+        if (isScanJobSnapshot(remoteJob.body)) {
+          const synced = await syncPersistedScanJob(userId, persistedJob, remoteJob.body);
+          return NextResponse.json(synced, { status: remoteJob.status });
+        }
+      }
+
+      return NextResponse.json(toClientScanJob(persistedJob));
+    }
+  }
 
   if (hasScannerService()) {
     const remoteJob = await getRemoteScanJob(jobId);

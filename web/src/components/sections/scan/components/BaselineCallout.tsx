@@ -5,14 +5,7 @@ import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Icon } from "@/components/ui";
 import { useSession } from "@/lib/auth-client";
-import {
-  pageLabel,
-  pendingFromReport,
-  previewSave,
-  readWorkspace,
-  saveScan,
-  writePendingScan,
-} from "@/lib/workspace";
+import { pendingFromReport, writePendingScan } from "@/lib/workspace";
 import type { ScanReport } from "../types";
 import { LockIcon } from "./icons";
 import styles from "../ScanStudio.module.scss";
@@ -24,32 +17,24 @@ interface BaselineCalloutProps {
 }
 
 /**
- * The save moment, adapted to who's looking and what they scanned:
- *  - Guest → create an account (or log in) to save the baseline.
- *  - Member, new domain → create a new project.
- *  - Member, new path on a tracked domain → add a new page.
- *  - Member, same path → preview the comparison and save a follow-up scan.
+ * Public scan save prompt. Guests carry one pending scan into auth; signed-in
+ * users save through the dashboard scanner, where reports persist in Neon.
  */
 export const BaselineCallout = ({ report, onSaved }: BaselineCalloutProps) => {
   const router = useRouter();
   const { data: session } = useSession();
   const [saving, setSaving] = useState(false);
 
-  // Read once — this callout only renders client-side, after a scan.
-  const [storedWorkspace] = useState(() => readWorkspace());
-  const workspace = session?.user ? storedWorkspace : null;
+  const signedIn = Boolean(session?.user);
   const pending = useMemo(() => pendingFromReport(report), [report]);
-  const preview = useMemo(() => previewSave(workspace, pending), [workspace, pending]);
 
   const total = report.issues.length;
-  const who = workspace ? workspace.account.name || workspace.account.email : "";
 
-  const saveMember = () => {
+  const openDashboard = () => {
     if (saving) return;
     setSaving(true);
-    saveScan(pending);
     if (onSaved) onSaved();
-    else router.push("/dashboard");
+    else router.push("/dashboard/scan");
   };
 
   const routeGuest = (dest: string) => {
@@ -79,7 +64,7 @@ export const BaselineCallout = ({ report, onSaved }: BaselineCalloutProps) => {
   let context: string | null = null;
   let heading: string;
   let lead: ReactNode;
-  let body: ReactNode = statsBody;
+  const body: ReactNode = statsBody;
   let readyLabel = "Baseline ready";
   let primaryLabel = "Save as baseline";
   let primaryAction = () => routeGuest("/signup");
@@ -94,73 +79,18 @@ export const BaselineCallout = ({ report, onSaved }: BaselineCalloutProps) => {
     </button>
   );
 
-  if (workspace && preview.kind === "rescan" && preview.diff) {
-    const { diff, baselineScore = 0 } = preview;
-    const deltaColor = diff.scoreDelta >= 0 ? "var(--green)" : "var(--severity-critical)";
-    const regColor = diff.regressions > 0 ? "var(--severity-serious)" : "var(--text-secondary)";
-
-    context = `Signed in as ${who} · tracking ${pageLabel(preview.host, preview.path)}`;
-    heading = "Compare against your baseline";
+  if (signedIn) {
+    context = "Signed in";
+    heading = "Save scans from your dashboard";
     lead = (
       <>
-        You&apos;re tracking <strong>{pageLabel(preview.host, preview.path)}</strong> (baseline{" "}
-        {baselineScore}). Save this as a follow-up scan to update its progress and catch
-        regressions.
+        Open the dashboard scanner to save this site as a project or add a follow-up scan to an
+        existing page.
       </>
     );
-    body = (
-      <div className={styles.baselineStats}>
-        <span>
-          Score <strong>{pending.score}</strong>
-        </span>
-        <span className={styles.baselineDivider} aria-hidden="true" />
-        <span style={{ color: deltaColor }}>
-          <strong style={{ color: deltaColor }}>
-            {diff.scoreDelta >= 0 ? "+" : ""}
-            {diff.scoreDelta}
-          </strong>{" "}
-          vs baseline
-        </span>
-        <span className={styles.baselineDivider} aria-hidden="true" />
-        <span>
-          <strong>{diff.resolved}</strong> resolved
-        </span>
-        <span className={styles.baselineDivider} aria-hidden="true" />
-        <span style={{ color: regColor }}>
-          <strong style={{ color: regColor }}>{diff.regressions}</strong> new
-        </span>
-      </div>
-    );
-    readyLabel = "Compared to baseline";
-    primaryLabel = "Save follow-up scan";
-    primaryAction = saveMember;
-    secondary = null;
-  } else if (workspace && preview.kind === "new-page") {
-    context = `Signed in as ${who} · ${preview.host}`;
-    heading = `Add this page to ${preview.host}`;
-    lead = (
-      <>
-        <strong>{preview.path}</strong> isn&apos;t tracked yet. Save to add it as a new page to your{" "}
-        <strong>{preview.host}</strong> project
-        {preview.existingPages ? ` (${preview.existingPages} already tracked)` : ""}.
-      </>
-    );
-    readyLabel = "New page";
-    primaryLabel = "Add page";
-    primaryAction = saveMember;
-    secondary = null;
-  } else if (workspace && preview.kind === "new-project") {
-    context = `Signed in as ${who}`;
-    heading = `Track ${preview.host}`;
-    lead = (
-      <>
-        Save this scan to start a new project for <strong>{preview.host}</strong>. Its {total}{" "}
-        issues become tracked debt, and new ones get flagged in CI and pull requests.
-      </>
-    );
-    readyLabel = "New project";
-    primaryLabel = "Create project";
-    primaryAction = saveMember;
+    readyLabel = "Account ready";
+    primaryLabel = "Open dashboard";
+    primaryAction = openDashboard;
     secondary = null;
   } else {
     heading = "Turn this scan into a baseline";

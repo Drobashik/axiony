@@ -46,6 +46,32 @@ test('ignores duplicate empty id attributes', async () => {
   assert.equal(findDuplicateIdIssue(result, ''), undefined);
 });
 
+test('handles elements whose id property is not a string', async () => {
+  const result = await scanHtml(
+    `
+      <main>
+        <h1>Shadowed ID property</h1>
+        <script>
+          customElements.define('shadowed-id-card', class extends HTMLElement {
+            get id() {
+              return undefined;
+            }
+          });
+        </script>
+        <shadowed-id-card id="Shadowed">First</shadowed-id-card>
+        <shadowed-id-card id="Shadowed">Second</shadowed-id-card>
+      </main>
+    `,
+    { label: 'shadowed id property fixture' },
+  );
+
+  const duplicateIdIssue = findDuplicateIdIssue(result, 'Shadowed');
+
+  assert.ok(duplicateIdIssue);
+  assert.equal(duplicateIdIssue.impact, 'serious');
+  assert.deepEqual(duplicateIdIssue.selectors, ['#Shadowed', '#Shadowed']);
+});
+
 test('keeps duplicate IDs referenced by accessibility attributes serious', async () => {
   const result = await scanHtml(
     `

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { signIn, signUp } from "@/lib/auth-client";
-import { completeAuth } from "@/lib/workspace";
+import { importPendingScanToServer, readPendingScan } from "@/lib/workspace";
 import { getPasswordStrength, isEmail } from "../lib/validation";
 import type { AuthFieldName, AuthMode, AuthStatus, AuthView, OAuthProvider } from "../lib/types";
 
@@ -155,7 +155,7 @@ export function useAuthForm(mode: AuthMode) {
     setStatus("submitting");
 
     const email = fields.email.trim().toLowerCase();
-    const { data, error } =
+    const { error } =
       mode === "signup"
         ? await signUp.email({ name: fields.name.trim(), email, password: fields.password })
         : await signIn.email({ email, password: fields.password, rememberMe: remember });
@@ -172,13 +172,11 @@ export function useAuthForm(mode: AuthMode) {
       return;
     }
 
-    // The real session is now set via an httpOnly cookie. Bootstrap/refresh the
-    // localStorage workspace (still mock in this phase) — this also turns a
-    // pending scan into the account's first baseline.
-    completeAuth({
-      name: data?.user?.name ?? fields.name.trim() ?? email,
-      email: data?.user?.email ?? email,
-    });
+    const pendingScan = readPendingScan();
+
+    // The real session is now set via an httpOnly cookie. If the user scanned
+    // as a guest, import that pending result into Neon before entering dashboard.
+    await importPendingScanToServer(pendingScan);
     setStatus("success");
     schedule(() => router.push(REDIRECT_TO), REDIRECT_MS);
   };

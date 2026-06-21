@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer, type IncomingMessage, type Server } from 'node:http';
 import { scanUrl } from '../scan-url';
-import { BLOCKED_SCAN_PAGE_ERROR, POSSIBLE_CHALLENGE_PAGE_WARNING } from '../page-readiness';
+import { BLOCKED_SCAN_PAGE_ERROR, REFRESH_OR_CHALLENGE_PAGE_ERROR } from '../page-readiness';
 
 const listen = async (html: string): Promise<{ server: Server; url: string }> => {
   return listenWithHandler(() => html);
@@ -45,7 +45,7 @@ const closeServer = async (server: Server): Promise<void> => {
   });
 };
 
-test('warns when URL scan lands on a meta-refresh page', async () => {
+test('fails clearly when URL scan remains on a meta-refresh page', async () => {
   const { server, url } = await listen(`
     <!doctype html>
     <html lang="en">
@@ -60,9 +60,9 @@ test('warns when URL scan lands on a meta-refresh page', async () => {
   `);
 
   try {
-    const result = await scanUrl(url);
-
-    assert.deepEqual(result.metadata?.warnings, [POSSIBLE_CHALLENGE_PAGE_WARNING]);
+    await assert.rejects(() => scanUrl(url), {
+      message: REFRESH_OR_CHALLENGE_PAGE_ERROR,
+    });
   } finally {
     await closeServer(server);
   }

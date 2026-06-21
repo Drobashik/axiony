@@ -18,6 +18,7 @@ export interface DashboardContextValue extends WorkspaceState {
   openUpgrade: (plan?: Exclude<BillingPlan, "free">) => void;
   navigateTab: (tab: DashboardTab) => void;
   setNavigationGuard: (guard: NavigationGuard | null) => void;
+  refreshWorkspace: () => Promise<void>;
 }
 
 const DEFAULT_BILLING: BillingState = {
@@ -37,7 +38,7 @@ const DEFAULT_BILLING: BillingState = {
 /**
  * Shares the workspace + selected project read by the (persistent) dashboard
  * shell with each routed tab page, so navigating between /dashboard/* routes
- * doesn't re-read localStorage or flash between preview/workspace modes.
+ * doesn't refetch reports or flash between preview/workspace modes.
  */
 export const DashboardWorkspaceContext = createContext<DashboardContextValue>({
   ready: false,
@@ -50,6 +51,7 @@ export const DashboardWorkspaceContext = createContext<DashboardContextValue>({
   openUpgrade: () => {},
   navigateTab: () => {},
   setNavigationGuard: () => {},
+  refreshWorkspace: async () => {},
 });
 
 export const useDashboardWorkspace = (): DashboardContextValue =>

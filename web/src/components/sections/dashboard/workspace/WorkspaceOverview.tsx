@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Badge, Button, Icon } from "@/components/ui";
 import cn from "classnames";
 import type { IconName } from "@/types";
@@ -7,10 +8,8 @@ import type { DashboardTab } from "@/lib/data/dashboard";
 import {
   aggregateOpenIssues,
   latestScannedPage,
-  markCreatedSeen,
   pageLabel,
   pageModel,
-  setOnboardingStep,
   workspaceSummary,
 } from "@/lib/workspace";
 import type { JustCreated, OnboardingStepId, Workspace } from "@/lib/workspace";
@@ -105,9 +104,27 @@ const STEP_DEFS: {
 
 export const WorkspaceOverview = ({ workspace, onTab }: WorkspaceOverviewProps) => {
   const summary = workspaceSummary(workspace);
+  const [stepOverrides, setStepOverrides] = useState<Partial<Record<OnboardingStepId, boolean>>>(
+    {},
+  );
+  const [dismissedCreatedKey, setDismissedCreatedKey] = useState<string | null>(null);
+
   if (!summary) return null;
 
-  const { onboarding } = workspace;
+  const created = workspace.onboarding.justCreated;
+  const createdKey = created ? `${created.kind}:${created.host}:${created.path}` : null;
+  const steps = STEP_DEFS.reduce<Record<OnboardingStepId, boolean>>(
+    (acc, step) => {
+      acc[step.id] = stepOverrides[step.id] ?? workspace.onboarding.steps[step.id];
+      return acc;
+    },
+    { ...workspace.onboarding.steps },
+  );
+  const onboarding = {
+    ...workspace.onboarding,
+    steps,
+    justCreated: createdKey && dismissedCreatedKey === createdKey ? null : created,
+  };
   const located = latestScannedPage(workspace);
   const pm = located ? pageModel(located.page) : null;
   const openIssues = aggregateOpenIssues(workspace);
@@ -117,7 +134,12 @@ export const WorkspaceOverview = ({ workspace, onTab }: WorkspaceOverviewProps) 
   return (
     <div className={styles.overview}>
       {onboarding.justCreated && (
-        <Celebration created={onboarding.justCreated} onDismiss={markCreatedSeen} />
+        <Celebration
+          created={onboarding.justCreated}
+          onDismiss={() => {
+            if (createdKey) setDismissedCreatedKey(createdKey);
+          }}
+        />
       )}
 
       <section className={styles.head}>
@@ -258,7 +280,13 @@ export const WorkspaceOverview = ({ workspace, onTab }: WorkspaceOverviewProps) 
                   <button
                     type="button"
                     className={styles.stepCheck}
-                    onClick={() => !step.locked && setOnboardingStep(step.id, !done)}
+                    onClick={() =>
+                      !step.locked &&
+                      setStepOverrides((current) => ({
+                        ...current,
+                        [step.id]: !done,
+                      }))
+                    }
                     disabled={step.locked}
                     aria-pressed={done}
                     aria-label={done ? `${step.title} (done)` : `Mark "${step.title}" done`}

@@ -25,7 +25,7 @@ export const findDuplicateIdIssues = async (
     const byId = new Map<string, Element[]>();
 
     for (const element of Array.from(root.querySelectorAll('[id]'))) {
-      const id = element.id.trim();
+      const id = (element.getAttribute('id') ?? '').trim();
 
       if (!id) {
         continue;
@@ -98,7 +98,7 @@ export const findDuplicateIdIssues = async (
           idValue,
           impact: isSvgResourceOnly && !hasStrongA11yRisk ? 'minor' : 'serious',
           isSvgResourceOnly,
-          selectors: elements.map((element) => `#${escapeId(element.id)}`),
+          selectors: elements.map((element) => `#${escapeId(element.getAttribute('id') ?? '')}`),
           snippets: elements.map((element) => element.outerHTML),
         };
       });

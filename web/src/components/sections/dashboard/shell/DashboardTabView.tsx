@@ -24,6 +24,7 @@ export function DashboardTabView({ tab }: { tab: DashboardTab }) {
     openUpgrade,
     navigateTab,
     setNavigationGuard,
+    refreshWorkspace,
   } = useDashboardWorkspace();
 
   if (workspace) {
@@ -39,6 +40,7 @@ export function DashboardTabView({ tab }: { tab: DashboardTab }) {
         billing={billing}
         onUpgrade={openUpgrade}
         setNavigationGuard={setNavigationGuard}
+        refreshWorkspace={refreshWorkspace}
       />
     );
   }

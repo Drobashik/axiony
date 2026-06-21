@@ -11,7 +11,7 @@ import { useBilling } from "@/lib/billing";
 import type { BillingPlan } from "@/lib/billing";
 import { useReveal } from "@/lib/hooks/useReveal";
 import { recordGuestScan, useGuestScanUsage } from "@/lib/scan/guest-usage";
-import { pendingFromReport, useWorkspace, writePendingScan } from "@/lib/workspace";
+import { pendingFromReport, writePendingScan } from "@/lib/workspace";
 import { GuestScanLimitDialog } from "./components/GuestScanLimitDialog";
 import { ReportView } from "./components/ReportView";
 import { ResetScanDialog } from "./components/ResetScanDialog";
@@ -27,7 +27,6 @@ export const ScanStudio = () => {
   const router = useRouter();
   const engine = useScanEngine();
   const { data: session } = useSession();
-  const { workspace } = useWorkspace();
   const { billing } = useBilling();
   const guestUsage = useGuestScanUsage();
   const [query, setQuery] = useState("");
@@ -42,25 +41,24 @@ export const ScanStudio = () => {
   const busy = engine.status === "scanning";
   const active = engine.status !== "idle";
   const signedIn = Boolean(session?.user);
-  const memberWorkspace = signedIn ? workspace : null;
   const guestScansLeft = guestUsage.remaining;
   const guestLimitReached = guestScansLeft <= 0;
 
   // Signed-in users scan inside the dashboard shell (clean tool, no
   // marketing) — send them there instead of the public studio.
   useEffect(() => {
-    if (memberWorkspace) router.replace("/dashboard/scan");
-  }, [memberWorkspace, router]);
+    if (signedIn) router.replace("/dashboard/scan");
+  }, [router, signedIn]);
 
   useEffect(() => {
-    if (memberWorkspace || engine.status !== "results" || !engine.report) return;
+    if (signedIn || engine.status !== "results" || !engine.report) return;
 
     const resultKey = `${engine.report.url}@${engine.report.scannedAt.getTime()}`;
     if (recordedGuestKey.current === resultKey) return;
 
     recordedGuestKey.current = resultKey;
     recordGuestScan(engine.report.url);
-  }, [engine.report, engine.status, memberWorkspace]);
+  }, [engine.report, engine.status, signedIn]);
 
   // Bring the scan view to the top so the stage/results are visible without
   // the user having to scroll (e.g. after a "scan another" from the bottom).
@@ -179,7 +177,7 @@ export const ScanStudio = () => {
   );
 
   // Avoid flashing the public studio while the redirect above runs.
-  if (memberWorkspace) return null;
+  if (signedIn) return null;
 
   return (
     <>

@@ -5,7 +5,13 @@ import type { ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { planDefinition, useBilling } from "@/lib/billing";
 import type { BillingPlan } from "@/lib/billing";
-import { completeAuth, signOut, useWorkspace } from "@/lib/workspace";
+import {
+  importPendingScanToServer,
+  readPendingScan,
+  restoreWorkspaceFromServer,
+  signOut,
+} from "@/lib/workspace";
+import type { WorkspaceState } from "@/lib/workspace";
 import { signOut as authSignOut, useSession } from "@/lib/auth-client";
 import type { DashboardTab } from "@/lib/data/dashboard";
 import { UpgradeDialog } from "../billing";
@@ -42,13 +48,14 @@ const tabFromPath = (pathname: string): DashboardTab => {
 export function DashboardShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const state = useWorkspace();
+  const [state, setState] = useState<WorkspaceState>({ ready: false, workspace: null });
   const billingState = useBilling();
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedPagePath, setSelectedPagePath] = useState<string | null>(null);
   const [upgradePlan, setUpgradePlan] = useState<Exclude<BillingPlan, "free"> | null>(null);
   const [signOutOpen, setSignOutOpen] = useState(false);
   const [signOutUserName, setSignOutUserName] = useState<string | null>(null);
+  const [signingOut, setSigningOut] = useState(false);
   const [navigationGuard, setNavigationGuardValue] = useState<NavigationGuard | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { ready, workspace } = state;
@@ -68,15 +75,32 @@ export function DashboardShell({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [sidebarOpen]);
 
-  // Bootstrap the local workspace for users who arrive with a session but no
-  // workspace yet — notably after an OAuth redirect, where the email/password
-  // path's completeAuth() never ran on this page.
-  const { data: session } = useSession();
+  // Build the dashboard workspace from Neon reports. OAuth returns directly
+  // here, so this also imports any guest scan waiting to become the baseline.
+  const { data: session, isPending: sessionPending } = useSession();
   const sessionUser = session?.user;
+  const sessionEmail = sessionUser?.email;
+  const sessionName = sessionUser?.name;
+  const refreshWorkspace = useCallback(async () => {
+    if (!sessionEmail) {
+      setState({ ready: true, workspace: null });
+      return;
+    }
+
+    const identity = { name: sessionName ?? sessionEmail, email: sessionEmail };
+    const workspace = await restoreWorkspaceFromServer(identity);
+    setState({ ready: true, workspace });
+  }, [sessionEmail, sessionName]);
+
   useEffect(() => {
-    if (!ready || workspace || !sessionUser) return;
-    completeAuth({ name: sessionUser.name ?? sessionUser.email, email: sessionUser.email });
-  }, [ready, workspace, sessionUser]);
+    if (sessionPending || signingOut) return;
+
+    void (async () => {
+      const pendingScan = readPendingScan();
+      await importPendingScanToServer(pendingScan);
+      await refreshWorkspace();
+    })();
+  }, [refreshWorkspace, sessionPending, signingOut]);
 
   const canNavigate = useCallback(
     () => (navigationGuard ? navigationGuard() : true),
@@ -118,18 +142,20 @@ export function DashboardShell({ children }: { children: ReactNode }) {
     setSignOutUserName(null);
   }, []);
   const handleSignOut = useCallback(async () => {
+    setSigningOut(true);
     try {
       await authSignOut(); // clear the BetterAuth server session (cookie)
-      signOut(); // clear the localStorage workspace (still mock this phase)
+      signOut(); // clear pending scan + legacy client workspace key
       router.replace("/");
     } catch (error) {
       console.error("Unable to sign out", error);
+      setSigningOut(false);
       closeSignOut();
     }
   }, [closeSignOut, router]);
 
-  // First client tick before localStorage is read — keep it neutral so the
-  // preview/workspace modes don't flash.
+  // First client tick before auth/billing/report state is ready — keep it
+  // neutral so preview/workspace modes don't flash.
   if (!ready || !billingReady) return <div className={styles.page} aria-busy="true" />;
 
   // Ignore a stale selection (e.g. project removed) → treat as "all".
@@ -164,6 +190,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         openUpgrade,
         navigateTab: go,
         setNavigationGuard,
+        refreshWorkspace,
       }}
     >
       <div className={styles.page}>

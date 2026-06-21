@@ -3,16 +3,10 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import cn from "classnames";
-import { recordScanUsage, remainingScans } from "@/lib/billing";
+import { remainingScans } from "@/lib/billing";
 import type { BillingPlan, BillingState } from "@/lib/billing";
 import { SEVERITY_COLOR, SEVERITY_LABEL, SEVERITY_ORDER } from "@/lib/scan/issues";
-import {
-  pageModel,
-  projectModel,
-  relativeTime,
-  removeProject,
-  runFollowupScan,
-} from "@/lib/workspace";
+import { pageModel, projectModel, relativeTime } from "@/lib/workspace";
 import type { Project, ProjectPage, Workspace } from "@/lib/workspace";
 import { RefreshIcon } from "@/components/sections/scan/components/icons";
 import { ScoreRing, colorForScore } from "../shared/ScoreRing";
@@ -30,30 +24,23 @@ const ProjectCard = ({
   onOpen,
   onOpenPage,
   onRequestRemove,
+  onOpenScanner,
   onUpgrade,
+  removing,
 }: {
   project: Project;
   billing: BillingState;
   onOpen: () => void;
   onOpenPage: (path: string) => void;
   onRequestRemove: () => void;
+  onOpenScanner: (url: string) => void;
   onUpgrade: (plan?: Exclude<BillingPlan, "free">) => void;
+  removing: boolean;
 }) => {
-  const [scanning, setScanning] = useState<string | null>(null);
   const [pageToRescan, setPageToRescan] = useState<ProjectPage | null>(null);
   const pm = projectModel(project);
   const scansLeft = remainingScans(billing);
   const upgradeTarget = nextPlan(billing.plan);
-
-  const rescan = (path: string) => {
-    if (scanning) return;
-    setScanning(path);
-    window.setTimeout(() => {
-      runFollowupScan(project.host, path);
-      recordScanUsage(project.host);
-      setScanning(null);
-    }, 1000);
-  };
 
   const requestRescan = (page: ProjectPage) => {
     if (scansLeft <= 0) {
@@ -66,9 +53,9 @@ const ProjectCard = ({
 
   const confirmRescan = () => {
     if (!pageToRescan) return;
-    const path = pageToRescan.path;
+    const url = pageToRescan.url;
     setPageToRescan(null);
-    rescan(path);
+    onOpenScanner(url);
   };
 
   return (
@@ -95,6 +82,7 @@ const ProjectCard = ({
               className={styles.projectRemove}
               onClick={onRequestRemove}
               aria-label={`Remove ${project.host}`}
+              disabled={removing}
             >
               <TrashIcon />
             </button>
@@ -113,7 +101,6 @@ const ProjectCard = ({
         <ul className={styles.pageList}>
           {project.pages.map((page) => {
             const m = pageModel(page);
-            const busy = scanning === page.path;
             return (
               <li key={page.id} className={styles.pageRow}>
                 <button
@@ -133,11 +120,9 @@ const ProjectCard = ({
                   type="button"
                   className={styles.pageRescan}
                   onClick={() => requestRescan(page)}
-                  disabled={scanning !== null}
-                  aria-busy={busy}
                 >
-                  <RefreshIcon size={12} className={busy ? styles.spin : undefined} />
-                  {busy ? "Scanning…" : "Re-scan"}
+                  <RefreshIcon size={12} />
+                  Re-scan
                 </button>
               </li>
             );
@@ -166,8 +151,8 @@ const ProjectCard = ({
               <h3 id={`rescan-page-title-${project.id}`}>Re-scan this URL?</h3>
               <p className={styles.confirmUrl}>{pageToRescan.url}</p>
               <p id={`rescan-page-copy-${project.id}`}>
-                This URL already has scan history. A new scan will be added as another history
-                point.
+                This URL already has scan history. Open the scanner and run it again to add another
+                history point.
               </p>
               <div className={styles.confirmActions}>
                 <button
@@ -178,7 +163,7 @@ const ProjectCard = ({
                   Keep history
                 </button>
                 <button type="button" className={styles.confirmDanger} onClick={confirmRescan}>
-                  Re-scan URL
+                  Open scanner
                 </button>
               </div>
             </div>
@@ -229,10 +214,11 @@ const TrashIcon = () => (
 interface WorkspaceProjectsProps {
   workspace: Workspace;
   billing: BillingState;
-  onTab: (tab: "overview") => void;
+  onTab: (tab: "overview" | "scan") => void;
   onSelectProject: (id: string | null) => void;
   onSelectPage: (path: string | null) => void;
   onUpgrade: (plan?: Exclude<BillingPlan, "free">) => void;
+  refreshWorkspace: () => Promise<void>;
 }
 
 export const WorkspaceProjects = ({
@@ -242,8 +228,11 @@ export const WorkspaceProjects = ({
   onSelectProject,
   onSelectPage,
   onUpgrade,
+  refreshWorkspace,
 }: WorkspaceProjectsProps) => {
   const [projectToRemove, setProjectToRemove] = useState<Project | null>(null);
+  const [removingProjectId, setRemovingProjectId] = useState<string | null>(null);
+  const [removeError, setRemoveError] = useState<string | null>(null);
   if (workspace.projects.length === 0) return null;
 
   const openProject = (id: string) => {
@@ -258,12 +247,34 @@ export const WorkspaceProjects = ({
     onTab("overview");
   };
 
-  const confirmRemove = () => {
+  const openScanner = (projectId: string, page: ProjectPage) => {
+    onSelectProject(projectId);
+    onSelectPage(page.path);
+    onTab("scan");
+  };
+
+  const confirmRemove = async () => {
     if (!projectToRemove) return;
-    removeProject(projectToRemove.id);
-    setProjectToRemove(null);
-    onSelectProject(null);
-    onSelectPage(null);
+    setRemoveError(null);
+    setRemovingProjectId(projectToRemove.id);
+
+    try {
+      const response = await fetch(
+        `/api/scans/reports?host=${encodeURIComponent(projectToRemove.host)}`,
+        { method: "DELETE" },
+      );
+
+      if (!response.ok) throw new Error("Delete failed");
+
+      await refreshWorkspace();
+      setProjectToRemove(null);
+      onSelectProject(null);
+      onSelectPage(null);
+    } catch {
+      setRemoveError("Could not remove this project. Please try again.");
+    } finally {
+      setRemovingProjectId(null);
+    }
   };
 
   return (
@@ -290,7 +301,13 @@ export const WorkspaceProjects = ({
             onOpen={() => openProject(project.id)}
             onOpenPage={(path) => openPage(project.id, path)}
             onRequestRemove={() => setProjectToRemove(project)}
+            onOpenScanner={(url) => {
+              const page = project.pages.find((candidate) => candidate.url === url);
+              if (page) openScanner(project.id, page);
+              else onTab("scan");
+            }}
             onUpgrade={onUpgrade}
+            removing={removingProjectId === project.id}
           />
         ))}
       </div>
@@ -317,16 +334,23 @@ export const WorkspaceProjects = ({
                 This removes the domain project, all saved pages, scan history, and every issue
                 attached to it.
               </p>
+              {removeError && <p className={styles.confirmUrl}>{removeError}</p>}
               <div className={styles.confirmActions}>
                 <button
                   type="button"
                   className={styles.confirmCancel}
                   onClick={() => setProjectToRemove(null)}
+                  disabled={removingProjectId !== null}
                 >
                   Cancel
                 </button>
-                <button type="button" className={styles.confirmDanger} onClick={confirmRemove}>
-                  Remove project
+                <button
+                  type="button"
+                  className={styles.confirmDanger}
+                  onClick={confirmRemove}
+                  disabled={removingProjectId !== null}
+                >
+                  {removingProjectId ? "Removing..." : "Remove project"}
                 </button>
               </div>
             </div>

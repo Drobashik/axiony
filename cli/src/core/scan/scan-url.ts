@@ -3,6 +3,7 @@ import { addAxeInitScript, createScanPage, launchScanBrowser, runAxeOnPage } fro
 import {
   detectBlockedScanPage,
   detectPageWarnings,
+  REFRESH_OR_CHALLENGE_PAGE_ERROR,
   waitForChallengeResolution,
   waitForPageReadiness,
 } from './page-readiness';
@@ -65,14 +66,21 @@ export async function scanUrl(url: string, options: ScanUrlOptions = {}): Promis
 
     onProgressPrint('Waiting for page readiness');
     await waitForPageReadiness(page);
-    await waitForChallengeResolution(page);
+    const unresolvedChallengeWarnings = await waitForChallengeResolution(page);
 
     const blockedScanError = await detectBlockedScanPage(page, responseStatus);
     if (blockedScanError) {
       throw new Error(blockedScanError);
     }
 
-    const warnings = await detectPageWarnings(page);
+    const warnings =
+      unresolvedChallengeWarnings.length > 0
+        ? unresolvedChallengeWarnings
+        : await detectPageWarnings(page);
+
+    if (warnings.length > 0) {
+      throw new Error(REFRESH_OR_CHALLENGE_PAGE_ERROR);
+    }
 
     const result = await runAxeOnPage(page, {
       onProgressPrint,
