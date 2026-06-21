@@ -1,4 +1,5 @@
 import { Button, Container, Icon } from "@/components/ui";
+import { WorkspaceCta } from "../WorkspaceCta";
 import cn from "classnames";
 import styles from "./FinalCta.module.scss";
 
@@ -23,9 +24,7 @@ export const FinalCta = () => (
         <Button href="/scan" size="lg">
           Scan your site now
         </Button>
-        <Button href="/signup" variant="secondary" size="lg">
-          Create your workspace
-        </Button>
+        <WorkspaceCta />
       </div>
 
       <ul className={styles.checks}>

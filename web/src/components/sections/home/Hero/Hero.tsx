@@ -1,4 +1,5 @@
 import { Button, Container } from "@/components/ui";
+import { WorkspaceCta } from "../WorkspaceCta";
 import { ArrowRightIcon, CheckIcon } from "./components/icons";
 import { InstallCommand } from "./components/InstallCommand";
 import { LiveTerminal } from "./components/LiveTerminal";
@@ -87,9 +88,7 @@ export const Hero = () => (
             Scan your site now
             <ArrowRightIcon />
           </Button>
-          <Button href="/signup" variant="secondary" size="lg">
-            Create your workspace
-          </Button>
+          <WorkspaceCta />
         </div>
 
         <InstallCommand />

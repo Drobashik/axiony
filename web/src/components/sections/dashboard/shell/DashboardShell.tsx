@@ -5,8 +5,8 @@ import type { ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { planDefinition, useBilling } from "@/lib/billing";
 import type { BillingPlan } from "@/lib/billing";
-import { signOut, useWorkspace } from "@/lib/workspace";
-import { signOut as authSignOut } from "@/lib/auth-client";
+import { completeAuth, signOut, useWorkspace } from "@/lib/workspace";
+import { signOut as authSignOut, useSession } from "@/lib/auth-client";
 import type { DashboardTab } from "@/lib/data/dashboard";
 import { UpgradeDialog } from "../billing";
 import { Sidebar } from "../navigation/Sidebar";
@@ -14,6 +14,7 @@ import { Topbar } from "../navigation/Topbar";
 import { PreviewBanner } from "../preview/PreviewBanner";
 import { DashboardWorkspaceContext } from "./dashboard-workspace-context";
 import type { NavigationGuard } from "./dashboard-workspace-context";
+import { SignOutDialog } from "./SignOutDialog";
 import styles from "./DashboardShell.module.scss";
 
 const VALID_TABS: DashboardTab[] = [
@@ -46,6 +47,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedPagePath, setSelectedPagePath] = useState<string | null>(null);
   const [upgradePlan, setUpgradePlan] = useState<Exclude<BillingPlan, "free"> | null>(null);
+  const [signOutOpen, setSignOutOpen] = useState(false);
   const [navigationGuard, setNavigationGuardValue] = useState<NavigationGuard | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { ready, workspace } = state;
@@ -64,6 +66,16 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [sidebarOpen]);
+
+  // Bootstrap the local workspace for users who arrive with a session but no
+  // workspace yet — notably after an OAuth redirect, where the email/password
+  // path's completeAuth() never ran on this page.
+  const { data: session } = useSession();
+  const sessionUser = session?.user;
+  useEffect(() => {
+    if (!ready || workspace || !sessionUser) return;
+    completeAuth({ name: sessionUser.name ?? sessionUser.email, email: sessionUser.email });
+  }, [ready, workspace, sessionUser]);
 
   const canNavigate = useCallback(
     () => (navigationGuard ? navigationGuard() : true),
@@ -93,12 +105,16 @@ export function DashboardShell({ children }: { children: ReactNode }) {
     (plan: Exclude<BillingPlan, "free"> = "pro") => setUpgradePlan(plan),
     [],
   );
-  const handleSignOut = useCallback(async () => {
+  const requestSignOut = useCallback(() => {
     if (!canNavigate()) return;
+    setSidebarOpen(false);
+    setSignOutOpen(true);
+  }, [canNavigate]);
+  const handleSignOut = useCallback(async () => {
     await authSignOut(); // clear the BetterAuth server session (cookie)
     signOut(); // clear the localStorage workspace (still mock this phase)
     router.push("/");
-  }, [canNavigate, router]);
+  }, [router]);
 
   // First client tick before localStorage is read — keep it neutral so the
   // preview/workspace modes don't flash.
@@ -161,7 +177,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             userPlan={workspace ? `${planDefinition(billing.plan).name} plan` : undefined}
             issuesBadge={workspace ? openIssueCount : undefined}
             inlineScan={workspace !== null}
-            onSignOut={workspace ? handleSignOut : undefined}
+            onSignOut={workspace ? requestSignOut : undefined}
             billingPlan={workspace ? billing.plan : undefined}
             onUpgrade={workspace ? openUpgrade : undefined}
             projects={workspace?.projects.map((p) => ({ id: p.id, host: p.host }))}
@@ -194,6 +210,13 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             currentPlan={billing.plan}
             initialPlan={upgradePlan}
             onClose={() => setUpgradePlan(null)}
+          />
+        )}
+        {signOutOpen && workspace && (
+          <SignOutDialog
+            userName={workspace.account.name || workspace.account.email}
+            onClose={() => setSignOutOpen(false)}
+            onConfirm={handleSignOut}
           />
         )}
       </div>

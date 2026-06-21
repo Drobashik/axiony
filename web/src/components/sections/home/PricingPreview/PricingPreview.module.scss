@@ -89,6 +89,35 @@
   text-transform: uppercase;
 }
 
+.accountNote {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: fit-content;
+  margin: 0 auto 16px;
+  padding: 7px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: 99px;
+  background: var(--bg-base);
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 700;
+
+  span {
+    color: var(--green);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  strong {
+    color: var(--text-primary);
+    font-weight: 800;
+  }
+}
+
 // ── Cards ────────────────────────────────────────────────────────────
 .grid {
   display: grid;
@@ -226,6 +255,16 @@
   background: var(--accent-border);
 }
 
+.ctaPending {
+  color: transparent;
+  pointer-events: none;
+  animation: pricingCtaPulse 1.3s ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
 // ── Feature list ─────────────────────────────────────────────────────
 .features {
   display: grid;
@@ -256,6 +295,16 @@
 .check {
   margin-top: 2px;
   color: var(--accent);
+}
+
+@keyframes pricingCtaPulse {
+  0%,
+  100% {
+    opacity: 0.42;
+  }
+  50% {
+    opacity: 0.68;
+  }
 }
 
 @media (max-width: 900px) {
