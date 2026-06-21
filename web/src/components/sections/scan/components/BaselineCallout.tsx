@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Icon } from "@/components/ui";
+import { useSession } from "@/lib/auth-client";
 import {
   pageLabel,
   pendingFromReport,
@@ -31,10 +32,12 @@ interface BaselineCalloutProps {
  */
 export const BaselineCallout = ({ report, onSaved }: BaselineCalloutProps) => {
   const router = useRouter();
+  const { data: session } = useSession();
   const [saving, setSaving] = useState(false);
 
   // Read once — this callout only renders client-side, after a scan.
-  const [workspace] = useState(() => readWorkspace());
+  const [storedWorkspace] = useState(() => readWorkspace());
+  const workspace = session?.user ? storedWorkspace : null;
   const pending = useMemo(() => pendingFromReport(report), [report]);
   const preview = useMemo(() => previewSave(workspace, pending), [workspace, pending]);
 

@@ -1,0 +1,19 @@
+{
+  "name": "axiony-scanner",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Long-running Axiony URL scanner service.",
+  "type": "commonjs",
+  "scripts": {
+    "build": "node ../cli/node_modules/typescript/bin/tsc -p tsconfig.json",
+    "predev": "npm --prefix ../cli run build && npm run build",
+    "dev": "node --env-file-if-exists=.env --watch dist/server.js",
+    "prestart": "npm --prefix ../cli run build && npm run build",
+    "start": "node --env-file-if-exists=.env dist/server.js",
+    "check": "npm run build",
+    "test": "npm run build && node --test dist/__test__/*.test.js"
+  },
+  "engines": {
+    "node": ">=20.9.0"
+  }
+}
