@@ -7,13 +7,20 @@ import styles from "../PricingPreview.module.scss";
 interface TierCardProps {
   tier: PricingTier;
   cycle: BillingCycle;
+  action?: {
+    cta: string;
+    href: string;
+  };
+  actionPending?: boolean;
 }
 
 const formatScans = (count: number) => (count >= 1000 ? `${count / 1000}k` : `${count}`);
 
-export const TierCard = ({ tier, cycle }: TierCardProps) => {
+export const TierCard = ({ tier, cycle, action, actionPending = false }: TierCardProps) => {
   const free = tier.priceMonthly === 0;
   const annual = cycle === "annual";
+  const tierAction = action ?? { cta: tier.cta, href: tier.href };
+  const buttonVariant = tier.featured ? "primary" : "secondary";
 
   // Always show a per-month figure — it's the most comparable; annual just
   // shows the cheaper monthly-equivalent and how it's billed.
@@ -52,9 +59,15 @@ export const TierCard = ({ tier, cycle }: TierCardProps) => {
         </span>
       </div>
 
-      <Button href={tier.href} variant={tier.featured ? "primary" : "secondary"} block>
-        {tier.cta}
-      </Button>
+      {actionPending ? (
+        <Button variant={buttonVariant} block disabled className={styles.ctaPending}>
+          Manage current plan
+        </Button>
+      ) : (
+        <Button href={tierAction.href} variant={buttonVariant} block>
+          {tierAction.cta}
+        </Button>
+      )}
 
       <ul className={styles.features}>
         {tier.inherits && <li className={styles.inherits}>{tier.inherits}</li>}

@@ -1,0 +1,22 @@
+// Loading placeholder for the auth-aware CTA: reuses the real button's box
+// (size/variant) but hides the label and gently pulses, so there's no layout
+// shift while the session resolves.
+.pending {
+  color: transparent;
+  pointer-events: none;
+  animation: workspaceCtaPulse 1.3s ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes workspaceCtaPulse {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}

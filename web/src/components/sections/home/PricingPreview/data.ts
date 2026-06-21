@@ -32,7 +32,7 @@ const COPY: Record<BillingPlan, TierCopy> = {
       "Compare any two runs · email alerts",
       "AI fix suggestions · exportable reports",
     ],
-    cta: "Get early access",
+    cta: "Start Pro now",
     href: "/signup",
   },
   team: {
@@ -43,7 +43,7 @@ const COPY: Record<BillingPlan, TierCopy> = {
       "GitHub / GitLab checks + PR comments",
       "Branch baselines · Slack alerts",
     ],
-    cta: "Get early access",
+    cta: "Start Team now",
     href: "/signup",
   },
 };

@@ -20,6 +20,38 @@ const previewAllowedHosts =
 
 const allowedHosts = [new URL(productionUrl).host, ...previewAllowedHosts];
 
+// Social sign-in providers, enabled only when their credentials are present —
+// so a missing OAuth app never breaks startup (CI, or before secrets are set).
+// Each provider's callback is /api/auth/callback/<provider>.
+type SocialProviders = NonNullable<Parameters<typeof betterAuth>[0]["socialProviders"]>;
+
+function resolveSocialProviders(): SocialProviders {
+  const providers: SocialProviders = {};
+  const env = process.env;
+
+  if (env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET) {
+    providers.google = {
+      clientId: env.GOOGLE_CLIENT_ID,
+      clientSecret: env.GOOGLE_CLIENT_SECRET,
+    };
+  }
+  if (env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET) {
+    providers.github = {
+      clientId: env.GITHUB_CLIENT_ID,
+      clientSecret: env.GITHUB_CLIENT_SECRET,
+    };
+  }
+  if (env.GITLAB_CLIENT_ID && env.GITLAB_CLIENT_SECRET) {
+    providers.gitlab = {
+      clientId: env.GITLAB_CLIENT_ID,
+      clientSecret: env.GITLAB_CLIENT_SECRET,
+      ...(env.GITLAB_ISSUER ? { issuer: env.GITLAB_ISSUER } : {}),
+    };
+  }
+
+  return providers;
+}
+
 // Server-side BetterAuth instance. Sessions are cookie-based; the user,
 // session, account and verification rows live in Postgres via the Prisma
 // adapter. Preview deployments resolve their base URL from the current Vercel
@@ -36,5 +68,21 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
-  // OAuth providers (Google/GitHub) are added in a later step.
+  socialProviders: resolveSocialProviders(),
+  account: {
+    // Link a social sign-in to an existing account with the same email — but
+    // only for these providers AND only when that existing account is already
+    // email-verified (BetterAuth's requireLocalEmailVerified gate stays on by
+    // default). There's no email-verification flow yet, so password accounts
+    // won't auto-link to social until one is added.
+    accountLinking: {
+      trustedProviders: ["google", "github", "gitlab"],
+    },
+  },
+  // Fallback for OAuth failures with no per-flow errorCallbackURL: send them to
+  // our login page (?error=<code>) instead of BetterAuth's built-in error page.
+  // `signIn.social()` passes errorCallbackURL for the normal sign-in flow.
+  onAPIError: {
+    errorURL: "/login",
+  },
 });

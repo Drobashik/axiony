@@ -16,7 +16,8 @@ export const PricingPreview = () => (
         </h2>
         <p className={styles.lead}>
           Every plan meters the same two things — domains you track and scans you run. The CLI is
-          free and open-source today; Pro and Team are landing soon, no card to start.
+          free and open-source today; upgrade anytime for hosted dashboards, scheduled scans, and
+          team workflows.
         </p>
       </div>
 

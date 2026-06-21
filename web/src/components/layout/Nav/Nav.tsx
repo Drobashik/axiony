@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button, LogoMark } from "@/components/ui";
 import cn from "classnames";
 import { useScrolled } from "@/lib/hooks/useScrolled";
+import { useSession } from "@/lib/auth-client";
 import { LINKS, SPY_IDS } from "./data";
 import { useActiveSection } from "./hooks/useActiveSection";
 import { GitHubIcon, ScanIcon } from "./icons";
@@ -15,6 +16,8 @@ export const Nav = () => {
   const active = useActiveSection(SPY_IDS);
   const [menuOpen, setMenuOpen] = useState(false);
   const [hovered, setHovered] = useState<string | null>(null);
+  const { data: session, isPending: sessionPending } = useSession();
+  const loggedIn = Boolean(session?.user);
 
   const linkRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
   const indicatorRef = useRef<HTMLSpanElement>(null);
@@ -106,6 +109,20 @@ export const Nav = () => {
 
   const close = () => setMenuOpen(false);
 
+  // Swap the auth CTA once the session resolves: logged-in → Dashboard,
+  // otherwise Log in. While it's still loading we render a same-size skeleton
+  // (desktop) so the bar never shifts or flashes the wrong link.
+  const renderAuthLink = (className: string, onClick?: () => void) =>
+    loggedIn ? (
+      <Link href="/dashboard" className={className} onClick={onClick}>
+        Dashboard
+      </Link>
+    ) : (
+      <Link href="/login" className={className} onClick={onClick}>
+        Log in
+      </Link>
+    );
+
   return (
     <header className={cn(styles.nav, scrolled && styles.scrolled, menuOpen && styles.menuOpen)}>
       <div className={styles.inner}>
@@ -149,9 +166,11 @@ export const Nav = () => {
             <GitHubIcon />
             GitHub
           </a>
-          <Link href="/login" className={styles.signIn}>
-            Log in
-          </Link>
+          {sessionPending ? (
+            <span className={styles.authSkeleton} aria-hidden="true" />
+          ) : (
+            renderAuthLink(styles.signIn)
+          )}
           <Button href="/scan" size="sm" className={styles.scanCta}>
             <ScanIcon />
             <span className={styles.ctaText}>Start scanning</span>
@@ -211,9 +230,7 @@ export const Nav = () => {
             <GitHubIcon />
             GitHub
           </a>
-          <Link href="/login" className={styles.mobileAction} onClick={close}>
-            Log in
-          </Link>
+          {renderAuthLink(styles.mobileAction, close)}
         </div>
 
         <Button href="/scan" size="lg" block onClick={close} className={styles.mobileCta}>

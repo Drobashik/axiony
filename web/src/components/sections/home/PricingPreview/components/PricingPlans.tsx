@@ -2,16 +2,50 @@
 
 import { useState } from "react";
 import cn from "classnames";
-import type { BillingCycle } from "@/lib/billing";
+import { PLAN_ORDER, planDefinition, useBilling } from "@/lib/billing";
+import type { BillingCycle, BillingPlan } from "@/lib/billing";
+import { useSession } from "@/lib/auth-client";
 import { PRICING_TIERS } from "../data";
+import type { PricingTier } from "../types";
 import { TierCard } from "./TierCard";
 import styles from "../PricingPreview.module.scss";
 
+const DASHBOARD_BILLING_HREF = "/dashboard/settings";
+
+const actionForTier = (
+  tier: PricingTier,
+  signedIn: boolean,
+  currentPlan: BillingPlan,
+): { cta: string; href: string } => {
+  if (!signedIn) return { cta: tier.cta, href: tier.href };
+
+  if (tier.id === currentPlan) {
+    return { cta: "Manage current plan", href: DASHBOARD_BILLING_HREF };
+  }
+
+  if (PLAN_ORDER[tier.id] < PLAN_ORDER[currentPlan]) {
+    return { cta: "Included in your plan", href: DASHBOARD_BILLING_HREF };
+  }
+
+  return { cta: `Upgrade to ${tier.name}`, href: DASHBOARD_BILLING_HREF };
+};
+
 export const PricingPlans = () => {
   const [cycle, setCycle] = useState<BillingCycle>("monthly");
+  const { data: session, isPending: sessionPending } = useSession();
+  const { billing } = useBilling();
+  const signedIn = Boolean(session?.user);
+  const currentPlanName = planDefinition(billing.plan).name;
 
   return (
     <div className={cn(styles.plans, "reveal")}>
+      {signedIn && (
+        <div className={styles.accountNote} role="status">
+          <span>Signed in</span>
+          <strong>{currentPlanName} plan</strong>
+        </div>
+      )}
+
       <div className={styles.cycle} role="group" aria-label="Billing cycle">
         {(["monthly", "annual"] as const).map((value) => (
           <button
@@ -29,7 +63,13 @@ export const PricingPlans = () => {
 
       <div className={styles.grid}>
         {PRICING_TIERS.map((tier) => (
-          <TierCard key={tier.id} tier={tier} cycle={cycle} />
+          <TierCard
+            key={tier.id}
+            tier={tier}
+            cycle={cycle}
+            action={actionForTier(tier, signedIn, billing.plan)}
+            actionPending={sessionPending}
+          />
         ))}
       </div>
     </div>

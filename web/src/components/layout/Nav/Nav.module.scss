@@ -248,6 +248,29 @@
   }
 }
 
+.authSkeleton {
+  display: inline-block;
+  width: 82px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: oklch(1 0 0 / 0.06);
+  animation: authSkeletonPulse 1.3s ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes authSkeletonPulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
 .scanCta {
   box-shadow:
     0 0 0 1px oklch(1 0 0 / 0.05),

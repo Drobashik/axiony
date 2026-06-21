@@ -4,25 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { signIn, signUp } from "@/lib/auth-client";
-import { upsertMockOAuthAccount } from "@/lib/auth/mock-store";
 import { completeAuth } from "@/lib/workspace";
 import { getPasswordStrength, isEmail } from "../lib/validation";
 import type { AuthFieldName, AuthMode, AuthStatus, AuthView, OAuthProvider } from "../lib/types";
 
-// ── Mock timing + destination ────────────────────────────────────────
+// ── Timing + destination ─────────────────────────────────────────────
 const SUBMIT_MS = 1300;
 const REDIRECT_MS = 1000;
-const OAUTH_MS = 1200;
 const REDIRECT_TO = "/dashboard";
-
-// Stand-in profiles returned by the mock OAuth providers, so a social
-// sign-in still produces a believable account. Swap for the real profile
-// from the provider callback later.
-const OAUTH_IDENTITY: Record<OAuthProvider["id"], { name: string; email: string }> = {
-  google: { name: "Alex Rivera", email: "alex.rivera@gmail.com" },
-  github: { name: "Sam Carter", email: "sam@users.noreply.github.com" },
-  gitlab: { name: "Priya Nair", email: "priya@gitlab-mail.com" },
-};
 
 interface Fields {
   name: string;
@@ -35,8 +24,9 @@ type Errors = Partial<Record<AuthFieldName | "terms", string>>;
 /**
  * Owns all state for the auth form: field values, touched/error tracking,
  * and the submit lifecycle (idle → submitting → success/error) with a redirect
- * to the dashboard. Email/password go through BetterAuth (`@/lib/auth-client`);
- * social sign-in is still mocked pending OAuth credentials.
+ * to the dashboard. Email/password and social sign-in both go through
+ * BetterAuth (`@/lib/auth-client`). OAuth failures redirect back here as
+ * `?error=<code>` and surface on the form.
  */
 export function useAuthForm(mode: AuthMode) {
   const router = useRouter();
@@ -63,10 +53,27 @@ export function useAuthForm(mode: AuthMode) {
     }
   }, [router]);
 
-  // Clear any pending mock timers on unmount.
+  // Clear any pending timers on unmount.
   useEffect(() => {
     const pending = timers.current;
     return () => pending.forEach(clearTimeout);
+  }, []);
+
+  // Surface OAuth failures: BetterAuth redirects back here as ?error=<code>
+  // (instead of its own error page). Show it on the form, then strip the param
+  // so a refresh doesn't replay it.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("error");
+    if (!code) return;
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time sync from a client-only URL param
+    setFormError(oauthRedirectMessage(code));
+
+    params.delete("error");
+    params.delete("error_description");
+    const query = params.toString();
+    window.history.replaceState(null, "", window.location.pathname + (query ? `?${query}` : ""));
   }, []);
 
   const schedule = (fn: () => void, ms: number) => {
@@ -176,16 +183,25 @@ export function useAuthForm(mode: AuthMode) {
     schedule(() => router.push(REDIRECT_TO), REDIRECT_MS);
   };
 
-  // TODO(auth): social sign-in is still mocked. Wire to
-  // `authClient.signIn.social({ provider })` once OAuth credentials exist.
-  const handleOAuth = (id: OAuthProvider["id"]) => {
+  const handleOAuth = async (id: OAuthProvider["id"]) => {
     if (oauthPending || status === "submitting") return;
     setOauthPending(id);
-    schedule(() => {
-      const identity = upsertMockOAuthAccount(OAUTH_IDENTITY[id], id);
-      completeAuth(identity);
-      router.push(REDIRECT_TO);
-    }, OAUTH_MS);
+
+    // Kicks off the provider redirect. On success the browser leaves this page,
+    // so the code below only runs if *initiating* the flow failed (e.g. the
+    // provider isn't configured). The workspace is bootstrapped on return to
+    // /dashboard from the BetterAuth session (see DashboardShell).
+    const { error } = await signIn.social({
+      provider: id,
+      callbackURL: REDIRECT_TO,
+      // If the OAuth round-trip fails, come back to this auth page with
+      // ?error=<code> instead of BetterAuth's built-in error page.
+      errorCallbackURL: mode === "signup" ? "/signup" : "/login",
+    });
+    if (error) {
+      setOauthPending(null);
+      setFormError(authErrorMessage(error, mode));
+    }
   };
 
   // ── Inline "forgot password" reset (login only) ────────────────────
@@ -258,4 +274,20 @@ function authErrorMessage(error: AuthClientError, mode: AuthMode): string {
   return mode === "signup"
     ? "We couldn't create your account. Please try again."
     : "We couldn't sign you in. Check your details and try again.";
+}
+
+// Maps a BetterAuth OAuth `?error=<code>` (from a failed provider round-trip)
+// to a human message shown on the form.
+function oauthRedirectMessage(code: string): string {
+  switch (code) {
+    case "account_not_linked":
+      return "That email already has an account with a different sign-in method. Sign in that way first, then link the provider.";
+    case "email_doesn't_match":
+    case "email_not_found":
+      return "That provider didn't share a usable email, so we couldn't sign you in.";
+    case "oauth_provider_not_found":
+      return "That sign-in option isn't available right now.";
+    default:
+      return "We couldn't finish signing in with that provider. Please try again.";
+  }
 }
