@@ -1,4 +1,4 @@
-FROM node:24-bookworm-slim
+FROM mcr.microsoft.com/playwright:v1.59.1-noble
 
 WORKDIR /app
 
@@ -7,7 +7,6 @@ RUN npm --prefix cli ci
 
 COPY cli ./cli
 RUN npm --prefix cli run build
-RUN npx --prefix cli playwright install --with-deps chromium
 
 COPY scanner ./scanner
 RUN npm --prefix scanner run build
