@@ -15,7 +15,7 @@ interface IssueRowProps {
   open: boolean;
   onToggle: (id: string) => void;
   locked?: boolean;
-  onUpgrade?: () => void;
+  onCreateAccount?: () => void;
 }
 
 interface FormattedWcagTag {
@@ -100,7 +100,7 @@ const repairDetails = (issue: Issue) => {
   };
 };
 
-export const IssueRow = ({ issue, open, onToggle, locked, onUpgrade }: IssueRowProps) => {
+export const IssueRow = ({ issue, open, onToggle, locked, onCreateAccount }: IssueRowProps) => {
   const bodyId = useId();
   const details = repairDetails(issue);
   const primaryWcag = issue.wcag[0] ? formatWcagTag(issue.wcag[0]) : null;
@@ -130,7 +130,7 @@ export const IssueRow = ({ issue, open, onToggle, locked, onUpgrade }: IssueRowP
             <span>
               {issue.nodes.length} occurrence{issue.nodes.length !== 1 ? "s" : ""}
             </span>
-            {locked && <span className={styles.issueLockedPill}>Pro details</span>}
+            {locked && <span className={styles.issueLockedPill}>Sign up</span>}
           </span>
         </span>
         <ChevronIcon className={cn(styles.issueChevron, open && styles.issueChevronOpen)} />
@@ -145,20 +145,24 @@ export const IssueRow = ({ issue, open, onToggle, locked, onUpgrade }: IssueRowP
         <div className={styles.issueBodyInner}>
           {locked ? (
             <section className={styles.issueLockedPanel}>
-              <span className={styles.issueLockedKicker}>Detailed fix locked</span>
+              <span className={styles.issueLockedKicker}>Sign up to see details</span>
               <h3>{issue.title}</h3>
               <p>
-                Upgrade to view affected elements, formatted code, suggested repair previews, and
-                copyable fixes for this issue.
+                Create a free account to view affected elements, formatted code, suggested repair
+                previews, and copyable fixes for this issue.
               </p>
               <div className={styles.issueLockedMeta}>
                 <span>{issue.nodes.length} affected elements</span>
                 <span>{issue.rule}</span>
                 {issue.wcag[0] && <span>{issue.wcag[0]}</span>}
               </div>
-              {onUpgrade && (
-                <button type="button" className={styles.issueLockedAction} onClick={onUpgrade}>
-                  Unlock all issue details
+              {onCreateAccount && (
+                <button
+                  type="button"
+                  className={styles.issueLockedAction}
+                  onClick={onCreateAccount}
+                >
+                  Create free account
                 </button>
               )}
             </section>

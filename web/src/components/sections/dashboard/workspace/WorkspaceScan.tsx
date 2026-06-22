@@ -439,8 +439,7 @@ export const WorkspaceScan = ({
               reduce={engine.reduce}
               onRescan={rescan}
               embedded
-              freePreview={billing.plan === "free"}
-              onUpgrade={() => onUpgrade("pro")}
+              guestPreview={false}
             />
           </div>
 

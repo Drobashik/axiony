@@ -5,10 +5,7 @@ import { useRouter } from "next/navigation";
 import { Container } from "@/components/ui";
 import { ScanNav } from "@/components/layout";
 import cn from "classnames";
-import { UpgradeDialog } from "@/components/sections/dashboard/billing";
 import { useSession } from "@/lib/auth-client";
-import { useBilling } from "@/lib/billing";
-import type { BillingPlan } from "@/lib/billing";
 import { useReveal } from "@/lib/hooks/useReveal";
 import { recordGuestScan, useGuestScanUsage } from "@/lib/scan/guest-usage";
 import { pendingFromReport, writePendingScan } from "@/lib/workspace";
@@ -27,14 +24,12 @@ export const ScanStudio = () => {
   const router = useRouter();
   const engine = useScanEngine();
   const { data: session } = useSession();
-  const { billing } = useBilling();
   const guestUsage = useGuestScanUsage();
   const [query, setQuery] = useState("");
   const [level, setLevel] = useState<WcagLevel>("AA");
   const [focusSignal, setFocusSignal] = useState(0);
   const [resetDialog, setResetDialog] = useState<"report" | "scanning" | null>(null);
   const [guestLimitDialog, setGuestLimitDialog] = useState(false);
-  const [upgradePlan, setUpgradePlan] = useState<Exclude<BillingPlan, "free"> | null>(null);
   const topRef = useRef<HTMLElement>(null);
   const recordedGuestKey = useRef<string | null>(null);
 
@@ -156,8 +151,6 @@ export const ScanStudio = () => {
     setFocusSignal((value) => value + 1);
   };
 
-  const openUpgrade = (plan: Exclude<BillingPlan, "free"> = "pro") => setUpgradePlan(plan);
-
   // The URL form lives at the top while idle, then docks below the report
   // once there's a result (so the result is what the user sees first).
   const consoleBlock = (
@@ -255,8 +248,8 @@ export const ScanStudio = () => {
                   report={engine.report}
                   reduce={engine.reduce}
                   onRescan={rescanCurrent}
-                  freePreview={!signedIn || billing.plan === "free"}
-                  onUpgrade={() => openUpgrade("pro")}
+                  guestPreview={!signedIn}
+                  onCreateAccount={() => routeGuestWithReport("/signup")}
                 />
               </div>
               {consoleBlock}
@@ -281,14 +274,6 @@ export const ScanStudio = () => {
           onCancel={() => setGuestLimitDialog(false)}
           onSignup={() => routeGuestWithReport("/signup")}
           onLogin={() => routeGuestWithReport("/login")}
-        />
-      )}
-
-      {upgradePlan && (
-        <UpgradeDialog
-          currentPlan={billing.plan}
-          initialPlan={upgradePlan}
-          onClose={() => setUpgradePlan(null)}
         />
       )}
     </>
