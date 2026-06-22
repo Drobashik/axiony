@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import cn from "classnames";
 import { Select } from "@/components/ui";
 import { SEVERITY_LABEL } from "@/lib/scan/issues";
-import { aggregateOpenIssues, pageLabel, setIssueStatus } from "@/lib/workspace";
+import { aggregateOpenIssues, pageLabel } from "@/lib/workspace";
 import type { IssueStatus, Workspace } from "@/lib/workspace";
 import type { Severity } from "@/types";
 import { STATUS_OPTIONS, statusMeta } from "./issue-status";
@@ -95,11 +95,20 @@ export const WorkspaceIssues = ({
   canControlIssues,
   onUpgrade,
 }: WorkspaceIssuesProps) => {
-  const issues = aggregateOpenIssues(workspace);
   const [filter, setFilter] = useState<Filter>("open");
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>("all");
   const [search, setSearch] = useState("");
   const [detailKey, setDetailKey] = useState<DetailKey | null>(null);
+  const [statusOverrides, setStatusOverrides] = useState<Record<string, IssueStatus>>({});
+  const baseIssues = useMemo(() => aggregateOpenIssues(workspace), [workspace]);
+  const issues = useMemo(
+    () =>
+      baseIssues.map((located) => {
+        const status = statusOverrides[issueKey(located.host, located.path, located.issue.id)];
+        return status ? { ...located, issue: { ...located.issue, status } } : located;
+      }),
+    [baseIssues, statusOverrides],
+  );
   const unlockedDetailKeys = canControlIssues ? null : freeDetailKeys(issues);
 
   const statusFiltered = issues.filter(({ issue }) => {
@@ -146,7 +155,10 @@ export const WorkspaceIssues = ({
 
   const changeStatus = (host: string, path: string, issueId: string, status: IssueStatus) => {
     if (!canControlIssues) return;
-    setIssueStatus(host, path, issueId, status);
+    setStatusOverrides((current) => ({
+      ...current,
+      [issueKey(host, path, issueId)]: status,
+    }));
   };
 
   return (

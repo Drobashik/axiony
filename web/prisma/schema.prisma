@@ -33,6 +33,9 @@ model User {
   image         String?
   sessions      Session[]
   accounts      Account[]
+  billing       UserBilling?
+  scanJobs      ScanJob[]
+  scanReports   UserScanReport[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -79,4 +82,70 @@ model Verification {
   updatedAt  DateTime @updatedAt
 
   @@index([identifier])
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Scan persistence — first production layer for hosted scans. The dashboard
+// still has a local workspace cache, but scan jobs/reports and usage limits now
+// have a server-side source of truth.
+// ─────────────────────────────────────────────────────────────────────
+
+model UserBilling {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan       String   @default("free")
+  cycle      String   @default("monthly")
+  status     String   @default("active")
+  startedAt  DateTime @default(now())
+  renewalAt  DateTime?
+  checkoutId String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model ScanJob {
+  id            String          @id @default(cuid())
+  userId        String?
+  user          User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  url           String
+  normalizedUrl String
+  level         String
+  status        String
+  progress      Int             @default(0)
+  lines         Json?
+  report        Json?
+  error         String?
+  scannerJobId  String?
+  scanReport    UserScanReport?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  completedAt   DateTime?
+  expiresAt     DateTime?
+
+  @@index([userId, status])
+  @@index([scannerJobId])
+  @@index([createdAt])
+}
+
+model UserScanReport {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scanJobId String?  @unique
+  scanJob   ScanJob? @relation(fields: [scanJobId], references: [id], onDelete: SetNull)
+  url       String
+  host      String
+  path      String
+  level     String
+  score     Int
+  total     Int
+  counts    Json
+  report    Json
+  scannedAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, scannedAt])
+  @@index([userId, host, path])
 }

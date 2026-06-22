@@ -16,6 +16,7 @@ interface ScanStageProps {
 
 const RADIUS = 32;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+const SCAN_NODES = ["dom", "axe", "wcag"] as const;
 
 export const ScanStage = ({
   url,
@@ -29,7 +30,19 @@ export const ScanStage = ({
   const failed = status === "failed";
 
   return (
-    <div className={styles.stage}>
+    <div className={cn(styles.stage, !failed && styles.stageScanning)}>
+      {!failed && (
+        <div className={cn(styles.scanField, reduce && styles.scanFieldStatic)} aria-hidden="true">
+          <span className={styles.scanGrid} />
+          <span className={styles.scanSweep} />
+          <span className={styles.scanOrbit} />
+          <span className={styles.scanOrbitInner} />
+          {SCAN_NODES.map((node) => (
+            <span key={node} className={styles.scanNode} data-node={node} />
+          ))}
+        </div>
+      )}
+
       <div className={styles.stageHead}>
         <div
           className={styles.progressRing}
@@ -39,6 +52,18 @@ export const ScanStage = ({
           aria-valuemax={100}
           aria-label="Scan progress"
         >
+          {!failed && (
+            <>
+              <span
+                className={cn(styles.ringHalo, reduce && styles.ringHaloStatic)}
+                aria-hidden="true"
+              />
+              <span
+                className={cn(styles.ringScanner, reduce && styles.ringScannerStatic)}
+                aria-hidden="true"
+              />
+            </>
+          )}
           <svg viewBox="0 0 80 80" aria-hidden="true">
             <circle className={styles.ringTrack} cx="40" cy="40" r={RADIUS} />
             <circle

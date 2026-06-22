@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import cn from "classnames";
 import { PLAN_ORDER, planDefinition, useBilling } from "@/lib/billing";
 import type { BillingCycle, BillingPlan } from "@/lib/billing";
@@ -11,6 +11,10 @@ import { TierCard } from "./TierCard";
 import styles from "../PricingPreview.module.scss";
 
 const DASHBOARD_BILLING_HREF = "/dashboard/settings";
+
+const subscribeHydration = () => () => {};
+const clientHydrationSnapshot = () => true;
+const serverHydrationSnapshot = () => false;
 
 const actionForTier = (
   tier: PricingTier,
@@ -32,10 +36,16 @@ const actionForTier = (
 
 export const PricingPlans = () => {
   const [cycle, setCycle] = useState<BillingCycle>("monthly");
-  const { data: session, isPending: sessionPending } = useSession();
+  const hydrated = useSyncExternalStore(
+    subscribeHydration,
+    clientHydrationSnapshot,
+    serverHydrationSnapshot,
+  );
+  const { data: session } = useSession();
   const { billing } = useBilling();
-  const signedIn = Boolean(session?.user);
-  const currentPlanName = planDefinition(billing.plan).name;
+  const signedIn = hydrated && Boolean(session?.user);
+  const currentPlan = hydrated ? billing.plan : "free";
+  const currentPlanName = planDefinition(currentPlan).name;
 
   return (
     <div className={cn(styles.plans, "reveal")}>
@@ -67,8 +77,7 @@ export const PricingPlans = () => {
             key={tier.id}
             tier={tier}
             cycle={cycle}
-            action={actionForTier(tier, signedIn, billing.plan)}
-            actionPending={sessionPending}
+            action={actionForTier(tier, signedIn, currentPlan)}
           />
         ))}
       </div>

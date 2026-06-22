@@ -2,17 +2,16 @@ import type { Severity } from "@/types";
 import type { SeverityCounts } from "@/lib/scan/issues";
 
 // =====================================================================
-// Mock "workspace" model (v2 — multi-project).
+// Client workspace model (v3 — multi-project).
 // ---------------------------------------------------------------------
 // A workspace holds one or more projects (one per domain/host). Each
 // project holds one or more pages (one per path). Each page tracks its
 // own baseline + scan history, so a new scan never overwrites another:
-//   • new domain        → new project
-//   • new path (same domain) → new page on that project
-//   • same path again   → a follow-up scan on that page
+//   - new domain             → new project
+//   - new path (same domain) → new page on that project
+//   - same path again        → a follow-up scan on that page
 //
-// Client-only, persisted to localStorage via `store.ts`. Swap that module
-// for a real API later; these shapes stay the same.
+// The dashboard builds this shape from Neon scan reports in `store.ts`.
 // =====================================================================
 
 export type WcagLevel = "A" | "AA" | "AAA";

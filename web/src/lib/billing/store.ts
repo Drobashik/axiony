@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import type { BillingCycle, BillingPlan, BillingState, BillingUsage } from "./types";
 
 const BILLING_KEY = "axiony.billing.mock";
@@ -126,9 +126,42 @@ function writeBilling(state: BillingState): BillingState {
   return billing;
 }
 
+export async function syncBillingFromServer(): Promise<BillingState | null> {
+  if (!isBrowser()) return null;
+
+  try {
+    const response = await fetch("/api/billing/state", {
+      cache: "no-store",
+    });
+
+    if (!response.ok) return null;
+
+    return writeBilling((await response.json()) as BillingState);
+  } catch {
+    return null;
+  }
+}
+
+const patchServerBilling = (body: { plan: BillingPlan; cycle: BillingCycle }) => {
+  if (!isBrowser()) return;
+
+  void fetch("/api/billing/state", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  })
+    .then((response) => (response.ok ? response.json() : null))
+    .then((billing) => {
+      if (billing) writeBilling(billing as BillingState);
+    })
+    .catch(() => {
+      /* server sync is best-effort; local state keeps the mock UI responsive */
+    });
+};
+
 export function upgradePlan(plan: Exclude<BillingPlan, "free">, cycle: BillingCycle): BillingState {
   const current = readBilling();
-  return writeBilling({
+  const next = writeBilling({
     ...current,
     plan,
     cycle,
@@ -137,11 +170,14 @@ export function upgradePlan(plan: Exclude<BillingPlan, "free">, cycle: BillingCy
     renewalAt: renewalDate(cycle),
     checkoutId: `mock_${randomId()}`,
   });
+  patchServerBilling({ plan, cycle });
+  return next;
 }
 
 export function resetBilling(): BillingState {
   if (isBrowser()) localStorage.removeItem(BILLING_KEY);
   notify();
+  patchServerBilling({ plan: "free", cycle: "monthly" });
   return freeState();
 }
 
@@ -210,6 +246,10 @@ export interface BillingHookState {
 
 export function useBilling(): BillingHookState {
   const billing = useSyncExternalStore(subscribeBilling, billingSnapshot, getServerBillingSnapshot);
+
+  useEffect(() => {
+    void syncBillingFromServer();
+  }, []);
 
   return { ready: true, billing };
 }

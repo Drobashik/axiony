@@ -255,16 +255,6 @@
   background: var(--accent-border);
 }
 
-.ctaPending {
-  color: transparent;
-  pointer-events: none;
-  animation: pricingCtaPulse 1.3s ease-in-out infinite;
-
-  @media (prefers-reduced-motion: reduce) {
-    animation: none;
-  }
-}
-
 // ── Feature list ─────────────────────────────────────────────────────
 .features {
   display: grid;
@@ -295,16 +285,6 @@
 .check {
   margin-top: 2px;
   color: var(--accent);
-}
-
-@keyframes pricingCtaPulse {
-  0%,
-  100% {
-    opacity: 0.42;
-  }
-  50% {
-    opacity: 0.68;
-  }
 }
 
 @media (max-width: 900px) {

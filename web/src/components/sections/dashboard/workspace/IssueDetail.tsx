@@ -98,8 +98,8 @@ export const IssueDetail = ({
     };
   }, [onClose]);
 
-  // Prefer the saved live scan payload; older localStorage records fall back
-  // to synthetic templates or generic copy.
+  // Prefer the saved live scan payload; sparse reports fall back to synthetic
+  // templates or generic copy.
   const nodes = issue.nodes?.length ? issue.nodes : (template?.nodes ?? []);
   const wcag = issue.wcag?.length ? issue.wcag : (template?.wcag ?? []);
   const fallbackBefore = nodes[0] ?? "Affected element not reported.";

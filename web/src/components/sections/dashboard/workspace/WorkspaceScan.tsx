@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Button, Icon } from "@/components/ui";
 import { ReportView } from "@/components/sections/scan/components/ReportView";
+import { ResetScanDialog } from "@/components/sections/scan/components/ResetScanDialog";
 import { ScanStage } from "@/components/sections/scan/components/ScanStage";
 import { UrlConsole } from "@/components/sections/scan/components/UrlConsole";
 import { RefreshIcon } from "@/components/sections/scan/components/icons";
@@ -13,12 +14,12 @@ import {
   canManageIssues,
   entitlementsForPlan,
   planDefinition,
-  recordScanUsage,
   remainingScans,
+  syncBillingFromServer,
 } from "@/lib/billing";
 import type { BillingPlan, BillingState } from "@/lib/billing";
 import { normalizeUrl } from "@/lib/scan/url";
-import { hostFromUrl, pageLabel, pathFromUrl, pendingFromReport, saveScan } from "@/lib/workspace";
+import { hostFromUrl, pageLabel, pathFromUrl } from "@/lib/workspace";
 import type { Workspace } from "@/lib/workspace";
 import type { DashboardTab } from "@/lib/data/dashboard";
 import { ScannerUpgradeCard } from "../billing";
@@ -31,6 +32,7 @@ interface WorkspaceScanProps {
   billing: BillingState;
   onUpgrade: (plan?: Exclude<BillingPlan, "free">) => void;
   setNavigationGuard: (guard: (() => boolean) | null) => void;
+  refreshWorkspace: () => Promise<void>;
 }
 
 interface PendingScanRequest {
@@ -82,13 +84,16 @@ export const WorkspaceScan = ({
   billing,
   onUpgrade,
   setNavigationGuard,
+  refreshWorkspace,
 }: WorkspaceScanProps) => {
   const engine = useScanEngine();
   const [query, setQuery] = useState("");
   const [level, setLevel] = useState<WcagLevel>("AA");
   const [quotaAlert, setQuotaAlert] = useState<string | null>(null);
   const [quotaFocusSignal, setQuotaFocusSignal] = useState(0);
+  const [scanFocusSignal, setScanFocusSignal] = useState(0);
   const [pendingScan, setPendingScan] = useState<PendingScanRequest | null>(null);
+  const [stopDialogOpen, setStopDialogOpen] = useState(false);
   // Dedupe usage and auto-save independently across re-renders.
   const recordedKey = useRef<string | null>(null);
   const savedKey = useRef<string | null>(null);
@@ -129,18 +134,17 @@ export const WorkspaceScan = ({
   // Auto-create / update the baseline as soon as a scan finishes.
   useEffect(() => {
     if (!resultKey || !report) return;
-    const host = hostFromUrl(report.url);
 
     if (recordedKey.current !== resultKey) {
       recordedKey.current = resultKey;
-      recordScanUsage(host);
+      void syncBillingFromServer();
     }
 
     if (saveBlocked || savedKey.current === resultKey) return;
 
-    const saved = saveScan(pendingFromReport(report));
-    if (saved) savedKey.current = resultKey;
-  }, [report, resultKey, saveBlocked]);
+    savedKey.current = resultKey;
+    void refreshWorkspace();
+  }, [refreshWorkspace, report, resultKey, saveBlocked]);
 
   useEffect(() => {
     if (!unsavedResult) {
@@ -242,6 +246,14 @@ export const WorkspaceScan = ({
     const target = report?.url || engine.url || query;
     if (target) requestScan(target);
   };
+  const stopScan = () => {
+    const target = engine.url;
+    setStopDialogOpen(false);
+    setPendingScan(null);
+    engine.reset();
+    setQuery(target);
+    setScanFocusSignal((value) => value + 1);
+  };
 
   const urlConsole = (
     <UrlConsole
@@ -250,6 +262,7 @@ export const WorkspaceScan = ({
       busy={busy}
       onUrlChange={setQuery}
       onLevelChange={setLevel}
+      focusSignal={scanFocusSignal}
       showQuickLinks={false}
       onScan={runScan}
     />
@@ -351,6 +364,15 @@ export const WorkspaceScan = ({
             lines={engine.lines}
             reduce={engine.reduce}
           />
+          <div className={styles.scanStopPanel}>
+            <div className={styles.scanStopCopy}>
+              <span>Scanner is running</span>
+              <strong>{engine.url}</strong>
+            </div>
+            <Button variant="secondary" size="sm" onClick={() => setStopDialogOpen(true)}>
+              Stop scan
+            </Button>
+          </div>
         </div>
       )}
 
@@ -493,6 +515,15 @@ export const WorkspaceScan = ({
           </div>,
           document.body,
         )}
+
+      {stopDialogOpen && (
+        <ResetScanDialog
+          mode="scanning"
+          url={engine.url || query}
+          onCancel={() => setStopDialogOpen(false)}
+          onConfirm={stopScan}
+        />
+      )}
     </div>
   );
 };

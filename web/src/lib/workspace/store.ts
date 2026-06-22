@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
-import { entitlementsForPlan, readBilling, recordScanUsage } from "@/lib/billing";
-import type { BillingState } from "@/lib/billing";
+import { useSyncExternalStore } from "react";
 import type { Severity } from "@/types";
-import { countsFromIssues, initialsFromName, scoreFromIssues } from "./derive";
+import {
+  countsFromIssues,
+  hostFromUrl,
+  initialsFromName,
+  pathFromUrl,
+  scoreFromIssues,
+} from "./derive";
 import type {
-  IssueStatus,
-  OnboardingStepId,
   PendingScan,
   Project,
   ProjectPage,
@@ -17,17 +19,12 @@ import type {
   WorkspaceAccount,
 } from "./types";
 
-// =====================================================================
-// Mock persistence for the multi-project workspace.
-// ---------------------------------------------------------------------
-// Everything lives in localStorage. To go real, replace the read/write
-// helpers — the component-facing functions (`completeAuth`, `saveScan`,
-// `runFollowupScan`, `useWorkspace`…) keep the same signatures.
-// =====================================================================
-
+// Pending guest scans live briefly in localStorage so OAuth/email auth can
+// finish and import that one result into the account. Saved reports are loaded
+// from Neon via /api/scans/reports.
 const PENDING_KEY = "axiony.pending_scan";
-const WORKSPACE_KEY = "axiony.workspace";
-const AUTH_KEY = "axiony.auth.mock";
+const LEGACY_WORKSPACE_KEY = "axiony.workspace";
+const LEGACY_AUTH_KEY = "axiony.auth.mock";
 const CHANGE_EVENT = "axiony:workspace-change";
 const VERSION = 3;
 
@@ -35,15 +32,39 @@ const isBrowser = (): boolean => typeof window !== "undefined";
 const now = (): string => new Date().toISOString();
 const randomId = (): string => Math.random().toString(36).slice(2, 9);
 
-const canSavePendingScan = (
-  workspace: Workspace,
-  pending: PendingScan,
-  billing: BillingState = readBilling(),
-): boolean => {
-  const existingProject = workspace.projects.some((project) => project.host === pending.host);
-  if (existingProject) return true;
-  return workspace.projects.length < entitlementsForPlan(billing.plan).domainLimit;
-};
+interface PersistedScanReportRow {
+  url?: string;
+  host?: string;
+  path?: string;
+  level?: unknown;
+  score?: number;
+  total?: number;
+  counts?: PendingScan["counts"];
+  scannedAt?: string;
+  report?: {
+    url?: string;
+    level?: unknown;
+    scannedAt?: string;
+    score?: number;
+    counts?: PendingScan["counts"];
+    issues?: Array<{
+      id?: string;
+      title?: string;
+      severity?: unknown;
+      rule?: string;
+      description?: string;
+      wcag?: string[];
+      nodes?: string[];
+      fix?: string;
+      whatHappened?: string;
+      whyItMatters?: string;
+      suggestedFix?: string;
+      beforeCode?: string;
+      afterCode?: string;
+      code?: string;
+    }>;
+  };
+}
 
 function safeParse<T>(raw: string | null): T | null {
   if (!raw) return null;
@@ -111,7 +132,7 @@ export function writePendingScan(scan: PendingScan): void {
   try {
     localStorage.setItem(PENDING_KEY, JSON.stringify(scan));
   } catch {
-    /* storage may be unavailable — non-fatal for the mock */
+    /* storage may be unavailable — the user can still scan */
   }
   notify();
 }
@@ -127,38 +148,37 @@ export function clearPendingScan(): void {
   notify();
 }
 
-// ── Workspace read / write ───────────────────────────────────────────
-export function readWorkspace(): Workspace | null {
-  if (!isBrowser()) return null;
-  const ws = safeParse<Workspace>(localStorage.getItem(WORKSPACE_KEY));
-  return ws && ws.version === VERSION ? ws : null;
-}
+export async function importPendingScanToServer(pending: PendingScan | null): Promise<boolean> {
+  if (!isBrowser() || !pending) return false;
 
-function writeWorkspace(ws: Workspace): Workspace {
-  if (isBrowser()) {
-    try {
-      localStorage.setItem(WORKSPACE_KEY, JSON.stringify(ws));
-    } catch {
-      /* ignore */
-    }
+  try {
+    const response = await fetch("/api/scans/import", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pending }),
+    });
+    if (response.ok) clearPendingScan();
+    return response.ok;
+  } catch {
+    /* keep the pending scan so the next authenticated dashboard load can retry */
+    return false;
   }
-  notify();
-  return ws;
 }
 
-export function hasWorkspace(): boolean {
-  return readWorkspace() !== null;
+function clearLegacyWorkspaceStorage(): void {
+  if (!isBrowser()) return;
+  localStorage.removeItem(LEGACY_WORKSPACE_KEY);
+  try {
+    sessionStorage.removeItem(LEGACY_AUTH_KEY);
+  } catch {
+    /* ignore */
+  }
 }
 
 export function signOut(): void {
   if (!isBrowser()) return;
-  localStorage.removeItem(WORKSPACE_KEY);
   localStorage.removeItem(PENDING_KEY);
-  try {
-    sessionStorage.removeItem(AUTH_KEY);
-  } catch {
-    /* ignore */
-  }
+  clearLegacyWorkspaceStorage();
   notify();
 }
 
@@ -171,7 +191,7 @@ function baselineScanRecord(pending: PendingScan): ScanRecord {
     total: pending.total,
     resolved: 0,
     regressions: [],
-    scannedAt: now(),
+    scannedAt: pending.scannedAt,
   };
 }
 
@@ -186,7 +206,7 @@ function pageFromPending(pending: PendingScan): ProjectPage {
       counts: pending.counts,
       total: pending.total,
       issues: pending.issues,
-      createdAt: now(),
+      createdAt: pending.scannedAt,
     },
     open: [...pending.issues],
     scans: [baselineScanRecord(pending)],
@@ -197,7 +217,7 @@ function projectFromPending(pending: PendingScan): Project {
   return {
     id: randomId(),
     host: pending.host,
-    createdAt: now(),
+    createdAt: pending.scannedAt,
     pages: [pageFromPending(pending)],
   };
 }
@@ -219,7 +239,7 @@ function addScanToPage(page: ProjectPage, pending: PendingScan): void {
     regressions: pending.issues
       .filter((issue) => !hasIssueMatch(baselineKeys, issue))
       .map((i) => i.title),
-    scannedAt: now(),
+    scannedAt: pending.scannedAt,
   });
 }
 
@@ -271,14 +291,81 @@ function createWorkspace(account: WorkspaceAccount, pending: PendingScan | null)
   };
 }
 
-// ── Component-facing actions ─────────────────────────────────────────
-export interface AuthIdentity {
-  name: string;
-  email: string;
-}
+const isSeverity = (value: unknown): value is Severity =>
+  value === "critical" || value === "serious" || value === "moderate" || value === "minor";
 
-/** Login/signup success — ensure a workspace exists and fold in any scan. */
-export function completeAuth(identity: AuthIdentity): Workspace {
+const isWcagLevel = (value: unknown): value is PendingScan["level"] =>
+  value === "A" || value === "AA" || value === "AAA";
+
+const trackedIssueFromReport = (
+  issue: NonNullable<NonNullable<PersistedScanReportRow["report"]>["issues"]>[number],
+  index: number,
+): TrackedIssue => {
+  const nodes = Array.isArray(issue.nodes) ? issue.nodes : [];
+  const rule = issue.rule || "unknown-rule";
+
+  return {
+    id: issue.id || `${rule}-${index}`,
+    title: issue.title || rule,
+    severity: isSeverity(issue.severity) ? issue.severity : "minor",
+    rule,
+    count: Math.max(1, nodes.length),
+    status: "open",
+    description: issue.description,
+    wcag: Array.isArray(issue.wcag) ? issue.wcag : [],
+    nodes,
+    fix: issue.fix,
+    whatHappened: issue.whatHappened,
+    whyItMatters: issue.whyItMatters,
+    suggestedFix: issue.suggestedFix,
+    beforeCode: issue.beforeCode,
+    afterCode: issue.afterCode,
+    code: issue.code,
+  };
+};
+
+const pendingFromPersistedReport = (row: PersistedScanReportRow): PendingScan | null => {
+  const report = row.report;
+  const url = report?.url || row.url;
+  const level = report?.level || row.level;
+  const scannedAt = report?.scannedAt || row.scannedAt;
+  const issues = Array.isArray(report?.issues) ? report.issues.map(trackedIssueFromReport) : [];
+
+  if (!url || !isWcagLevel(level) || !scannedAt || !Number.isFinite(Date.parse(scannedAt))) {
+    return null;
+  }
+
+  const counts = report?.counts || row.counts || countsFromIssues(issues);
+  const score =
+    typeof report?.score === "number" ? report.score : (row.score ?? scoreFromIssues(issues));
+
+  return {
+    url,
+    host: row.host || hostFromUrl(url),
+    path: row.path || pathFromUrl(url),
+    level,
+    score,
+    counts,
+    total: typeof row.total === "number" ? row.total : issues.length,
+    issues,
+    scannedAt,
+  };
+};
+
+const hasScanRecord = (ws: Workspace, pending: PendingScan): boolean => {
+  const page = ws.projects
+    .find((project) => project.host === pending.host)
+    ?.pages.find((projectPage) => projectPage.path === pending.path);
+
+  return Boolean(page?.scans.some((scan) => scan.scannedAt === pending.scannedAt));
+};
+
+export async function restoreWorkspaceFromServer(
+  identity: AuthIdentity,
+): Promise<Workspace | null> {
+  if (!isBrowser()) return null;
+  clearLegacyWorkspaceStorage();
+
   const account: WorkspaceAccount = {
     name: identity.name.trim(),
     email: identity.email.trim(),
@@ -286,179 +373,40 @@ export function completeAuth(identity: AuthIdentity): Workspace {
     createdAt: now(),
   };
 
-  const pending = readPendingScan();
-  const existing = readWorkspace();
-  const billing = readBilling();
-  if (pending) recordScanUsage(pending.host);
-
-  if (!existing) {
-    const ws = createWorkspace(account, pending);
-    clearPendingScan();
-    return writeWorkspace(ws);
+  let rows: PersistedScanReportRow[];
+  try {
+    const response = await fetch("/api/scans/reports", { cache: "no-store" });
+    if (!response.ok) return createWorkspace(account, null);
+    const body = (await response.json()) as { reports?: PersistedScanReportRow[] };
+    rows = Array.isArray(body.reports) ? body.reports : [];
+  } catch {
+    return createWorkspace(account, null);
   }
 
-  existing.account = { ...existing.account, ...account, createdAt: existing.account.createdAt };
-  if (pending && canSavePendingScan(existing, pending, billing)) {
-    applyScan(existing, pending);
-  }
-  if (pending) clearPendingScan();
-  return writeWorkspace(existing);
-}
+  const scans = rows
+    .map(pendingFromPersistedReport)
+    .filter((scan): scan is PendingScan => Boolean(scan))
+    .sort((a, b) => a.scannedAt.localeCompare(b.scannedAt));
 
-/** Save a scan straight into the existing workspace (logged-in flow). */
-export function saveScan(pending: PendingScan): Workspace | null {
-  const ws = readWorkspace();
-  if (!ws) return null;
-  if (!canSavePendingScan(ws, pending)) return null;
-  applyScan(ws, pending);
-  return writeWorkspace(ws);
-}
+  const ws = createWorkspace(account, null);
+  if (scans.length === 0) return ws;
 
-export function removeProject(projectId: string): Workspace | null {
-  const ws = readWorkspace();
-  if (!ws) return null;
-
-  const nextProjects = ws.projects.filter((project) => project.id !== projectId);
-  if (nextProjects.length === ws.projects.length) return ws;
-
-  ws.projects = nextProjects;
-  if (
-    ws.onboarding.justCreated?.kind === "project" &&
-    !nextProjects.some((project) => project.host === ws.onboarding.justCreated?.host)
-  ) {
-    ws.onboarding.justCreated = null;
+  for (const pending of scans) {
+    if (!hasScanRecord(ws, pending)) applyScan(ws, pending);
   }
 
-  return writeWorkspace(ws);
-}
-
-// Plausible new issues a follow-up scan might surface (regressions).
-const REGRESSION_POOL: Omit<TrackedIssue, "id" | "count" | "status">[] = [
-  {
-    title: "New image missing alt text",
-    severity: "serious",
-    rule: "wcag-1.1.1",
-    templateId: "image-alt",
-  },
-  {
-    title: "Icon button lost its accessible name",
-    severity: "critical",
-    rule: "wcag-4.1.2",
-    templateId: "empty-button",
-  },
-  {
-    title: "Contrast regressed on primary CTA",
-    severity: "serious",
-    rule: "wcag-1.4.3",
-    templateId: "color-contrast",
-  },
-  {
-    title: "New form field without a label",
-    severity: "critical",
-    rule: "wcag-1.3.1",
-    templateId: "label-missing",
-  },
-  {
-    title: "Focus outline removed on links",
-    severity: "serious",
-    rule: "wcag-2.4.11",
-    templateId: "focus-visible",
-  },
-];
-
-const SEVERITY_EASE: Record<Severity, number> = { minor: 0, moderate: 1, serious: 2, critical: 3 };
-
-/**
- * Simulate a scheduled re-scan of one page: resolve a couple of easy wins
- * and, sometimes, surface a regression — so progress and regression
- * protection are visible on the user's own data (real scans are
- * deterministic per URL, so this is how the demo shows movement).
- */
-export function runFollowupScan(host: string, path: string): Workspace | null {
-  const ws = readWorkspace();
-  const page = ws?.projects.find((p) => p.host === host)?.pages.find((pg) => pg.path === path);
-  if (!ws || !page) return ws ?? null;
-
-  const open = [...page.open].sort((a, b) => SEVERITY_EASE[a.severity] - SEVERITY_EASE[b.severity]);
-  // 0–2 easy wins resolved; combined with the regression chance below a
-  // re-scan can move the score up, down, or not at all.
-  const resolveCount = Math.min(open.length, Math.floor(Math.random() * 3));
-  const resolved = open.splice(0, resolveCount);
-
-  const regressions: string[] = [];
-  if (Math.random() < 0.5) {
-    const candidate = REGRESSION_POOL.find((r) => !open.some((i) => i.title === r.title));
-    if (candidate) {
-      open.push({ ...candidate, id: `reg-${randomId()}`, count: 1, status: "open" });
-      regressions.push(candidate.title);
-    }
-  }
-
-  const counts = countsFromIssues(open);
-  page.open = open.map((i) => ({ ...i }));
-  page.scans.push({
-    id: randomId(),
-    score: scoreFromIssues(open),
-    counts,
-    total: open.length,
-    resolved: resolved.length,
-    regressions,
-    scannedAt: now(),
-  });
-
-  return writeWorkspace(ws);
-}
-
-export function setIssueStatus(
-  host: string,
-  path: string,
-  issueId: string,
-  status: IssueStatus,
-): void {
-  const ws = readWorkspace();
-  const page = ws?.projects.find((p) => p.host === host)?.pages.find((pg) => pg.path === path);
-  const issue = page?.open.find((i) => i.id === issueId);
-  if (!ws || !issue) return;
-  issue.status = status;
-  writeWorkspace(ws);
-}
-
-export function markCreatedSeen(): void {
-  const ws = readWorkspace();
-  if (!ws || !ws.onboarding.justCreated) return;
   ws.onboarding.justCreated = null;
-  writeWorkspace(ws);
+  return ws;
 }
 
-export function setOnboardingStep(step: OnboardingStepId, value: boolean): void {
-  const ws = readWorkspace();
-  if (!ws) return;
-  ws.onboarding.steps[step] = value;
-  writeWorkspace(ws);
+export interface AuthIdentity {
+  name: string;
+  email: string;
 }
 
-// ── React binding ────────────────────────────────────────────────────
 export interface WorkspaceState {
   ready: boolean;
   workspace: Workspace | null;
-}
-
-/** Subscribe to the workspace; re-reads on any local mutation or cross-tab change. */
-export function useWorkspace(): WorkspaceState {
-  const [state, setState] = useState<WorkspaceState>({ ready: false, workspace: null });
-
-  useEffect(() => {
-    const read = () => setState({ ready: true, workspace: readWorkspace() });
-    read();
-    window.addEventListener(CHANGE_EVENT, read);
-    window.addEventListener("storage", read);
-    return () => {
-      window.removeEventListener(CHANGE_EVENT, read);
-      window.removeEventListener("storage", read);
-    };
-  }, []);
-
-  return state;
 }
 
 // ── Pending-scan subscription (read-only, hydration-safe) ────────────

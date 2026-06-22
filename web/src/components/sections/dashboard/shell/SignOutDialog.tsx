@@ -99,8 +99,8 @@ export const SignOutDialog = ({ userName, onClose, onConfirm }: SignOutDialogPro
         <span className={styles.kicker}>End session</span>
         <h2 id="sign-out-title">Log out of Axiony?</h2>
         <p>
-          You are signed in as <strong>{userName}</strong>. Your local workspace data stays on this
-          device, but you will need to log in again to continue in the dashboard.
+          You are signed in as <strong>{userName}</strong>. Your saved reports stay in your account,
+          and you will need to log in again to continue in the dashboard.
         </p>
 
         <div className={styles.actions}>

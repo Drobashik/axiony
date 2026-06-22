@@ -9,6 +9,8 @@ import type { WcagLevel } from "../types";
 import { GlobeIcon, SearchIcon } from "./icons";
 import styles from "../ScanStudio.module.scss";
 
+const BUSY_STEPS = ["Opening page", "Stabilizing DOM", "Running axe-core"] as const;
+
 interface UrlConsoleProps {
   url: string;
   level: WcagLevel;
@@ -84,11 +86,15 @@ export const UrlConsole = ({
   };
 
   return (
-    <form className={styles.console} onSubmit={handleSubmit} noValidate>
+    <form
+      className={cn(styles.console, busy && styles.consoleBusy)}
+      onSubmit={handleSubmit}
+      noValidate
+    >
       <div className={styles.consoleHead}>
         <span className={styles.consoleStatus}>
           <span className={styles.consolePulse} aria-hidden="true" />
-          Live scan
+          {busy ? "Scanner active" : "Live scan"}
         </span>
         <span className={cn(styles.consoleMeta, guestLimitReached && styles.consoleMetaEmpty)}>
           {meta}
@@ -122,10 +128,36 @@ export const UrlConsole = ({
           disabled={busy}
         />
         <button type="submit" className={styles.scanBtn} disabled={busy || !url.trim()}>
-          <SearchIcon size={15} />
-          {busy ? "Scanning…" : "Run scan"}
+          {busy ? (
+            <>
+              <span className={styles.scanBtnLoader} aria-hidden="true">
+                <span />
+                <span />
+                <span />
+              </span>
+              Scanning...
+            </>
+          ) : (
+            <>
+              <SearchIcon size={15} />
+              Run scan
+            </>
+          )}
         </button>
       </div>
+
+      {busy && (
+        <div className={styles.consoleTelemetry} role="status" aria-live="polite">
+          <span className={styles.telemetryRail} aria-hidden="true">
+            <span />
+          </span>
+          <span className={styles.telemetryCopy}>
+            {BUSY_STEPS.map((step) => (
+              <span key={step}>{step}</span>
+            ))}
+          </span>
+        </div>
+      )}
 
       {error && (
         <p id={errorId} className={styles.error} role="alert">

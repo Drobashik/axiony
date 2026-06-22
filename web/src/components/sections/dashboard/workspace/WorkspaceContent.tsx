@@ -188,6 +188,7 @@ interface WorkspaceContentProps {
   billing: BillingState;
   onUpgrade: (plan?: Exclude<BillingPlan, "free">) => void;
   setNavigationGuard: (guard: (() => boolean) | null) => void;
+  refreshWorkspace: () => Promise<void>;
 }
 
 export const WorkspaceContent = ({
@@ -201,6 +202,7 @@ export const WorkspaceContent = ({
   billing,
   onUpgrade,
   setNavigationGuard,
+  refreshWorkspace,
 }: WorkspaceContentProps) => {
   // The scanner sees the full workspace (scanning isn't scoped).
   if (tab === "scan") {
@@ -211,6 +213,7 @@ export const WorkspaceContent = ({
         billing={billing}
         onUpgrade={onUpgrade}
         setNavigationGuard={setNavigationGuard}
+        refreshWorkspace={refreshWorkspace}
       />
     );
   }
@@ -244,6 +247,7 @@ export const WorkspaceContent = ({
         onSelectProject={onSelectProject}
         onSelectPage={onSelectPage}
         onUpgrade={onUpgrade}
+        refreshWorkspace={refreshWorkspace}
       />
     );
   if (tab === "issues")

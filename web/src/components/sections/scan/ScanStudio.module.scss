@@ -308,6 +308,37 @@
     inset 0 -24px 50px oklch(0 0 0 / 0.14);
 }
 
+.consoleBusy {
+  border-color: oklch(0.62 0.22 240 / 0.34);
+  box-shadow:
+    0 34px 100px oklch(0 0 0 / 0.48),
+    0 0 0 1px oklch(0.62 0.22 240 / 0.14),
+    0 0 60px oklch(0.62 0.22 240 / 0.13);
+
+  &::before {
+    height: 3px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--green) 18%,
+      var(--blue) 48%,
+      var(--violet) 78%,
+      transparent
+    );
+    background-size: 220% 100%;
+    animation: consoleBusyTrace 1.35s linear infinite;
+  }
+}
+
+@keyframes consoleBusyTrace {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
 .consoleHead {
   display: flex;
   align-items: center;
@@ -387,6 +418,13 @@
   }
 }
 
+.consoleBusy .inputRow {
+  border-color: oklch(0.62 0.22 240 / 0.28);
+  background:
+    linear-gradient(90deg, oklch(0.62 0.22 240 / 0.1), transparent 34%),
+    oklch(0.075 0.006 260 / 0.88);
+}
+
 .inputRowError {
   border-color: var(--severity-critical);
 
@@ -462,6 +500,166 @@
   }
   &:focus-visible {
     @include focus-ring($offset: -2px);
+  }
+}
+
+.consoleBusy .scanBtn:disabled {
+  opacity: 1;
+  cursor: progress;
+  filter: saturate(1.08);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.3),
+    -16px 0 38px oklch(0.62 0.22 240 / 0.22),
+    0 0 34px oklch(0.72 0.18 145 / 0.13);
+}
+
+.scanBtnLoader {
+  display: inline-grid;
+  grid-template-columns: repeat(3, 5px);
+  gap: 4px;
+  align-items: center;
+
+  span {
+    width: 5px;
+    height: 14px;
+    border-radius: 99px;
+    background: currentColor;
+    transform-origin: 50% 100%;
+    animation: scanBtnEqualizer 0.72s ease-in-out infinite;
+
+    &:nth-child(2) {
+      animation-delay: 0.12s;
+    }
+    &:nth-child(3) {
+      animation-delay: 0.24s;
+    }
+  }
+}
+
+@keyframes scanBtnEqualizer {
+  0%,
+  100% {
+    opacity: 0.48;
+    transform: scaleY(0.45);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+.consoleTelemetry {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid oklch(1 0 0 / 0.1);
+  border-radius: var(--radius-md);
+  background:
+    radial-gradient(80% 180% at 0% 0%, oklch(0.72 0.18 145 / 0.1), transparent 58%),
+    oklch(0.04 0.006 260 / 0.48);
+  animation: telemetryIn 0.24s $ease-out both;
+}
+
+.telemetryRail {
+  position: relative;
+  height: 7px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: oklch(1 0 0 / 0.07);
+
+  &::before,
+  &::after,
+  span {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 34%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, transparent, var(--blue), var(--green), transparent);
+    filter: drop-shadow(0 0 10px oklch(0.62 0.22 240 / 0.34));
+    animation: telemetrySweep 1.45s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+  }
+
+  &::before {
+    animation-delay: -0.46s;
+    opacity: 0.62;
+  }
+
+  &::after {
+    animation-delay: -0.92s;
+    opacity: 0.36;
+  }
+}
+
+.telemetryCopy {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 800;
+
+  span {
+    position: relative;
+    min-width: 0;
+    padding-left: 13px;
+    white-space: nowrap;
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 50%;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 4px oklch(0.72 0.18 145 / 0.1);
+      transform: translateY(-50%);
+      animation: telemetryDot 1.5s ease-in-out infinite;
+    }
+
+    &:nth-child(2)::before {
+      animation-delay: 0.25s;
+    }
+
+    &:nth-child(3)::before {
+      animation-delay: 0.5s;
+    }
+  }
+}
+
+@keyframes telemetryIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes telemetrySweep {
+  from {
+    transform: translateX(-110%);
+  }
+  to {
+    transform: translateX(320%);
+  }
+}
+
+@keyframes telemetryDot {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: translateY(-50%) scale(0.82);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
   }
 }
 
@@ -639,8 +837,179 @@
 
 // ── Scan stage ───────────────────────────────────────────────────────
 .stage {
+  position: relative;
+  overflow: hidden;
   @include elevated-panel(var(--radius-xl));
   padding: 22px;
+}
+
+.stageScanning {
+  border-color: oklch(0.62 0.22 240 / 0.3);
+  background:
+    radial-gradient(90% 70% at 82% 0%, oklch(0.62 0.22 240 / 0.12), transparent 62%),
+    radial-gradient(70% 70% at 12% 0%, oklch(0.72 0.18 145 / 0.09), transparent 62%),
+    var(--bg-surface);
+  box-shadow:
+    var(--shadow-lg),
+    0 0 0 1px oklch(0.62 0.22 240 / 0.12),
+    0 24px 80px oklch(0.62 0.22 240 / 0.1);
+}
+
+.stage > :not(.scanField) {
+  position: relative;
+  z-index: 1;
+}
+
+.scanField {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0.95;
+}
+
+.scanGrid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(oklch(1 0 0 / 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(1 0 0 / 0.045) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse 88% 72% at 50% 0%, black, transparent 78%);
+  animation: scanGridDrift 8s linear infinite;
+}
+
+.scanSweep {
+  position: absolute;
+  inset: -36% auto -36% -24%;
+  width: 36%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    oklch(0.62 0.22 240 / 0.04),
+    oklch(0.72 0.18 145 / 0.12),
+    oklch(0.62 0.22 240 / 0.08),
+    transparent
+  );
+  filter: blur(1px);
+  transform: rotate(11deg);
+  animation: scanSweep 2.8s cubic-bezier(0.5, 0, 0.2, 1) infinite;
+}
+
+.scanOrbit,
+.scanOrbitInner {
+  position: absolute;
+  top: -92px;
+  right: -68px;
+  border: 1px solid oklch(1 0 0 / 0.09);
+  border-radius: 50%;
+  box-shadow:
+    inset 0 0 34px oklch(0.62 0.22 240 / 0.04),
+    0 0 44px oklch(0.62 0.22 240 / 0.05);
+}
+
+.scanOrbit {
+  width: 260px;
+  height: 260px;
+  animation: scanOrbitTurn 10s linear infinite;
+}
+
+.scanOrbitInner {
+  top: -50px;
+  right: -26px;
+  width: 174px;
+  height: 174px;
+  animation: scanOrbitTurn 7s linear infinite reverse;
+}
+
+.scanNode {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow:
+    0 0 0 5px oklch(0.72 0.18 145 / 0.08),
+    0 0 20px oklch(0.72 0.18 145 / 0.38);
+  animation: scanNodePulse 1.7s ease-in-out infinite;
+
+  &[data-node="dom"] {
+    top: 42px;
+    right: 118px;
+  }
+
+  &[data-node="axe"] {
+    top: 118px;
+    right: 46px;
+    animation-delay: 0.28s;
+  }
+
+  &[data-node="wcag"] {
+    top: 168px;
+    right: 156px;
+    background: var(--blue);
+    box-shadow:
+      0 0 0 5px oklch(0.62 0.22 240 / 0.09),
+      0 0 20px oklch(0.62 0.22 240 / 0.38);
+    animation-delay: 0.56s;
+  }
+}
+
+.scanFieldStatic {
+  .scanGrid,
+  .scanSweep,
+  .scanOrbit,
+  .scanOrbitInner,
+  .scanNode {
+    animation: none;
+  }
+
+  .scanSweep {
+    opacity: 0.35;
+  }
+}
+
+@keyframes scanGridDrift {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 32px 32px;
+  }
+}
+
+@keyframes scanSweep {
+  0% {
+    transform: translateX(0) rotate(11deg);
+    opacity: 0;
+  }
+  12%,
+  78% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(420%) rotate(11deg);
+    opacity: 0;
+  }
+}
+
+@keyframes scanOrbitTurn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes scanNodePulse {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.82);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .stageHead {
@@ -659,6 +1028,40 @@
   svg {
     width: 100%;
     height: 100%;
+  }
+}
+
+.ringHalo,
+.ringScanner {
+  position: absolute;
+  inset: -7px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.ringHalo {
+  border: 1px solid oklch(0.62 0.22 240 / 0.18);
+  background:
+    radial-gradient(circle, transparent 56%, oklch(0.62 0.22 240 / 0.13) 57%, transparent 68%),
+    conic-gradient(from 180deg, transparent, oklch(0.72 0.18 145 / 0.25), transparent 34%);
+  animation: ringHaloSpin 4s linear infinite;
+}
+
+.ringScanner {
+  inset: -3px;
+  background: conic-gradient(from 0deg, transparent 0 70%, var(--green) 78%, transparent 86% 100%);
+  mask: radial-gradient(circle, transparent 57%, black 60% 67%, transparent 70%);
+  animation: ringHaloSpin 1.55s linear infinite;
+}
+
+.ringHaloStatic,
+.ringScannerStatic {
+  animation: none;
+}
+
+@keyframes ringHaloSpin {
+  to {
+    transform: rotate(360deg);
   }
 }
 
@@ -737,9 +1140,20 @@
 }
 
 .phaseActive {
+  position: relative;
+  overflow: hidden;
   opacity: 1;
   border-color: var(--blue-border);
   background: linear-gradient(90deg, var(--blue-dim), transparent 70%), var(--bg-base);
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 -45%;
+    width: 42%;
+    background: linear-gradient(90deg, transparent, oklch(1 0 0 / 0.1), transparent);
+    animation: phaseTrace 1.8s ease-in-out infinite;
+  }
 }
 
 .phaseDone {
@@ -766,6 +1180,12 @@
   }
 }
 
+@keyframes phaseTrace {
+  to {
+    transform: translateX(360%);
+  }
+}
+
 .phaseNum {
   font-family: var(--font-mono);
   font-size: 0.72rem;
@@ -789,7 +1209,34 @@
 }
 
 .stageTerminal {
+  position: relative;
   width: 100%;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 42px 1px 1px;
+    border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      transparent 0 16%,
+      oklch(0.72 0.18 145 / 0.07) 17%,
+      transparent 18% 100%
+    );
+    background-size: 100% 34px;
+    mix-blend-mode: screen;
+    animation: terminalScanline 1.5s linear infinite;
+  }
+}
+
+@keyframes terminalScanline {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 0 34px;
+  }
 }
 
 // ── Report ───────────────────────────────────────────────────────────
@@ -1996,7 +2443,22 @@
   .grid,
   .glow,
   .consolePulse,
+  .consoleBusy::before,
+  .scanBtnLoader span,
+  .telemetryRail::before,
+  .telemetryRail::after,
+  .telemetryRail span,
+  .telemetryCopy span::before,
   .runner,
+  .scanGrid,
+  .scanSweep,
+  .scanOrbit,
+  .scanOrbitInner,
+  .scanNode,
+  .ringHalo,
+  .ringScanner,
+  .phaseActive::after,
+  .stageTerminal::after,
   .dialFill,
   .sevSeg {
     animation: none !important;
@@ -2010,6 +2472,9 @@
   }
   .sevSeg {
     transform: scaleX(1);
+  }
+  .scanSweep {
+    opacity: 0.35;
   }
   .issue {
     animation: none;
@@ -2099,9 +2564,32 @@
     border-top: 1px solid var(--border-subtle);
   }
 
+  .consoleTelemetry {
+    padding: 11px;
+  }
+
+  .telemetryCopy {
+    display: grid;
+    gap: 7px;
+  }
+
   .consoleRow {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .stage {
+    padding: 18px;
+  }
+
+  .stageHead {
+    align-items: flex-start;
+  }
+
+  .scanOrbit,
+  .scanOrbitInner,
+  .scanNode {
+    display: none;
   }
 
   .reportHead {

@@ -11,12 +11,11 @@ interface TierCardProps {
     cta: string;
     href: string;
   };
-  actionPending?: boolean;
 }
 
 const formatScans = (count: number) => (count >= 1000 ? `${count / 1000}k` : `${count}`);
 
-export const TierCard = ({ tier, cycle, action, actionPending = false }: TierCardProps) => {
+export const TierCard = ({ tier, cycle, action }: TierCardProps) => {
   const free = tier.priceMonthly === 0;
   const annual = cycle === "annual";
   const tierAction = action ?? { cta: tier.cta, href: tier.href };
@@ -59,15 +58,9 @@ export const TierCard = ({ tier, cycle, action, actionPending = false }: TierCar
         </span>
       </div>
 
-      {actionPending ? (
-        <Button variant={buttonVariant} block disabled className={styles.ctaPending}>
-          Manage current plan
-        </Button>
-      ) : (
-        <Button href={tierAction.href} variant={buttonVariant} block>
-          {tierAction.cta}
-        </Button>
-      )}
+      <Button href={tierAction.href} variant={buttonVariant} block>
+        {tierAction.cta}
+      </Button>
 
       <ul className={styles.features}>
         {tier.inherits && <li className={styles.inherits}>{tier.inherits}</li>}

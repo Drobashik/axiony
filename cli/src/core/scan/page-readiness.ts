@@ -15,6 +15,9 @@ export const POSSIBLE_CHALLENGE_PAGE_WARNING =
 export const BLOCKED_SCAN_PAGE_ERROR =
   'The target site blocked the scanner with an access-denied or bot-protection page. Try the CLI from a network the site trusts, or scan a staging URL that allows automated accessibility checks.';
 
+export const REFRESH_OR_CHALLENGE_PAGE_ERROR =
+  'The target page returned a refresh or bot-protection page. Try again, run the CLI locally, or allow the scanner network through the site protection layer.';
+
 const CHALLENGE_URL_PATTERNS = ['__cf_chl_rt_tk', '/cdn-cgi/challenge-platform/', 'challenge'];
 
 const CHALLENGE_TEXT_PATTERNS = [
@@ -80,8 +83,11 @@ export const waitForPageReadiness = async (page: Page): Promise<void> => {
             resolve();
           }
 
+          const bodyText = () =>
+            typeof body.innerText === 'string' ? body.innerText : (body.textContent ?? '');
+
           const hasMeaningfulContent = () => {
-            const textLength = body.innerText.trim().length;
+            const textLength = bodyText().trim().length;
             const interactiveCount = body.querySelectorAll(
               'a,button,input,select,textarea,main,nav,header,footer,[role]',
             ).length;
@@ -177,7 +183,7 @@ export const detectBlockedScanPage = async (
   return undefined;
 };
 
-export const waitForChallengeResolution = async (page: Page): Promise<void> => {
+export const waitForChallengeResolution = async (page: Page): Promise<string[]> => {
   const startedAt = Date.now();
   let attempts = 0;
 
@@ -188,7 +194,7 @@ export const waitForChallengeResolution = async (page: Page): Promise<void> => {
     const warnings = await detectPageWarnings(page);
 
     if (warnings.length === 0) {
-      return;
+      return [];
     }
 
     attempts += 1;
@@ -215,4 +221,6 @@ export const waitForChallengeResolution = async (page: Page): Promise<void> => {
 
     await waitForPageReadiness(page);
   }
+
+  return detectPageWarnings(page);
 };
