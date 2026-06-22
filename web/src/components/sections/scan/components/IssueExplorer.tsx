@@ -17,7 +17,7 @@ interface IssueExplorerProps {
   onFilter: (filter: FilterValue) => void;
   previewIssueIds?: string[];
   lockedIssueCount?: number;
-  onUpgrade?: () => void;
+  onCreateAccount?: () => void;
 }
 
 const FILTERS: ReadonlyArray<{ id: FilterValue; label: string }> = [
@@ -53,7 +53,7 @@ export const IssueExplorer = ({
   onFilter,
   previewIssueIds,
   lockedIssueCount = 0,
-  onUpgrade,
+  onCreateAccount,
 }: IssueExplorerProps) => {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortValue>("severity");
@@ -148,16 +148,15 @@ export const IssueExplorer = ({
       {previewSet && lockedIssueCount > 0 && (
         <div className={styles.freePreviewNotice}>
           <div>
-            <span className={styles.freePreviewKicker}>Free scan preview</span>
+            <span className={styles.freePreviewKicker}>Guest scan preview</span>
             <p>
-              Full score, severity counts, and issue list are visible. Detailed affected elements,
-              repair previews, and copyable fixes are unlocked for {previewSet.size} priority
-              issues.
+              Full score, severity counts, and issue list are visible. Create a free account to view
+              every affected element, repair preview, and copyable fix.
             </p>
           </div>
-          {onUpgrade && (
-            <button type="button" className={styles.freePreviewAction} onClick={onUpgrade}>
-              Unlock all details
+          {onCreateAccount && (
+            <button type="button" className={styles.freePreviewAction} onClick={onCreateAccount}>
+              Create free account
             </button>
           )}
         </div>
@@ -179,7 +178,7 @@ export const IssueExplorer = ({
               open={openIds.has(issue.id)}
               onToggle={toggleOne}
               locked={previewSet ? !previewSet.has(issue.id) : false}
-              onUpgrade={onUpgrade}
+              onCreateAccount={onCreateAccount}
             />
           ))
         )}

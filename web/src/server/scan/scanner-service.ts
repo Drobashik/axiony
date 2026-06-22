@@ -10,6 +10,7 @@ interface ScannerProxyResult {
 
 interface ScannerFetchOptions {
   auth?: boolean;
+  timeoutMs?: number;
 }
 
 const SCANNER_UNAVAILABLE_MESSAGE =
@@ -52,7 +53,7 @@ const scannerFetch = async (
   init?: RequestInit,
   options: ScannerFetchOptions = {},
 ): Promise<ScannerProxyResult> => {
-  const { auth = true } = options;
+  const { auth = true, timeoutMs } = options;
 
   if (!SCANNER_API_URL) {
     return {
@@ -69,11 +70,18 @@ const scannerFetch = async (
   }
 
   let response: Response;
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  const controller = timeoutMs ? new AbortController() : undefined;
+
+  if (controller && timeoutMs) {
+    timeout = setTimeout(() => controller.abort(), timeoutMs);
+  }
 
   try {
     response = await fetch(`${SCANNER_API_URL}${path}`, {
       ...init,
       cache: "no-store",
+      signal: controller?.signal ?? init?.signal,
       headers: {
         "Content-Type": "application/json",
         ...(auth && SCANNER_API_KEY ? { Authorization: `Bearer ${SCANNER_API_KEY}` } : {}),
@@ -87,6 +95,8 @@ const scannerFetch = async (
       body: { error: SCANNER_UNAVAILABLE_MESSAGE },
       status: 502,
     };
+  } finally {
+    if (timeout) clearTimeout(timeout);
   }
 
   return {
@@ -117,4 +127,4 @@ export const getRemoteScanJob = (jobId: string): Promise<ScannerProxyResult> =>
   scannerFetch(`/scans/${encodeURIComponent(jobId)}`);
 
 export const getRemoteScannerHealth = (): Promise<ScannerProxyResult> =>
-  scannerFetch("/health", { method: "GET" });
+  scannerFetch("/health", { method: "GET" }, { timeoutMs: 5_000 });

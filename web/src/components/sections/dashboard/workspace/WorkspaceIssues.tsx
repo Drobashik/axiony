@@ -28,29 +28,7 @@ interface DetailKey {
   issueId: string;
 }
 
-type LocatedIssues = ReturnType<typeof aggregateOpenIssues>;
-
 const issueKey = (host: string, path: string, issueId: string) => `${host}::${path}::${issueId}`;
-const pageKey = (host: string, path: string) => `${host}::${path}`;
-
-const freeDetailKeys = (located: LocatedIssues): Set<string> => {
-  const selectedKeys = new Set<string>();
-  const byPage = new Map<string, LocatedIssues>();
-
-  for (const item of located) {
-    const key = pageKey(item.host, item.path);
-    byPage.set(key, [...(byPage.get(key) ?? []), item]);
-  }
-
-  for (const pageIssues of byPage.values()) {
-    for (const severity of SEVERITIES) {
-      const item = pageIssues.find(({ issue }) => issue.severity === severity);
-      if (item) selectedKeys.add(issueKey(item.host, item.path, item.issue.id));
-    }
-  }
-
-  return selectedKeys;
-};
 
 const OpenIcon = () => (
   <svg
@@ -109,7 +87,6 @@ export const WorkspaceIssues = ({
       }),
     [baseIssues, statusOverrides],
   );
-  const unlockedDetailKeys = canControlIssues ? null : freeDetailKeys(issues);
 
   const statusFiltered = issues.filter(({ issue }) => {
     if (filter === "open" && (issue.status === "resolved" || issue.status === "ignored")) {
@@ -127,9 +104,6 @@ export const WorkspaceIssues = ({
 
     const project = pageLabel(host, path);
     const status = statusMeta(issue.status).label;
-    const detailsLocked = Boolean(
-      unlockedDetailKeys && !unlockedDetailKeys.has(issueKey(host, path, issue.id)),
-    );
     const haystack = [
       issue.title,
       issue.rule,
@@ -138,7 +112,7 @@ export const WorkspaceIssues = ({
       status,
       isRegression ? "new regression" : "",
       ...(issue.wcag ?? []),
-      ...(detailsLocked ? [] : (issue.nodes ?? [])),
+      ...(issue.nodes ?? []),
     ]
       .join(" ")
       .toLowerCase();
@@ -251,9 +225,6 @@ export const WorkspaceIssues = ({
             {filtered.map(({ host, path, issue, isRegression }) => {
               const project = pageLabel(host, path);
               const assignedToCurrentUser = issue.status === "in-progress";
-              const detailsLocked = Boolean(
-                unlockedDetailKeys && !unlockedDetailKeys.has(issueKey(host, path, issue.id)),
-              );
 
               return (
                 <li key={`${host}${path}-${issue.id}`} className={styles.issueTableRow}>
@@ -274,9 +245,6 @@ export const WorkspaceIssues = ({
                       <span className={styles.issueTableTitleLine}>
                         <span className={styles.issueTableTitle}>{issue.title}</span>
                         {isRegression && <span className={styles.newPill}>New</span>}
-                        {detailsLocked && (
-                          <span className={styles.issueProDetailsPill}>Pro details</span>
-                        )}
                       </span>
                       <span className={styles.issueTableRule}>
                         {issue.rule} · {issue.count} occurrence{issue.count === 1 ? "" : "s"}
@@ -338,10 +306,6 @@ export const WorkspaceIssues = ({
             changeStatus(detailLoc.host, detailLoc.path, detailLoc.issue.id, status)
           }
           canControlIssues={canControlIssues}
-          detailsLocked={Boolean(
-            unlockedDetailKeys &&
-            !unlockedDetailKeys.has(issueKey(detailLoc.host, detailLoc.path, detailLoc.issue.id)),
-          )}
           onUpgrade={() => onUpgrade("pro")}
         />
       )}

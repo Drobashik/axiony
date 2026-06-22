@@ -9,6 +9,8 @@ import { SCAN_PHASES } from "../data";
 import type { ScanReport, StudioState, WcagLevel } from "../types";
 
 const POLL_MS = 750;
+const SCANNER_WAKEUP_DELAYS = [0, 1_500, 2_500, 4_000, 6_000, 8_000, 10_000, 12_000] as const;
+const SCANNER_WAKEUP_MESSAGE = "Scanner is waking up.";
 
 const randomInitialProgress = (): number => Math.floor(Math.random() * 4) + 2;
 
@@ -37,6 +39,39 @@ const getErrorMessage = async (response: Response): Promise<string> => {
     return "Scan request failed.";
   }
 };
+
+const isRetryableScannerWakeup = (status: number, message: string): boolean => {
+  const normalized = message.toLowerCase();
+
+  return (
+    status === 502 ||
+    status === 504 ||
+    (status === 503 && !normalized.includes("not configured")) ||
+    normalized.includes("temporarily unavailable") ||
+    normalized.includes("waking up") ||
+    normalized.includes("bad gateway")
+  );
+};
+
+const wait = (ms: number, signal: AbortSignal): Promise<void> =>
+  new Promise((resolve, reject) => {
+    if (signal.aborted) {
+      reject(new DOMException("Scan cancelled.", "AbortError"));
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      signal.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+
+    const onAbort = () => {
+      window.clearTimeout(timeout);
+      reject(new DOMException("Scan cancelled.", "AbortError"));
+    };
+
+    signal.addEventListener("abort", onAbort, { once: true });
+  });
 
 const commandLine = (line: string): TerminalLine => {
   if (!line.startsWith("$ ")) return [txt(line, "cmd")];
@@ -93,6 +128,7 @@ export const useScanEngine = (): ScanEngine => {
   const pollTimer = useRef<number | null>(null);
   const activeJob = useRef<string | null>(null);
   const abortController = useRef<AbortController | null>(null);
+  const scanRunId = useRef(0);
 
   const clearPolling = useCallback(() => {
     if (pollTimer.current !== null) {
@@ -113,6 +149,68 @@ export const useScanEngine = (): ScanEngine => {
     setError(message);
     setLines((prev) => [...prev, toTerminalLine(`✕ ${message}`)]);
   }, []);
+
+  const appendConsoleLine = useCallback((line: string) => {
+    setLines((prev) => [...prev, toTerminalLine(line)]);
+  }, []);
+
+  const waitForScannerWakeup = useCallback(
+    async (runId: number) => {
+      const ensureCurrentRun = (signal?: AbortSignal) => {
+        if (signal?.aborted || scanRunId.current !== runId) {
+          throw new DOMException("Scan cancelled.", "AbortError");
+        }
+      };
+
+      let wakingAnnounced = false;
+
+      ensureCurrentRun();
+      appendConsoleLine("◈ Checking scanner service");
+      setProgress((current) => Math.max(current, 5));
+
+      for (let attempt = 0; attempt < SCANNER_WAKEUP_DELAYS.length; attempt += 1) {
+        const controller = new AbortController();
+        abortController.current = controller;
+
+        const delay = SCANNER_WAKEUP_DELAYS[attempt];
+        if (delay > 0) {
+          await wait(delay, controller.signal);
+        }
+        ensureCurrentRun(controller.signal);
+
+        const response = await fetch("/api/scans/health", {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        ensureCurrentRun(controller.signal);
+
+        if (response.ok) {
+          appendConsoleLine("✓ Scanner is ready");
+          setProgress((current) => Math.max(current, 10));
+          return;
+        }
+
+        const message = await getErrorMessage(response);
+        const retryable = isRetryableScannerWakeup(response.status, message);
+
+        if (!retryable || attempt === SCANNER_WAKEUP_DELAYS.length - 1) {
+          throw new Error(
+            retryable ? "Scanner is still waking up. Try again in a minute." : message,
+          );
+        }
+
+        if (!wakingAnnounced) {
+          appendConsoleLine(`◈ ${SCANNER_WAKEUP_MESSAGE}`);
+          wakingAnnounced = true;
+        } else {
+          appendConsoleLine("◈ Retrying scanner health check");
+        }
+
+        setProgress((current) => Math.max(current, Math.min(22, 8 + attempt * 2)));
+      }
+    },
+    [appendConsoleLine],
+  );
 
   const applyJob = useCallback(
     (job: ApiScanJob) => {
@@ -190,6 +288,8 @@ export const useScanEngine = (): ScanEngine => {
       if (!target) return;
 
       clearPolling();
+      const runId = scanRunId.current + 1;
+      scanRunId.current = runId;
       setUrl(target);
       setReport(null);
       setError(null);
@@ -204,9 +304,12 @@ export const useScanEngine = (): ScanEngine => {
       setLines(initialLines.map(toTerminalLine));
 
       void (async () => {
-        abortController.current = new AbortController();
-
         try {
+          await waitForScannerWakeup(runId);
+          if (scanRunId.current !== runId) return;
+
+          abortController.current = new AbortController();
+
           const response = await fetch("/api/scans", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -219,6 +322,8 @@ export const useScanEngine = (): ScanEngine => {
           }
 
           const job = (await response.json()) as ApiScanJob;
+          if (scanRunId.current !== runId) return;
+
           activeJob.current = job.jobId;
           applyJob(job);
 
@@ -230,6 +335,7 @@ export const useScanEngine = (): ScanEngine => {
           );
         } catch (startError) {
           if (startError instanceof DOMException && startError.name === "AbortError") return;
+          if (scanRunId.current !== runId) return;
 
           const message =
             startError instanceof Error ? startError.message : "Could not start scan.";
@@ -238,10 +344,11 @@ export const useScanEngine = (): ScanEngine => {
         }
       })();
     },
-    [applyJob, clearPolling, fail, pollJob, reduce],
+    [applyJob, clearPolling, fail, pollJob, reduce, waitForScannerWakeup],
   );
 
   const reset = useCallback(() => {
+    scanRunId.current += 1;
     clearPolling();
     activeJob.current = null;
     setStatus("idle");

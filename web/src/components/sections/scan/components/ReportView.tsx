@@ -21,11 +21,11 @@ interface ReportViewProps {
   /** In the dashboard the scan is auto-saved, so the in-report "save
    * baseline" callout is hidden (the dashboard shows its own confirmation). */
   embedded?: boolean;
-  freePreview?: boolean;
-  onUpgrade?: () => void;
+  guestPreview?: boolean;
+  onCreateAccount?: () => void;
 }
 
-const freePreviewIssueIds = (report: ScanReport): string[] => {
+const guestPreviewIssueIds = (report: ScanReport): string[] => {
   const sorted = sortIssues(report.issues, "severity");
   return SEVERITY_ORDER.map(
     (severity) => sorted.find((issue) => issue.severity === severity)?.id,
@@ -48,15 +48,15 @@ export const ReportView = ({
   reduce,
   onRescan,
   embedded,
-  freePreview,
-  onUpgrade,
+  guestPreview,
+  onCreateAccount,
 }: ReportViewProps) => {
   const [filter, setFilter] = useState<FilterValue>("all");
 
   const total = report.issues.length;
   const previewIssueIds = useMemo(
-    () => (freePreview ? freePreviewIssueIds(report) : undefined),
-    [freePreview, report],
+    () => (guestPreview ? guestPreviewIssueIds(report) : undefined),
+    [guestPreview, report],
   );
   const lockedIssueCount = previewIssueIds
     ? Math.max(0, report.issues.length - previewIssueIds.length)
@@ -126,10 +126,10 @@ export const ReportView = ({
         </div>
 
         <div className={styles.reportActions}>
-          {freePreview && onUpgrade ? (
-            <Button variant="secondary" size="sm" onClick={onUpgrade}>
+          {guestPreview && onCreateAccount ? (
+            <Button variant="secondary" size="sm" onClick={onCreateAccount}>
               <DownloadIcon size={14} />
-              Unlock export
+              Sign up to export
             </Button>
           ) : (
             <Button variant="secondary" size="sm" onClick={exportJson}>
@@ -159,7 +159,7 @@ export const ReportView = ({
         onFilter={setFilter}
         previewIssueIds={previewIssueIds}
         lockedIssueCount={lockedIssueCount}
-        onUpgrade={onUpgrade}
+        onCreateAccount={onCreateAccount}
       />
 
       {!embedded && <BaselineCallout report={report} />}
