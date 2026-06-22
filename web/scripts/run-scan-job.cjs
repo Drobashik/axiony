@@ -5,6 +5,7 @@ const path = require("node:path");
 const runner = async () => {
   const targetUrl = process.argv[2];
   const selector = process.argv[3];
+  const level = process.argv[4];
 
   const write = (event) => {
     process.stdout.write(`${JSON.stringify(event)}\n`);
@@ -21,6 +22,7 @@ const runner = async () => {
     const { scanUrl } = require(scanModulePath);
 
     const result = await scanUrl(targetUrl, {
+      level: level || undefined,
       selector: selector || undefined,
       onProgressPrint: (message) => write({ type: "progress", message }),
     });

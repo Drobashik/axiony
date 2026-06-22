@@ -23,6 +23,10 @@ export type ScanResult = {
 };
 
 export type AxeRunOptions = {
+  runOnly?: {
+    type: 'tag';
+    values: string[];
+  };
   rules?: Record<string, { enabled: boolean }>;
 };
 
@@ -40,6 +44,7 @@ export type ScanProgressMessage =
   | 'Processing results';
 
 export type ScanUrlOptions = {
+  level?: 'A' | 'AA' | 'AAA';
   onProgressPrint?: (message: ScanProgressMessage) => void;
   selector?: string;
 };
@@ -68,6 +73,6 @@ export type AxeRunResult = {
 
 export type WindowWithAxe = Window & {
   axe: {
-    run: (context?: string, options?: AxeRunOptions) => Promise<AxeRunResult>;
+    run: (context?: string | Document, options?: AxeRunOptions) => Promise<AxeRunResult>;
   };
 };

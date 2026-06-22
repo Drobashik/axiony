@@ -94,6 +94,7 @@ const runJob = async (job: MutableScanJob): Promise<void> => {
   try {
     const result = await withTimeout(
       scanUrl(job.url, {
+        level: job.level,
         onProgressPrint: (message) => {
           if (job.status === "complete" || job.status === "failed") return;
           job.progress = randomProgressForMessage(job, message);

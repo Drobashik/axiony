@@ -11,7 +11,7 @@ import type {
 } from "./types";
 
 const JOB_TTL_MS = 30 * 60 * 1000;
-const JOB_TIMEOUT_MS = 75 * 1000;
+const JOB_TIMEOUT_MS = 240 * 1000;
 const MAX_LINES = 60;
 
 const PROGRESS_RANGE_BY_MESSAGE: Record<string, readonly [number, number]> = {
@@ -150,7 +150,7 @@ const handleRunnerEvent = (job: MutableScanJob, event: ScanRunnerEvent) => {
 
 const startScanProcess = (job: MutableScanJob) => {
   const scriptPath = path.resolve(process.cwd(), "scripts/run-scan-job.cjs");
-  const child = spawn(process.execPath, [scriptPath, job.url], {
+  const child = spawn(process.execPath, [scriptPath, job.url, "", job.level], {
     cwd: process.cwd(),
     env: {
       ...process.env,

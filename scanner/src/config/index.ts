@@ -9,7 +9,7 @@ export const config = {
   apiKey: process.env.SCANNER_API_KEY || "",
   allowUnauthenticated: process.env.SCANNER_ALLOW_UNAUTHENTICATED === "1",
   concurrency: Math.min(toInt(process.env.SCANNER_CONCURRENCY, 1), 4),
-  jobTimeoutMs: toInt(process.env.SCAN_JOB_TIMEOUT_MS, 90_000),
+  jobTimeoutMs: toInt(process.env.SCAN_JOB_TIMEOUT_MS, 240_000),
 };
 
 export const validateConfig = (): void => {

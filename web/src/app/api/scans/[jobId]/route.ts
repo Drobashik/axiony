@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerUserId } from "@/server/auth/session";
 import {
+  failPersistedScanJob,
   getPersistedScanJob,
   isScanJobSnapshot,
   syncPersistedScanJob,
@@ -22,6 +23,14 @@ interface RouteContext {
   }>;
 }
 
+const errorMessageFromBody = (body: unknown): string =>
+  body &&
+  typeof body === "object" &&
+  "error" in body &&
+  typeof (body as { error?: unknown }).error === "string"
+    ? (body as { error: string }).error
+    : "Scanner service is temporarily unavailable. Try again in a minute.";
+
 export const GET = async (_request: Request, { params }: RouteContext) => {
   const { jobId } = await params;
   const userId = await getServerUserId();
@@ -38,6 +47,14 @@ export const GET = async (_request: Request, { params }: RouteContext) => {
         if (isScanJobSnapshot(remoteJob.body)) {
           const synced = await syncPersistedScanJob(userId, persistedJob, remoteJob.body);
           return NextResponse.json(synced, { status: remoteJob.status });
+        }
+
+        if (remoteJob.status >= 500) {
+          const failed = await failPersistedScanJob(
+            persistedJob,
+            errorMessageFromBody(remoteJob.body),
+          );
+          return NextResponse.json(failed);
         }
       }
 

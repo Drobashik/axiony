@@ -363,16 +363,8 @@ export const WorkspaceScan = ({
             progress={engine.progress}
             lines={engine.lines}
             reduce={engine.reduce}
+            onStop={() => setStopDialogOpen(true)}
           />
-          <div className={styles.scanStopPanel}>
-            <div className={styles.scanStopCopy}>
-              <span>Scanner is running</span>
-              <strong>{engine.url}</strong>
-            </div>
-            <Button variant="secondary" size="sm" onClick={() => setStopDialogOpen(true)}>
-              Stop scan
-            </Button>
-          </div>
         </div>
       )}
 

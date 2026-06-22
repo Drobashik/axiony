@@ -15,7 +15,6 @@ interface ScanNavProps {
   issueCount?: number;
   onNewScan: () => void;
   onRescan: () => void;
-  onStop: () => void;
 }
 
 const statusLabel: Record<StudioState, string> = {
@@ -44,7 +43,6 @@ export const ScanNav = ({
   issueCount,
   onNewScan,
   onRescan,
-  onStop,
 }: ScanNavProps) => {
   const activeUrl = shortUrl(currentUrl);
   const hasTarget = Boolean(currentUrl);
@@ -76,11 +74,7 @@ export const ScanNav = ({
         </div>
 
         <div className={styles.actions} aria-label="Scanner controls">
-          {status === "scanning" ? (
-            <Button variant="secondary" size="sm" onClick={onStop}>
-              Stop
-            </Button>
-          ) : status === "idle" ? (
+          {status === "scanning" ? null : status === "idle" ? (
             <>
               <Button href="/login" variant="ghost" size="sm" className={styles.idleLogin}>
                 Log in

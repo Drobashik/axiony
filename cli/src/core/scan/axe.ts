@@ -19,6 +19,7 @@ import {
   SCAN_VIEWPORT_WIDTH,
 } from './constants';
 import { findDuplicateIdIssues } from './custom-checks';
+import { DEFAULT_AXE_RUN_OPTIONS } from './profile';
 
 export const launchScanBrowser = async (
   onProgressPrint: (message: ScanProgressMessage) => void,
@@ -103,6 +104,10 @@ export async function runAxeOnPage(
   },
 ): Promise<Pick<ScanResult, 'url' | 'timestamp' | 'issues' | 'manualChecks'>> {
   const { axeOptions, onProgressPrint, selector } = options;
+  const runOptions: AxeRunOptions = {
+    ...DEFAULT_AXE_RUN_OPTIONS,
+    ...axeOptions,
+  };
 
   onProgressPrint('Injecting accessibility engine');
 
@@ -128,10 +133,16 @@ export async function runAxeOnPage(
     result = await page.evaluate(
       async ({ context, runOptions }) => {
         const runtimeWindow = window as unknown as WindowWithAxe;
+        const result = await runtimeWindow.axe.run(context ?? document, runOptions);
 
-        return await runtimeWindow.axe.run(context, runOptions);
+        return {
+          url: result.url,
+          timestamp: result.timestamp,
+          violations: result.violations,
+          incomplete: result.incomplete,
+        };
       },
-      { context: selector, runOptions: axeOptions },
+      { context: selector, runOptions },
     );
   } catch {
     throw new Error('Could not run accessibility scan.');

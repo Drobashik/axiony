@@ -89,6 +89,19 @@ export const CopyIcon = ({ className, size = 14 }: IconProps) => (
   </svg>
 );
 
+export const StopIcon = ({ className, size = 14 }: IconProps) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    aria-hidden="true"
+    className={className}
+  >
+    <rect x="6" y="6" width="12" height="12" rx="3" />
+  </svg>
+);
+
 export const ChevronIcon = ({ className, size = 16 }: IconProps) => (
   <svg
     {...base(size)}

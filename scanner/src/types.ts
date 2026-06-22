@@ -71,6 +71,7 @@ export interface CliScanResult {
 }
 
 export interface ScanUrlOptions {
+  level?: WcagLevel;
   onProgressPrint?: (message: string) => void;
   selector?: string;
 }
