@@ -7,6 +7,7 @@ import {
   waitForChallengeResolution,
   waitForPageReadiness,
 } from './page-readiness';
+import { createWcagAxeOptions } from './profile';
 import type { ScanResult, ScanUrlOptions } from './types';
 
 type ScanUrlMetadata = NonNullable<ScanResult['metadata']>;
@@ -37,8 +38,22 @@ const buildScanUrlMetadata = (
   return metadata;
 };
 
+const REFRESH_ONLY_RULE_IDS = new Set(['meta-refresh', 'meta-refresh-no-exceptions']);
+
+const isLikelyRefreshPlaceholderResult = (
+  result: Pick<ScanResult, 'issues' | 'manualChecks'>,
+): boolean => {
+  const hasNoFindings = result.issues.length === 0 && result.manualChecks.length === 0;
+  const hasOnlyRefreshIssues =
+    result.issues.length > 0 &&
+    result.manualChecks.length === 0 &&
+    result.issues.every((issue) => REFRESH_ONLY_RULE_IDS.has(issue.id));
+
+  return hasNoFindings || hasOnlyRefreshIssues;
+};
+
 export async function scanUrl(url: string, options: ScanUrlOptions = {}): Promise<ScanResult> {
-  const { onProgressPrint = () => undefined, selector } = options;
+  const { level, onProgressPrint = () => undefined, selector } = options;
 
   const browser = await launchScanBrowser(onProgressPrint);
 
@@ -78,14 +93,15 @@ export async function scanUrl(url: string, options: ScanUrlOptions = {}): Promis
         ? unresolvedChallengeWarnings
         : await detectPageWarnings(page);
 
-    if (warnings.length > 0) {
-      throw new Error(REFRESH_OR_CHALLENGE_PAGE_ERROR);
-    }
-
     const result = await runAxeOnPage(page, {
+      axeOptions: level ? createWcagAxeOptions(level) : undefined,
       onProgressPrint,
       selector,
     });
+
+    if (warnings.length > 0 && isLikelyRefreshPlaceholderResult(result)) {
+      throw new Error(REFRESH_OR_CHALLENGE_PAGE_ERROR);
+    }
 
     return {
       url: result.url,

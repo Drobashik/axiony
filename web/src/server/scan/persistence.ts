@@ -192,6 +192,28 @@ export const syncPersistedScanJob = async (
   return toClientScanJob(updated);
 };
 
+export const failPersistedScanJob = async (
+  job: ScanJob,
+  message: string,
+): Promise<ScanJobSnapshot> => {
+  const lines = stringArray(job.lines);
+  const lastLine = lines[lines.length - 1];
+  const failedLines = lastLine?.includes(message) ? lines : [...lines, `✕ ${message}`];
+
+  const updated = await prisma.scanJob.update({
+    where: { id: job.id },
+    data: {
+      status: "failed",
+      progress: Math.max(job.progress, 5),
+      lines: json(failedLines),
+      error: message,
+      completedAt: new Date(),
+    },
+  });
+
+  return toClientScanJob(updated);
+};
+
 export const latestUserScanReports = async (userId: string, limit = 20) =>
   prisma.userScanReport.findMany({
     where: { userId },

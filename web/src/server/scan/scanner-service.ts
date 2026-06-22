@@ -13,15 +13,37 @@ interface ScannerFetchOptions {
 }
 
 const SCANNER_UNAVAILABLE_MESSAGE =
-  "Scanner service is unavailable. Start the scanner and try again.";
+  "Scanner service is temporarily unavailable. It may be waking up, deploying, or restarting. Try again in a minute.";
 
-const toJsonBody = (value: string): unknown => {
+const MAX_ERROR_MESSAGE_LENGTH = 280;
+
+const isHtmlDocument = (value: string): boolean => {
+  const trimmed = value.trim().toLowerCase();
+  return (
+    trimmed.startsWith("<!doctype html") || trimmed.startsWith("<html") || trimmed.includes("<body")
+  );
+};
+
+const fallbackErrorMessage = (status: number, value: string): string => {
+  if (status === 502) {
+    return "Scanner service is temporarily unavailable (502 Bad Gateway). It may be waking up, deploying, or restarting. Try again in a minute.";
+  }
+
+  if (status === 503 || status === 504 || isHtmlDocument(value)) {
+    return SCANNER_UNAVAILABLE_MESSAGE;
+  }
+
+  const message = value.replace(/\s+/g, " ").trim();
+  return message ? message.slice(0, MAX_ERROR_MESSAGE_LENGTH) : SCANNER_UNAVAILABLE_MESSAGE;
+};
+
+const toJsonBody = (value: string, status: number): unknown => {
   if (!value) return {};
 
   try {
     return JSON.parse(value);
   } catch {
-    return { error: value };
+    return { error: fallbackErrorMessage(status, value) };
   }
 };
 
@@ -68,7 +90,7 @@ const scannerFetch = async (
   }
 
   return {
-    body: toJsonBody(await response.text()),
+    body: toJsonBody(await response.text(), response.status),
     status: response.status,
   };
 };

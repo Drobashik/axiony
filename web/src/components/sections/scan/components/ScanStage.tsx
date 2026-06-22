@@ -1,9 +1,11 @@
 import type { CSSProperties } from "react";
-import { Icon, Terminal } from "@/components/ui";
-import type { TerminalLine } from "@/components/ui";
 import cn from "classnames";
+import type { TerminalLine } from "@/components/ui";
 import { SCAN_PHASES } from "../data";
 import { phaseForProgress } from "../hooks/useScanEngine";
+import { ScanBeacon } from "./ScanBeacon";
+import { ScanConsole } from "./ScanConsole";
+import { StopIcon } from "./icons";
 import styles from "../ScanStudio.module.scss";
 
 interface ScanStageProps {
@@ -12,11 +14,20 @@ interface ScanStageProps {
   lines: TerminalLine[];
   reduce: boolean;
   status?: "scanning" | "failed";
+  onStop?: () => void;
 }
 
-const RADIUS = 32;
+const RADIUS = 30;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
-const SCAN_NODES = ["dom", "axe", "wcag"] as const;
+
+const hostOf = (value: string): string => {
+  if (!value) return "";
+  try {
+    return new URL(value).hostname.replace(/^www\./, "");
+  } catch {
+    return value.replace(/^https?:\/\//, "").split("/")[0] ?? value;
+  }
+};
 
 export const ScanStage = ({
   url,
@@ -24,28 +35,22 @@ export const ScanStage = ({
   lines,
   reduce,
   status = "scanning",
+  onStop,
 }: ScanStageProps) => {
-  const phase = phaseForProgress(progress);
-  const offset = CIRCUMFERENCE * (1 - progress / 100);
   const failed = status === "failed";
+  const phase = phaseForProgress(progress);
+  const phaseLabel = SCAN_PHASES[phase].label;
+  const offset = CIRCUMFERENCE * (1 - Math.min(100, progress) / 100);
+  const host = hostOf(url);
+  const showStop = !failed && Boolean(onStop);
 
   return (
-    <div className={cn(styles.stage, !failed && styles.stageScanning)}>
-      {!failed && (
-        <div className={cn(styles.scanField, reduce && styles.scanFieldStatic)} aria-hidden="true">
-          <span className={styles.scanGrid} />
-          <span className={styles.scanSweep} />
-          <span className={styles.scanOrbit} />
-          <span className={styles.scanOrbitInner} />
-          {SCAN_NODES.map((node) => (
-            <span key={node} className={styles.scanNode} data-node={node} />
-          ))}
-        </div>
-      )}
+    <div className={cn(styles.stage, !failed ? styles.stageScanning : styles.stageFailed)}>
+      <ScanBeacon host={host} reduce={reduce} failed={failed} />
 
       <div className={styles.stageHead}>
         <div
-          className={styles.progressRing}
+          className={cn(styles.ring, failed && styles.ringFailed)}
           role="progressbar"
           aria-valuenow={progress}
           aria-valuemin={0}
@@ -53,76 +58,81 @@ export const ScanStage = ({
           aria-label="Scan progress"
         >
           {!failed && (
-            <>
-              <span
-                className={cn(styles.ringHalo, reduce && styles.ringHaloStatic)}
-                aria-hidden="true"
-              />
-              <span
-                className={cn(styles.ringScanner, reduce && styles.ringScannerStatic)}
-                aria-hidden="true"
-              />
-            </>
+            <span
+              className={cn(styles.ringScanner, reduce && styles.ringScannerStatic)}
+              aria-hidden="true"
+            />
           )}
-          <svg viewBox="0 0 80 80" aria-hidden="true">
-            <circle className={styles.ringTrack} cx="40" cy="40" r={RADIUS} />
+          <svg viewBox="0 0 72 72" aria-hidden="true">
+            <circle className={styles.ringTrack} cx="36" cy="36" r={RADIUS} />
             <circle
               className={cn(styles.ringProgress, reduce && styles.ringProgressStatic)}
-              cx="40"
-              cy="40"
+              cx="36"
+              cy="36"
               r={RADIUS}
               style={{ "--c": CIRCUMFERENCE, "--o": offset } as CSSProperties}
             />
           </svg>
-          <span className={styles.ringPct}>{progress}%</span>
+          <span className={styles.ringPct}>{failed ? "!" : `${progress}%`}</span>
         </div>
 
         <div className={styles.stageMeta}>
-          <strong>{failed ? "Scan failed" : "Scanning…"}</strong>
+          <span className={styles.stageKicker}>{failed ? "Interrupted" : "Live scan"}</span>
+          <strong>{failed ? "Scan failed" : `${phaseLabel}…`}</strong>
           <span className={styles.stageUrl}>{url}</span>
         </div>
       </div>
 
       {/* Announce phase changes without visual noise. */}
       <p className={styles.srOnly} role="status" aria-live="polite">
-        {failed ? "Scan failed" : `${SCAN_PHASES[phase].label} — ${progress}% complete`}
+        {failed ? "Scan failed" : `${phaseLabel} — ${progress}% complete`}
       </p>
 
-      <ol className={styles.phases}>
+      <ol className={styles.stepper}>
         {SCAN_PHASES.map((item, index) => {
-          const done = index < phase || progress >= 100;
-          const active = index === phase && progress < 100;
+          const done = index < phase;
+          const active = index === phase && !failed;
+          const stalled = failed && index === phase;
 
           return (
             <li
               key={item.key}
-              className={cn(styles.phase, done && styles.phaseDone, active && styles.phaseActive)}
+              className={cn(
+                styles.step,
+                done && styles.stepDone,
+                active && styles.stepActive,
+                stalled && styles.stepStalled,
+              )}
               aria-current={active ? "step" : undefined}
             >
-              <span className={styles.phaseIcon} aria-hidden="true">
-                {done ? (
-                  <Icon name="check" size={13} />
-                ) : (
-                  <span className={styles.phaseNum}>{index + 1}</span>
-                )}
-              </span>
-              <span className={styles.phaseText}>
-                <strong>{item.label}</strong>
-                <span>{item.detail}</span>
-              </span>
+              <span className={styles.stepDot} aria-hidden="true" />
+              <span className={styles.stepLabel}>{item.label}</span>
             </li>
           );
         })}
       </ol>
 
-      <div className={styles.stageTerminal}>
-        <Terminal
-          filename="axiony — cloud scan"
-          lines={lines}
-          showCursor={!reduce && !failed && progress < 100}
-          animated={!failed}
-        />
-      </div>
+      <ScanConsole
+        lines={lines}
+        progress={progress}
+        phaseLabel={phaseLabel}
+        host={host}
+        reduce={reduce}
+        failed={failed}
+      />
+
+      {showStop && (
+        <div className={styles.stageFoot}>
+          <span className={styles.stageFootMeta}>
+            <span className={styles.stageFootDot} aria-hidden="true" />
+            Scanning {host || "your page"} — safe to keep working
+          </span>
+          <button type="button" className={styles.stageStop} onClick={onStop}>
+            <StopIcon size={13} />
+            Stop scan
+          </button>
+        </div>
+      )}
     </div>
   );
 };

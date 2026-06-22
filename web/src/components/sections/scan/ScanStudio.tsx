@@ -189,7 +189,6 @@ export const ScanStudio = () => {
         issueCount={engine.report?.issues.length}
         onNewScan={requestNewScan}
         onRescan={rescanCurrent}
-        onStop={stopScan}
       />
 
       <section id="scanner" ref={topRef} className={cn(styles.top, active && styles.topActive)}>
@@ -211,6 +210,7 @@ export const ScanStudio = () => {
                 progress={engine.progress}
                 lines={engine.lines}
                 reduce={engine.reduce}
+                onStop={stopScan}
               />
             </div>
           )}

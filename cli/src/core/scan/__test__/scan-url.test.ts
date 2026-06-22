@@ -115,6 +115,36 @@ test('retries when the first URL scan response is a refresh page', async () => {
   }
 });
 
+test('allows a URL scan with refresh warnings when the page has meaningful findings', async () => {
+  const { server, url } = await listen(`
+    <!doctype html>
+    <html lang="en">
+      <head>
+        <title>Real page with refresh metadata</title>
+        <meta http-equiv="refresh" content="360">
+      </head>
+      <body>
+        <main>
+          <h1>Real page with content</h1>
+          <input type="text">
+        </main>
+      </body>
+    </html>
+  `);
+
+  try {
+    const result = await scanUrl(url);
+
+    assert.equal(result.metadata?.warnings?.length, 1);
+    assert.equal(
+      result.issues.some((issue) => issue.id === 'label'),
+      true,
+    );
+  } finally {
+    await closeServer(server);
+  }
+});
+
 test('fails clearly when a URL scan lands on an access-denied page', async () => {
   const { server, url } = await listen(`
     <!doctype html>

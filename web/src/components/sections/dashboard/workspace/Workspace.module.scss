@@ -896,52 +896,6 @@
   line-height: 1.55;
 }
 
-.scanStopPanel {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  margin-top: 12px;
-  padding: 12px 14px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  background: linear-gradient(90deg, oklch(0.72 0.2 20 / 0.08), transparent 58%), var(--bg-surface);
-  box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.04);
-}
-
-.scanStopCopy {
-  display: grid;
-  gap: 3px;
-  min-width: 0;
-
-  span {
-    color: var(--text-muted);
-    font-family: var(--font-mono);
-    font-size: 0.7rem;
-    font-weight: 800;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
-
-  strong {
-    min-width: 0;
-    overflow: hidden;
-    color: var(--text-primary);
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-}
-
-@include breakpoint-down(sm) {
-  .scanStopPanel {
-    align-items: stretch;
-    flex-direction: column;
-  }
-}
-
 .quotaCard {
   display: flex;
   flex-direction: column;
