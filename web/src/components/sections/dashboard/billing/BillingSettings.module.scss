@@ -61,6 +61,49 @@
   }
 }
 
+.tutorialPanel {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 1px solid var(--blue-border);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(100% 130% at 0% 0%, var(--blue-dim), transparent 58%), var(--bg-surface);
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.04);
+}
+
+.tutorialIcon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--blue-border);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  color: var(--blue);
+}
+
+.tutorialCopy {
+  flex: 1;
+  min-width: 0;
+
+  h3 {
+    margin: 3px 0 4px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 800;
+  }
+
+  p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.84rem;
+    line-height: 1.45;
+  }
+}
+
 .price {
   flex-shrink: 0;
   color: var(--text-primary);
@@ -231,7 +274,8 @@
   }
 
   .next,
-  .current {
+  .current,
+  .tutorialPanel {
     align-items: flex-start;
     flex-direction: column;
   }

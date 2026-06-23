@@ -16,6 +16,7 @@ interface BillingSettingsProps {
   billing: BillingState;
   workspace: Workspace;
   onUpgrade: (plan: Exclude<BillingPlan, "free">) => void;
+  onStartTutorial: () => void;
 }
 
 const renewalLabel = (iso: string | null): string => {
@@ -28,7 +29,12 @@ const renewalLabel = (iso: string | null): string => {
 const percentUsed = (used: number, limit: number): number =>
   Math.min(100, Math.round((used / Math.max(1, limit)) * 100));
 
-export const BillingSettings = ({ billing, workspace, onUpgrade }: BillingSettingsProps) => {
+export const BillingSettings = ({
+  billing,
+  workspace,
+  onUpgrade,
+  onStartTutorial,
+}: BillingSettingsProps) => {
   const plan = planDefinition(billing.plan);
   const entitlements = entitlementsForPlan(billing.plan);
   const scansLeft = remainingScans(billing);
@@ -37,7 +43,7 @@ export const BillingSettings = ({ billing, workspace, onUpgrade }: BillingSettin
   const paid = billing.plan !== "free";
 
   return (
-    <div className={styles.wrap}>
+    <div className={styles.wrap} data-tour="settings-panel">
       <header className={styles.head}>
         <span className={styles.kicker}>Subscription</span>
         <h2>Plan and billing</h2>
@@ -46,6 +52,21 @@ export const BillingSettings = ({ billing, workspace, onUpgrade }: BillingSettin
           billing API can plug in later.
         </p>
       </header>
+
+      <section className={styles.tutorialPanel}>
+        <div className={styles.tutorialIcon} aria-hidden="true">
+          <Icon name="selector" size={17} />
+        </div>
+        <div className={styles.tutorialCopy}>
+          <span className={styles.kicker}>Tutorial</span>
+          <h3>Replay the dashboard walkthrough</h3>
+          <p>Run the guided tour again any time you want to revisit the scan and triage flow.</p>
+        </div>
+        <Button variant="secondary" onClick={onStartTutorial}>
+          Replay tutorial
+          <Icon name="arrow" size={14} />
+        </Button>
+      </section>
 
       <section className={styles.current}>
         <div>

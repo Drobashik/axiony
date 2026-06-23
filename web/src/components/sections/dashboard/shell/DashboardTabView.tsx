@@ -23,6 +23,7 @@ export function DashboardTabView({ tab }: { tab: DashboardTab }) {
     billing,
     openUpgrade,
     navigateTab,
+    startDashboardTutorial,
     setNavigationGuard,
     refreshWorkspace,
   } = useDashboardWorkspace();
@@ -39,6 +40,7 @@ export function DashboardTabView({ tab }: { tab: DashboardTab }) {
         onSelectPage={setSelectedPagePath}
         billing={billing}
         onUpgrade={openUpgrade}
+        onStartTutorial={startDashboardTutorial}
         setNavigationGuard={setNavigationGuard}
         refreshWorkspace={refreshWorkspace}
       />

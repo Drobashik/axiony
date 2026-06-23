@@ -21,6 +21,8 @@ export type IssueStatus = "open" | "in-progress" | "resolved" | "ignored";
 
 /** One tracked issue, including the scan details needed by the dashboard dialog. */
 export interface TrackedIssue {
+  /** Stable identity used for persisted triage across reloads and follow-up scans. */
+  issueKey?: string;
   id: string;
   title: string;
   severity: Severity;
@@ -40,6 +42,8 @@ export interface TrackedIssue {
   beforeCode?: string;
   afterCode?: string;
   code?: string;
+  /** First time this issue was seen on the tracked page. */
+  createdAt?: string;
 }
 
 /** A scan result captured at the point the user chose to save it. */
@@ -70,6 +74,8 @@ export interface ScanRecord {
   total: number;
   /** Issues fixed since the previous scan of this page. */
   resolved: number;
+  /** Full details for issues that disappeared in this scan. */
+  resolvedIssues?: TrackedIssue[];
   /** Titles of new issues not present in the page baseline (regressions). */
   regressions: string[];
   scannedAt: string; // ISO

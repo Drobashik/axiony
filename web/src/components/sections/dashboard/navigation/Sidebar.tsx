@@ -90,6 +90,7 @@ export function Sidebar({
           href={item.href}
           className={styles.item}
           style={item.green ? { color: "var(--green)" } : undefined}
+          data-tour={`dashboard-nav-${item.id}`}
         >
           {TAB_ICONS[item.id]} {item.label}
           {item.badge !== undefined && (
@@ -106,6 +107,7 @@ export function Sidebar({
         className={cn(styles.item, activeTab === item.id && styles.itemActive)}
         style={item.green ? { color: "var(--green)" } : undefined}
         onClick={() => onTabChange(item.id)}
+        data-tour={`dashboard-nav-${item.id}`}
       >
         {TAB_ICONS[item.id]} {item.label}
         {item.badge !== undefined && <span className={styles.badge}>{item.badge}</span>}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { planDefinition, useBilling } from "@/lib/billing";
@@ -19,6 +19,7 @@ import { UpgradeDialog } from "../billing";
 import { Sidebar } from "../navigation/Sidebar";
 import { Topbar } from "../navigation/Topbar";
 import { PreviewBanner } from "../preview/PreviewBanner";
+import { DashboardTutorial } from "../workspace/DashboardTutorial";
 import { DashboardWorkspaceContext } from "./dashboard-workspace-context";
 import type { NavigationGuard } from "./dashboard-workspace-context";
 import { SignOutDialog } from "./SignOutDialog";
@@ -34,6 +35,8 @@ const VALID_TABS: DashboardTab[] = [
   "team",
   "settings",
 ];
+const TUTORIAL_STORAGE_PREFIX = "axiony.dashboard_tutorial";
+const OPEN_ISSUE_STATUSES = new Set(["open", "in-progress"]);
 
 /** Derive the active tab from /dashboard/<tab> (root = overview). */
 const tabFromPath = (pathname: string): DashboardTab => {
@@ -59,9 +62,16 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const [signingOut, setSigningOut] = useState(false);
   const [navigationGuard, setNavigationGuardValue] = useState<NavigationGuard | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [tutorialOpen, setTutorialOpen] = useState(false);
+  const [tutorialDismissed, setTutorialDismissed] = useState(true);
   const { ready, workspace } = state;
   const { ready: billingReady, billing } = billingState;
   const tab = tabFromPath(pathname);
+  const tutorialStorageKey = useMemo(() => {
+    if (!workspace) return null;
+    const owner = workspace.account.email || workspace.account.name || "workspace";
+    return `${TUTORIAL_STORAGE_PREFIX}.${owner}.${billing.plan}`;
+  }, [billing.plan, workspace]);
 
   const closeSidebar = useCallback(() => setSidebarOpen(false), []);
 
@@ -110,6 +120,23 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const setNavigationGuard = useCallback((guard: NavigationGuard | null) => {
     setNavigationGuardValue(() => guard);
   }, []);
+  const rememberTutorial = useCallback(
+    (status: "completed" | "skipped") => {
+      try {
+        if (tutorialStorageKey) window.localStorage.setItem(tutorialStorageKey, status);
+      } catch {
+        // Losing this preference is harmless; the dashboard itself still works.
+      }
+      setTutorialDismissed(true);
+      setTutorialOpen(false);
+    },
+    [tutorialStorageKey],
+  );
+  const startDashboardTutorial = useCallback(() => {
+    setSidebarOpen(false);
+    setTutorialOpen(true);
+  }, []);
+  const skipDashboardTutorial = useCallback(() => rememberTutorial("skipped"), [rememberTutorial]);
   const go = useCallback(
     (next: DashboardTab) => {
       setSidebarOpen(false);
@@ -158,6 +185,35 @@ export function DashboardShell({ children }: { children: ReactNode }) {
     }
   }, [closeSignOut, router]);
 
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      if (!tutorialStorageKey) {
+        setTutorialDismissed(true);
+        setTutorialOpen(false);
+        return;
+      }
+
+      let dismissed = true;
+      try {
+        dismissed = Boolean(window.localStorage.getItem(tutorialStorageKey));
+      } catch {
+        dismissed = true;
+      }
+
+      setTutorialDismissed(dismissed);
+      setTutorialOpen(false);
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [tutorialStorageKey]);
+
+  useEffect(() => {
+    if (tutorialDismissed || !workspace || workspace.projects.length === 0) return;
+
+    const frame = window.requestAnimationFrame(() => setTutorialOpen(true));
+    return () => window.cancelAnimationFrame(frame);
+  }, [tutorialDismissed, workspace]);
+
   // First client tick before auth/billing/report state is ready — keep it
   // neutral so preview/workspace modes don't flash.
   if (!ready || !billingReady) return <div className={styles.page} aria-busy="true" />;
@@ -180,7 +236,10 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const scopedPages = scopedProjects
     .flatMap((p) => p.pages)
     .filter((page) => !effectivePagePath || page.path === effectivePagePath);
-  const openIssueCount = scopedPages.reduce((sum, page) => sum + page.open.length, 0);
+  const openIssueCount = scopedPages.reduce(
+    (sum, page) => sum + page.open.filter((issue) => OPEN_ISSUE_STATUSES.has(issue.status)).length,
+    0,
+  );
 
   return (
     <DashboardWorkspaceContext.Provider
@@ -193,6 +252,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         billing,
         openUpgrade,
         navigateTab: go,
+        startDashboardTutorial,
         setNavigationGuard,
         refreshWorkspace,
       }}
@@ -226,7 +286,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             projects={workspace?.projects.map((p) => ({ id: p.id, host: p.host }))}
             pages={selectedProject?.pages.map((page) => ({
               path: page.path,
-              openIssues: page.open.length,
+              openIssues: page.open.filter((issue) => OPEN_ISSUE_STATUSES.has(issue.status)).length,
             }))}
             selectedProjectId={effectiveProjectId}
             selectedPagePath={effectivePagePath}
@@ -260,6 +320,16 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             userName={signOutUserName}
             onClose={closeSignOut}
             onConfirm={handleSignOut}
+          />
+        )}
+        {workspace && (
+          <DashboardTutorial
+            open={tutorialOpen}
+            plan={billing.plan}
+            activeTab={tab}
+            onNavigate={go}
+            onSkip={skipDashboardTutorial}
+            onComplete={() => rememberTutorial("completed")}
           />
         )}
       </div>

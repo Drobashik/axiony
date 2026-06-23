@@ -1,6 +1,6 @@
 import type { Prisma, ScanJob } from "@prisma/client";
 import { prisma } from "@/lib/db";
-import type { PendingScan } from "@/lib/workspace/types";
+import type { IssueStatus, PendingScan } from "@/lib/workspace/types";
 import type { ScanJobSnapshot, ScanReportPayload, WcagLevel } from "./types";
 
 const REPORT_TTL_MS = 1000 * 60 * 60 * 24 * 30;
@@ -221,13 +221,89 @@ export const latestUserScanReports = async (userId: string, limit = 20) =>
     take: limit,
   });
 
-export const deleteUserScanReportsByHost = async (userId: string, host: string) =>
-  prisma.userScanReport.deleteMany({
+export const deleteUserScanReportsByHost = async (userId: string, host: string) => {
+  const [reports] = await prisma.$transaction([
+    prisma.userScanReport.deleteMany({
+      where: {
+        userId,
+        host,
+      },
+    }),
+    prisma.userIssueState.deleteMany({
+      where: {
+        userId,
+        host,
+      },
+    }),
+  ]);
+
+  return reports;
+};
+
+const toClientIssueState = (state: {
+  host: string;
+  path: string;
+  issueKey: string;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+}) => ({
+  host: state.host,
+  path: state.path,
+  issueKey: state.issueKey,
+  status: state.status,
+  createdAt: state.createdAt.toISOString(),
+  updatedAt: state.updatedAt.toISOString(),
+});
+
+export const listUserIssueStates = async (userId: string) => {
+  const states = await prisma.userIssueState.findMany({
+    where: { userId },
+    orderBy: { updatedAt: "desc" },
+  });
+
+  return states.map(toClientIssueState);
+};
+
+export const upsertUserIssueState = async ({
+  userId,
+  host,
+  path,
+  issueKey,
+  status,
+  createdAt,
+}: {
+  userId: string;
+  host: string;
+  path: string;
+  issueKey: string;
+  status: IssueStatus;
+  createdAt?: Date;
+}) => {
+  const state = await prisma.userIssueState.upsert({
     where: {
+      userId_host_path_issueKey: {
+        userId,
+        host,
+        path,
+        issueKey,
+      },
+    },
+    create: {
       userId,
       host,
+      path,
+      issueKey,
+      status,
+      createdAt,
+    },
+    update: {
+      status,
     },
   });
+
+  return toClientIssueState(state);
+};
 
 const pendingToReportPayload = (pending: PendingScan): ScanReportPayload => ({
   url: pending.url,

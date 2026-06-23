@@ -68,6 +68,13 @@ const CloseIcon = () => (
   </svg>
 );
 
+const formatIssueDate = (iso: string): string =>
+  new Date(iso).toLocaleDateString(undefined, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+
 export const IssueDetail = ({ located, onClose, onStatus }: IssueDetailProps) => {
   const { host, path, issue } = located;
   const template = getIssueTemplate(issue.templateId ?? issue.id);
@@ -160,6 +167,18 @@ export const IssueDetail = ({ located, onClose, onStatus }: IssueDetailProps) =>
             <span className={styles.dialogMetaLabel}>Occurrences</span>
             <span className={styles.dialogMetaValue}>{occurrenceCount}</span>
           </div>
+          {issue.createdAt && (
+            <div className={styles.dialogMetaItem}>
+              <span className={styles.dialogMetaLabel}>Created</span>
+              <span className={styles.dialogMetaValue}>{formatIssueDate(issue.createdAt)}</span>
+            </div>
+          )}
+          {located.resolvedAt && (
+            <div className={styles.dialogMetaItem}>
+              <span className={styles.dialogMetaLabel}>Resolved</span>
+              <span className={styles.dialogMetaValue}>{formatIssueDate(located.resolvedAt)}</span>
+            </div>
+          )}
           <div className={styles.dialogMetaStatus}>
             <span className={styles.dialogMetaLabel}>Status</span>
             <Select

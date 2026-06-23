@@ -186,6 +186,233 @@
   color: var(--text-muted);
 }
 
+// ── Return-visit changelog ──────────────────────────────────────────
+.changeDigest {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(220px, 0.62fr);
+  grid-template-areas:
+    "lead stats"
+    "feed feed";
+  gap: 14px;
+  padding: 18px 20px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(85% 130% at 0% 0%, var(--green-dim), transparent 58%),
+    radial-gradient(75% 120% at 100% 0%, var(--blue-dim), transparent 60%), var(--bg-surface);
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.04);
+  animation: wsIn 0.44s $ease-out both;
+
+  @include breakpoint-down(lg) {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "lead"
+      "stats"
+      "feed";
+  }
+}
+
+.changeLead {
+  grid-area: lead;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.changeKicker {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--green);
+}
+
+.changeTitle {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.08rem;
+  font-weight: 650;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+}
+
+.changeText {
+  max-width: 76ch;
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+  line-height: 1.48;
+}
+
+.changeStats {
+  grid-area: stats;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  align-self: start;
+
+  @include breakpoint-down(sm) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.changeStat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 11px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: oklch(1 0 0 / 0.035);
+
+  strong {
+    font-family: var(--font-mono);
+    font-size: 1.08rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--text-primary);
+  }
+}
+
+.changeStatLabel {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  @include truncate;
+}
+
+.changeGood,
+.changeStat strong.changeGood {
+  color: var(--green);
+}
+
+.changeBad,
+.changeStat strong.changeBad {
+  color: var(--severity-serious);
+}
+
+.changeFeed {
+  grid-area: feed;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  @include breakpoint-down(lg) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.changeItem {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 11px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(180deg, oklch(1 0 0 / 0.035), transparent),
+    color-mix(in oklch, var(--bg-base) 76%, black);
+}
+
+.changeIcon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  background: var(--bg-muted);
+
+  &[data-tone="good"] {
+    color: var(--green);
+    border-color: $green-border;
+    background: var(--green-dim);
+  }
+
+  &[data-tone="alert"] {
+    color: var(--severity-serious);
+    border-color: oklch(0.72 0.18 50 / 0.24);
+    background: oklch(0.72 0.18 50 / 0.12);
+  }
+}
+
+.changeItemMain {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.changeItemTitle {
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  font-weight: 650;
+  @include truncate;
+}
+
+.changeItemMeta {
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  line-height: 1.35;
+  @include truncate;
+}
+
+.changeDate {
+  justify-self: end;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  white-space: nowrap;
+}
+
+.changeCta {
+  grid-area: feed;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  justify-self: start;
+  min-height: 34px;
+  padding: 8px 13px;
+  border: 1px solid var(--blue-border);
+  border-radius: var(--radius-md);
+  background: var(--blue-dim);
+  color: var(--blue);
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform var(--transition),
+    border-color var(--transition),
+    background var(--transition);
+
+  &:hover {
+    transform: translateY(-1px);
+    border-color: var(--blue);
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+
+  @include breakpoint-down(sm) {
+    justify-self: stretch;
+  }
+}
+
 // ── Run-scan flash ───────────────────────────────────────────────────
 .flash {
   display: flex;
@@ -404,14 +631,188 @@
   font-family: var(--font-mono);
 }
 
-.stepCount {
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--text-secondary);
+// ── Trend chart ──────────────────────────────────────────────────────
+.trend {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-// ── Score trend chart ────────────────────────────────────────────────
+.trendHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.trendTabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(180deg, oklch(1 0 0 / 0.035), transparent),
+    color-mix(in oklch, var(--bg-base) 86%, black);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.04),
+    0 10px 24px oklch(0 0 0 / 0.12);
+}
+
+.trendTab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 30px;
+  padding: 6px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: transparent;
+  cursor: pointer;
+  transition:
+    border-color var(--transition),
+    color var(--transition),
+    background var(--transition),
+    box-shadow var(--transition),
+    transform var(--transition);
+
+  &::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--border-strong);
+    box-shadow: 0 0 0 3px transparent;
+    transition:
+      background var(--transition),
+      box-shadow var(--transition);
+  }
+
+  &:hover {
+    color: var(--text-primary);
+    background: oklch(1 0 0 / 0.035);
+  }
+  &:focus-visible {
+    @include focus-ring($offset: 2px);
+  }
+}
+
+.trendTabOn {
+  color: var(--text-primary);
+  border-color: var(--blue-border);
+  background:
+    radial-gradient(110% 140% at 0% 0%, var(--blue-dim), transparent 62%), var(--bg-elevated);
+  box-shadow:
+    0 8px 18px oklch(0 0 0 / 0.18),
+    inset 0 1px 0 oklch(1 0 0 / 0.06);
+
+  &::before {
+    background: var(--blue);
+    box-shadow:
+      0 0 0 3px var(--blue-dim),
+      0 0 16px oklch(0.62 0.22 240 / 0.36);
+  }
+}
+
+.trendStat {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.trendStatNow {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.trendStatDelta {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.trendUp {
+  color: var(--green);
+  background: var(--green-dim);
+}
+.trendDown {
+  color: var(--severity-serious);
+  background: oklch(0.72 0.18 50 / 0.14);
+}
+.trendFlat {
+  color: var(--text-muted);
+  background: var(--bg-muted);
+}
+
+.trendCaption {
+  margin: -2px 0 0;
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  letter-spacing: 0.01em;
+}
+
+.trendPlot {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 8px;
+}
+
+.trendYAxis {
+  position: relative;
+  grid-column: 1;
+  grid-row: 1;
+  width: 22px;
+}
+
+.trendYTick {
+  position: absolute;
+  right: 0;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  line-height: 1;
+}
+
+.trendCanvas {
+  position: relative;
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.trendXAxis {
+  position: relative;
+  grid-column: 2;
+  grid-row: 2;
+  height: 16px;
+  margin-top: 4px;
+}
+
+.trendXTick {
+  position: absolute;
+  top: 0;
+  transform: translateX(var(--shift, -50%));
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  white-space: nowrap;
+}
+
 .trendSvg {
   display: block;
   width: 100%;
@@ -419,65 +820,13 @@
   overflow: visible;
 }
 
-.trendWrap {
-  position: relative;
-  padding-top: 34px;
+.trendEnter {
+  animation: trendEnter 0.3s ease;
 }
 
-.trendNumbers {
-  position: absolute;
-  inset: 0 0 auto auto;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-
-  span {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 5px;
-    padding: 5px 8px;
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-sm);
-    background: oklch(0.09 0.006 260 / 0.82);
-    color: var(--text-muted);
-    font-size: 0.72rem;
-  }
-
-  strong {
-    color: var(--text-primary);
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
-  }
-}
-
-.trendPoint {
-  cursor: pointer;
-
-  &:focus-visible {
-    outline: none;
-  }
-}
-
-.trendTooltip {
-  position: absolute;
-  z-index: 2;
-  min-width: 118px;
-  padding: 8px 10px;
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  background: var(--bg-elevated);
-  box-shadow: var(--shadow-md);
-  color: var(--text-secondary);
-  font-size: 0.76rem;
-  line-height: 1.35;
-  pointer-events: none;
-  transform: translate(-50%, calc(-100% - 8px));
-
-  strong {
-    display: block;
-    color: var(--text-primary);
-    font-family: var(--font-mono);
-    font-size: 0.9rem;
+@keyframes trendEnter {
+  from {
+    opacity: 0;
   }
 }
 
@@ -491,8 +840,148 @@
   stroke: var(--text-muted);
   stroke-width: 1;
   stroke-dasharray: 4 4;
-  opacity: 0.55;
+  opacity: 0.5;
   vector-effect: non-scaling-stroke;
+}
+
+.trendGuide {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.trendHit {
+  fill: transparent;
+  cursor: pointer;
+  outline: none;
+
+  &:focus {
+    outline: none;
+  }
+  &:focus-visible {
+    outline: none;
+    fill: transparent;
+  }
+}
+
+.trendTip {
+  position: absolute;
+  z-index: 3;
+  min-width: 120px;
+  padding: 9px 11px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-md);
+  pointer-events: none;
+  transform: translate(-50%, calc(-100% - 12px));
+  animation: trendTipIn 0.12s ease;
+}
+
+@keyframes trendTipIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-100% - 6px));
+  }
+}
+
+.tipDate {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.tipBig {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 1.3rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.tipNote {
+  display: block;
+  margin-top: 3px;
+  color: var(--text-secondary);
+  font-size: 0.74rem;
+}
+
+.tipList {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tipRow {
+  display: grid;
+  grid-template-columns: 10px 1fr auto;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+}
+
+.tipDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.tipLabel {
+  white-space: nowrap;
+}
+
+.tipVal {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.tipTotal {
+  margin-top: 3px;
+  padding-top: 5px;
+  border-top: 1px solid var(--border-subtle);
+  grid-template-columns: 1fr auto;
+}
+
+.trendLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.trendLegendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+}
+
+.trendLegendDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.trendLegendLabel {
+  color: var(--text-muted);
+}
+
+.trendLegendVal {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-weight: 700;
 }
 
 .trendHint {
@@ -502,91 +991,35 @@
   line-height: 1.4;
 }
 
-// ── Next steps ───────────────────────────────────────────────────────
-.steps {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.step {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  padding: 9px 4px;
-  border-bottom: 1px solid var(--border-subtle);
-
-  &:last-child {
-    border-bottom: none;
+@include breakpoint-down(sm) {
+  .trendHead {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
   }
-}
-
-.stepCheck {
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  width: 20px;
-  height: 20px;
-  border: 1.5px solid var(--border-strong);
-  border-radius: 6px;
-  background: var(--bg-base);
-  color: #fff;
-  cursor: pointer;
-  transition:
-    background var(--transition),
-    border-color var(--transition);
-
-  &:disabled {
-    cursor: default;
+  .trendTabs {
+    width: 100%;
   }
-
-  &:focus-visible {
-    @include focus-ring;
+  .trendTab {
+    flex: 1;
+    justify-content: center;
+    text-align: center;
   }
-
-  .stepDone & {
-    background: var(--green);
-    border-color: var(--green);
+  .trendStat {
+    justify-content: space-between;
   }
-}
-
-.stepIcon {
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  width: 30px;
-  height: 30px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-default);
-  background: var(--bg-elevated);
-  color: var(--text-secondary);
-}
-
-.stepBody {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  min-width: 0;
-}
-
-.stepTitle {
-  font-size: 0.86rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.stepText {
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  line-height: 1.4;
-}
-
-.stepDone {
-  .stepTitle {
-    color: var(--text-secondary);
+  .trendStatNow {
+    font-size: 1.35rem;
+  }
+  .trendYAxis {
+    width: 18px;
+  }
+  .trendYTick,
+  .trendXTick {
+    font-size: 0.6rem;
+  }
+  .trendTip {
+    min-width: 104px;
   }
 }
 
@@ -639,6 +1072,19 @@
   border: 1px solid var(--blue-border);
   background: var(--blue-dim);
   color: var(--blue);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.resolvedPill {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: 99px;
+  border: 1px solid $green-border;
+  background: var(--green-dim);
+  color: var(--green);
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.03em;
@@ -1406,6 +1852,20 @@
   font-size: 0.775rem;
 }
 
+.issueResolvedMeta {
+  color: var(--green);
+}
+
+.issueCreatedMeta {
+  color: var(--text-secondary);
+}
+
+.issueStatusError {
+  margin: -6px 0 0;
+  color: var(--severity-serious);
+  font-size: 0.82rem;
+}
+
 .issueProDetailsPill {
   display: inline-flex;
   align-items: center;
@@ -1452,31 +1912,6 @@
 
 .issueStatusCell {
   min-width: 0;
-}
-
-.issueLockedStatus {
-  width: 100%;
-  padding: 6px 9px;
-  border: 1px solid var(--blue-border);
-  border-radius: var(--radius-md);
-  background: var(--blue-dim);
-  color: var(--blue);
-  font-family: var(--font-sans);
-  font-size: 0.78rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition:
-    border-color var(--transition),
-    background var(--transition);
-
-  &:hover {
-    border-color: var(--blue);
-    background: oklch(0.62 0.22 240 / 0.2);
-  }
-
-  &:focus-visible {
-    @include focus-ring;
-  }
 }
 
 .issueTableEmpty {
@@ -2506,4 +2941,11 @@
   color: var(--text-secondary);
   font-size: 0.92rem;
   line-height: 1.55;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trendEnter,
+  .trendTip {
+    animation: none;
+  }
 }

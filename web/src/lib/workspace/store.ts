@@ -6,10 +6,12 @@ import {
   countsFromIssues,
   hostFromUrl,
   initialsFromName,
+  issuePersistenceKey,
   pathFromUrl,
   scoreFromIssues,
 } from "./derive";
 import type {
+  IssueStatus,
   PendingScan,
   Project,
   ProjectPage,
@@ -62,8 +64,19 @@ interface PersistedScanReportRow {
       beforeCode?: string;
       afterCode?: string;
       code?: string;
+      issueKey?: string;
+      createdAt?: string;
     }>;
   };
+}
+
+interface PersistedIssueStateRow {
+  host?: string;
+  path?: string;
+  issueKey?: string;
+  status?: unknown;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
 }
 
 function safeParse<T>(raw: string | null): T | null {
@@ -84,46 +97,80 @@ const normalizeKeyPart = (value: string | undefined): string =>
 
 const issueIdentityKeys = (issue: TrackedIssue): string[] => {
   const keys: string[] = [];
+  const issueKey = normalizeKeyPart(issue.issueKey);
   const templateId = normalizeKeyPart(issue.templateId);
   const rule = normalizeKeyPart(issue.rule);
   const title = normalizeKeyPart(issue.title);
   const firstNode = normalizeKeyPart(issue.nodes?.[0]);
   const id = normalizeKeyPart(issue.id);
 
-  if (templateId) keys.push(`template:${templateId}`);
-  if (rule && title) keys.push(`rule-title:${rule}|${title}`);
+  if (issueKey) keys.push(`issue-key:${issueKey}`);
   if (rule && firstNode) keys.push(`rule-node:${rule}|${firstNode}`);
-  if (rule) keys.push(`rule:${rule}`);
+  if (id && firstNode) keys.push(`id-node:${id}|${firstNode}`);
+  if (rule && title) keys.push(`rule-title:${rule}|${title}`);
+  if (templateId && firstNode) keys.push(`template-node:${templateId}|${firstNode}`);
+  if (templateId) keys.push(`template:${templateId}`);
   if (id) keys.push(`id:${id}`);
+  if (rule) keys.push(`rule:${rule}`);
 
   return keys;
 };
 
-const issueKeySet = (issues: TrackedIssue[]): Set<string> =>
-  new Set(issues.flatMap(issueIdentityKeys));
+interface MatchableIssue {
+  issue: TrackedIssue;
+  matched: boolean;
+}
 
-const hasIssueMatch = (keys: Set<string>, issue: TrackedIssue): boolean =>
-  issueIdentityKeys(issue).some((key) => keys.has(key));
+const createIssueMatcher = (issues: TrackedIssue[]) => {
+  const matchable = issues.map<MatchableIssue>((issue) => ({ issue, matched: false }));
+  const byKey = new Map<string, MatchableIssue[]>();
 
-const mergeIssueTriage = (
-  nextIssues: TrackedIssue[],
-  previousIssues: TrackedIssue[],
-): TrackedIssue[] => {
-  const previousByKey = new Map<string, TrackedIssue>();
-
-  for (const issue of previousIssues) {
-    for (const key of issueIdentityKeys(issue)) {
-      if (!previousByKey.has(key)) previousByKey.set(key, issue);
+  for (const entry of matchable) {
+    for (const key of issueIdentityKeys(entry.issue)) {
+      const bucket = byKey.get(key);
+      if (bucket) bucket.push(entry);
+      else byKey.set(key, [entry]);
     }
   }
 
-  return nextIssues.map((issue) => {
-    const previous = issueIdentityKeys(issue)
-      .map((key) => previousByKey.get(key))
-      .find((match): match is TrackedIssue => Boolean(match));
+  const consume = (issue: TrackedIssue): TrackedIssue | null => {
+    for (const key of issueIdentityKeys(issue)) {
+      const match = byKey.get(key)?.find((entry) => !entry.matched);
+      if (match) {
+        match.matched = true;
+        return match.issue;
+      }
+    }
+    return null;
+  };
 
-    return previous ? { ...issue, id: previous.id, status: previous.status } : issue;
+  return {
+    consume,
+    unmatched: () => matchable.filter((entry) => !entry.matched).map((entry) => entry.issue),
+  };
+};
+
+const mergeIssueTriage = (nextIssues: TrackedIssue[], previousIssues: TrackedIssue[]) => {
+  const matcher = createIssueMatcher(previousIssues);
+  const issues = nextIssues.map((issue) => {
+    const previous = matcher.consume(issue);
+    return previous
+      ? {
+          ...issue,
+          id: previous.id,
+          issueKey: previous.issueKey ?? issue.issueKey,
+          status: previous.status,
+          createdAt: previous.createdAt ?? issue.createdAt,
+        }
+      : issue;
   });
+
+  return { issues, resolvedIssues: matcher.unmatched() };
+};
+
+const regressionTitles = (nextIssues: TrackedIssue[], baselineIssues: TrackedIssue[]): string[] => {
+  const matcher = createIssueMatcher(baselineIssues);
+  return nextIssues.filter((issue) => !matcher.consume(issue)).map((issue) => issue.title);
 };
 
 // ── Pending scan (scan page → signup / save) ─────────────────────────
@@ -190,12 +237,15 @@ function baselineScanRecord(pending: PendingScan): ScanRecord {
     counts: pending.counts,
     total: pending.total,
     resolved: 0,
+    resolvedIssues: [],
     regressions: [],
     scannedAt: pending.scannedAt,
   };
 }
 
 function pageFromPending(pending: PendingScan): ProjectPage {
+  const issues = pending.issues.map((issue) => withIssueTracking(issue, pending.scannedAt));
+
   return {
     id: randomId(),
     path: pending.path,
@@ -205,10 +255,10 @@ function pageFromPending(pending: PendingScan): ProjectPage {
       score: pending.score,
       counts: pending.counts,
       total: pending.total,
-      issues: pending.issues,
+      issues,
       createdAt: pending.scannedAt,
     },
-    open: [...pending.issues],
+    open: [...issues],
     scans: [baselineScanRecord(pending)],
   };
 }
@@ -224,10 +274,10 @@ function projectFromPending(pending: PendingScan): Project {
 
 /** Record a real follow-up scan on a page by diffing fresh issues. */
 function addScanToPage(page: ProjectPage, pending: PendingScan): void {
-  const baselineKeys = issueKeySet(page.baseline.issues);
   const previousIssues = page.open;
-  const nextKeys = issueKeySet(pending.issues);
-  const nextIssues = mergeIssueTriage(pending.issues, previousIssues);
+  const trackedIssues = pending.issues.map((issue) => withIssueTracking(issue, pending.scannedAt));
+  const { issues: nextIssues, resolvedIssues } = mergeIssueTriage(trackedIssues, previousIssues);
+  const resolvedNow = resolvedIssues.map((issue) => ({ ...issue, status: "resolved" as const }));
 
   page.open = nextIssues;
   page.scans.push({
@@ -235,10 +285,9 @@ function addScanToPage(page: ProjectPage, pending: PendingScan): void {
     score: pending.score,
     counts: pending.counts,
     total: pending.total,
-    resolved: previousIssues.filter((issue) => !hasIssueMatch(nextKeys, issue)).length,
-    regressions: pending.issues
-      .filter((issue) => !hasIssueMatch(baselineKeys, issue))
-      .map((i) => i.title),
+    resolved: resolvedNow.length,
+    resolvedIssues: resolvedNow,
+    regressions: regressionTitles(pending.issues, page.baseline.issues),
     scannedAt: pending.scannedAt,
   });
 }
@@ -297,14 +346,40 @@ const isSeverity = (value: unknown): value is Severity =>
 const isWcagLevel = (value: unknown): value is PendingScan["level"] =>
   value === "A" || value === "AA" || value === "AAA";
 
+const isIssueStatus = (value: unknown): value is IssueStatus =>
+  value === "open" || value === "in-progress" || value === "resolved" || value === "ignored";
+
+const isoFromDateLike = (value: string | Date | undefined): string | undefined => {
+  if (!value) return undefined;
+  const date = value instanceof Date ? value : new Date(value);
+  return Number.isFinite(date.getTime()) ? date.toISOString() : undefined;
+};
+
+const withIssueTracking = (issue: TrackedIssue, createdAt: string): TrackedIssue => {
+  const tracked = {
+    ...issue,
+    createdAt: issue.createdAt ?? createdAt,
+  };
+
+  return {
+    ...tracked,
+    issueKey: tracked.issueKey ?? issuePersistenceKey(tracked),
+  };
+};
+
+const issueStateMapKey = (host: string, path: string, issueKey: string): string =>
+  `${host}::${path}::${issueKey}`;
+
 const trackedIssueFromReport = (
   issue: NonNullable<NonNullable<PersistedScanReportRow["report"]>["issues"]>[number],
   index: number,
+  createdAt: string,
 ): TrackedIssue => {
   const nodes = Array.isArray(issue.nodes) ? issue.nodes : [];
   const rule = issue.rule || "unknown-rule";
 
-  return {
+  const tracked: TrackedIssue = {
+    issueKey: typeof issue.issueKey === "string" ? issue.issueKey : undefined,
     id: issue.id || `${rule}-${index}`,
     title: issue.title || rule,
     severity: isSeverity(issue.severity) ? issue.severity : "minor",
@@ -321,7 +396,10 @@ const trackedIssueFromReport = (
     beforeCode: issue.beforeCode,
     afterCode: issue.afterCode,
     code: issue.code,
+    createdAt: isoFromDateLike(issue.createdAt) ?? createdAt,
   };
+
+  return withIssueTracking(tracked, createdAt);
 };
 
 const pendingFromPersistedReport = (row: PersistedScanReportRow): PendingScan | null => {
@@ -329,11 +407,15 @@ const pendingFromPersistedReport = (row: PersistedScanReportRow): PendingScan | 
   const url = report?.url || row.url;
   const level = report?.level || row.level;
   const scannedAt = report?.scannedAt || row.scannedAt;
-  const issues = Array.isArray(report?.issues) ? report.issues.map(trackedIssueFromReport) : [];
 
   if (!url || !isWcagLevel(level) || !scannedAt || !Number.isFinite(Date.parse(scannedAt))) {
     return null;
   }
+
+  const createdAt = new Date(scannedAt).toISOString();
+  const issues = Array.isArray(report?.issues)
+    ? report.issues.map((issue, index) => trackedIssueFromReport(issue, index, createdAt))
+    : [];
 
   const counts = report?.counts || row.counts || countsFromIssues(issues);
   const score =
@@ -360,6 +442,69 @@ const hasScanRecord = (ws: Workspace, pending: PendingScan): boolean => {
   return Boolean(page?.scans.some((scan) => scan.scannedAt === pending.scannedAt));
 };
 
+const issueStateLookup = (rows: PersistedIssueStateRow[]): Map<string, PersistedIssueStateRow> => {
+  const map = new Map<string, PersistedIssueStateRow>();
+
+  for (const row of rows) {
+    if (
+      typeof row.host === "string" &&
+      typeof row.path === "string" &&
+      typeof row.issueKey === "string" &&
+      isIssueStatus(row.status)
+    ) {
+      map.set(issueStateMapKey(row.host, row.path, row.issueKey), row);
+    }
+  }
+
+  return map;
+};
+
+const applyIssueState = (
+  host: string,
+  path: string,
+  issue: TrackedIssue,
+  states: Map<string, PersistedIssueStateRow>,
+  options: { keepResolved?: boolean } = {},
+): TrackedIssue => {
+  const tracked = withIssueTracking(issue, issue.createdAt ?? now());
+  const state = states.get(
+    issueStateMapKey(host, path, tracked.issueKey ?? issuePersistenceKey(tracked)),
+  );
+
+  if (!state) return tracked;
+
+  const createdAt = isoFromDateLike(state.createdAt) ?? tracked.createdAt;
+  return {
+    ...tracked,
+    status: options.keepResolved
+      ? "resolved"
+      : isIssueStatus(state.status)
+        ? state.status
+        : tracked.status,
+    createdAt,
+  };
+};
+
+const applyIssueStates = (ws: Workspace, rows: PersistedIssueStateRow[]): void => {
+  const states = issueStateLookup(rows);
+  if (states.size === 0) return;
+
+  for (const project of ws.projects) {
+    for (const page of project.pages) {
+      page.baseline.issues = page.baseline.issues.map((issue) =>
+        applyIssueState(project.host, page.path, issue, states),
+      );
+      page.open = page.open.map((issue) => applyIssueState(project.host, page.path, issue, states));
+      page.scans = page.scans.map((scan) => ({
+        ...scan,
+        resolvedIssues: scan.resolvedIssues?.map((issue) =>
+          applyIssueState(project.host, page.path, issue, states, { keepResolved: true }),
+        ),
+      }));
+    }
+  }
+};
+
 export async function restoreWorkspaceFromServer(
   identity: AuthIdentity,
 ): Promise<Workspace | null> {
@@ -374,11 +519,16 @@ export async function restoreWorkspaceFromServer(
   };
 
   let rows: PersistedScanReportRow[];
+  let issueStates: PersistedIssueStateRow[];
   try {
     const response = await fetch("/api/scans/reports", { cache: "no-store" });
     if (!response.ok) return createWorkspace(account, null);
-    const body = (await response.json()) as { reports?: PersistedScanReportRow[] };
+    const body = (await response.json()) as {
+      reports?: PersistedScanReportRow[];
+      issueStates?: PersistedIssueStateRow[];
+    };
     rows = Array.isArray(body.reports) ? body.reports : [];
+    issueStates = Array.isArray(body.issueStates) ? body.issueStates : [];
   } catch {
     return createWorkspace(account, null);
   }
@@ -395,6 +545,7 @@ export async function restoreWorkspaceFromServer(
     if (!hasScanRecord(ws, pending)) applyScan(ws, pending);
   }
 
+  applyIssueStates(ws, issueStates);
   ws.onboarding.justCreated = null;
   return ws;
 }
