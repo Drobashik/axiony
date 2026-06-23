@@ -14,8 +14,6 @@ interface IssueDetailProps {
   located: LocatedIssue;
   onClose: () => void;
   onStatus: (status: IssueStatus) => void;
-  canControlIssues: boolean;
-  onUpgrade: () => void;
 }
 
 const CodeSnippet = ({ value, lineNumbers = false }: { value: string; lineNumbers?: boolean }) => {
@@ -70,13 +68,7 @@ const CloseIcon = () => (
   </svg>
 );
 
-export const IssueDetail = ({
-  located,
-  onClose,
-  onStatus,
-  canControlIssues,
-  onUpgrade,
-}: IssueDetailProps) => {
+export const IssueDetail = ({ located, onClose, onStatus }: IssueDetailProps) => {
   const { host, path, issue } = located;
   const template = getIssueTemplate(issue.templateId ?? issue.id);
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -170,19 +162,13 @@ export const IssueDetail = ({
           </div>
           <div className={styles.dialogMetaStatus}>
             <span className={styles.dialogMetaLabel}>Status</span>
-            {canControlIssues ? (
-              <Select
-                size="sm"
-                value={issue.status}
-                options={STATUS_OPTIONS}
-                onChange={(v) => onStatus(v as IssueStatus)}
-                ariaLabel="Issue status"
-              />
-            ) : (
-              <button type="button" className={styles.issueLockedStatus} onClick={onUpgrade}>
-                Upgrade to triage
-              </button>
-            )}
+            <Select
+              size="sm"
+              value={issue.status}
+              options={STATUS_OPTIONS}
+              onChange={(v) => onStatus(v as IssueStatus)}
+              ariaLabel="Issue status"
+            />
           </div>
         </div>
 

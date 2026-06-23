@@ -2,7 +2,7 @@
 
 import { Button, Icon } from "@/components/ui";
 import type { DashboardTab } from "@/lib/data/dashboard";
-import { canAccessPlan, canManageIssues } from "@/lib/billing";
+import { canAccessPlan } from "@/lib/billing";
 import type { BillingPlan, BillingState } from "@/lib/billing";
 import type { Workspace } from "@/lib/workspace";
 import type { IconName } from "@/types";
@@ -250,14 +250,7 @@ export const WorkspaceContent = ({
         refreshWorkspace={refreshWorkspace}
       />
     );
-  if (tab === "issues")
-    return (
-      <WorkspaceIssues
-        workspace={scoped}
-        canControlIssues={canManageIssues(billing)}
-        onUpgrade={onUpgrade}
-      />
-    );
+  if (tab === "issues") return <WorkspaceIssues workspace={scoped} />;
 
   const gated = GATED_TABS[tab];
   if (gated) {

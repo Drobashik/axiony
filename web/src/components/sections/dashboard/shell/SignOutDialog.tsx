@@ -10,10 +10,10 @@ interface SignOutDialogProps {
   onConfirm: () => Promise<void>;
 }
 
-const SignOutMark = () => (
+const SignOutMark = ({ size = 22 }: { size?: number }) => (
   <svg
-    width="22"
-    height="22"
+    width={size}
+    height={size}
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -108,6 +108,7 @@ export const SignOutDialog = ({ userName, onClose, onConfirm }: SignOutDialogPro
             Stay signed in
           </Button>
           <Button onClick={confirm} disabled={signingOut} className={styles.confirm}>
+            <SignOutMark size={16} />
             {signingOut ? "Logging out..." : "Log out"}
           </Button>
         </div>

@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Icon } from "@/components/ui";
 import { useSession } from "@/lib/auth-client";
+import { startRouteLoading } from "@/lib/navigation/route-loading";
 import { pendingFromReport, writePendingScan } from "@/lib/workspace";
 import type { ScanReport } from "../types";
 import { LockIcon } from "./icons";
@@ -34,13 +35,17 @@ export const BaselineCallout = ({ report, onSaved }: BaselineCalloutProps) => {
     if (saving) return;
     setSaving(true);
     if (onSaved) onSaved();
-    else router.push("/dashboard/scan");
+    else {
+      startRouteLoading();
+      router.push("/dashboard/scan");
+    }
   };
 
   const routeGuest = (dest: string) => {
     if (saving) return;
     setSaving(true);
     writePendingScan(pending);
+    startRouteLoading();
     router.push(dest);
   };
 

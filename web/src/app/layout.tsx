@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, Short_Stack, Space_Grotesk } from "next/font/google";
+import { Suspense } from "react";
 import type { ReactNode } from "react";
-import { BootGate } from "@/components/layout";
+import { BootGate, RouteLoadingIndicator } from "@/components/layout";
 import "@/styles/globals.scss";
 
 export const metadata: Metadata = {
@@ -48,6 +49,9 @@ const RootLayout = ({ children }: { children: ReactNode }) => (
   >
     <body>
       <BootGate>{children}</BootGate>
+      <Suspense fallback={null}>
+        <RouteLoadingIndicator />
+      </Suspense>
     </body>
   </html>
 );
