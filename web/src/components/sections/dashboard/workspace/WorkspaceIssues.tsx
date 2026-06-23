@@ -64,15 +64,9 @@ const SearchIcon = () => (
 
 interface WorkspaceIssuesProps {
   workspace: Workspace;
-  canControlIssues: boolean;
-  onUpgrade: (plan?: "pro" | "team") => void;
 }
 
-export const WorkspaceIssues = ({
-  workspace,
-  canControlIssues,
-  onUpgrade,
-}: WorkspaceIssuesProps) => {
+export const WorkspaceIssues = ({ workspace }: WorkspaceIssuesProps) => {
   const [filter, setFilter] = useState<Filter>("open");
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>("all");
   const [search, setSearch] = useState("");
@@ -128,7 +122,6 @@ export const WorkspaceIssues = ({
     );
 
   const changeStatus = (host: string, path: string, issueId: string, status: IssueStatus) => {
-    if (!canControlIssues) return;
     setStatusOverrides((current) => ({
       ...current,
       [issueKey(host, path, issueId)]: status,
@@ -263,24 +256,14 @@ export const WorkspaceIssues = ({
                   </div>
 
                   <div className={styles.issueStatusCell}>
-                    {canControlIssues ? (
-                      <Select
-                        size="sm"
-                        align="end"
-                        value={issue.status}
-                        options={STATUS_OPTIONS}
-                        ariaLabel={`Status for ${issue.title}`}
-                        onChange={(v) => changeStatus(host, path, issue.id, v as IssueStatus)}
-                      />
-                    ) : (
-                      <button
-                        type="button"
-                        className={styles.issueLockedStatus}
-                        onClick={() => onUpgrade("pro")}
-                      >
-                        Upgrade to triage
-                      </button>
-                    )}
+                    <Select
+                      size="sm"
+                      align="end"
+                      value={issue.status}
+                      options={STATUS_OPTIONS}
+                      ariaLabel={`Status for ${issue.title}`}
+                      onChange={(v) => changeStatus(host, path, issue.id, v as IssueStatus)}
+                    />
                   </div>
 
                   <button
@@ -305,8 +288,6 @@ export const WorkspaceIssues = ({
           onStatus={(status) =>
             changeStatus(detailLoc.host, detailLoc.path, detailLoc.issue.id, status)
           }
-          canControlIssues={canControlIssues}
-          onUpgrade={() => onUpgrade("pro")}
         />
       )}
     </div>

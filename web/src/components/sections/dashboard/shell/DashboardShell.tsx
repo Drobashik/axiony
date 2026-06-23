@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { planDefinition, useBilling } from "@/lib/billing";
 import type { BillingPlan } from "@/lib/billing";
+import { startRouteLoading } from "@/lib/navigation/route-loading";
 import {
   importPendingScanToServer,
   readPendingScan,
@@ -114,12 +115,14 @@ export function DashboardShell({ children }: { children: ReactNode }) {
       setSidebarOpen(false);
       if (next === tab) return;
       if (!canNavigate()) return;
+      startRouteLoading();
       router.push(`/dashboard/${next}`);
     },
     [canNavigate, router, tab],
   );
   const goHome = useCallback(() => {
     if (!canNavigate()) return;
+    startRouteLoading();
     router.push("/");
   }, [canNavigate, router]);
   const handleSelectProject = useCallback((id: string | null) => {
@@ -146,6 +149,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
     try {
       await authSignOut(); // clear the BetterAuth server session (cookie)
       signOut(); // clear pending scan + legacy client workspace key
+      startRouteLoading();
       router.replace("/");
     } catch (error) {
       console.error("Unable to sign out", error);

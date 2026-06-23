@@ -214,37 +214,6 @@ export const WorkspaceOverview = ({ workspace, onTab }: WorkspaceOverviewProps) 
         </article>
       </div>
 
-      <div className={styles.valueCards}>
-        <article className={styles.valueCard}>
-          <span className={styles.valueIcon} data-tone="blue">
-            <Icon name="report" size={17} />
-          </span>
-          <span className={styles.valueTitle}>Existing debt, remembered</span>
-          <span className={styles.valueText}>
-            Each page&apos;s baseline issues are tracked, not forgotten — and never fail your build.
-          </span>
-        </article>
-        <article className={styles.valueCard}>
-          <span className={styles.valueIcon} data-tone="green">
-            <Icon name="ci" size={17} />
-          </span>
-          <span className={styles.valueTitle}>Regression protection</span>
-          <span className={styles.valueText}>
-            Every re-scan is compared to that page&apos;s baseline; new issues get flagged in CI
-            &amp; PRs.
-          </span>
-        </article>
-        <article className={styles.valueCard}>
-          <span className={styles.valueIcon} data-tone="violet">
-            <Icon name="bolt" size={17} />
-          </span>
-          <span className={styles.valueTitle}>AI fix suggestions</span>
-          <span className={styles.valueText}>
-            Plain-English fixes and ready-to-paste code for each tracked issue.
-          </span>
-        </article>
-      </div>
-
       <div className={styles.cols}>
         <section className={styles.panel}>
           <header className={styles.panelHead}>

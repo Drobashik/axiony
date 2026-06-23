@@ -1,0 +1,63 @@
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: 9800;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 140ms ease;
+
+  &.active {
+    opacity: 1;
+  }
+}
+
+.haze {
+  position: fixed;
+  inset: 0 0 auto;
+  height: 82px;
+  background: linear-gradient(180deg, oklch(0.62 0.22 240 / 0.13), transparent 72%);
+}
+
+.track {
+  position: fixed;
+  inset: 0 0 auto;
+  height: 2px;
+  overflow: hidden;
+  background: oklch(1 0 0 / 0.06);
+}
+
+.bar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 42%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--blue), var(--green), var(--violet));
+  box-shadow:
+    0 0 18px oklch(0.62 0.22 240 / 0.45),
+    0 0 30px oklch(0.78 0.18 155 / 0.26);
+  animation: routeLoading 1.05s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+@keyframes routeLoading {
+  0% {
+    transform: translateX(-110%) scaleX(0.55);
+  }
+  45% {
+    transform: translateX(58vw) scaleX(1);
+  }
+  100% {
+    transform: translateX(112vw) scaleX(0.7);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root {
+    transition: none;
+  }
+
+  .bar {
+    width: 100%;
+    animation: none;
+    transform: none;
+  }
+}

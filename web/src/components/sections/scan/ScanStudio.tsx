@@ -7,6 +7,7 @@ import { ScanNav } from "@/components/layout";
 import cn from "classnames";
 import { useSession } from "@/lib/auth-client";
 import { useReveal } from "@/lib/hooks/useReveal";
+import { startRouteLoading } from "@/lib/navigation/route-loading";
 import { recordGuestScan, useGuestScanUsage } from "@/lib/scan/guest-usage";
 import { pendingFromReport, writePendingScan } from "@/lib/workspace";
 import { GuestScanLimitDialog } from "./components/GuestScanLimitDialog";
@@ -42,7 +43,9 @@ export const ScanStudio = () => {
   // Signed-in users scan inside the dashboard shell (clean tool, no
   // marketing) — send them there instead of the public studio.
   useEffect(() => {
-    if (signedIn) router.replace("/dashboard/scan");
+    if (!signedIn) return;
+    startRouteLoading();
+    router.replace("/dashboard/scan");
   }, [router, signedIn]);
 
   useEffect(() => {
@@ -74,6 +77,7 @@ export const ScanStudio = () => {
 
   const routeGuestWithReport = (dest: "/signup" | "/login") => {
     if (engine.report) writePendingScan(pendingFromReport(engine.report));
+    startRouteLoading();
     router.push(dest);
   };
 

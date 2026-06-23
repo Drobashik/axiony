@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { signIn, signUp } from "@/lib/auth-client";
+import { startRouteLoading } from "@/lib/navigation/route-loading";
 import { importPendingScanToServer, readPendingScan } from "@/lib/workspace";
 import { getPasswordStrength, isEmail } from "../lib/validation";
 import type { AuthFieldName, AuthMode, AuthStatus, AuthView, OAuthProvider } from "../lib/types";
@@ -178,7 +179,10 @@ export function useAuthForm(mode: AuthMode) {
     // as a guest, import that pending result into Neon before entering dashboard.
     await importPendingScanToServer(pendingScan);
     setStatus("success");
-    schedule(() => router.push(REDIRECT_TO), REDIRECT_MS);
+    schedule(() => {
+      startRouteLoading();
+      router.push(REDIRECT_TO);
+    }, REDIRECT_MS);
   };
 
   const handleOAuth = async (id: OAuthProvider["id"]) => {

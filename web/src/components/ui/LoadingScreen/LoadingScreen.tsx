@@ -7,53 +7,42 @@ import styles from "./LoadingScreen.module.scss";
 
 export interface LoadingScreenProps {
   onDone?: () => void;
-  durationMs?: number;
+  ready?: boolean;
 }
 
 type Phase = "enter" | "visible" | "exit";
 
-const statusForProgress = (progress: number): string => {
-  if (progress < 35) return "Initializing scanner...";
-  if (progress < 65) return "Loading WCAG ruleset...";
-  if (progress < 90) return "Preparing workspace...";
-  return "Ready";
-};
+const EXIT_MS = 500;
 
-export const LoadingScreen = ({ onDone, durationMs = 2000 }: LoadingScreenProps) => {
+export const LoadingScreen = ({ onDone, ready = false }: LoadingScreenProps) => {
   const [phase, setPhase] = useState<Phase>("enter");
-  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    let current = 0;
-    const id = window.setInterval(() => {
-      current += Math.random() * 18 + 4;
-      if (current >= 100) {
-        current = 100;
-        window.clearInterval(id);
-      }
-      setProgress(Math.min(current, 100));
-    }, 80);
-    return () => window.clearInterval(id);
+    const frame = window.requestAnimationFrame(() => setPhase("visible"));
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
   useEffect(() => {
-    const enterDelay = 200;
-    const exitDelay = Math.max(durationMs - 500, enterDelay + 200);
-    const doneDelay = durationMs;
+    if (!ready) return;
 
-    const t1 = window.setTimeout(() => setPhase("visible"), enterDelay);
-    const t2 = window.setTimeout(() => setPhase("exit"), exitDelay);
-    const t3 = window.setTimeout(() => onDone?.(), doneDelay);
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const doneDelay = reduceMotion ? 0 : EXIT_MS;
+    let timer = 0;
+
+    const frame = window.requestAnimationFrame(() => {
+      setPhase("exit");
+      timer = window.setTimeout(() => onDone?.(), doneDelay);
+    });
 
     return () => {
-      window.clearTimeout(t1);
-      window.clearTimeout(t2);
-      window.clearTimeout(t3);
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
     };
-  }, [durationMs, onDone]);
+  }, [onDone, ready]);
 
   const hidden = phase === "exit";
-  const status = statusForProgress(progress);
+  const visible = phase !== "enter";
+  const status = ready ? "Ready" : "Loading Axiony...";
 
   return (
     <div
@@ -79,13 +68,19 @@ export const LoadingScreen = ({ onDone, durationMs = 2000 }: LoadingScreenProps)
         <span className={styles.glow} />
       </div>
 
-      <div className={cn(styles.logoWrap, styles.logoReady)}>
+      <div className={cn(styles.logoWrap, visible && styles.logoReady)}>
         <LogoLockup markSize={86} />
       </div>
 
-      <div className={cn(styles.progress, styles.progressReady)}>
+      <div
+        className={cn(
+          styles.progress,
+          visible && styles.progressReady,
+          ready && styles.progressComplete,
+        )}
+      >
         <div className={styles.bar}>
-          <div className={styles.fill} style={{ width: `${progress}%` }} />
+          <div className={styles.fill} />
         </div>
         <div className={styles.status}>{status}</div>
       </div>
