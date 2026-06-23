@@ -157,7 +157,7 @@ const GATED_TABS: Partial<Record<DashboardTab, GatedTabConfig>> = {
 };
 
 const FeaturePage = ({ kicker, title, text, cards }: GatedTabConfig["unlocked"]) => (
-  <div className={styles.featurePage}>
+  <div className={styles.featurePage} data-tour="feature-page">
     <header className={styles.featureHero}>
       <span className={styles.scanKicker}>{kicker}</span>
       <h2>{title}</h2>
@@ -187,6 +187,7 @@ interface WorkspaceContentProps {
   onSelectPage: (path: string | null) => void;
   billing: BillingState;
   onUpgrade: (plan?: Exclude<BillingPlan, "free">) => void;
+  onStartTutorial: () => void;
   setNavigationGuard: (guard: (() => boolean) | null) => void;
   refreshWorkspace: () => Promise<void>;
 }
@@ -201,70 +202,91 @@ export const WorkspaceContent = ({
   onSelectPage,
   billing,
   onUpgrade,
+  onStartTutorial,
   setNavigationGuard,
   refreshWorkspace,
 }: WorkspaceContentProps) => {
-  // The scanner sees the full workspace (scanning isn't scoped).
-  if (tab === "scan") {
-    return (
-      <WorkspaceScan
-        workspace={workspace}
-        onTab={onTab}
-        billing={billing}
-        onUpgrade={onUpgrade}
-        setNavigationGuard={setNavigationGuard}
-        refreshWorkspace={refreshWorkspace}
-      />
-    );
-  }
-
-  // No projects yet → data tabs show a "scan first" empty state with a link
-  // to the scanner; subscription/product tabs still render useful gated content.
-  if (workspace.projects.length === 0 && !COMING_SOON.includes(tab)) {
-    return <ScanEmpty tab={tab} onScan={() => onTab("scan")} />;
-  }
-
-  // Overview + Issues respect the project/page switchers; Projects always lists all.
-  const scopedProjects = selectedProjectId
-    ? workspace.projects
-        .filter((p) => p.id === selectedProjectId)
-        .map((project) =>
-          selectedPagePath
-            ? { ...project, pages: project.pages.filter((page) => page.path === selectedPagePath) }
-            : project,
-        )
-        .filter((project) => project.pages.length > 0)
-    : workspace.projects;
-  const scoped = selectedProjectId ? { ...workspace, projects: scopedProjects } : workspace;
-
-  if (tab === "overview") return <WorkspaceOverview workspace={scoped} onTab={onTab} />;
-  if (tab === "projects")
-    return (
-      <WorkspaceProjects
-        workspace={workspace}
-        billing={billing}
-        onTab={onTab}
-        onSelectProject={onSelectProject}
-        onSelectPage={onSelectPage}
-        onUpgrade={onUpgrade}
-        refreshWorkspace={refreshWorkspace}
-      />
-    );
-  if (tab === "issues") return <WorkspaceIssues workspace={scoped} />;
-
-  const gated = GATED_TABS[tab];
-  if (gated) {
-    if (!canAccessPlan(billing.plan, gated.requiredPlan)) {
+  const content = (() => {
+    // The scanner sees the full workspace (scanning isn't scoped).
+    if (tab === "scan") {
       return (
-        <BillingGate requiredPlan={gated.requiredPlan} {...gated.gate} onUpgrade={onUpgrade} />
+        <WorkspaceScan
+          workspace={workspace}
+          onTab={onTab}
+          billing={billing}
+          onUpgrade={onUpgrade}
+          setNavigationGuard={setNavigationGuard}
+          refreshWorkspace={refreshWorkspace}
+        />
       );
     }
-    return <FeaturePage {...gated.unlocked} />;
-  }
 
-  if (tab === "settings")
-    return <BillingSettings billing={billing} workspace={workspace} onUpgrade={onUpgrade} />;
-  if (COMING_SOON.includes(tab)) return <ComingSoon title={tab} />;
+    // No projects yet → data tabs show a "scan first" empty state with a link
+    // to the scanner; subscription/product tabs still render useful gated content.
+    if (workspace.projects.length === 0 && !COMING_SOON.includes(tab)) {
+      return <ScanEmpty tab={tab} onScan={() => onTab("scan")} />;
+    }
 
-  return <WorkspaceOverview workspace={scoped} onTab={onTab} />;
+    // Overview + Issues respect the project/page switchers; Projects always lists all.
+    const scopedProjects = selectedProjectId
+      ? workspace.projects
+          .filter((p) => p.id === selectedProjectId)
+          .map((project) =>
+            selectedPagePath
+              ? {
+                  ...project,
+                  pages: project.pages.filter((page) => page.path === selectedPagePath),
+                }
+              : project,
+          )
+          .filter((project) => project.pages.length > 0)
+      : workspace.projects;
+    const scoped = selectedProjectId ? { ...workspace, projects: scopedProjects } : workspace;
+
+    if (tab === "overview") {
+      return <WorkspaceOverview workspace={scoped} onTab={onTab} />;
+    }
+
+    if (tab === "projects")
+      return (
+        <WorkspaceProjects
+          workspace={workspace}
+          billing={billing}
+          onTab={onTab}
+          onSelectProject={onSelectProject}
+          onSelectPage={onSelectPage}
+          onUpgrade={onUpgrade}
+          refreshWorkspace={refreshWorkspace}
+        />
+      );
+    if (tab === "issues")
+      return <WorkspaceIssues workspace={scoped} refreshWorkspace={refreshWorkspace} />;
+
+    const gated = GATED_TABS[tab];
+    if (gated) {
+      if (!canAccessPlan(billing.plan, gated.requiredPlan)) {
+        return (
+          <div data-tour="feature-page">
+            <BillingGate requiredPlan={gated.requiredPlan} {...gated.gate} onUpgrade={onUpgrade} />
+          </div>
+        );
+      }
+      return <FeaturePage {...gated.unlocked} />;
+    }
+
+    if (tab === "settings")
+      return (
+        <BillingSettings
+          billing={billing}
+          workspace={workspace}
+          onUpgrade={onUpgrade}
+          onStartTutorial={onStartTutorial}
+        />
+      );
+    if (COMING_SOON.includes(tab)) return <ComingSoon title={tab} />;
+
+    return <WorkspaceOverview workspace={scoped} onTab={onTab} />;
+  })();
+
+  return content;
 };

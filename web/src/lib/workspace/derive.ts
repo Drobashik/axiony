@@ -81,6 +81,44 @@ const sumCounts = (list: SeverityCounts[]): SeverityCounts =>
     { critical: 0, serious: 0, moderate: 0, minor: 0 },
   );
 
+const ACTIONABLE_STATUSES = new Set(["open", "in-progress"]);
+
+const actionableIssues = (issues: TrackedIssue[]): TrackedIssue[] =>
+  issues.filter((issue) => ACTIONABLE_STATUSES.has(issue.status));
+
+const normalizeIssueKeyPart = (value: string | number | undefined): string =>
+  String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ");
+
+const stableHash = (value: string): string => {
+  let hash = 5381;
+  for (let i = 0; i < value.length; i += 1) {
+    hash = (hash * 33) ^ value.charCodeAt(i);
+  }
+  return (hash >>> 0).toString(36);
+};
+
+export const issuePersistenceKey = (issue: TrackedIssue): string => {
+  if (issue.issueKey) return issue.issueKey;
+
+  const nodeSignature = issue.nodes?.slice(0, 3).map(normalizeIssueKeyPart).join("|");
+  const identity = [
+    issue.templateId,
+    issue.id,
+    issue.rule,
+    issue.title,
+    issue.severity,
+    nodeSignature,
+    issue.count,
+  ]
+    .map(normalizeIssueKeyPart)
+    .join("|");
+
+  return stableHash(identity);
+};
+
 /** Minimal shape the scan page passes in — structurally typed so this
  * module never imports the scan component types. */
 interface ReportLike {
@@ -107,45 +145,63 @@ interface ReportLike {
   }[];
 }
 
-export const pendingFromReport = (report: ReportLike): PendingScan => ({
-  url: report.url,
-  host: hostFromUrl(report.url),
-  path: pathFromUrl(report.url),
-  level: report.level,
-  score: report.score,
-  counts: report.counts,
-  total: report.issues.length,
-  issues: report.issues.map((issue) => ({
-    id: issue.id,
-    title: issue.title,
-    severity: issue.severity,
-    rule: issue.rule,
-    count: issue.nodes.length,
-    status: "open" as const,
-    description: issue.description,
-    wcag: issue.wcag,
-    nodes: issue.nodes,
-    fix: issue.fix,
-    whatHappened: issue.whatHappened,
-    whyItMatters: issue.whyItMatters,
-    suggestedFix: issue.suggestedFix,
-    beforeCode: issue.beforeCode,
-    afterCode: issue.afterCode,
-    code: issue.code,
-  })),
-  scannedAt: report.scannedAt.toISOString(),
-});
+export const pendingFromReport = (report: ReportLike): PendingScan => {
+  const scannedAt = report.scannedAt.toISOString();
+
+  return {
+    url: report.url,
+    host: hostFromUrl(report.url),
+    path: pathFromUrl(report.url),
+    level: report.level,
+    score: report.score,
+    counts: report.counts,
+    total: report.issues.length,
+    issues: report.issues.map((source) => {
+      const issue: TrackedIssue = {
+        id: source.id,
+        title: source.title,
+        severity: source.severity,
+        rule: source.rule,
+        count: source.nodes.length,
+        status: "open" as const,
+        description: source.description,
+        wcag: source.wcag,
+        nodes: source.nodes,
+        fix: source.fix,
+        whatHappened: source.whatHappened,
+        whyItMatters: source.whyItMatters,
+        suggestedFix: source.suggestedFix,
+        beforeCode: source.beforeCode,
+        afterCode: source.afterCode,
+        code: source.code,
+        createdAt: scannedAt,
+      };
+
+      return { ...issue, issueKey: issuePersistenceKey(issue) };
+    }),
+    scannedAt,
+  };
+};
 
 // ── Page / project / workspace roll-ups ──────────────────────────────
+export interface TrendPoint {
+  score: number;
+  total: number;
+  counts: SeverityCounts;
+  scannedAt: string;
+}
+
 export interface PageModel {
   latestScore: number;
   baselineScore: number;
+  baselineTotal: number;
   scoreDelta: number;
   openIssues: number;
   debt: number;
   hasFollowups: boolean;
   scanCount: number;
   trendScores: number[];
+  trend: TrendPoint[];
   regressionsCaught: number;
   resolvedTotal: number;
   lastScannedAt: string;
@@ -158,16 +214,23 @@ export const pageModel = (page: ProjectPage): PageModel => {
   return {
     latestScore: latest.score,
     baselineScore: page.baseline.score,
+    baselineTotal: page.baseline.total,
     scoreDelta: latest.score - page.baseline.score,
-    openIssues: page.open.length,
+    openIssues: actionableIssues(page.open).length,
     debt: page.baseline.total,
     hasFollowups: followups.length > 0,
     scanCount: page.scans.length,
     trendScores: page.scans.map((s) => s.score),
+    trend: page.scans.map((s) => ({
+      score: s.score,
+      total: s.total,
+      counts: s.counts,
+      scannedAt: s.scannedAt,
+    })),
     regressionsCaught: followups.reduce((sum, s) => sum + s.regressions.length, 0),
     resolvedTotal: followups.reduce((sum, s) => sum + s.resolved, 0),
     lastScannedAt: latest.scannedAt,
-    counts: latest.counts,
+    counts: countsFromIssues(actionableIssues(page.open)),
   };
 };
 
@@ -207,12 +270,13 @@ export interface WorkspaceSummary {
   openIssues: number;
   regressionsCaught: number;
   resolvedTotal: number;
+  counts: SeverityCounts;
 }
 
 export const allPages = (ws: Workspace): ProjectPage[] => ws.projects.flatMap((p) => p.pages);
 
 export const totalOpenIssues = (ws: Workspace): number =>
-  allPages(ws).reduce((sum, page) => sum + page.open.length, 0);
+  allPages(ws).reduce((sum, page) => sum + actionableIssues(page.open).length, 0);
 
 export const workspaceSummary = (ws: Workspace): WorkspaceSummary | null => {
   const pages = allPages(ws);
@@ -227,6 +291,94 @@ export const workspaceSummary = (ws: Workspace): WorkspaceSummary | null => {
     openIssues: models.reduce((s, m) => s + m.openIssues, 0),
     regressionsCaught: models.reduce((s, m) => s + m.regressionsCaught, 0),
     resolvedTotal: models.reduce((s, m) => s + m.resolvedTotal, 0),
+    counts: sumCounts(models.map((m) => m.counts)),
+  };
+};
+
+export interface WorkspaceChangeEvent {
+  id: string;
+  host: string;
+  path: string;
+  label: string;
+  scannedAt: string;
+  previousScannedAt: string;
+  score: number;
+  previousScore: number;
+  scoreDelta: number;
+  resolved: number;
+  regressions: number;
+}
+
+export interface WorkspaceChangeDigest {
+  windowDays: number;
+  resolved: number;
+  regressions: number;
+  netScoreDelta: number;
+  changedPages: number;
+  followupScans: number;
+  latestEvent: WorkspaceChangeEvent | null;
+  strongestScoreEvent: WorkspaceChangeEvent | null;
+  events: WorkspaceChangeEvent[];
+  hasFollowups: boolean;
+}
+
+const DAYS_TO_MS = 24 * 60 * 60 * 1000;
+
+const scanTime = (iso: string): number => {
+  const time = new Date(iso).getTime();
+  return Number.isFinite(time) ? time : 0;
+};
+
+/** A return-visit summary: follow-up scans in the selected window, compared to each page's previous scan. */
+export const workspaceChangeDigest = (
+  ws: Workspace,
+  windowDays = 7,
+  nowMs = Date.now(),
+): WorkspaceChangeDigest => {
+  const cutoff = nowMs - windowDays * DAYS_TO_MS;
+  const allEvents: WorkspaceChangeEvent[] = [];
+
+  for (const project of ws.projects) {
+    for (const page of project.pages) {
+      for (let index = 1; index < page.scans.length; index += 1) {
+        const previous = page.scans[index - 1];
+        const scan = page.scans[index];
+        allEvents.push({
+          id: scan.id,
+          host: project.host,
+          path: page.path,
+          label: pageLabel(project.host, page.path),
+          scannedAt: scan.scannedAt,
+          previousScannedAt: previous.scannedAt,
+          score: scan.score,
+          previousScore: previous.score,
+          scoreDelta: scan.score - previous.score,
+          resolved: scan.resolved,
+          regressions: scan.regressions.length,
+        });
+      }
+    }
+  }
+
+  const sortedEvents = allEvents.sort((a, b) => scanTime(b.scannedAt) - scanTime(a.scannedAt));
+  const events = sortedEvents.filter((event) => scanTime(event.scannedAt) >= cutoff);
+  const pageKeys = new Set(events.map((event) => `${event.host}${event.path}`));
+  const strongestScoreEvent =
+    events
+      .filter((event) => event.scoreDelta !== 0)
+      .sort((a, b) => Math.abs(b.scoreDelta) - Math.abs(a.scoreDelta))[0] ?? null;
+
+  return {
+    windowDays,
+    resolved: events.reduce((sum, event) => sum + event.resolved, 0),
+    regressions: events.reduce((sum, event) => sum + event.regressions, 0),
+    netScoreDelta: events.reduce((sum, event) => sum + event.scoreDelta, 0),
+    changedPages: pageKeys.size,
+    followupScans: events.length,
+    latestEvent: sortedEvents[0] ?? null,
+    strongestScoreEvent,
+    events,
+    hasFollowups: sortedEvents.length > 0,
   };
 };
 
@@ -256,10 +408,32 @@ export interface LocatedIssue {
   path: string;
   issue: TrackedIssue;
   isRegression: boolean;
+  resolvedAt?: string;
 }
 
-/** All currently-open issues across the workspace, worst-first. */
-export const aggregateOpenIssues = (ws: Workspace): LocatedIssue[] => {
+export const locatedIssueKey = (located: LocatedIssue, index: number): string => {
+  const { host, path, issue } = located;
+  const nodeSignature = issue.nodes?.slice(0, 3).map(normalizeIssueKeyPart).join("|");
+  const identity = [
+    host,
+    path,
+    issue.templateId,
+    issue.id,
+    issue.rule,
+    issue.title,
+    issue.severity,
+    nodeSignature,
+    issue.count,
+    located.resolvedAt,
+  ]
+    .map(normalizeIssueKeyPart)
+    .join("|");
+
+  return `issue:${stableHash(identity)}:${index}`;
+};
+
+/** Current scan issues across the workspace, worst-first. */
+export const aggregateCurrentIssues = (ws: Workspace): LocatedIssue[] => {
   const rank: Record<Severity, number> = { critical: 0, serious: 1, moderate: 2, minor: 3 };
   const out: LocatedIssue[] = [];
   for (const project of ws.projects) {
@@ -277,6 +451,40 @@ export const aggregateOpenIssues = (ws: Workspace): LocatedIssue[] => {
   }
   return out.sort((a, b) => rank[a.issue.severity] - rank[b.issue.severity]);
 };
+
+/** Actionable currently-open issues across the workspace, worst-first. */
+export const aggregateOpenIssues = (ws: Workspace): LocatedIssue[] =>
+  aggregateCurrentIssues(ws).filter((located) => ACTIONABLE_STATUSES.has(located.issue.status));
+
+/** Issues that disappeared during follow-up scans, newest resolution first. */
+export const aggregateResolvedIssues = (ws: Workspace): LocatedIssue[] => {
+  const out: LocatedIssue[] = [];
+
+  for (const project of ws.projects) {
+    for (const page of project.pages) {
+      const baselineTitles = new Set(page.baseline.issues.map((i) => i.title));
+      for (const scan of page.scans.slice(1)) {
+        for (const issue of scan.resolvedIssues ?? []) {
+          out.push({
+            host: project.host,
+            path: page.path,
+            issue: { ...issue, status: "resolved" },
+            isRegression: !baselineTitles.has(issue.title),
+            resolvedAt: scan.scannedAt,
+          });
+        }
+      }
+    }
+  }
+
+  return out.sort((a, b) => (b.resolvedAt ?? "").localeCompare(a.resolvedAt ?? ""));
+};
+
+/** Current open issues plus resolved issue history for the Issues tab. */
+export const aggregateTrackedIssues = (ws: Workspace): LocatedIssue[] => [
+  ...aggregateCurrentIssues(ws),
+  ...aggregateResolvedIssues(ws),
+];
 
 // ── Save preview (scan page) ─────────────────────────────────────────
 export interface SavePreview {

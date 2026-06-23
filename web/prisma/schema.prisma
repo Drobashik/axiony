@@ -26,18 +26,19 @@ datasource db {
 // ─────────────────────────────────────────────────────────────────────
 
 model User {
-  id            String    @id @default(cuid())
+  id            String           @id @default(cuid())
   name          String
-  email         String    @unique
-  emailVerified Boolean   @default(false)
+  email         String           @unique
+  emailVerified Boolean          @default(false)
   image         String?
   sessions      Session[]
   accounts      Account[]
   billing       UserBilling?
   scanJobs      ScanJob[]
   scanReports   UserScanReport[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  issueStates   UserIssueState[]
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
 }
 
 model Session {
@@ -91,17 +92,17 @@ model Verification {
 // ─────────────────────────────────────────────────────────────────────
 
 model UserBilling {
-  id         String   @id @default(cuid())
-  userId     String   @unique
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  plan       String   @default("free")
-  cycle      String   @default("monthly")
-  status     String   @default("active")
-  startedAt  DateTime @default(now())
+  id         String    @id @default(cuid())
+  userId     String    @unique
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan       String    @default("free")
+  cycle      String    @default("monthly")
+  status     String    @default("active")
+  startedAt  DateTime  @default(now())
   renewalAt  DateTime?
   checkoutId String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 }
 
 model ScanJob {
@@ -147,5 +148,20 @@ model UserScanReport {
   updatedAt DateTime @updatedAt
 
   @@index([userId, scannedAt])
+  @@index([userId, host, path])
+}
+
+model UserIssueState {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  host      String
+  path      String
+  issueKey  String
+  status    String   @default("open")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, host, path, issueKey])
   @@index([userId, host, path])
 }

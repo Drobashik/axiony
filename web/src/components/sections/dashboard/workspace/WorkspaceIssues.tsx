@@ -4,8 +4,13 @@ import { useMemo, useState } from "react";
 import cn from "classnames";
 import { Select } from "@/components/ui";
 import { SEVERITY_LABEL } from "@/lib/scan/issues";
-import { aggregateOpenIssues, pageLabel } from "@/lib/workspace";
-import type { IssueStatus, Workspace } from "@/lib/workspace";
+import {
+  aggregateTrackedIssues,
+  issuePersistenceKey,
+  locatedIssueKey,
+  pageLabel,
+} from "@/lib/workspace";
+import type { IssueStatus, LocatedIssue, Workspace } from "@/lib/workspace";
 import type { Severity } from "@/types";
 import { STATUS_OPTIONS, statusMeta } from "./issue-status";
 import { IssueDetail } from "./IssueDetail";
@@ -23,12 +28,13 @@ const SEVERITIES: readonly Severity[] = ["critical", "serious", "moderate", "min
 type SeverityFilter = Severity | "all";
 
 interface DetailKey {
-  host: string;
-  path: string;
-  issueId: string;
+  rowKey: string;
 }
 
-const issueKey = (host: string, path: string, issueId: string) => `${host}::${path}::${issueId}`;
+type IssueRow = LocatedIssue & { rowKey: string };
+
+const formatIssueDate = (iso: string): string =>
+  new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short" });
 
 const OpenIcon = () => (
   <svg
@@ -64,22 +70,32 @@ const SearchIcon = () => (
 
 interface WorkspaceIssuesProps {
   workspace: Workspace;
+  refreshWorkspace: () => Promise<void>;
 }
 
-export const WorkspaceIssues = ({ workspace }: WorkspaceIssuesProps) => {
+export const WorkspaceIssues = ({ workspace, refreshWorkspace }: WorkspaceIssuesProps) => {
   const [filter, setFilter] = useState<Filter>("open");
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>("all");
   const [search, setSearch] = useState("");
   const [detailKey, setDetailKey] = useState<DetailKey | null>(null);
   const [statusOverrides, setStatusOverrides] = useState<Record<string, IssueStatus>>({});
-  const baseIssues = useMemo(() => aggregateOpenIssues(workspace), [workspace]);
+  const [statusError, setStatusError] = useState<string | null>(null);
+  const baseIssues = useMemo(() => aggregateTrackedIssues(workspace), [workspace]);
+  const keyedIssues = useMemo<IssueRow[]>(
+    () =>
+      baseIssues.map((located, index) => ({
+        ...located,
+        rowKey: locatedIssueKey(located, index),
+      })),
+    [baseIssues],
+  );
   const issues = useMemo(
     () =>
-      baseIssues.map((located) => {
-        const status = statusOverrides[issueKey(located.host, located.path, located.issue.id)];
+      keyedIssues.map((located) => {
+        const status = statusOverrides[located.rowKey];
         return status ? { ...located, issue: { ...located.issue, status } } : located;
       }),
-    [baseIssues, statusOverrides],
+    [keyedIssues, statusOverrides],
   );
 
   const statusFiltered = issues.filter(({ issue }) => {
@@ -114,18 +130,38 @@ export const WorkspaceIssues = ({ workspace }: WorkspaceIssuesProps) => {
     return haystack.includes(q);
   });
 
-  const detailLoc =
-    detailKey &&
-    issues.find(
-      (l) =>
-        l.host === detailKey.host && l.path === detailKey.path && l.issue.id === detailKey.issueId,
-    );
+  const detailLoc = detailKey && issues.find((l) => l.rowKey === detailKey.rowKey);
 
-  const changeStatus = (host: string, path: string, issueId: string, status: IssueStatus) => {
+  const changeStatus = async (located: IssueRow, status: IssueStatus) => {
+    const previous = statusOverrides[located.rowKey] ?? located.issue.status;
+    setStatusError(null);
     setStatusOverrides((current) => ({
       ...current,
-      [issueKey(host, path, issueId)]: status,
+      [located.rowKey]: status,
     }));
+
+    try {
+      const response = await fetch("/api/workspace/issues/status", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          host: located.host,
+          path: located.path,
+          issueKey: located.issue.issueKey ?? issuePersistenceKey(located.issue),
+          status,
+          createdAt: located.issue.createdAt,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Status update failed.");
+      await refreshWorkspace();
+    } catch {
+      setStatusOverrides((current) => ({
+        ...current,
+        [located.rowKey]: previous,
+      }));
+      setStatusError("Could not save status. Try again.");
+    }
   };
 
   return (
@@ -134,11 +170,11 @@ export const WorkspaceIssues = ({ workspace }: WorkspaceIssuesProps) => {
         <h2>Issues</h2>
         <p>
           Open issues across your projects. Triage with a status, or open an issue for the full fix.
-          New issues since a page&apos;s baseline are tagged as regressions.
+          Resolved issues from follow-up scans stay in history instead of disappearing.
         </p>
       </header>
 
-      <div className={styles.issueToolbar}>
+      <div className={styles.issueToolbar} data-tour="issues-filters">
         <div className={styles.issueSearch}>
           <SearchIcon />
           <input
@@ -199,8 +235,13 @@ export const WorkspaceIssues = ({ workspace }: WorkspaceIssuesProps) => {
           ))}
         </div>
       </div>
+      {statusError && (
+        <p className={styles.issueStatusError} role="status">
+          {statusError}
+        </p>
+      )}
 
-      <div className={styles.issueTableCard}>
+      <div className={styles.issueTableCard} data-tour="issues-table">
         <div className={styles.issueTableHeader}>
           {["Issue", "Project", "Assignee", "Status", ""].map((heading) => (
             <div key={heading} className={styles.issueTableHeaderCell}>
@@ -210,21 +251,30 @@ export const WorkspaceIssues = ({ workspace }: WorkspaceIssuesProps) => {
         </div>
 
         {issues.length === 0 ? (
-          <p className={styles.issueTableEmpty}>No open issues - your baselines are clean.</p>
+          <p className={styles.issueTableEmpty}>No tracked issues yet.</p>
         ) : filtered.length === 0 ? (
-          <p className={styles.issueTableEmpty}>No issues match the current filter.</p>
+          <p className={styles.issueTableEmpty}>
+            {filter === "open"
+              ? "No open issues. Resolved issues are saved in the Resolved filter."
+              : "No issues match the current filter."}
+          </p>
         ) : (
           <ul className={styles.issueList}>
-            {filtered.map(({ host, path, issue, isRegression }) => {
+            {filtered.map((located) => {
+              const { rowKey, host, path, issue, isRegression, resolvedAt } = located;
               const project = pageLabel(host, path);
               const assignedToCurrentUser = issue.status === "in-progress";
+              const createdLabel = issue.createdAt
+                ? `Created ${formatIssueDate(issue.createdAt)}`
+                : null;
+              const resolvedLabel = resolvedAt ? `Resolved ${formatIssueDate(resolvedAt)}` : null;
 
               return (
-                <li key={`${host}${path}-${issue.id}`} className={styles.issueTableRow}>
+                <li key={rowKey} className={styles.issueTableRow}>
                   <button
                     type="button"
                     className={styles.issueTableOpen}
-                    onClick={() => setDetailKey({ host, path, issueId: issue.id })}
+                    onClick={() => setDetailKey({ rowKey })}
                     aria-label={`Open ${issue.title}`}
                   >
                     <span
@@ -238,9 +288,22 @@ export const WorkspaceIssues = ({ workspace }: WorkspaceIssuesProps) => {
                       <span className={styles.issueTableTitleLine}>
                         <span className={styles.issueTableTitle}>{issue.title}</span>
                         {isRegression && <span className={styles.newPill}>New</span>}
+                        {resolvedAt && <span className={styles.resolvedPill}>Resolved</span>}
                       </span>
                       <span className={styles.issueTableRule}>
                         {issue.rule} · {issue.count} occurrence{issue.count === 1 ? "" : "s"}
+                        {createdLabel && (
+                          <>
+                            {" "}
+                            · <span className={styles.issueCreatedMeta}>{createdLabel}</span>
+                          </>
+                        )}
+                        {resolvedLabel && (
+                          <>
+                            {" "}
+                            · <span className={styles.issueResolvedMeta}>{resolvedLabel}</span>
+                          </>
+                        )}
                       </span>
                     </span>
                   </button>
@@ -262,14 +325,14 @@ export const WorkspaceIssues = ({ workspace }: WorkspaceIssuesProps) => {
                       value={issue.status}
                       options={STATUS_OPTIONS}
                       ariaLabel={`Status for ${issue.title}`}
-                      onChange={(v) => changeStatus(host, path, issue.id, v as IssueStatus)}
+                      onChange={(v) => void changeStatus(located, v as IssueStatus)}
                     />
                   </div>
 
                   <button
                     type="button"
                     className={styles.issueChevron}
-                    onClick={() => setDetailKey({ host, path, issueId: issue.id })}
+                    onClick={() => setDetailKey({ rowKey })}
                     aria-label={`Open ${issue.title}`}
                   >
                     <OpenIcon />
@@ -285,9 +348,7 @@ export const WorkspaceIssues = ({ workspace }: WorkspaceIssuesProps) => {
         <IssueDetail
           located={detailLoc}
           onClose={() => setDetailKey(null)}
-          onStatus={(status) =>
-            changeStatus(detailLoc.host, detailLoc.path, detailLoc.issue.id, status)
-          }
+          onStatus={(status) => void changeStatus(detailLoc, status)}
         />
       )}
     </div>

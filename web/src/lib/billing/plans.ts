@@ -10,7 +10,7 @@ export const PLAN_ENTITLEMENTS: Record<BillingPlan, PlanEntitlements> = {
   free: {
     domainLimit: 1,
     monthlyScans: 5,
-    issueManagement: false,
+    issueManagement: true,
     reports: false,
     alerts: false,
     teamWorkspace: false,
@@ -48,7 +48,7 @@ export const PLAN_DEFINITIONS: PlanDefinition[] = [
       { label: "1 domain project", tier: "free" },
       { label: "5 hosted scans per month", tier: "free" },
       { label: "Plain-English issue explanations", tier: "free" },
-      { label: "Read-only scan results", tier: "free" },
+      { label: "Save and update issue statuses", tier: "free" },
     ],
   },
   {
@@ -66,7 +66,7 @@ export const PLAN_DEFINITIONS: PlanDefinition[] = [
       { label: "Everything in Free", tier: "free" },
       { label: "5 domain projects", tier: "pro" },
       { label: "1,000 hosted scans per month", tier: "pro" },
-      { label: "Save and triage issues", tier: "pro" },
+      { label: "Full issue history across projects", tier: "pro" },
       { label: "Scheduled scans and full history", tier: "pro" },
       { label: "Scan comparison and email alerts", tier: "pro" },
       { label: "Exportable accessibility reports", tier: "pro" },

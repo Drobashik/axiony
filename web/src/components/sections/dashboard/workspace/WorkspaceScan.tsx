@@ -11,7 +11,6 @@ import { RefreshIcon } from "@/components/sections/scan/components/icons";
 import { useScanEngine } from "@/components/sections/scan/hooks/useScanEngine";
 import type { WcagLevel } from "@/components/sections/scan/types";
 import {
-  canManageIssues,
   entitlementsForPlan,
   planDefinition,
   remainingScans,
@@ -110,7 +109,6 @@ export const WorkspaceScan = ({
     100,
     Math.round((billing.usage.scansUsed / entitlements.monthlyScans) * 100),
   );
-  const canControlIssues = canManageIssues(billing);
   const domainCount = workspace.projects.length;
   const upgradeTarget = nextPlan(billing.plan);
   const approachingScanLimit =
@@ -269,7 +267,7 @@ export const WorkspaceScan = ({
   );
 
   return (
-    <div className={styles.scanColumn}>
+    <div className={styles.scanColumn} data-tour="scan-runner">
       <header className={styles.scanHead}>
         <div className={styles.scanHeadMain}>
           <span className={styles.scanKicker}>
@@ -278,11 +276,9 @@ export const WorkspaceScan = ({
           </span>
           <h2 className={styles.scanTitle}>Run a scan</h2>
           <p className={styles.scanLead}>
-            {canControlIssues
-              ? hasProjects
-                ? "Results save automatically — a new domain starts a project, a new path adds a page, the same path tracks progress."
-                : "Scan a site to create your first project. The result is saved automatically as a baseline."
-              : "Free saves one domain project. You can scan other sites, but extra domains stay unsaved until you upgrade."}
+            {hasProjects
+              ? "Results save automatically — a new domain starts a project, a new path adds a page, the same path tracks progress."
+              : "Scan a site to create your first project. The result is saved automatically as a baseline."}
           </p>
         </div>
       </header>

@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { getServerUserId } from "@/server/auth/session";
-import { deleteUserScanReportsByHost, latestUserScanReports } from "@/server/scan/persistence";
+import {
+  deleteUserScanReportsByHost,
+  latestUserScanReports,
+  listUserIssueStates,
+} from "@/server/scan/persistence";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -12,9 +16,12 @@ export const GET = async () => {
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   }
 
-  const reports = await latestUserScanReports(userId);
+  const [reports, issueStates] = await Promise.all([
+    latestUserScanReports(userId),
+    listUserIssueStates(userId),
+  ]);
 
-  return NextResponse.json({ reports });
+  return NextResponse.json({ reports, issueStates });
 };
 
 export const DELETE = async (request: Request) => {
