@@ -1,11 +1,6 @@
 import type { Page } from 'playwright';
 import type { ScanDiagnostic } from './types';
 import {
-  BROWSER_TIMEOUT,
-  PAGE_CHALLENGE_MAX_RETRY_DELAY,
-  PAGE_CHALLENGE_RETRY_DELAY,
-  PAGE_CHALLENGE_RETRY_ATTEMPTS,
-  PAGE_CHALLENGE_RETRY_TIMEOUT,
   PAGE_READINESS_MIN_INTERACTIVE_ELEMENTS,
   PAGE_READINESS_MIN_OBSERVATION,
   PAGE_READINESS_MIN_TEXT_LENGTH,
@@ -25,6 +20,9 @@ export const BLOCKED_SCAN_PAGE_ERROR =
 
 export const REFRESH_OR_CHALLENGE_PAGE_ERROR =
   'The target page returned a refresh or bot-protection page. Try again, run the CLI locally, or allow the scanner network through the site protection layer.';
+
+export const CLOUDFLARE_CHALLENGE_PAGE_ERROR =
+  'Cloudflare blocked the cloud scanner with a Turnstile security challenge. Run the Axiony CLI locally or allow the scanner network in Cloudflare.';
 
 const CHALLENGE_URL_PATTERNS = ['__cf_chl_rt_tk', '/cdn-cgi/challenge-platform/', 'challenge'];
 
@@ -47,6 +45,7 @@ const BLOCKED_TEXT_PATTERNS = [
 ];
 
 interface PageWarningSignals {
+  hasCloudflareChallenge: boolean;
   hasChallengeText: boolean;
   hasMetaRefresh: boolean;
   metaRefreshDelaySeconds?: number;
@@ -56,6 +55,7 @@ interface PageWarningSignals {
 }
 
 export interface ChallengeResolution {
+  cloudflareBlocked: boolean;
   responseStatus?: number;
   warnings: string[];
 }
@@ -227,11 +227,17 @@ const readPageWarningSignals = async (page: Page): Promise<PageWarningSignals> =
       const rawPageText = `${document.title} ${document.body?.innerText ?? ''}`.trim();
       const pageText = rawPageText.toLowerCase().slice(0, 5_000);
       const hasChallengeText = challengeTextPatterns.some((pattern) => pageText.includes(pattern));
+      const hasCloudflareChallenge = Boolean(
+        document.querySelector(
+          'input[name="cf-turnstile-response"], script[src*="challenges.cloudflare.com"], iframe[src*="challenges.cloudflare.com"]',
+        ),
+      );
 
       return {
         elementCount: document.body?.querySelectorAll('*').length ?? 0,
         formControlCount:
           document.body?.querySelectorAll('button,input,select,textarea').length ?? 0,
+        hasCloudflareChallenge,
         hasChallengeText,
         hasMetaRefresh: Boolean(metaRefresh),
         metaRefreshDelaySeconds: Number.isFinite(parsedDelay) ? parsedDelay : undefined,
@@ -242,6 +248,7 @@ const readPageWarningSignals = async (page: Page): Promise<PageWarningSignals> =
       (): PageWarningSignals => ({
         elementCount: 0,
         formControlCount: 0,
+        hasCloudflareChallenge: false,
         hasChallengeText: false,
         hasMetaRefresh: false,
         textLength: 0,
@@ -254,19 +261,6 @@ const warningsFromSignals = (page: Page, signals: PageWarningSignals): string[] 
   }
 
   return [];
-};
-
-const shouldRetryChallenge = (page: Page, signals: PageWarningSignals): boolean => {
-  if (signals.hasChallengeText || looksLikeChallengeUrl(page.url())) return true;
-  if (!signals.hasMetaRefresh) return false;
-
-  const hasShortRefresh =
-    signals.metaRefreshDelaySeconds !== undefined &&
-    signals.metaRefreshDelaySeconds <= PAGE_SHORT_REFRESH_MAX_DELAY_SECONDS;
-  const looksLikeSparsePlaceholder =
-    signals.textLength < 600 && signals.elementCount < 120 && signals.formControlCount === 0;
-
-  return hasShortRefresh || looksLikeSparsePlaceholder;
 };
 
 export const detectPageWarnings = async (page: Page): Promise<string[]> =>
@@ -352,70 +346,38 @@ export const detectBlockedScanPage = async (
   return undefined;
 };
 
-export const waitForChallengeResolution = async (
-  page: Page,
-  targetUrl: string,
-): Promise<ChallengeResolution> => {
-  const startedAt = Date.now();
-  let attempts = 0;
-  let responseStatus: number | undefined;
+export const waitForChallengeResolution = async (page: Page): Promise<ChallengeResolution> => {
+  const signals = await readPageWarningSignals(page);
+  const warnings = warningsFromSignals(page, signals);
 
-  while (
-    attempts < PAGE_CHALLENGE_RETRY_ATTEMPTS &&
-    Date.now() - startedAt < PAGE_CHALLENGE_RETRY_TIMEOUT
-  ) {
-    const signals = await readPageWarningSignals(page);
-    const warnings = warningsFromSignals(page, signals);
+  if (signals.hasCloudflareChallenge) {
+    return { cloudflareBlocked: true, warnings };
+  }
 
-    if (warnings.length === 0) {
-      return { responseStatus, warnings: [] };
-    }
+  const shortRefresh =
+    signals.metaRefreshDelaySeconds !== undefined &&
+    signals.metaRefreshDelaySeconds <= PAGE_SHORT_REFRESH_MAX_DELAY_SECONDS;
 
-    if (!shouldRetryChallenge(page, signals)) {
-      return { responseStatus, warnings };
-    }
-
-    attempts += 1;
-
+  if (shortRefresh) {
     const currentUrl = page.url();
-    const retryDelay = Math.min(
-      PAGE_CHALLENGE_RETRY_DELAY * attempts,
-      PAGE_CHALLENGE_MAX_RETRY_DELAY,
-    );
-    const refreshDelay =
-      signals.metaRefreshDelaySeconds !== undefined &&
-      signals.metaRefreshDelaySeconds <= PAGE_SHORT_REFRESH_MAX_DELAY_SECONDS
-        ? signals.metaRefreshDelaySeconds * 1_000 + 500
-        : retryDelay;
-    const remainingTime = PAGE_CHALLENGE_RETRY_TIMEOUT - (Date.now() - startedAt);
-    const navigationWait = Math.max(0, Math.min(refreshDelay, retryDelay, remainingTime));
+    const navigationWait = signals.metaRefreshDelaySeconds! * 1_000 + 750;
 
-    if (navigationWait > 0) {
-      await Promise.race([
-        page
-          .waitForURL((nextUrl) => nextUrl.href !== currentUrl, {
-            timeout: navigationWait,
-          })
-          .catch(() => undefined),
-        delay(navigationWait),
-      ]);
-    }
-
-    if (page.url() === currentUrl) {
-      const response = await page
-        .goto(targetUrl, {
-          timeout: Math.min(BROWSER_TIMEOUT, Math.max(PAGE_READINESS_TIMEOUT, remainingTime)),
-          waitUntil: 'domcontentloaded',
+    await Promise.race([
+      page
+        .waitForURL((nextUrl) => nextUrl.href !== currentUrl, {
+          timeout: navigationWait,
         })
-        .catch(() => null);
-      responseStatus = response?.status();
-    }
+        .catch(() => undefined),
+      delay(navigationWait),
+    ]);
 
-    await waitForPageReadiness(page);
+    if (page.url() !== currentUrl) {
+      await waitForPageReadiness(page);
+    }
   }
 
   return {
-    responseStatus,
+    cloudflareBlocked: false,
     warnings: await detectPageWarnings(page),
   };
 };
