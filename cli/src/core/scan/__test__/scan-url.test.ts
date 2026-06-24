@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createServer, type IncomingMessage, type Server } from 'node:http';
+import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
 import { scanUrl } from '../scan-url';
 import { BLOCKED_SCAN_PAGE_ERROR, REFRESH_OR_CHALLENGE_PAGE_ERROR } from '../page-readiness';
 
@@ -15,6 +15,27 @@ const listenWithHandler = async (
     response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
     response.end(handler(request));
   });
+
+  await new Promise<void>((resolve) => {
+    server.listen(0, '127.0.0.1', resolve);
+  });
+
+  const address = server.address();
+
+  if (!address || typeof address === 'string') {
+    throw new Error('Could not start test server.');
+  }
+
+  return {
+    server,
+    url: `http://127.0.0.1:${address.port}`,
+  };
+};
+
+const listenWithResponseHandler = async (
+  handler: (request: IncomingMessage, response: ServerResponse) => void,
+): Promise<{ server: Server; url: string }> => {
+  const server = createServer(handler);
 
   await new Promise<void>((resolve) => {
     server.listen(0, '127.0.0.1', resolve);
@@ -297,6 +318,64 @@ test('retries a persistent refresh placeholder with a fresh browser context', as
       result.issues.some((issue) => issue.id === 'label'),
       true,
     );
+  } finally {
+    await closeServer(server);
+  }
+});
+
+test('reuses a successful public site session for a later scan', async () => {
+  let requestCount = 0;
+  const { server, url } = await listenWithResponseHandler((request, response) => {
+    if (request.url !== '/') {
+      response.writeHead(404);
+      response.end();
+      return;
+    }
+
+    requestCount += 1;
+    const hasTrustedCookie = request.headers.cookie?.includes('trusted-scan=1');
+    const isFirstRequest = requestCount === 1;
+
+    response.writeHead(200, {
+      'content-type': 'text/html; charset=utf-8',
+      ...(isFirstRequest ? { 'set-cookie': 'trusted-scan=1; Path=/; HttpOnly; SameSite=Lax' } : {}),
+    });
+
+    if (!isFirstRequest && !hasTrustedCookie) {
+      response.end(`
+        <!doctype html>
+        <html lang="en">
+          <head>
+            <title>Refresh page</title>
+            <meta http-equiv="refresh" content="360">
+          </head>
+          <body><main><h1>Refresh page</h1></main></body>
+        </html>
+      `);
+      return;
+    }
+
+    response.end(`
+      <!doctype html>
+      <html lang="en">
+        <head><title>Trusted page</title></head>
+        <body>
+          <main>
+            <h1>Trusted page</h1>
+            <input type="text">
+          </main>
+        </body>
+      </html>
+    `);
+  });
+
+  try {
+    const first = await scanUrl(url);
+    const second = await scanUrl(url);
+
+    assert.equal(first.metadata?.warnings, undefined);
+    assert.equal(second.metadata?.warnings, undefined);
+    assert.equal(requestCount, 2);
   } finally {
     await closeServer(server);
   }

@@ -12,6 +12,7 @@ import {
   waitForPageReadiness,
 } from './page-readiness';
 import { createWcagAxeOptions } from './profile';
+import { readScanSessionCookies, writeScanSessionCookies } from './session-cookies';
 import type { ScanResult, ScanUrlOptions } from './types';
 
 type ScanUrlMetadata = NonNullable<ScanResult['metadata']>;
@@ -68,10 +69,15 @@ export async function scanUrl(url: string, options: ScanUrlOptions = {}): Promis
   const browser = await launchScanBrowser(onProgressPrint);
 
   try {
+    const storedCookies = readScanSessionCookies(url);
+
     for (let attempt = 1; attempt <= SCAN_REFRESH_CONTEXT_ATTEMPTS; attempt += 1) {
       onProgressPrint('Opening page');
 
-      const page = await createScanPage(browser);
+      const page = await createScanPage(browser, {
+        // A retry after a rejected stored session must be genuinely clean.
+        cookies: attempt === 1 ? storedCookies : [],
+      });
 
       try {
         await addAxeInitScript(page);
@@ -124,6 +130,12 @@ export async function scanUrl(url: string, options: ScanUrlOptions = {}): Promis
         if (refreshPlaceholder) {
           throw new Error(REFRESH_OR_CHALLENGE_PAGE_ERROR);
         }
+
+        const sessionCookies = await page
+          .context()
+          .cookies(url)
+          .catch(() => []);
+        writeScanSessionCookies(url, sessionCookies);
 
         return {
           url: result.url,
