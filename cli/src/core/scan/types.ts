@@ -59,7 +59,6 @@ export type ScanProgressMessage =
   | 'Launching browser'
   | 'Opening page'
   | 'Waiting for page readiness'
-  | 'Retrying with a fresh browser session'
   | 'Rendering HTML'
   | 'Rendering component'
   | 'Injecting accessibility engine'

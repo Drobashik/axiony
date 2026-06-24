@@ -2,7 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
 import { scanUrl } from '../scan-url';
-import { BLOCKED_SCAN_PAGE_ERROR, REFRESH_OR_CHALLENGE_PAGE_ERROR } from '../page-readiness';
+import {
+  BLOCKED_SCAN_PAGE_ERROR,
+  CLOUDFLARE_CHALLENGE_PAGE_ERROR,
+  REFRESH_OR_CHALLENGE_PAGE_ERROR,
+} from '../page-readiness';
 
 const listen = async (html: string): Promise<{ server: Server; url: string }> => {
   return listenWithHandler(() => html);
@@ -109,53 +113,6 @@ test('fails clearly when URL scan remains on a meta-refresh page', async () => {
   }
 });
 
-test('retries when the first URL scan response is a refresh page', async () => {
-  let requestCount = 0;
-  const { server, url } = await listenWithHandler(() => {
-    requestCount += 1;
-
-    if (requestCount === 1) {
-      return `
-        <!doctype html>
-        <html lang="en">
-          <head>
-            <title>Refresh page</title>
-            <meta http-equiv="refresh" content="360">
-          </head>
-          <body>
-            <main><h1>Refresh page</h1></main>
-          </body>
-        </html>
-      `;
-    }
-
-    return `
-      <!doctype html>
-      <html lang="en">
-        <head><title>Ready page</title></head>
-        <body>
-          <main>
-            <h1>Ready page</h1>
-            <input type="text">
-          </main>
-        </body>
-      </html>
-    `;
-  });
-
-  try {
-    const result = await scanUrl(url);
-
-    assert.equal(result.metadata?.warnings, undefined);
-    assert.equal(
-      result.issues.some((issue) => issue.id === 'label'),
-      true,
-    );
-  } finally {
-    await closeServer(server);
-  }
-});
-
 test('allows a URL scan with refresh warnings when the page has meaningful findings', async () => {
   let requestCount = 0;
   const { server, url } = await listenWithHandler(() => {
@@ -235,44 +192,24 @@ test('allows a short meta refresh to resolve naturally', async () => {
   }
 });
 
-test('retries the original target after a redirect to a challenge URL', async () => {
-  let targetRequests = 0;
-  const { server, url } = await listenWithHandler((request) => {
-    if (request.url === '/challenge') {
-      return `
-        <!doctype html>
-        <html lang="en">
-          <head>
-            <title>Checking your browser</title>
-            <meta http-equiv="refresh" content="360">
-          </head>
-          <body><main><h1>Checking your browser</h1></main></body>
-        </html>
-      `;
-    }
-
-    targetRequests += 1;
-    if (targetRequests === 1) {
-      return `
-        <!doctype html>
-        <html lang="en">
-          <head><title>Redirecting</title></head>
-          <body>
-            <main><h1>Redirecting</h1></main>
-            <script>window.location.replace('/challenge');</script>
-          </body>
-        </html>
-      `;
-    }
+test('fails immediately without retrying a Cloudflare Turnstile challenge', async () => {
+  let requestCount = 0;
+  const { server, url } = await listenWithHandler(() => {
+    requestCount += 1;
 
     return `
       <!doctype html>
-      <html lang="en">
-        <head><title>Ready target</title></head>
+      <html lang="en-US">
+        <head>
+          <title>Just a moment...</title>
+          <meta name="robots" content="noindex,nofollow">
+          <meta http-equiv="refresh" content="360">
+        </head>
         <body>
           <main>
-            <h1>Ready target</h1>
-            <input type="text">
+            <h1>Performing security verification</h1>
+            <p>This website verifies you are not a bot.</p>
+            <input type="hidden" name="cf-turnstile-response">
           </main>
         </body>
       </html>
@@ -280,64 +217,16 @@ test('retries the original target after a redirect to a challenge URL', async ()
   });
 
   try {
-    const result = await scanUrl(url);
-
-    assert.equal(targetRequests, 2);
-    assert.equal(new URL(result.url).pathname, '/');
-    assert.equal(result.metadata?.warnings, undefined);
-    assert.equal(
-      result.issues.some((issue) => issue.id === 'label'),
-      true,
+    await assert.rejects(
+      () => scanUrl(url),
+      (error: unknown) => {
+        assert.ok(error instanceof Error);
+        assert.equal(error.message, CLOUDFLARE_CHALLENGE_PAGE_ERROR);
+        assert.equal(error.name, 'ScanDiagnosticError');
+        return true;
+      },
     );
-  } finally {
-    await closeServer(server);
-  }
-});
-
-test('retries a persistent refresh placeholder with a fresh browser context', async () => {
-  let targetRequests = 0;
-  const { server, url } = await listenWithHandler((request) => {
-    targetRequests += 1;
-    const hasChallengeCookie = request.headers.cookie?.includes('challenge-session=1');
-
-    if (targetRequests === 1 || hasChallengeCookie) {
-      return `
-        <!doctype html>
-        <html lang="en">
-          <head>
-            <title>Refresh page</title>
-            <meta http-equiv="refresh" content="360">
-          </head>
-          <body>
-            <main><h1>Refresh page</h1></main>
-            <script>document.cookie = 'challenge-session=1; path=/'</script>
-          </body>
-        </html>
-      `;
-    }
-
-    return `
-      <!doctype html>
-      <html lang="en">
-        <head><title>Fresh session ready</title></head>
-        <body>
-          <main>
-            <h1>Fresh session ready</h1>
-            <input type="text">
-          </main>
-        </body>
-      </html>
-    `;
-  });
-
-  try {
-    const result = await scanUrl(url);
-
-    assert.equal(result.metadata?.warnings, undefined);
-    assert.equal(
-      result.issues.some((issue) => issue.id === 'label'),
-      true,
-    );
+    assert.equal(requestCount, 1);
   } finally {
     await closeServer(server);
   }
