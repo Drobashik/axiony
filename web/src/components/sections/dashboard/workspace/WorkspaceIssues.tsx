@@ -34,7 +34,7 @@ interface DetailKey {
 type IssueRow = LocatedIssue & { rowKey: string };
 
 const formatIssueDate = (iso: string): string =>
-  new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short" });
+  new Date(iso).toLocaleDateString("en-US", { day: "numeric", month: "short" });
 
 const OpenIcon = () => (
   <svg

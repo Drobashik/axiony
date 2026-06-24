@@ -1,12 +1,19 @@
 import type { Page } from 'playwright';
 import {
+  BROWSER_TIMEOUT,
+  PAGE_CHALLENGE_MAX_RETRY_DELAY,
   PAGE_CHALLENGE_RETRY_DELAY,
   PAGE_CHALLENGE_RETRY_ATTEMPTS,
   PAGE_CHALLENGE_RETRY_TIMEOUT,
   PAGE_READINESS_MIN_INTERACTIVE_ELEMENTS,
+  PAGE_READINESS_MIN_OBSERVATION,
   PAGE_READINESS_MIN_TEXT_LENGTH,
+  PAGE_READINESS_NETWORK_IDLE_TIMEOUT,
+  PAGE_READINESS_RESOURCE_TIMEOUT,
+  PAGE_READINESS_SAMPLE_INTERVAL,
   PAGE_READINESS_STABLE_WINDOW,
   PAGE_READINESS_TIMEOUT,
+  PAGE_SHORT_REFRESH_MAX_DELAY_SECONDS,
 } from './constants';
 
 export const POSSIBLE_CHALLENGE_PAGE_WARNING =
@@ -38,6 +45,20 @@ const BLOCKED_TEXT_PATTERNS = [
   'forbidden',
 ];
 
+interface PageWarningSignals {
+  hasChallengeText: boolean;
+  hasMetaRefresh: boolean;
+  metaRefreshDelaySeconds?: number;
+  elementCount: number;
+  formControlCount: number;
+  textLength: number;
+}
+
+export interface ChallengeResolution {
+  responseStatus?: number;
+  warnings: string[];
+}
+
 const looksLikeChallengeUrl = (url: string): boolean => {
   const normalizedUrl = url.toLowerCase();
 
@@ -56,12 +77,52 @@ const delay = async (timeout: number): Promise<void> => {
   });
 };
 
+const waitForDocumentResources = async (page: Page): Promise<void> => {
+  await Promise.all([
+    page
+      .waitForLoadState('load', { timeout: PAGE_READINESS_RESOURCE_TIMEOUT })
+      .catch(() => undefined),
+    page
+      .waitForLoadState('networkidle', { timeout: PAGE_READINESS_NETWORK_IDLE_TIMEOUT })
+      .catch(() => undefined),
+    page
+      .evaluate(
+        (timeout) =>
+          Promise.race([
+            Promise.allSettled([
+              document.fonts?.ready,
+              ...Array.from(document.images)
+                .filter((image) => !image.complete)
+                .map(
+                  (image) =>
+                    new Promise<void>((resolve) => {
+                      image.addEventListener('load', () => resolve(), { once: true });
+                      image.addEventListener('error', () => resolve(), { once: true });
+                    }),
+                ),
+            ]),
+            new Promise<void>((resolve) => window.setTimeout(resolve, timeout)),
+          ]).then(() => undefined),
+        PAGE_READINESS_RESOURCE_TIMEOUT,
+      )
+      .catch(() => undefined),
+  ]);
+};
+
 export const waitForPageReadiness = async (page: Page): Promise<void> => {
   await page.waitForSelector('body', { timeout: PAGE_READINESS_TIMEOUT }).catch(() => undefined);
+  await waitForDocumentResources(page);
 
   await page
     .evaluate(
-      ({ minInteractiveElements, minTextLength, stableWindow, timeout }) =>
+      ({
+        minInteractiveElements,
+        minObservation,
+        minTextLength,
+        sampleInterval,
+        stableWindow,
+        timeout,
+      }) =>
         new Promise<void>((resolve) => {
           const body = document.body;
 
@@ -70,10 +131,51 @@ export const waitForPageReadiness = async (page: Page): Promise<void> => {
             return;
           }
 
-          let lastMutationAt = Date.now();
+          const startedAt = Date.now();
+          let stableSince = startedAt;
+          let previousSignature = '';
+
+          const bodyText = () =>
+            typeof body.innerText === 'string' ? body.innerText : (body.textContent ?? '');
+
+          const snapshot = () => {
+            const textLength = bodyText().trim().length;
+            const interactiveElements = Array.from(
+              body.querySelectorAll<HTMLElement>(
+                'a,button,input,select,textarea,main,nav,header,footer,[role]',
+              ),
+            );
+            const images = Array.from(body.querySelectorAll<HTMLImageElement>('img'));
+            const namedInteractiveCount = interactiveElements.filter((element) => {
+              const text = element.textContent?.trim();
+              const ariaLabel = element.getAttribute('aria-label')?.trim();
+              const title = element.getAttribute('title')?.trim();
+              const imageAlt = Array.from(element.querySelectorAll<HTMLImageElement>('img')).some(
+                (image) => Boolean(image.alt.trim()),
+              );
+
+              return Boolean(text || ariaLabel || title || imageAlt);
+            }).length;
+            const interactiveCount = interactiveElements.length;
+            const elementCount = body.querySelectorAll('*').length;
+            const completeImageCount = images.filter(
+              (image) => image.complete && image.naturalWidth > 0,
+            ).length;
+
+            return {
+              meaningful: textLength >= minTextLength || interactiveCount >= minInteractiveElements,
+              signature: [
+                elementCount,
+                textLength,
+                interactiveCount,
+                namedInteractiveCount,
+                images.length,
+                completeImageCount,
+              ].join(':'),
+            };
+          };
 
           function cleanup() {
-            observer.disconnect();
             window.clearInterval(intervalId);
             window.clearTimeout(timeoutId);
           }
@@ -83,42 +185,30 @@ export const waitForPageReadiness = async (page: Page): Promise<void> => {
             resolve();
           }
 
-          const bodyText = () =>
-            typeof body.innerText === 'string' ? body.innerText : (body.textContent ?? '');
-
-          const hasMeaningfulContent = () => {
-            const textLength = bodyText().trim().length;
-            const interactiveCount = body.querySelectorAll(
-              'a,button,input,select,textarea,main,nav,header,footer,[role]',
-            ).length;
-
-            return textLength >= minTextLength || interactiveCount >= minInteractiveElements;
-          };
-
-          const observer = new MutationObserver(() => {
-            lastMutationAt = Date.now();
-          });
-
-          observer.observe(body, {
-            attributes: true,
-            characterData: true,
-            childList: true,
-            subtree: true,
-          });
-
           const intervalId = window.setInterval(() => {
-            const hasStableDom = Date.now() - lastMutationAt >= stableWindow;
+            const current = snapshot();
+            const currentTime = Date.now();
 
-            if (hasMeaningfulContent() && hasStableDom) {
+            if (current.signature !== previousSignature) {
+              previousSignature = current.signature;
+              stableSince = currentTime;
+            }
+
+            const observedLongEnough = currentTime - startedAt >= minObservation;
+            const stableLongEnough = currentTime - stableSince >= stableWindow;
+
+            if (current.meaningful && observedLongEnough && stableLongEnough) {
               finish();
             }
-          }, 100);
+          }, sampleInterval);
 
           const timeoutId = window.setTimeout(finish, timeout);
         }),
       {
         minInteractiveElements: PAGE_READINESS_MIN_INTERACTIVE_ELEMENTS,
+        minObservation: PAGE_READINESS_MIN_OBSERVATION,
         minTextLength: PAGE_READINESS_MIN_TEXT_LENGTH,
+        sampleInterval: PAGE_READINESS_SAMPLE_INTERVAL,
         stableWindow: PAGE_READINESS_STABLE_WINDOW,
         timeout: PAGE_READINESS_TIMEOUT,
       },
@@ -126,32 +216,60 @@ export const waitForPageReadiness = async (page: Page): Promise<void> => {
     .catch(() => undefined);
 };
 
-export const detectPageWarnings = async (page: Page): Promise<string[]> => {
-  const warningSignals = await page
+const readPageWarningSignals = async (page: Page): Promise<PageWarningSignals> =>
+  page
     .evaluate((challengeTextPatterns) => {
-      const hasMetaRefresh = Boolean(document.querySelector('meta[http-equiv="refresh" i]'));
-      const pageText = `${document.title} ${document.body?.innerText ?? ''}`
-        .toLowerCase()
-        .slice(0, 5_000);
+      const metaRefresh = document.querySelector<HTMLMetaElement>('meta[http-equiv="refresh" i]');
+      const metaRefreshContent = metaRefresh?.content?.trim() ?? '';
+      const rawDelay = metaRefreshContent.split(';', 1)[0]?.trim();
+      const parsedDelay = rawDelay ? Number.parseFloat(rawDelay) : Number.NaN;
+      const rawPageText = `${document.title} ${document.body?.innerText ?? ''}`.trim();
+      const pageText = rawPageText.toLowerCase().slice(0, 5_000);
       const hasChallengeText = challengeTextPatterns.some((pattern) => pageText.includes(pattern));
 
       return {
+        elementCount: document.body?.querySelectorAll('*').length ?? 0,
+        formControlCount:
+          document.body?.querySelectorAll('button,input,select,textarea').length ?? 0,
         hasChallengeText,
-        hasMetaRefresh,
+        hasMetaRefresh: Boolean(metaRefresh),
+        metaRefreshDelaySeconds: Number.isFinite(parsedDelay) ? parsedDelay : undefined,
+        textLength: rawPageText.length,
       };
     }, CHALLENGE_TEXT_PATTERNS)
-    .catch(() => ({ hasChallengeText: false, hasMetaRefresh: false }));
+    .catch(
+      (): PageWarningSignals => ({
+        elementCount: 0,
+        formControlCount: 0,
+        hasChallengeText: false,
+        hasMetaRefresh: false,
+        textLength: 0,
+      }),
+    );
 
-  if (
-    warningSignals.hasMetaRefresh ||
-    warningSignals.hasChallengeText ||
-    looksLikeChallengeUrl(page.url())
-  ) {
+const warningsFromSignals = (page: Page, signals: PageWarningSignals): string[] => {
+  if (signals.hasMetaRefresh || signals.hasChallengeText || looksLikeChallengeUrl(page.url())) {
     return [POSSIBLE_CHALLENGE_PAGE_WARNING];
   }
 
   return [];
 };
+
+const shouldRetryChallenge = (page: Page, signals: PageWarningSignals): boolean => {
+  if (signals.hasChallengeText || looksLikeChallengeUrl(page.url())) return true;
+  if (!signals.hasMetaRefresh) return false;
+
+  const hasShortRefresh =
+    signals.metaRefreshDelaySeconds !== undefined &&
+    signals.metaRefreshDelaySeconds <= PAGE_SHORT_REFRESH_MAX_DELAY_SECONDS;
+  const looksLikeSparsePlaceholder =
+    signals.textLength < 600 && signals.elementCount < 120 && signals.formControlCount === 0;
+
+  return hasShortRefresh || looksLikeSparsePlaceholder;
+};
+
+export const detectPageWarnings = async (page: Page): Promise<string[]> =>
+  warningsFromSignals(page, await readPageWarningSignals(page));
 
 export const detectBlockedScanPage = async (
   page: Page,
@@ -183,44 +301,70 @@ export const detectBlockedScanPage = async (
   return undefined;
 };
 
-export const waitForChallengeResolution = async (page: Page): Promise<string[]> => {
+export const waitForChallengeResolution = async (
+  page: Page,
+  targetUrl: string,
+): Promise<ChallengeResolution> => {
   const startedAt = Date.now();
   let attempts = 0;
+  let responseStatus: number | undefined;
 
   while (
     attempts < PAGE_CHALLENGE_RETRY_ATTEMPTS &&
     Date.now() - startedAt < PAGE_CHALLENGE_RETRY_TIMEOUT
   ) {
-    const warnings = await detectPageWarnings(page);
+    const signals = await readPageWarningSignals(page);
+    const warnings = warningsFromSignals(page, signals);
 
     if (warnings.length === 0) {
-      return [];
+      return { responseStatus, warnings: [] };
+    }
+
+    if (!shouldRetryChallenge(page, signals)) {
+      return { responseStatus, warnings };
     }
 
     attempts += 1;
 
     const currentUrl = page.url();
+    const retryDelay = Math.min(
+      PAGE_CHALLENGE_RETRY_DELAY * attempts,
+      PAGE_CHALLENGE_MAX_RETRY_DELAY,
+    );
+    const refreshDelay =
+      signals.metaRefreshDelaySeconds !== undefined &&
+      signals.metaRefreshDelaySeconds <= PAGE_SHORT_REFRESH_MAX_DELAY_SECONDS
+        ? signals.metaRefreshDelaySeconds * 1_000 + 500
+        : retryDelay;
+    const remainingTime = PAGE_CHALLENGE_RETRY_TIMEOUT - (Date.now() - startedAt);
+    const navigationWait = Math.max(0, Math.min(refreshDelay, retryDelay, remainingTime));
 
-    await Promise.race([
-      page
-        .waitForURL((nextUrl) => nextUrl.href !== currentUrl, {
-          timeout: PAGE_CHALLENGE_RETRY_DELAY,
-        })
-        .catch(() => undefined),
-      delay(PAGE_CHALLENGE_RETRY_DELAY),
-    ]);
+    if (navigationWait > 0) {
+      await Promise.race([
+        page
+          .waitForURL((nextUrl) => nextUrl.href !== currentUrl, {
+            timeout: navigationWait,
+          })
+          .catch(() => undefined),
+        delay(navigationWait),
+      ]);
+    }
 
     if (page.url() === currentUrl) {
-      await page
-        .reload({
-          timeout: PAGE_READINESS_TIMEOUT,
+      const response = await page
+        .goto(targetUrl, {
+          timeout: Math.min(BROWSER_TIMEOUT, Math.max(PAGE_READINESS_TIMEOUT, remainingTime)),
           waitUntil: 'domcontentloaded',
         })
-        .catch(() => undefined);
+        .catch(() => null);
+      responseStatus = response?.status();
     }
 
     await waitForPageReadiness(page);
   }
 
-  return detectPageWarnings(page);
+  return {
+    responseStatus,
+    warnings: await detectPageWarnings(page),
+  };
 };

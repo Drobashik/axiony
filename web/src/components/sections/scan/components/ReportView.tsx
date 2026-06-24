@@ -121,7 +121,8 @@ export const ReportView = ({
           </span>
           <span className={styles.reportUrl}>{report.url}</span>
           <span className={styles.reportMeta}>
-            WCAG {report.level} · {report.scannedAt.toLocaleTimeString()}
+            WCAG {report.level} ·{" "}
+            {report.scannedAt.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
           </span>
         </div>
 

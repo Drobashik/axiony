@@ -69,7 +69,7 @@ const CloseIcon = () => (
 );
 
 const formatIssueDate = (iso: string): string =>
-  new Date(iso).toLocaleDateString(undefined, {
+  new Date(iso).toLocaleDateString("en-US", {
     day: "numeric",
     month: "short",
     year: "numeric",
