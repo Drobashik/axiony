@@ -20,6 +20,19 @@ interface ApiScanReport extends Omit<ScanReport, "scannedAt"> {
   scannedAt: string;
 }
 
+export interface ScanDiagnostic {
+  capturedAt: string;
+  requestedUrl: string;
+  finalUrl: string;
+  httpStatus?: number;
+  title: string;
+  metaRefresh?: string;
+  textLength: number;
+  elementCount: number;
+  formControlCount: number;
+  htmlPreview: string;
+}
+
 interface ApiScanJob {
   jobId: string;
   status: ApiScanJobStatus;
@@ -29,6 +42,7 @@ interface ApiScanJob {
   lines: string[];
   report?: ApiScanReport;
   error?: string;
+  diagnostic?: ScanDiagnostic;
 }
 
 const getErrorMessage = async (response: Response): Promise<string> => {
@@ -109,6 +123,7 @@ export interface ScanEngine {
   progress: number;
   report: ScanReport | null;
   error: string | null;
+  diagnostic: ScanDiagnostic | null;
   reduce: boolean;
   start: (rawUrl: string, level: WcagLevel) => void;
   reset: () => void;
@@ -124,6 +139,7 @@ export const useScanEngine = (): ScanEngine => {
   const [progress, setProgress] = useState(0);
   const [report, setReport] = useState<ScanReport | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [diagnostic, setDiagnostic] = useState<ScanDiagnostic | null>(null);
 
   const pollTimer = useRef<number | null>(null);
   const activeJob = useRef<string | null>(null);
@@ -147,6 +163,7 @@ export const useScanEngine = (): ScanEngine => {
     setProgress((current) => Math.max(current, 5));
     setReport(null);
     setError(message);
+    setDiagnostic(null);
     setLines((prev) => [...prev, toTerminalLine(`✕ ${message}`)]);
   }, []);
 
@@ -223,6 +240,7 @@ export const useScanEngine = (): ScanEngine => {
         activeJob.current = null;
         setReport(toReport(job.report));
         setError(null);
+        setDiagnostic(null);
         setStatus("results");
         return;
       }
@@ -232,12 +250,14 @@ export const useScanEngine = (): ScanEngine => {
         activeJob.current = null;
         setReport(null);
         setError(job.error ?? "Scan failed.");
+        setDiagnostic(job.diagnostic ?? null);
         setStatus("failed");
         return;
       }
 
       setReport(null);
       setError(null);
+      setDiagnostic(null);
       setStatus("scanning");
     },
     [clearPolling],
@@ -293,6 +313,7 @@ export const useScanEngine = (): ScanEngine => {
       setUrl(target);
       setReport(null);
       setError(null);
+      setDiagnostic(null);
       setLines([]);
       setProgress(randomInitialProgress());
       setStatus("scanning");
@@ -356,7 +377,8 @@ export const useScanEngine = (): ScanEngine => {
     setProgress(0);
     setReport(null);
     setError(null);
+    setDiagnostic(null);
   }, [clearPolling]);
 
-  return { status, url, lines, progress, report, error, reduce, start, reset };
+  return { status, url, lines, progress, report, error, diagnostic, reduce, start, reset };
 };

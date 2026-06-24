@@ -22,6 +22,29 @@ export type ScanResult = {
   manualChecks: ScanIssue[];
 };
 
+export interface ScanDiagnostic {
+  capturedAt: string;
+  requestedUrl: string;
+  finalUrl: string;
+  httpStatus?: number;
+  title: string;
+  metaRefresh?: string;
+  textLength: number;
+  elementCount: number;
+  formControlCount: number;
+  htmlPreview: string;
+}
+
+export class ScanDiagnosticError extends Error {
+  diagnostic: ScanDiagnostic;
+
+  constructor(message: string, diagnostic: ScanDiagnostic) {
+    super(message);
+    this.name = 'ScanDiagnosticError';
+    this.diagnostic = diagnostic;
+  }
+}
+
 export type AxeRunOptions = {
   runOnly?: {
     type: 'tag';

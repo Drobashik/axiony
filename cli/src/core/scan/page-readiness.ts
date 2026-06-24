@@ -1,4 +1,5 @@
 import type { Page } from 'playwright';
+import type { ScanDiagnostic } from './types';
 import {
   BROWSER_TIMEOUT,
   PAGE_CHALLENGE_MAX_RETRY_DELAY,
@@ -270,6 +271,56 @@ const shouldRetryChallenge = (page: Page, signals: PageWarningSignals): boolean 
 
 export const detectPageWarnings = async (page: Page): Promise<string[]> =>
   warningsFromSignals(page, await readPageWarningSignals(page));
+
+export const captureScanDiagnostic = async (
+  page: Page,
+  requestedUrl: string,
+  httpStatus?: number,
+): Promise<ScanDiagnostic> => {
+  const details = await page
+    .evaluate(() => {
+      const body = document.body;
+      const rawHtml = document.documentElement?.outerHTML ?? '';
+      const sanitizedHtml = rawHtml
+        .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '<script>…</script>')
+        .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, '<style>…</style>')
+        .replace(
+          /\s(value|nonce|integrity|authorization|token|secret|api-key)=("[^"]*"|'[^']*')/gi,
+          ' $1="[redacted]"',
+        )
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 1_500);
+
+      return {
+        elementCount: body?.querySelectorAll('*').length ?? 0,
+        formControlCount: body?.querySelectorAll('button,input,select,textarea').length ?? 0,
+        htmlPreview: sanitizedHtml,
+        metaRefresh:
+          document
+            .querySelector<HTMLMetaElement>('meta[http-equiv="refresh" i]')
+            ?.content?.trim() || undefined,
+        textLength: (body?.innerText ?? body?.textContent ?? '').trim().length,
+        title: document.title.trim(),
+      };
+    })
+    .catch(() => ({
+      elementCount: 0,
+      formControlCount: 0,
+      htmlPreview: '',
+      metaRefresh: undefined,
+      textLength: 0,
+      title: '',
+    }));
+
+  return {
+    capturedAt: new Date().toISOString(),
+    requestedUrl,
+    finalUrl: page.url(),
+    httpStatus,
+    ...details,
+  };
+};
 
 export const detectBlockedScanPage = async (
   page: Page,

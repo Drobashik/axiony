@@ -32,6 +32,10 @@ const runner = async () => {
     write({
       type: "error",
       message: error instanceof Error ? error.message : "Scan failed.",
+      diagnostic:
+        error && typeof error === "object" && typeof error.diagnostic === "object"
+          ? error.diagnostic
+          : undefined,
     });
     process.exitCode = 1;
   }

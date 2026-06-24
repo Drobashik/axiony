@@ -77,6 +77,7 @@ const snapshot = (job: MutableScanJob): ScanJobSnapshot => ({
   updatedAt: job.updatedAt,
   report: job.report,
   error: job.error,
+  diagnostic: job.diagnostic,
 });
 
 const touch = (job: MutableScanJob) => {
@@ -91,9 +92,14 @@ const pushLine = (job: MutableScanJob, line: string) => {
   touch(job);
 };
 
-const markFailed = (job: MutableScanJob, message: string) => {
+const markFailed = (
+  job: MutableScanJob,
+  message: string,
+  diagnostic?: ScanJobSnapshot["diagnostic"],
+) => {
   job.status = "failed";
   job.error = message;
+  job.diagnostic = diagnostic;
   job.progress = Math.max(job.progress, 5);
   pushLine(job, `✕ ${message}`);
 };
@@ -146,7 +152,7 @@ const handleRunnerEvent = (job: MutableScanJob, event: ScanRunnerEvent) => {
     return;
   }
 
-  markFailed(job, event.message);
+  markFailed(job, event.message, event.diagnostic);
 };
 
 const startScanProcess = (job: MutableScanJob) => {

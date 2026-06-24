@@ -13,6 +13,19 @@ export interface ScanReportPayload {
   score: number;
 }
 
+export interface ScanDiagnostic {
+  capturedAt: string;
+  requestedUrl: string;
+  finalUrl: string;
+  httpStatus?: number;
+  title: string;
+  metaRefresh?: string;
+  textLength: number;
+  elementCount: number;
+  formControlCount: number;
+  htmlPreview: string;
+}
+
 export interface ScanJobSnapshot {
   jobId: string;
   status: ScanJobStatus;
@@ -24,6 +37,7 @@ export interface ScanJobSnapshot {
   updatedAt: string;
   report?: ScanReportPayload;
   error?: string;
+  diagnostic?: ScanDiagnostic;
 }
 
 export interface CliScanIssue {
@@ -51,4 +65,4 @@ export interface CliScanResult {
 export type ScanRunnerEvent =
   | { type: "progress"; message: string }
   | { type: "result"; result: CliScanResult }
-  | { type: "error"; message: string };
+  | { type: "error"; message: string; diagnostic?: ScanDiagnostic };
