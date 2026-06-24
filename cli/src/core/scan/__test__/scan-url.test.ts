@@ -253,6 +253,55 @@ test('retries the original target after a redirect to a challenge URL', async ()
   }
 });
 
+test('retries a persistent refresh placeholder with a fresh browser context', async () => {
+  let targetRequests = 0;
+  const { server, url } = await listenWithHandler((request) => {
+    targetRequests += 1;
+    const hasChallengeCookie = request.headers.cookie?.includes('challenge-session=1');
+
+    if (targetRequests === 1 || hasChallengeCookie) {
+      return `
+        <!doctype html>
+        <html lang="en">
+          <head>
+            <title>Refresh page</title>
+            <meta http-equiv="refresh" content="360">
+          </head>
+          <body>
+            <main><h1>Refresh page</h1></main>
+            <script>document.cookie = 'challenge-session=1; path=/'</script>
+          </body>
+        </html>
+      `;
+    }
+
+    return `
+      <!doctype html>
+      <html lang="en">
+        <head><title>Fresh session ready</title></head>
+        <body>
+          <main>
+            <h1>Fresh session ready</h1>
+            <input type="text">
+          </main>
+        </body>
+      </html>
+    `;
+  });
+
+  try {
+    const result = await scanUrl(url);
+
+    assert.equal(result.metadata?.warnings, undefined);
+    assert.equal(
+      result.issues.some((issue) => issue.id === 'label'),
+      true,
+    );
+  } finally {
+    await closeServer(server);
+  }
+});
+
 test('fails clearly when a URL scan lands on an access-denied page', async () => {
   const { server, url } = await listen(`
     <!doctype html>
