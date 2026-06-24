@@ -4,6 +4,7 @@ const PROGRESS_RANGE_BY_MESSAGE: Record<string, readonly [number, number]> = {
   "Launching browser": [6, 12],
   "Opening page": [18, 29],
   "Waiting for page readiness": [34, 48],
+  "Retrying with a fresh browser session": [44, 52],
   "Injecting accessibility engine": [53, 64],
   "Validating selector": [62, 72],
   "Running accessibility checks": [74, 87],

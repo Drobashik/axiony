@@ -1,4 +1,8 @@
-import { BROWSER_TIMEOUT } from './constants';
+import {
+  BROWSER_TIMEOUT,
+  SCAN_REFRESH_CONTEXT_ATTEMPTS,
+  SCAN_REFRESH_CONTEXT_RETRY_DELAY,
+} from './constants';
 import { addAxeInitScript, createScanPage, launchScanBrowser, runAxeOnPage } from './axe';
 import {
   detectBlockedScanPage,
@@ -52,65 +56,91 @@ const isLikelyRefreshPlaceholderResult = (
   return hasNoFindings || hasOnlyRefreshIssues;
 };
 
+const delay = async (timeout: number): Promise<void> => {
+  await new Promise<void>((resolve) => {
+    setTimeout(resolve, timeout);
+  });
+};
+
 export async function scanUrl(url: string, options: ScanUrlOptions = {}): Promise<ScanResult> {
   const { level, onProgressPrint = () => undefined, selector } = options;
 
   const browser = await launchScanBrowser(onProgressPrint);
 
   try {
-    onProgressPrint('Opening page');
+    for (let attempt = 1; attempt <= SCAN_REFRESH_CONTEXT_ATTEMPTS; attempt += 1) {
+      onProgressPrint('Opening page');
 
-    const page = await createScanPage(browser);
-    await addAxeInitScript(page);
+      const page = await createScanPage(browser);
 
-    let responseStatus: number | undefined;
+      try {
+        await addAxeInitScript(page);
 
-    try {
-      const response = await page.goto(url, {
-        waitUntil: 'domcontentloaded',
-        timeout: BROWSER_TIMEOUT,
-      });
-      responseStatus = response?.status();
-    } catch (error) {
-      const navigationError = new Error(formatNavigationError(error)) as Error & {
-        cause?: unknown;
-      };
-      navigationError.cause = error;
-      throw navigationError;
+        let responseStatus: number | undefined;
+
+        try {
+          const response = await page.goto(url, {
+            waitUntil: 'domcontentloaded',
+            timeout: BROWSER_TIMEOUT,
+          });
+          responseStatus = response?.status();
+        } catch (error) {
+          const navigationError = new Error(formatNavigationError(error)) as Error & {
+            cause?: unknown;
+          };
+          navigationError.cause = error;
+          throw navigationError;
+        }
+
+        onProgressPrint('Waiting for page readiness');
+        await waitForPageReadiness(page);
+        const challengeResolution = await waitForChallengeResolution(page, url);
+        responseStatus = challengeResolution.responseStatus ?? responseStatus;
+
+        const blockedScanError = await detectBlockedScanPage(page, responseStatus);
+        if (blockedScanError) {
+          throw new Error(blockedScanError);
+        }
+
+        const warnings =
+          challengeResolution.warnings.length > 0
+            ? challengeResolution.warnings
+            : await detectPageWarnings(page);
+
+        const result = await runAxeOnPage(page, {
+          axeOptions: level ? createWcagAxeOptions(level) : undefined,
+          onProgressPrint,
+          selector,
+        });
+
+        const refreshPlaceholder = warnings.length > 0 && isLikelyRefreshPlaceholderResult(result);
+
+        if (refreshPlaceholder && attempt < SCAN_REFRESH_CONTEXT_ATTEMPTS) {
+          onProgressPrint('Retrying with a fresh browser session');
+          await delay(SCAN_REFRESH_CONTEXT_RETRY_DELAY);
+          continue;
+        }
+
+        if (refreshPlaceholder) {
+          throw new Error(REFRESH_OR_CHALLENGE_PAGE_ERROR);
+        }
+
+        return {
+          url: result.url,
+          timestamp: result.timestamp,
+          metadata: buildScanUrlMetadata(selector, warnings),
+          issues: result.issues,
+          manualChecks: result.manualChecks,
+        };
+      } finally {
+        await page
+          .context()
+          .close()
+          .catch(() => undefined);
+      }
     }
 
-    onProgressPrint('Waiting for page readiness');
-    await waitForPageReadiness(page);
-    const challengeResolution = await waitForChallengeResolution(page, url);
-    responseStatus = challengeResolution.responseStatus ?? responseStatus;
-
-    const blockedScanError = await detectBlockedScanPage(page, responseStatus);
-    if (blockedScanError) {
-      throw new Error(blockedScanError);
-    }
-
-    const warnings =
-      challengeResolution.warnings.length > 0
-        ? challengeResolution.warnings
-        : await detectPageWarnings(page);
-
-    const result = await runAxeOnPage(page, {
-      axeOptions: level ? createWcagAxeOptions(level) : undefined,
-      onProgressPrint,
-      selector,
-    });
-
-    if (warnings.length > 0 && isLikelyRefreshPlaceholderResult(result)) {
-      throw new Error(REFRESH_OR_CHALLENGE_PAGE_ERROR);
-    }
-
-    return {
-      url: result.url,
-      timestamp: result.timestamp,
-      metadata: buildScanUrlMetadata(selector, warnings),
-      issues: result.issues,
-      manualChecks: result.manualChecks,
-    };
+    throw new Error(REFRESH_OR_CHALLENGE_PAGE_ERROR);
   } finally {
     await browser.close().catch(() => undefined);
   }
