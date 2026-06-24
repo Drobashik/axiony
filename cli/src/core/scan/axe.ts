@@ -1,6 +1,6 @@
 import axe from 'axe-core';
 import { chromium } from 'playwright';
-import type { Browser, Page } from 'playwright';
+import type { Browser, Cookie, Page } from 'playwright';
 import type {
   AxeRunResult,
   AxeRunOptions,
@@ -36,7 +36,10 @@ export const launchScanBrowser = async (
 const createDesktopChromeUserAgent = (chromeVersion: string): string =>
   `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${chromeVersion} Safari/537.36`;
 
-export const createScanPage = async (browser: Browser): Promise<Page> => {
+export const createScanPage = async (
+  browser: Browser,
+  options: { cookies?: Cookie[] } = {},
+): Promise<Page> => {
   const context = await browser.newContext({
     extraHTTPHeaders: {
       'Accept-Language': SCAN_ACCEPT_LANGUAGE,
@@ -49,6 +52,10 @@ export const createScanPage = async (browser: Browser): Promise<Page> => {
       width: SCAN_VIEWPORT_WIDTH,
     },
   });
+
+  if (options.cookies?.length) {
+    await context.addCookies(options.cookies);
+  }
 
   return await context.newPage();
 };
