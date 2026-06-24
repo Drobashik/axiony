@@ -5,6 +5,7 @@ import {
 } from './constants';
 import { addAxeInitScript, createScanPage, launchScanBrowser, runAxeOnPage } from './axe';
 import {
+  captureScanDiagnostic,
   detectBlockedScanPage,
   detectPageWarnings,
   REFRESH_OR_CHALLENGE_PAGE_ERROR,
@@ -13,6 +14,7 @@ import {
 } from './page-readiness';
 import { createWcagAxeOptions } from './profile';
 import { readScanSessionCookies, writeScanSessionCookies } from './session-cookies';
+import { ScanDiagnosticError } from './types';
 import type { ScanResult, ScanUrlOptions } from './types';
 
 type ScanUrlMetadata = NonNullable<ScanResult['metadata']>;
@@ -128,7 +130,10 @@ export async function scanUrl(url: string, options: ScanUrlOptions = {}): Promis
         }
 
         if (refreshPlaceholder) {
-          throw new Error(REFRESH_OR_CHALLENGE_PAGE_ERROR);
+          throw new ScanDiagnosticError(
+            REFRESH_OR_CHALLENGE_PAGE_ERROR,
+            await captureScanDiagnostic(page, url, responseStatus),
+          );
         }
 
         const sessionCookies = await page

@@ -81,9 +81,29 @@ test('fails clearly when URL scan remains on a meta-refresh page', async () => {
   `);
 
   try {
-    await assert.rejects(() => scanUrl(url), {
-      message: REFRESH_OR_CHALLENGE_PAGE_ERROR,
-    });
+    await assert.rejects(
+      () => scanUrl(url),
+      (error: unknown) => {
+        assert.ok(error instanceof Error);
+        assert.equal(error.message, REFRESH_OR_CHALLENGE_PAGE_ERROR);
+        assert.equal(error.name, 'ScanDiagnosticError');
+
+        const diagnostic = (
+          error as Error & {
+            diagnostic?: {
+              finalUrl?: string;
+              metaRefresh?: string;
+              title?: string;
+            };
+          }
+        ).diagnostic;
+
+        assert.equal(diagnostic?.finalUrl, new URL(url).href);
+        assert.equal(diagnostic?.metaRefresh, '360');
+        assert.equal(diagnostic?.title, 'Refresh page');
+        return true;
+      },
+    );
   } finally {
     await closeServer(server);
   }

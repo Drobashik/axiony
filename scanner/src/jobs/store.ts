@@ -35,6 +35,7 @@ const snapshot = (job: MutableScanJob): ScanJobSnapshot => ({
   updatedAt: job.updatedAt,
   report: job.report,
   error: job.error,
+  diagnostic: job.diagnostic,
 });
 
 const pushLine = (job: MutableScanJob, line: string): void => {
@@ -45,9 +46,19 @@ const pushLine = (job: MutableScanJob, line: string): void => {
   touch(job);
 };
 
-const markFailed = (job: MutableScanJob, message: string): void => {
+const markFailed = (job: MutableScanJob, error: unknown): void => {
+  const message = error instanceof Error ? error.message : "Scan failed.";
+  const diagnostic =
+    error &&
+    typeof error === "object" &&
+    "diagnostic" in error &&
+    typeof error.diagnostic === "object"
+      ? error.diagnostic
+      : undefined;
+
   job.status = "failed";
   job.error = message;
+  job.diagnostic = diagnostic as MutableScanJob["diagnostic"];
   job.progress = Math.max(job.progress, 5);
   pushLine(job, `✕ ${message}`);
 };
@@ -106,7 +117,7 @@ const runJob = async (job: MutableScanJob): Promise<void> => {
 
     markComplete(job, result);
   } catch (error) {
-    markFailed(job, error instanceof Error ? error.message : "Scan failed.");
+    markFailed(job, error);
   } finally {
     activeCount = Math.max(0, activeCount - 1);
     runNext();

@@ -3,6 +3,7 @@ import cn from "classnames";
 import type { TerminalLine } from "@/components/ui";
 import { SCAN_PHASES } from "../data";
 import { phaseForProgress } from "../hooks/useScanEngine";
+import type { ScanDiagnostic } from "../hooks/useScanEngine";
 import { ScanBeacon } from "./ScanBeacon";
 import { ScanConsole } from "./ScanConsole";
 import { StopIcon } from "./icons";
@@ -14,6 +15,7 @@ interface ScanStageProps {
   lines: TerminalLine[];
   reduce: boolean;
   status?: "scanning" | "failed";
+  diagnostic?: ScanDiagnostic | null;
   onStop?: () => void;
 }
 
@@ -35,6 +37,7 @@ export const ScanStage = ({
   lines,
   reduce,
   status = "scanning",
+  diagnostic,
   onStop,
 }: ScanStageProps) => {
   const failed = status === "failed";
@@ -132,6 +135,61 @@ export const ScanStage = ({
         reduce={reduce}
         failed={failed}
       />
+
+      {failed && diagnostic && (
+        <details className={styles.diagnostic}>
+          <summary className={styles.diagnosticSummary}>
+            <span>View diagnostic details</span>
+            <span className={styles.diagnosticHint}>Safe technical preview</span>
+          </summary>
+
+          <div className={styles.diagnosticBody}>
+            <dl className={styles.diagnosticGrid}>
+              <div>
+                <dt>HTTP status</dt>
+                <dd>{diagnostic.httpStatus ?? "Unknown"}</dd>
+              </div>
+              <div>
+                <dt>Page title</dt>
+                <dd>{diagnostic.title || "Empty"}</dd>
+              </div>
+              <div>
+                <dt>Final URL</dt>
+                <dd>{diagnostic.finalUrl}</dd>
+              </div>
+              <div>
+                <dt>Requested URL</dt>
+                <dd>{diagnostic.requestedUrl}</dd>
+              </div>
+              <div>
+                <dt>Meta refresh</dt>
+                <dd>{diagnostic.metaRefresh || "Not detected"}</dd>
+              </div>
+              <div>
+                <dt>DOM elements</dt>
+                <dd>{diagnostic.elementCount.toLocaleString()}</dd>
+              </div>
+              <div>
+                <dt>Visible text</dt>
+                <dd>{diagnostic.textLength.toLocaleString()} chars</dd>
+              </div>
+              <div>
+                <dt>Form controls</dt>
+                <dd>{diagnostic.formControlCount.toLocaleString()}</dd>
+              </div>
+              <div>
+                <dt>Captured</dt>
+                <dd>{new Date(diagnostic.capturedAt).toLocaleString("en-US")}</dd>
+              </div>
+            </dl>
+
+            <div className={styles.diagnosticPreview}>
+              <span>Sanitized HTML preview</span>
+              <pre>{diagnostic.htmlPreview || "No HTML was available."}</pre>
+            </div>
+          </div>
+        </details>
+      )}
     </div>
   );
 };

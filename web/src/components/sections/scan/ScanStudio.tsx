@@ -224,6 +224,7 @@ export const ScanStudio = () => {
                   lines={engine.lines}
                   reduce={engine.reduce}
                   status="failed"
+                  diagnostic={engine.diagnostic}
                 />
               </div>
               <div className={styles.consoleSlot}>

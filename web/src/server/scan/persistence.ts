@@ -1,7 +1,7 @@
 import type { Prisma, ScanJob } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import type { IssueStatus, PendingScan } from "@/lib/workspace/types";
-import type { ScanJobSnapshot, ScanReportPayload, WcagLevel } from "./types";
+import type { ScanDiagnostic, ScanJobSnapshot, ScanReportPayload, WcagLevel } from "./types";
 
 const REPORT_TTL_MS = 1000 * 60 * 60 * 24 * 30;
 
@@ -27,6 +27,28 @@ const reportPayload = (value: unknown): ScanReportPayload | undefined => {
   }
 
   return report as ScanReportPayload;
+};
+
+const diagnosticPayload = (value: unknown): ScanDiagnostic | undefined => {
+  if (!value || typeof value !== "object" || !("diagnostic" in value)) return undefined;
+  const diagnostic = (value as { diagnostic?: unknown }).diagnostic;
+  if (!diagnostic || typeof diagnostic !== "object") return undefined;
+
+  const payload = diagnostic as Partial<ScanDiagnostic>;
+  if (
+    typeof payload.capturedAt !== "string" ||
+    typeof payload.requestedUrl !== "string" ||
+    typeof payload.finalUrl !== "string" ||
+    typeof payload.title !== "string" ||
+    typeof payload.textLength !== "number" ||
+    typeof payload.elementCount !== "number" ||
+    typeof payload.formControlCount !== "number" ||
+    typeof payload.htmlPreview !== "string"
+  ) {
+    return undefined;
+  }
+
+  return payload as ScanDiagnostic;
 };
 
 export const isScanJobSnapshot = (value: unknown): value is ScanJobSnapshot => {
@@ -80,6 +102,7 @@ export const toClientScanJob = (job: ScanJob): ScanJobSnapshot => ({
   updatedAt: job.updatedAt.toISOString(),
   report: reportPayload(job.report),
   error: job.error ?? undefined,
+  diagnostic: diagnosticPayload(job.report),
 });
 
 const reportData = (userId: string, job: ScanJob, report: ScanReportPayload) => ({
@@ -140,7 +163,11 @@ export const createPersistedScanJob = async (
       status: remoteJob.status,
       progress: remoteJob.progress,
       lines: json(remoteJob.lines),
-      report: report ? json(report) : undefined,
+      report: report
+        ? json(report)
+        : remoteJob.diagnostic
+          ? json({ diagnostic: remoteJob.diagnostic })
+          : undefined,
       error: remoteJob.error,
       scannerJobId: remoteJob.jobId,
       completedAt: complete || failed ? now : undefined,
@@ -178,7 +205,11 @@ export const syncPersistedScanJob = async (
       status: remoteJob.status,
       progress: remoteJob.progress,
       lines: json(remoteJob.lines),
-      report: report ? json(report) : undefined,
+      report: report
+        ? json(report)
+        : remoteJob.diagnostic
+          ? json({ diagnostic: remoteJob.diagnostic })
+          : undefined,
       error: remoteJob.error,
       scannerJobId: remoteJob.jobId,
       completedAt: complete || failed ? new Date() : job.completedAt,

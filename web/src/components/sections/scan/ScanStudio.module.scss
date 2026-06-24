@@ -864,6 +864,134 @@
     var(--bg-surface);
 }
 
+.diagnostic {
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: color-mix(in oklch, var(--bg-base) 78%, transparent);
+  overflow: hidden;
+}
+
+.diagnosticSummary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 13px;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+
+  &::before {
+    content: "+";
+    color: var(--blue);
+    font-family: var(--font-mono);
+    font-size: 1rem;
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+
+  .diagnostic[open] &::before {
+    content: "−";
+  }
+}
+
+.diagnosticHint {
+  margin-left: auto;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+}
+
+.diagnosticBody {
+  display: grid;
+  gap: 12px;
+  padding: 0 13px 13px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.diagnosticGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 12px 0 0;
+
+  > div {
+    min-width: 0;
+    padding: 9px 10px;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    background: var(--bg-surface);
+  }
+
+  dt {
+    margin-bottom: 3px;
+    color: var(--text-muted);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+  }
+
+  dd {
+    margin: 0;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    overflow-wrap: anywhere;
+  }
+}
+
+.diagnosticPreview {
+  display: grid;
+  gap: 6px;
+
+  > span {
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  pre {
+    max-height: 220px;
+    overflow: auto;
+    margin: 0;
+    padding: 11px;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    background: #08090d;
+    color: var(--text-code);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+}
+
+@include breakpoint-down(sm) {
+  .diagnosticSummary {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .diagnosticHint {
+    width: 100%;
+    margin-left: 24px;
+  }
+
+  .diagnosticGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
 // ── Beacon (hero scan visualisation) ─────────────────────────────────
 .beacon {
   position: relative;
