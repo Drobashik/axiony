@@ -81,6 +81,18 @@ export const ScanStage = ({
           <strong>{failed ? "Scan failed" : `${phaseLabel}…`}</strong>
           <span className={styles.stageUrl}>{url}</span>
         </div>
+
+        {showStop && (
+          <button
+            type="button"
+            className={styles.stageStop}
+            onClick={onStop}
+            title="Stop the scan — your work is safe"
+          >
+            <StopIcon size={12} />
+            <span className={styles.stageStopLabel}>Stop scan</span>
+          </button>
+        )}
       </div>
 
       {/* Announce phase changes without visual noise. */}
@@ -120,19 +132,6 @@ export const ScanStage = ({
         reduce={reduce}
         failed={failed}
       />
-
-      {showStop && (
-        <div className={styles.stageFoot}>
-          <span className={styles.stageFootMeta}>
-            <span className={styles.stageFootDot} aria-hidden="true" />
-            Scanning {host || "your page"} — safe to keep working
-          </span>
-          <button type="button" className={styles.stageStop} onClick={onStop}>
-            <StopIcon size={13} />
-            Stop scan
-          </button>
-        </div>
-      )}
     </div>
   );
 };

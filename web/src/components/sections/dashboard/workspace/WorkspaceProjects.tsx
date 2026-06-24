@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import cn from "classnames";
 import { remainingScans } from "@/lib/billing";
@@ -17,6 +18,12 @@ const nextPlan = (plan: BillingPlan): Exclude<BillingPlan, "free"> | null => {
   if (plan === "pro") return "team";
   return null;
 };
+
+const monogramOf = (host: string): string =>
+  host
+    .replace(/^www\./, "")
+    .charAt(0)
+    .toUpperCase() || "•";
 
 const ProjectCard = ({
   project,
@@ -41,6 +48,10 @@ const ProjectCard = ({
   const pm = projectModel(project);
   const scansLeft = remainingScans(billing);
   const upgradeTarget = nextPlan(billing.plan);
+  // Card highlight tracks the project's overall health, matching the score
+  // ring and per-page score colours (green / amber / red).
+  const accent = colorForScore(pm.avgScore);
+  const clean = pm.openIssues === 0;
 
   const requestRescan = (page: ProjectPage) => {
     if (scansLeft <= 0) {
@@ -60,9 +71,12 @@ const ProjectCard = ({
 
   return (
     <>
-      <article className={styles.projectCard}>
+      <article className={styles.projectCard} style={{ "--accent": accent } as CSSProperties}>
         <div className={styles.projectTop}>
           <button type="button" className={styles.projectIdentityButton} onClick={onOpen}>
+            <span className={styles.projectMonogram} aria-hidden="true">
+              {monogramOf(project.host)}
+            </span>
             <span className={styles.projectId}>
               <span className={styles.projectName}>
                 {project.host}
@@ -71,7 +85,9 @@ const ProjectCard = ({
                 </span>
               </span>
               <span className={styles.projectUrl}>
-                {pm.pageCount} {pm.pageCount === 1 ? "page" : "pages"} · {pm.openIssues} open
+                {pm.pageCount} {pm.pageCount === 1 ? "page" : "pages"}
+                <span className={styles.projectDivider} aria-hidden="true" />
+                {pm.openIssues} open
               </span>
             </span>
           </button>
@@ -90,12 +106,23 @@ const ProjectCard = ({
         </div>
 
         <div className={styles.projectSeverities}>
-          {SEVERITY_ORDER.map((s) => (
-            <span key={s} className={styles.sevChip}>
-              <span className={styles.sevDot} style={{ background: SEVERITY_COLOR[s] }} />
-              {pm.counts[s]} {SEVERITY_LABEL[s]}
+          {clean ? (
+            <span className={cn(styles.sevChip, styles.sevChipClean)}>
+              <CheckIcon />
+              No open issues
             </span>
-          ))}
+          ) : (
+            SEVERITY_ORDER.map((s) => (
+              <span
+                key={s}
+                className={cn(styles.sevChip, pm.counts[s] === 0 && styles.sevChipEmpty)}
+              >
+                <span className={styles.sevDot} style={{ background: SEVERITY_COLOR[s] }} />
+                <span className={styles.sevCount}>{pm.counts[s]}</span>
+                {SEVERITY_LABEL[s]}
+              </span>
+            ))
+          )}
         </div>
 
         <ul className={styles.pageList}>
@@ -111,7 +138,11 @@ const ProjectCard = ({
                 >
                   {page.path}
                 </button>
-                <span className={styles.pageScore} style={{ color: colorForScore(m.latestScore) }}>
+                <span
+                  className={styles.pageScore}
+                  style={{ color: colorForScore(m.latestScore) }}
+                  title="Latest score"
+                >
                   {m.latestScore}
                 </span>
                 <span className={styles.pageMeta}>{m.openIssues} open</span>
@@ -120,9 +151,10 @@ const ProjectCard = ({
                   type="button"
                   className={styles.pageRescan}
                   onClick={() => requestRescan(page)}
+                  aria-label={`Re-scan ${page.path}`}
                 >
                   <RefreshIcon size={12} />
-                  Re-scan
+                  <span className={styles.pageRescanLabel}>Re-scan</span>
                 </button>
               </li>
             );
@@ -189,6 +221,22 @@ const WarningIcon = () => (
     <path d="M12 9v4" />
     <path d="M12 17h.01" />
     <path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z" />
+  </svg>
+);
+
+const CheckIcon = () => (
+  <svg
+    width="13"
+    height="13"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M20 6 9 17l-5-5" />
   </svg>
 );
 

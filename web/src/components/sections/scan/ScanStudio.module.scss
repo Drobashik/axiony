@@ -1586,68 +1586,48 @@
   color: var(--text-muted);
 }
 
-// ── In-stage stop control ────────────────────────────────────────────
-.stageFoot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 11px 14px;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-subtle);
-  background: linear-gradient(90deg, oklch(0.72 0.18 145 / 0.06), transparent 60%), var(--bg-base);
-}
-
-.stageFootMeta {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  min-width: 0;
-  color: var(--text-secondary);
-  font-size: 0.8rem;
-}
-
-.stageFootDot {
-  width: 8px;
-  height: 8px;
-  flex: none;
-  border-radius: 50%;
-  background: var(--green);
-  box-shadow: 0 0 8px oklch(0.72 0.18 145 / 0.6);
-  animation: dotPulse 1.5s ease-in-out infinite;
-}
-
+// ── In-stage stop control (sits at the right of the head row) ────────
 .stageStop {
   display: inline-flex;
   align-items: center;
   gap: 7px;
   flex: none;
-  padding: 8px 14px;
-  border-radius: 99px;
-  border: 1px solid oklch(0.62 0.2 20 / 0.35);
-  background: oklch(0.62 0.2 20 / 0.1);
-  color: oklch(0.82 0.11 25);
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  font-weight: 700;
+  align-self: center;
+  padding: 8px 13px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: var(--bg-base);
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 600;
   cursor: pointer;
   transition:
     background var(--transition),
     border-color var(--transition),
+    color var(--transition),
     transform var(--transition);
 
   svg {
-    color: oklch(0.72 0.2 22);
+    color: var(--text-muted);
+    transition: color var(--transition);
   }
 
   &:hover {
-    background: oklch(0.62 0.2 20 / 0.18);
+    background: oklch(0.62 0.2 20 / 0.12);
     border-color: oklch(0.62 0.2 20 / 0.5);
+    color: oklch(0.82 0.11 25);
+
+    svg {
+      color: oklch(0.72 0.2 22);
+    }
   }
   &:active {
     transform: scale(0.97);
   }
-  @include focus-ring(oklch(0.7 0.2 22));
+  &:focus-visible {
+    @include focus-ring(oklch(0.7 0.2 22));
+  }
 }
 
 // Tablets / large phones: drop the stepper to two columns so the WCAG
@@ -1677,7 +1657,7 @@
     display: none;
   }
   .stageHead {
-    gap: 12px;
+    gap: 10px;
   }
   .ring {
     width: 48px;
@@ -1698,15 +1678,20 @@
     gap: 6px;
     font-size: 0.74rem;
   }
-  .stageFoot {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .stageFootMeta {
-    justify-content: center;
-  }
+  // Collapse the stop button to its icon so the head row stays on one line.
   .stageStop {
-    justify-content: center;
+    padding: 8px;
+  }
+  .stageStopLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 }
 
@@ -2927,7 +2912,6 @@
   .ringScanner,
   .stepActive .stepDot,
   .c2step,
-  .stageFootDot,
   .dialFill,
   .sevSeg {
     animation: none !important;

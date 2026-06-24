@@ -116,26 +116,134 @@ test('retries when the first URL scan response is a refresh page', async () => {
 });
 
 test('allows a URL scan with refresh warnings when the page has meaningful findings', async () => {
-  const { server, url } = await listen(`
-    <!doctype html>
-    <html lang="en">
-      <head>
-        <title>Real page with refresh metadata</title>
-        <meta http-equiv="refresh" content="360">
-      </head>
-      <body>
-        <main>
-          <h1>Real page with content</h1>
-          <input type="text">
-        </main>
-      </body>
-    </html>
-  `);
+  let requestCount = 0;
+  const { server, url } = await listenWithHandler(() => {
+    requestCount += 1;
+
+    return `
+      <!doctype html>
+      <html lang="en">
+        <head>
+          <title>Real page with refresh metadata</title>
+          <meta http-equiv="refresh" content="360">
+        </head>
+        <body>
+          <main>
+            <h1>Real page with content</h1>
+            <input type="text">
+          </main>
+        </body>
+      </html>
+    `;
+  });
 
   try {
     const result = await scanUrl(url);
 
+    assert.equal(requestCount, 1);
     assert.equal(result.metadata?.warnings?.length, 1);
+    assert.equal(
+      result.issues.some((issue) => issue.id === 'label'),
+      true,
+    );
+  } finally {
+    await closeServer(server);
+  }
+});
+
+test('allows a short meta refresh to resolve naturally', async () => {
+  const { server, url } = await listenWithHandler((request) => {
+    if (request.url === '/ready') {
+      return `
+        <!doctype html>
+        <html lang="en">
+          <head><title>Ready page</title></head>
+          <body>
+            <main>
+              <h1>Ready page</h1>
+              <input type="text">
+            </main>
+          </body>
+        </html>
+      `;
+    }
+
+    return `
+      <!doctype html>
+      <html lang="en">
+        <head>
+          <title>Moving to ready page</title>
+          <meta http-equiv="refresh" content="0.2; url=/ready">
+        </head>
+        <body><main><h1>Loading</h1></main></body>
+      </html>
+    `;
+  });
+
+  try {
+    const result = await scanUrl(url);
+
+    assert.equal(new URL(result.url).pathname, '/ready');
+    assert.equal(result.metadata?.warnings, undefined);
+    assert.equal(
+      result.issues.some((issue) => issue.id === 'label'),
+      true,
+    );
+  } finally {
+    await closeServer(server);
+  }
+});
+
+test('retries the original target after a redirect to a challenge URL', async () => {
+  let targetRequests = 0;
+  const { server, url } = await listenWithHandler((request) => {
+    if (request.url === '/challenge') {
+      return `
+        <!doctype html>
+        <html lang="en">
+          <head>
+            <title>Checking your browser</title>
+            <meta http-equiv="refresh" content="360">
+          </head>
+          <body><main><h1>Checking your browser</h1></main></body>
+        </html>
+      `;
+    }
+
+    targetRequests += 1;
+    if (targetRequests === 1) {
+      return `
+        <!doctype html>
+        <html lang="en">
+          <head><title>Redirecting</title></head>
+          <body>
+            <main><h1>Redirecting</h1></main>
+            <script>window.location.replace('/challenge');</script>
+          </body>
+        </html>
+      `;
+    }
+
+    return `
+      <!doctype html>
+      <html lang="en">
+        <head><title>Ready target</title></head>
+        <body>
+          <main>
+            <h1>Ready target</h1>
+            <input type="text">
+          </main>
+        </body>
+      </html>
+    `;
+  });
+
+  try {
+    const result = await scanUrl(url);
+
+    assert.equal(targetRequests, 2);
+    assert.equal(new URL(result.url).pathname, '/');
+    assert.equal(result.metadata?.warnings, undefined);
     assert.equal(
       result.issues.some((issue) => issue.id === 'label'),
       true,
@@ -162,6 +270,37 @@ test('fails clearly when a URL scan lands on an access-denied page', async () =>
     await assert.rejects(() => scanUrl(url), {
       message: BLOCKED_SCAN_PAGE_ERROR,
     });
+  } finally {
+    await closeServer(server);
+  }
+});
+
+test('waits for delayed client-rendered accessible names before running axe', async () => {
+  const { server, url } = await listen(`
+    <!doctype html>
+    <html lang="en">
+      <head><title>Hydrating links</title></head>
+      <body>
+        <main>
+          <h1>Offers</h1>
+          <a id="delayed-link" href="/offers"></a>
+        </main>
+        <script>
+          window.setTimeout(() => {
+            document.querySelector('#delayed-link').textContent = 'View current offers';
+          }, 1_000);
+        </script>
+      </body>
+    </html>
+  `);
+
+  try {
+    const result = await scanUrl(url);
+
+    assert.equal(
+      result.issues.some((issue) => issue.id === 'link-name'),
+      false,
+    );
   } finally {
     await closeServer(server);
   }

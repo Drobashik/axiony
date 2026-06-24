@@ -464,7 +464,7 @@ const applyIssueState = (
   path: string,
   issue: TrackedIssue,
   states: Map<string, PersistedIssueStateRow>,
-  options: { keepResolved?: boolean } = {},
+  options: { keepResolved?: boolean; observedAt?: string } = {},
 ): TrackedIssue => {
   const tracked = withIssueTracking(issue, issue.createdAt ?? now());
   const state = states.get(
@@ -474,13 +474,24 @@ const applyIssueState = (
   if (!state) return tracked;
 
   const createdAt = isoFromDateLike(state.createdAt) ?? tracked.createdAt;
+  const stateUpdatedAt = isoFromDateLike(state.updatedAt);
+  const wasDetectedAfterResolution =
+    state.status === "resolved" &&
+    Boolean(
+      options.observedAt &&
+      stateUpdatedAt &&
+      Date.parse(options.observedAt) > Date.parse(stateUpdatedAt),
+    );
+
   return {
     ...tracked,
     status: options.keepResolved
       ? "resolved"
-      : isIssueStatus(state.status)
-        ? state.status
-        : tracked.status,
+      : wasDetectedAfterResolution
+        ? "open"
+        : isIssueStatus(state.status)
+          ? state.status
+          : tracked.status,
     createdAt,
   };
 };
@@ -491,10 +502,16 @@ const applyIssueStates = (ws: Workspace, rows: PersistedIssueStateRow[]): void =
 
   for (const project of ws.projects) {
     for (const page of project.pages) {
+      const latestScannedAt = page.scans[page.scans.length - 1]?.scannedAt;
+
       page.baseline.issues = page.baseline.issues.map((issue) =>
         applyIssueState(project.host, page.path, issue, states),
       );
-      page.open = page.open.map((issue) => applyIssueState(project.host, page.path, issue, states));
+      page.open = page.open.map((issue) =>
+        applyIssueState(project.host, page.path, issue, states, {
+          observedAt: latestScannedAt,
+        }),
+      );
       page.scans = page.scans.map((scan) => ({
         ...scan,
         resolvedIssues: scan.resolvedIssues?.map((issue) =>

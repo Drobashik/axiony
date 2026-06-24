@@ -31,7 +31,7 @@ const METRICS: { id: Metric; label: string; caption: string }[] = [
 ];
 
 const shortDate = (iso: string): string =>
-  new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short" });
+  new Date(iso).toLocaleDateString("en-US", { day: "numeric", month: "short" });
 
 const niceCeil = (peak: number): number => (peak <= 4 ? 4 : Math.ceil(peak / 2) * 2);
 

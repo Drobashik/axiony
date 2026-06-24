@@ -81,7 +81,8 @@ export async function scanUrl(url: string, options: ScanUrlOptions = {}): Promis
 
     onProgressPrint('Waiting for page readiness');
     await waitForPageReadiness(page);
-    const unresolvedChallengeWarnings = await waitForChallengeResolution(page);
+    const challengeResolution = await waitForChallengeResolution(page, url);
+    responseStatus = challengeResolution.responseStatus ?? responseStatus;
 
     const blockedScanError = await detectBlockedScanPage(page, responseStatus);
     if (blockedScanError) {
@@ -89,8 +90,8 @@ export async function scanUrl(url: string, options: ScanUrlOptions = {}): Promis
     }
 
     const warnings =
-      unresolvedChallengeWarnings.length > 0
-        ? unresolvedChallengeWarnings
+      challengeResolution.warnings.length > 0
+        ? challengeResolution.warnings
         : await detectPageWarnings(page);
 
     const result = await runAxeOnPage(page, {

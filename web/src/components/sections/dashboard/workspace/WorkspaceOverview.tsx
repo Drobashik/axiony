@@ -68,7 +68,7 @@ const fixedChange = (n: number): string => (n > 0 ? `+${fixedCount(n)}` : fixedC
 const signed = (value: number): string => (value === 0 ? "±0" : `${value > 0 ? "+" : ""}${value}`);
 
 const shortDate = (iso: string): string =>
-  new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short" });
+  new Date(iso).toLocaleDateString("en-US", { day: "numeric", month: "short" });
 
 const eventTone = (
   event: WorkspaceChangeDigest["events"][number],
@@ -93,29 +93,19 @@ const ChangeDigest = ({
   digest: WorkspaceChangeDigest;
   onScan: () => void;
 }) => {
-  const scoreEvent = digest.strongestScoreEvent;
   const hasRecentActivity = digest.followupScans > 0;
+  const movement = [
+    digest.resolved > 0 ? fixedChange(digest.resolved) : null,
+    digest.regressions > 0 ? plural(digest.regressions, "new regression") : null,
+    digest.netScoreDelta !== 0 ? `score ${signed(digest.netScoreDelta)}` : null,
+  ].filter((part): part is string => part !== null);
   const headline = hasRecentActivity
-    ? `Last ${digest.windowDays} days: ${fixedChange(digest.resolved)} · ${plural(
-        digest.regressions,
-        "new regression",
-      )} · ${
-        scoreEvent
-          ? `score ${signed(scoreEvent.scoreDelta)} on ${scoreEvent.label}`
-          : "score steady"
-      }`
+    ? `Last ${digest.windowDays} days: ${movement.length > 0 ? movement.join(" · ") : "no issue movement"}`
     : digest.hasFollowups
       ? `No follow-up changes in the last ${digest.windowDays} days`
       : "Baseline saved. Re-scan to start your changelog";
   const support = hasRecentActivity
-    ? `${plural(digest.followupScans, "follow-up scan")} across ${plural(
-        digest.changedPages,
-        "page",
-      )}. Latest: ${
-        digest.latestEvent
-          ? `${eventSummary(digest.latestEvent)} on ${digest.latestEvent.label}.`
-          : "waiting for the next scan."
-      }`
+    ? `${plural(digest.followupScans, "follow-up scan")} across ${plural(digest.changedPages, "page")}.`
     : digest.hasFollowups
       ? "Your older history is still tracked. Run a fresh scan to see this week's fixes, regressions, and score movement."
       : "The next scan of the same URL will show what disappeared, what came back, and whether the score moved.";
@@ -134,20 +124,20 @@ const ChangeDigest = ({
 
       <div className={styles.changeStats} aria-label={`Last ${digest.windowDays} days`}>
         <span className={styles.changeStat}>
-          <span className={styles.changeStatLabel}>Fixed</span>
           <strong className={styles.changeGood}>
             {digest.resolved > 0 ? `+${digest.resolved}` : digest.resolved}
           </strong>
+          <span className={styles.changeStatLabel}>Fixed</span>
         </span>
         <span className={styles.changeStat}>
-          <span className={styles.changeStatLabel}>Regressions</span>
           <strong className={digest.regressions > 0 ? styles.changeBad : styles.changeGood}>
             {digest.regressions}
           </strong>
+          <span className={styles.changeStatLabel}>New regressions</span>
         </span>
         <span className={styles.changeStat}>
-          <span className={styles.changeStatLabel}>Score net</span>
           <strong className={scoreTone}>{signed(digest.netScoreDelta)}</strong>
+          <span className={styles.changeStatLabel}>Score net</span>
         </span>
       </div>
 
