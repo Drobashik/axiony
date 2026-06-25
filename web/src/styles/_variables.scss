@@ -21,7 +21,9 @@ $border-strong: rgba(255, 255, 255, 0.18);
 // ── Text ──
 $text-primary: #f0f0f5;
 $text-secondary: #8888a8;
-$text-muted: #55556a;
+// Bumped from #55556a (~2.7:1) so muted text clears WCAG AA (≥4.5:1) on every
+// dark surface incl. the lighter bg-muted. See UX-IMPROVEMENTS.md P0-1.
+$text-muted: #82829b;
 $text-code: #c4cde8;
 
 // ── Brand & accents (oklch for richer color) ──

@@ -580,7 +580,7 @@
 
   > span {
     color: var(--text-muted);
-    font-size: 0.68rem;
+    font-size: 0.8rem;
     font-weight: 800;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -696,7 +696,7 @@
 
 .srReaderLabel {
   color: var(--text-muted);
-  font-size: 0.64rem;
+  font-size: 0.8rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -756,7 +756,7 @@
   display: block;
   margin-bottom: 4px;
   color: var(--text-muted);
-  font-size: 0.64rem;
+  font-size: 0.8rem;
   font-weight: 800;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -928,6 +928,10 @@
     scroll-snap-type: x proximity;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+    // Scrollbar is hidden, so fade the trailing edge — the off-screen chips
+    // then read as "scroll for more" instead of a hard mid-word clip.
+    mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
 
     &::-webkit-scrollbar {
       display: none;
