@@ -95,7 +95,7 @@
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   background: var(--bg-elevated);
-  box-shadow: 0 16px 40px oklch(0 0 0 / 0.5);
+  box-shadow: var(--shadow-lg);
   animation: selectIn 0.14s $ease-out both;
 }
 

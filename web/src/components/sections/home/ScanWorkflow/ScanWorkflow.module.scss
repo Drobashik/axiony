@@ -97,7 +97,7 @@
 
 .step_green {
   --c: var(--green);
-  --cb: #{$green-border};
+  --cb: var(--green-border);
   --cd: var(--green-dim);
 }
 .step_blue {
@@ -107,7 +107,7 @@
 }
 .step_violet {
   --c: var(--violet);
-  --cb: #{$violet-border};
+  --cb: var(--violet-border);
   --cd: var(--violet-dim);
 }
 
@@ -293,7 +293,7 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  border: 1px solid #{$green-border};
+  border: 1px solid var(--green-border);
   border-radius: 99px;
   padding: 5px 12px;
   background: var(--green-dim);
@@ -319,7 +319,7 @@
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 11px 14px;
-  background: oklch(0.16 0.018 250 / 0.7);
+  background: var(--bg-muted);
 }
 
 .scanTarget {
@@ -423,7 +423,7 @@
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 12px 14px;
-  background: oklch(0.16 0.018 250 / 0.55);
+  background: var(--bg-muted);
 }
 
 .blockHead {
@@ -531,7 +531,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  border: 1px solid #{$violet-border};
+  border: 1px solid var(--violet-border);
   border-radius: 99px;
   padding: 3px 8px;
   background: var(--violet-dim);
@@ -585,7 +585,7 @@
 
 .st_snoozed {
   border: 1px solid var(--border-default);
-  background: oklch(1 0 0 / 0.04);
+  background: var(--tint-weak);
   color: var(--text-muted);
 }
 
@@ -650,7 +650,7 @@
 
 // The new hire pops in, violet, the moment their "joined" event lands.
 .avatarNew {
-  border-color: #{$violet-border};
+  border-color: var(--violet-border);
   background: var(--violet-dim);
   color: var(--violet);
   animation: avatarPop 0.4s cubic-bezier(0.3, 1.4, 0.4, 1) both;
@@ -698,11 +698,10 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
-  border: 1px solid #{$violet-border};
+  border: 1px solid var(--violet-border);
   border-radius: var(--radius-md);
   padding: 13px 12px 12px;
-  background:
-    linear-gradient(180deg, var(--violet-dim), transparent 60%), oklch(0.16 0.018 250 / 0.6);
+  background: linear-gradient(180deg, var(--violet-dim), transparent 60%), var(--bg-muted);
 }
 
 .repo {
@@ -747,7 +746,7 @@
   position: absolute;
   top: -9px;
   left: 12px;
-  border: 1px solid #{$violet-border};
+  border: 1px solid var(--violet-border);
   border-radius: 99px;
   padding: 2px 9px;
   background: var(--bg-elevated);
@@ -880,12 +879,12 @@
 }
 .fp_fixed,
 .fp_clean {
-  border: 1px solid #{$green-border};
+  border: 1px solid var(--green-border);
   background: var(--green-dim);
   color: var(--green);
 }
 .fp_joined {
-  border: 1px solid #{$violet-border};
+  border: 1px solid var(--violet-border);
   background: var(--violet-dim);
   color: var(--violet);
 }

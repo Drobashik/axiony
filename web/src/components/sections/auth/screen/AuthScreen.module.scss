@@ -12,7 +12,7 @@
   // The form column gets a little more room — it's the focus.
   grid-template-columns: 0.92fr 1.08fr;
   overflow: hidden;
-  @include elevated-panel(var(--radius-2xl), 0 30px 80px oklch(0 0 0 / 0.45));
+  @include elevated-panel(var(--radius-2xl), var(--shadow-panel));
   animation: scaleIn 0.5s $ease-out both;
 }
 
@@ -26,7 +26,7 @@
   // Calmer + a touch darker than the form panel, so it reads as supporting
   // context and the form is what stands out.
   border-right: 1px solid var(--border-subtle);
-  background: linear-gradient(165deg, oklch(0.17 0.03 266 / 0.45), oklch(0.1 0.014 262 / 0.12));
+  background: linear-gradient(165deg, var(--blue-dim), transparent 60%), var(--bg-muted);
 }
 
 .asideGrid {
@@ -103,7 +103,7 @@
   padding: 16px;
   border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
-  background: oklch(0.12 0.012 260 / 0.6);
+  background: var(--bg-surface);
 }
 
 .scanCardTop {
@@ -261,7 +261,7 @@
   padding: 52px 46px;
   background:
     radial-gradient(125% 78% at 50% -8%, oklch(0.62 0.22 240 / 0.08), transparent 58%),
-    linear-gradient(180deg, oklch(1 0 0 / 0.032), oklch(1 0 0 / 0.012));
+    linear-gradient(180deg, var(--tint-weak), transparent);
 }
 
 .panel::before {
@@ -757,7 +757,7 @@
   border-radius: 50%;
 
   &[data-tone="success"] {
-    border: 1px solid $green-border;
+    border: 1px solid var(--green-border);
     background: var(--green-dim);
     color: var(--green);
     box-shadow: var(--shadow-glow-green);

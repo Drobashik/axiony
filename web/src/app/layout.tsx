@@ -3,6 +3,7 @@ import { IBM_Plex_Mono, Short_Stack, Space_Grotesk } from "next/font/google";
 import { Suspense } from "react";
 import type { ReactNode } from "react";
 import { BootGate, RouteLoadingIndicator } from "@/components/layout";
+import { ThemeProvider, THEME_NO_FLASH_SCRIPT } from "@/lib/theme";
 import "@/styles/globals.scss";
 
 export const metadata: Metadata = {
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: "#09090b",
-  colorScheme: "dark",
+  colorScheme: "dark light",
 };
 
 const spaceGrotesk = Space_Grotesk({
@@ -46,12 +47,22 @@ const RootLayout = ({ children }: { children: ReactNode }) => (
   <html
     lang="en"
     className={`${spaceGrotesk.variable} ${ibmPlexMono.variable} ${shortStack.variable}`}
+    suppressHydrationWarning
   >
     <body>
-      <BootGate>{children}</BootGate>
-      <Suspense fallback={null}>
-        <RouteLoadingIndicator />
-      </Suspense>
+      {/*
+        Sets the theme on <html> during initial HTML parse, before first paint,
+        so there's no flash of the wrong theme. It only needs to run on the SSR
+        document load (React's dev-only "script won't run on the client" notice
+        is expected and harmless — client updates go through ThemeProvider).
+      */}
+      <script dangerouslySetInnerHTML={{ __html: THEME_NO_FLASH_SCRIPT }} />
+      <ThemeProvider>
+        <BootGate>{children}</BootGate>
+        <Suspense fallback={null}>
+          <RouteLoadingIndicator />
+        </Suspense>
+      </ThemeProvider>
     </body>
   </html>
 );

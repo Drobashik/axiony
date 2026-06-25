@@ -44,7 +44,7 @@
     z-index: 205;
     border: none;
     padding: 0;
-    background: oklch(0 0 0 / 0.55);
+    background: var(--scrim);
     backdrop-filter: blur(2px);
     -webkit-backdrop-filter: blur(2px);
     cursor: pointer;

@@ -20,7 +20,7 @@
 .grid {
   @include absolute-fill;
   pointer-events: none;
-  background-image: radial-gradient(oklch(1 0 0 / 0.05) 1px, transparent 1.6px);
+  background-image: radial-gradient(var(--tint-soft) 1px, transparent 1.6px);
   background-size: 30px 30px;
   mask-image: radial-gradient(ellipse 95% 68% at 56% 28%, black, transparent 76%);
   animation: heroFadeIn 0.9s $ease-out both;
@@ -359,7 +359,7 @@
   border: 1px dashed var(--border-default);
   border-radius: var(--radius-md);
   padding: 8px 14px;
-  background: oklch(0.15 0.015 250 / 0.55);
+  background: var(--bg-muted);
   color: var(--text-secondary);
   font-family: var(--font-mono);
   font-size: 0.8rem;
@@ -497,7 +497,7 @@
 
 .terminal {
   position: relative;
-  @include elevated-panel(var(--radius-xl), 0 30px 80px oklch(0 0 0 / 0.42));
+  @include elevated-panel(var(--radius-xl), var(--shadow-panel));
   overflow: hidden;
   animation: cardIn 0.7s $ease-out 0.25s both;
 }
@@ -519,7 +519,7 @@
   gap: 12px;
   border-bottom: 1px solid var(--border-subtle);
   padding: 11px 16px;
-  background: oklch(0.16 0.018 250 / 0.6);
+  background: var(--bg-muted);
 }
 
 .dots {
@@ -530,7 +530,7 @@
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background: oklch(1 0 0 / 0.14);
+    background: var(--tint-strong);
 
     &:first-child {
       background: oklch(0.72 0.2 20 / 0.8);
@@ -764,7 +764,7 @@
   bottom: -30px;
   z-index: 3;
   width: min(300px, 88%);
-  @include elevated-panel(var(--radius-lg), 0 18px 50px oklch(0 0 0 / 0.5));
+  @include elevated-panel(var(--radius-lg), var(--shadow-panel));
   display: grid;
   gap: 9px;
   padding: 12px 14px;

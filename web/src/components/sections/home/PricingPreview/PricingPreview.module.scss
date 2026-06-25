@@ -159,7 +159,7 @@
 .featured {
   border-color: var(--accent-border);
   background: linear-gradient(180deg, var(--accent-dim), transparent 42%), var(--bg-surface);
-  box-shadow: 0 22px 60px oklch(0 0 0 / 0.34);
+  box-shadow: var(--shadow-panel);
 
   @media (min-width: 901px) {
     transform: translateY(-12px);

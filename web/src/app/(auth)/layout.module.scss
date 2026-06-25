@@ -14,7 +14,7 @@
     content: "";
     @include absolute-fill;
     pointer-events: none;
-    background-image: radial-gradient(oklch(1 0 0 / 0.04) 1px, transparent 1.6px);
+    background-image: radial-gradient(var(--tint-weak) 1px, transparent 1.6px);
     background-size: 32px 32px;
     mask-image: radial-gradient(ellipse 92% 70% at 50% 28%, black, transparent 78%);
   }
@@ -64,7 +64,7 @@
 
   &:hover {
     color: var(--text-primary);
-    background: oklch(1 0 0 / 0.05);
+    background: var(--tint-soft);
     text-decoration: none;
   }
 }
