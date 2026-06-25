@@ -9,3 +9,4 @@ export * from "./SectionEyebrow";
 export * from "./Select";
 export * from "./Tag";
 export * from "./Terminal";
+export * from "./ThemeToggle";

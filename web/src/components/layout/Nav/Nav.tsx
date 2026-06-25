@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { Button, LogoMark } from "@/components/ui";
+import { Button, LogoMark, ThemeToggle, ThemeToggleButton } from "@/components/ui";
 import cn from "classnames";
 import { useScrolled } from "@/lib/hooks/useScrolled";
 import { useSession } from "@/lib/auth-client";
@@ -156,6 +156,7 @@ export const Nav = () => {
         </nav>
 
         <div className={styles.actions}>
+          <ThemeToggleButton />
           <a
             href="https://github.com"
             target="_blank"
@@ -231,6 +232,11 @@ export const Nav = () => {
             GitHub
           </a>
           {renderAuthLink(styles.mobileAction, close)}
+        </div>
+
+        <div className={styles.mobileTheme}>
+          <span className={styles.mobileThemeLabel}>Theme</span>
+          <ThemeToggle block />
         </div>
 
         <Button href="/scan" size="lg" block onClick={close} className={styles.mobileCta}>

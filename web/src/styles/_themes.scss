@@ -1,0 +1,149 @@
+// =====================================================================
+// Theme maps
+// ---------------------------------------------------------------------
+// Only the tokens that differ between light and dark live here. Each map
+// is keyed by the CSS custom-property name (without the leading `--`) and
+// is emitted by `emit-theme()` into the matching `:root` selector in
+// `globals.scss`. Structural tokens (radii, fonts, motion, layout) don't
+// change with the theme and stay in `globals.scss` directly.
+//
+// `$theme-dark` mirrors the original hand-written values exactly, so the
+// dark experience is unchanged. `$theme-light` is the new surface.
+// =====================================================================
+
+@use "variables" as *;
+
+// ── Dark (default) ───────────────────────────────────────────────────
+$theme-dark: (
+  // Surfaces
+  "bg-base": $bg-base,
+  "bg-surface": $bg-surface,
+  "bg-elevated": $bg-elevated,
+  "bg-muted": $bg-muted,
+  // Borders
+  "border-subtle": $border-subtle,
+  "border-default": $border-default,
+  "border-strong": $border-strong,
+  // Text
+  "text-primary": $text-primary,
+  "text-secondary": $text-secondary,
+  "text-muted": $text-muted,
+  "text-code": $text-code,
+  // Accents
+  "blue": $blue,
+  "blue-dim": $blue-dim,
+  "blue-border": $blue-border,
+  "green": $green,
+  "green-dim": $green-dim,
+  "green-border": $green-border,
+  "violet": $violet,
+  "violet-dim": $violet-dim,
+  "violet-border": $violet-border,
+  // Severity
+  "severity-critical": $severity-critical,
+  "severity-serious": $severity-serious,
+  "severity-moderate": $severity-moderate,
+  "severity-minor": $severity-minor,
+  // Links resolve to the brand blue in both themes, exposed as a token so
+  // light mode can deepen it for contrast without touching fills.
+  "link": $blue,
+  // Elevation
+  "shadow-sm": $shadow-sm,
+  "shadow-md": $shadow-md,
+  "shadow-lg": $shadow-lg,
+  "shadow-panel": 0 24px 70px oklch(0 0 0 / 0.34),
+  "shadow-glow-blue": $shadow-glow-blue,
+  "shadow-glow-green": $shadow-glow-green,
+  "shadow-glow-violet": $shadow-glow-violet,
+  // Overlays — direction-flipping contrast tints. In dark they lighten a
+  // surface (white), in light they darken it (black); always reference the
+  // token, never a raw `oklch(1 0 0 / …)` literal, so they theme.
+  "edge-highlight": oklch(1 0 0 / 0.06),
+  "tint-weak": oklch(1 0 0 / 0.035),
+  "tint-soft": oklch(1 0 0 / 0.05),
+  "tint-medium": oklch(1 0 0 / 0.08),
+  "tint-strong": oklch(1 0 0 / 0.14),
+  "scrim": oklch(0 0 0 / 0.6),
+  // Elevated-panel gradient stops (used by the `elevated-panel` mixin).
+  "panel-grad-top": oklch(0.19 0.024 250 / 0.94),
+  "panel-grad-bottom": oklch(0.13 0.016 250 / 0.98),
+  // Frosted glass for floating bars (nav). Multi-layer backgrounds are
+  // parenthesised so their commas survive map interpolation.
+  "glass": (
+      linear-gradient(180deg, oklch(0.105 0.011 255 / 0.82), oklch(0.075 0.006 260 / 0.58)),
+      oklch(0.09 0.006 260 / 0.62)
+    ),
+  "glass-strong": (
+    linear-gradient(180deg, oklch(0.105 0.012 255 / 0.95), oklch(0.078 0.007 260 / 0.88)),
+    oklch(0.09 0.006 260 / 0.9)
+  ),
+  "glass-shadow": 0 10px 30px oklch(0 0 0 / 0.28)
+);
+
+// ── Light ────────────────────────────────────────────────────────────
+$theme-light: (
+  // Surfaces — page is a cool light grey; cards rise toward white.
+  "bg-base": #f3f4f7,
+  "bg-surface": #fbfcfd,
+  "bg-elevated": #ffffff,
+  "bg-muted": #eaecf1,
+  // Borders — ink (black) at low alpha reads on light surfaces.
+  "border-subtle": oklch(0 0 0 / 0.05),
+  "border-default": oklch(0 0 0 / 0.09),
+  "border-strong": oklch(0 0 0 / 0.15),
+  // Text — cool near-black, matched secondary/muted hues.
+  "text-primary": #14151b,
+  "text-secondary": #565869,
+  "text-muted": #8a8c9c,
+  "text-code": #38415c,
+  // Accents — same hue, deepened a step so fills/text clear contrast on white.
+  "blue": oklch(0.55 0.21 245),
+  "blue-dim": oklch(0.55 0.21 245 / 0.12),
+  "blue-border": oklch(0.55 0.21 245 / 0.28),
+  "green": oklch(0.58 0.16 150),
+  "green-dim": oklch(0.58 0.16 150 / 0.13),
+  "green-border": oklch(0.58 0.16 150 / 0.3),
+  "violet": oklch(0.54 0.21 290),
+  "violet-dim": oklch(0.54 0.21 290 / 0.12),
+  "violet-border": oklch(0.54 0.21 290 / 0.28),
+  // Severity — deepened for legibility on light.
+  "severity-critical": oklch(0.58 0.22 25),
+  "severity-serious": oklch(0.64 0.17 55),
+  "severity-moderate": oklch(0.68 0.14 80),
+  "severity-minor": oklch(0.55 0.21 245),
+  "link": oklch(0.52 0.2 245),
+  // Elevation — soft, cool-tinted, low-alpha shadows; no heavy black.
+  "shadow-sm": 0 1px 2px oklch(0 0 0 / 0.08),
+  "shadow-md": 0 4px 16px oklch(0.45 0.05 265 / 0.1),
+  "shadow-lg": 0 14px 44px oklch(0.45 0.05 265 / 0.14),
+  "shadow-panel": 0 20px 60px oklch(0.45 0.05 265 / 0.13),
+  "shadow-glow-blue": 0 0 40px oklch(0.55 0.21 245 / 0.16),
+  "shadow-glow-green": 0 0 40px oklch(0.58 0.16 150 / 0.16),
+  "shadow-glow-violet": 0 0 40px oklch(0.54 0.21 290 / 0.16),
+  // Overlays — flip to ink; the top gloss becomes a soft white edge.
+  "edge-highlight": oklch(1 0 0 / 0.75),
+  "tint-weak": oklch(0 0 0 / 0.03),
+  "tint-soft": oklch(0 0 0 / 0.045),
+  "tint-medium": oklch(0 0 0 / 0.06),
+  "tint-strong": oklch(0 0 0 / 0.1),
+  "scrim": oklch(0.22 0.03 265 / 0.4),
+  "panel-grad-top": #ffffff,
+  "panel-grad-bottom": #f7f8fb,
+  "glass": (
+    linear-gradient(180deg, oklch(1 0 0 / 0.85), oklch(1 0 0 / 0.66)),
+    oklch(0.99 0.002 255 / 0.72)
+  ),
+  "glass-strong": (
+    linear-gradient(180deg, oklch(1 0 0 / 0.94), oklch(1 0 0 / 0.84)),
+    oklch(0.99 0.002 255 / 0.88)
+  ),
+  "glass-shadow": 0 10px 30px oklch(0.45 0.05 265 / 0.1)
+);
+
+// ── Emit ─────────────────────────────────────────────────────────────
+// Writes a theme map as CSS custom properties into the current selector.
+@mixin emit-theme($theme) {
+  @each $name, $value in $theme {
+    --#{$name}: #{$value};
+  }
+}

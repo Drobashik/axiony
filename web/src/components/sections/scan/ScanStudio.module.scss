@@ -57,7 +57,7 @@
 .grid {
   @include absolute-fill;
   pointer-events: none;
-  background-image: radial-gradient(oklch(1 0 0 / 0.05) 1px, transparent 1.6px);
+  background-image: radial-gradient(var(--tint-soft) 1px, transparent 1.6px);
   background-size: 30px 30px;
   mask-image: radial-gradient(ellipse 95% 55% at 50% 16%, black, transparent 72%);
   animation: studioFade 0.9s $ease-out both;
@@ -126,8 +126,7 @@
   place-items: center;
   padding: 24px;
   background:
-    radial-gradient(circle at 50% 18%, oklch(0.62 0.22 240 / 0.16), transparent 34%),
-    oklch(0 0 0 / 0.58);
+    radial-gradient(circle at 50% 18%, oklch(0.62 0.22 240 / 0.16), transparent 34%), var(--scrim);
   backdrop-filter: blur(12px) saturate(130%);
   -webkit-backdrop-filter: blur(12px) saturate(130%);
 }
@@ -136,14 +135,14 @@
   position: relative;
   width: min(100%, 520px);
   overflow: hidden;
-  border: 1px solid oklch(1 0 0 / 0.14);
+  border: 1px solid var(--tint-strong);
   border-radius: var(--radius-xl);
   background:
     radial-gradient(110% 130% at 85% -20%, var(--blue-dim), transparent 52%),
-    linear-gradient(180deg, oklch(0.18 0.018 250 / 0.98), oklch(0.105 0.01 260 / 0.99));
+    linear-gradient(180deg, var(--bg-elevated), var(--bg-surface));
   box-shadow:
-    0 30px 90px oklch(0 0 0 / 0.54),
-    inset 0 1px 0 oklch(1 0 0 / 0.07);
+    var(--shadow-panel),
+    inset 0 1px 0 var(--edge-highlight);
   padding: 24px;
 
   &::before {
@@ -197,14 +196,14 @@
   border: 1px solid var(--blue-border);
   border-radius: var(--radius-md);
   background:
-    radial-gradient(circle at 50% 0%, oklch(1 0 0 / 0.08), transparent 58%), var(--blue-dim);
+    radial-gradient(circle at 50% 0%, var(--tint-medium), transparent 58%), var(--blue-dim);
   color: var(--blue);
   box-shadow: 0 10px 28px oklch(0.62 0.22 240 / 0.14);
 }
 
 .dialogIconMuted {
   border-color: var(--border-default);
-  background: oklch(1 0 0 / 0.045);
+  background: var(--tint-soft);
   color: var(--text-secondary);
   box-shadow: none;
 }
@@ -242,7 +241,7 @@
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
     padding: 9px 12px 9px 34px;
-    background: oklch(1 0 0 / 0.035);
+    background: var(--tint-weak);
     color: var(--text-secondary);
     font-size: 0.88rem;
     font-weight: 650;
@@ -275,14 +274,14 @@
   position: relative;
   max-width: 920px;
   margin: 0 auto;
-  @include elevated-panel(var(--radius-xl), 0 34px 100px oklch(0 0 0 / 0.46));
-  border-color: oklch(1 0 0 / 0.16);
+  @include elevated-panel(var(--radius-xl), var(--shadow-panel));
+  border-color: var(--border-strong);
   padding: 28px;
   overflow: hidden;
   background:
     radial-gradient(120% 150% at 12% -42%, oklch(0.72 0.18 145 / 0.12), transparent 48%),
     radial-gradient(120% 150% at 88% -40%, oklch(0.62 0.22 240 / 0.16), transparent 50%),
-    linear-gradient(180deg, oklch(0.18 0.018 250 / 0.98), oklch(0.105 0.01 260 / 0.99));
+    linear-gradient(180deg, var(--bg-elevated), var(--bg-surface));
 }
 
 // Brand scan-line across the top — signals "this is the scanner".
@@ -304,14 +303,14 @@
   border-radius: inherit;
   pointer-events: none;
   box-shadow:
-    inset 0 1px 0 oklch(1 0 0 / 0.08),
+    inset 0 1px 0 var(--edge-highlight),
     inset 0 -24px 50px oklch(0 0 0 / 0.14);
 }
 
 .consoleBusy {
   border-color: oklch(0.62 0.22 240 / 0.34);
   box-shadow:
-    0 34px 100px oklch(0 0 0 / 0.48),
+    var(--shadow-panel),
     0 0 0 1px oklch(0.62 0.22 240 / 0.14),
     0 0 60px oklch(0.62 0.22 240 / 0.13);
 
@@ -397,13 +396,13 @@
   display: flex;
   align-items: stretch;
   min-height: 64px;
-  border: 1px solid oklch(1 0 0 / 0.18);
+  border: 1px solid var(--border-strong);
   border-radius: 18px;
-  background: oklch(0.075 0.006 260 / 0.82);
+  background: var(--bg-base);
   overflow: hidden;
   box-shadow:
-    inset 0 1px 0 oklch(1 0 0 / 0.06),
-    0 18px 38px oklch(0 0 0 / 0.18);
+    inset 0 1px 0 var(--edge-highlight),
+    var(--shadow-md);
   transition:
     border-color var(--transition),
     box-shadow var(--transition),
@@ -413,16 +412,14 @@
     border-color: var(--blue);
     box-shadow:
       0 0 0 3px var(--blue-dim),
-      0 22px 48px oklch(0 0 0 / 0.24);
+      var(--shadow-lg);
     transform: translateY(-1px);
   }
 }
 
 .consoleBusy .inputRow {
   border-color: oklch(0.62 0.22 240 / 0.28);
-  background:
-    linear-gradient(90deg, oklch(0.62 0.22 240 / 0.1), transparent 34%),
-    oklch(0.075 0.006 260 / 0.88);
+  background: linear-gradient(90deg, oklch(0.62 0.22 240 / 0.1), transparent 34%), var(--bg-base);
 }
 
 .inputRowError {
@@ -442,7 +439,7 @@
   color: var(--blue);
   border-right: 1px solid var(--border-subtle);
   background:
-    radial-gradient(circle at 50% 35%, var(--blue-dim), transparent 70%), oklch(1 0 0 / 0.035);
+    radial-gradient(circle at 50% 35%, var(--blue-dim), transparent 70%), var(--tint-weak);
 }
 
 .input {
@@ -553,11 +550,10 @@
   gap: 10px;
   margin-top: 12px;
   padding: 12px 14px;
-  border: 1px solid oklch(1 0 0 / 0.1);
+  border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   background:
-    radial-gradient(80% 180% at 0% 0%, oklch(0.72 0.18 145 / 0.1), transparent 58%),
-    oklch(0.04 0.006 260 / 0.48);
+    radial-gradient(80% 180% at 0% 0%, oklch(0.72 0.18 145 / 0.1), transparent 58%), var(--bg-muted);
   animation: telemetryIn 0.24s $ease-out both;
 }
 
@@ -566,7 +562,7 @@
   height: 7px;
   overflow: hidden;
   border-radius: 99px;
-  background: oklch(1 0 0 / 0.07);
+  background: var(--tint-medium);
 
   &::before,
   &::after,
@@ -966,7 +962,7 @@
     padding: 11px;
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-sm);
-    background: #08090d;
+    background: var(--bg-muted);
     color: var(--text-code);
     font-family: var(--font-mono);
     font-size: 0.7rem;
@@ -1001,15 +997,16 @@
   overflow: hidden;
   isolation: isolate;
   background:
-    radial-gradient(120% 130% at 50% 130%, oklch(0.62 0.22 240 / 0.08), transparent 60%), #0a0b11;
+    radial-gradient(120% 130% at 50% 130%, oklch(0.62 0.22 240 / 0.08), transparent 60%),
+    var(--bg-muted);
 }
 
 .beaconGrid {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(oklch(1 0 0 / 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, oklch(1 0 0 / 0.04) 1px, transparent 1px);
+    linear-gradient(var(--tint-weak) 1px, transparent 1px),
+    linear-gradient(90deg, var(--tint-weak) 1px, transparent 1px);
   background-size: 26px 26px;
   mask-image: radial-gradient(125% 95% at 50% 0%, black, transparent 76%);
 }
@@ -1029,11 +1026,11 @@
   display: grid;
   grid-template-rows: auto 1fr;
   border-radius: 12px;
-  border: 1px solid oklch(1 0 0 / 0.1);
-  background: linear-gradient(180deg, oklch(1 0 0 / 0.045), oklch(1 0 0 / 0.012));
+  border: 1px solid var(--border-default);
+  background: linear-gradient(180deg, var(--tint-soft), transparent);
   box-shadow:
-    0 18px 44px oklch(0 0 0 / 0.42),
-    inset 0 1px 0 oklch(1 0 0 / 0.06);
+    var(--shadow-panel),
+    inset 0 1px 0 var(--edge-highlight);
   overflow: hidden;
 }
 
@@ -1042,8 +1039,8 @@
   align-items: center;
   gap: 8px;
   padding: 7px 10px;
-  border-bottom: 1px solid oklch(1 0 0 / 0.07);
-  background: oklch(1 0 0 / 0.03);
+  border-bottom: 1px solid var(--tint-medium);
+  background: var(--tint-weak);
 }
 
 .browserDots {
@@ -1055,7 +1052,7 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: oklch(1 0 0 / 0.18);
+    background: var(--tint-strong);
   }
   i:first-child {
     background: oklch(0.7 0.18 25 / 0.65);
@@ -1076,7 +1073,7 @@
   min-width: 0;
   padding: 3px 9px;
   border-radius: 99px;
-  background: oklch(1 0 0 / 0.05);
+  background: var(--tint-soft);
   color: var(--text-secondary);
   font-family: var(--font-mono);
   font-size: 0.66rem;
@@ -1116,14 +1113,14 @@
 .skel {
   position: absolute;
   border-radius: 5px;
-  background: oklch(1 0 0 / 0.08);
+  background: var(--tint-medium);
 }
 .skelTitle {
   top: 16px;
   left: 16px;
   width: 46%;
   height: 13px;
-  background: oklch(1 0 0 / 0.14);
+  background: var(--tint-strong);
 }
 .skelMeta {
   top: 36px;
@@ -1209,8 +1206,9 @@
   flex: none;
   padding: 1px 6px;
   border-radius: 99px;
-  background: oklch(0 0 0 / 0.5);
+  background: var(--bg-elevated);
   border: 1px solid var(--tone-soft);
+  box-shadow: var(--shadow-sm);
   color: var(--text-secondary);
   font-family: var(--font-mono);
   font-size: 0.58rem;
@@ -1339,7 +1337,7 @@
 
 .ringTrack {
   fill: none;
-  stroke: oklch(1 0 0 / 0.1);
+  stroke: var(--border-default);
   stroke-width: 6;
 }
 
@@ -1460,7 +1458,7 @@
 
 .stepDone {
   opacity: 1;
-  border-color: #{$green-border};
+  border-color: var(--green-border);
 
   .stepDot {
     background: var(--green);
@@ -1505,7 +1503,7 @@
   overflow: hidden;
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-default);
-  background: #090a0f;
+  background: var(--bg-surface);
   box-shadow:
     var(--shadow-lg),
     0 0 0 1px oklch(0.62 0.22 240 / 0.06);
@@ -1520,8 +1518,8 @@
   align-items: center;
   gap: 10px;
   padding: 9px 12px;
-  background: #111219;
-  border-bottom: 1px solid oklch(1 0 0 / 0.06);
+  background: var(--bg-muted);
+  border-bottom: 1px solid var(--tint-medium);
 }
 
 .console2Dots {
@@ -1694,7 +1692,7 @@
 }
 
 .c2track {
-  color: oklch(1 0 0 / 0.14);
+  color: var(--tint-strong);
   letter-spacing: -0.5px;
 }
 
@@ -1927,7 +1925,7 @@
 
 .dialTrack {
   fill: none;
-  stroke: oklch(1 0 0 / 0.1);
+  stroke: var(--border-default);
   stroke-width: 8;
 }
 
@@ -2444,7 +2442,7 @@
   span {
     border-radius: 99px;
     padding: 0 5px;
-    background: oklch(1 0 0 / 0.08);
+    background: var(--tint-medium);
     color: var(--text-primary);
     font-size: 0.66rem;
   }
@@ -2704,7 +2702,7 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  border: 1px solid #{$violet-border};
+  border: 1px solid var(--violet-border);
   border-radius: 99px;
   padding: 3px 9px;
   background: var(--violet-dim);
@@ -2865,7 +2863,7 @@
 
 .copyBtnDone {
   color: var(--green);
-  border-color: #{$green-border};
+  border-color: var(--green-border);
 }
 
 // ── Baseline callout ─────────────────────────────────────────────────
@@ -2976,7 +2974,7 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  border: 1px solid #{$green-border};
+  border: 1px solid var(--green-border);
   border-radius: 99px;
   padding: 5px 12px;
   background: var(--green-dim);

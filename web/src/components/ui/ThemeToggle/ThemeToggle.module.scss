@@ -1,0 +1,134 @@
+// ── Segmented control (System / Light / Dark) — settings ──────────────
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-base);
+  padding: 3px;
+  gap: 2px;
+}
+
+.block {
+  display: flex;
+  width: 100%;
+
+  .segment {
+    flex: 1 1 0;
+  }
+}
+
+.segment {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 44px;
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background var(--transition),
+    color var(--transition),
+    box-shadow var(--transition);
+
+  &:hover {
+    color: var(--text-primary);
+  }
+  &:has(:focus-visible) {
+    @include focus-ring;
+  }
+}
+
+.segmentActive {
+  background: var(--blue-dim);
+  color: var(--blue);
+  box-shadow: inset 0 0 0 1px var(--blue-border);
+
+  &:hover {
+    color: var(--blue);
+  }
+}
+
+.segmentIcon {
+  display: inline-flex;
+
+  svg {
+    width: 15px;
+    height: 15px;
+  }
+}
+
+.input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+// ── Icon button (light ⇄ dark) — marketing header ─────────────────────
+.iconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  background: transparent;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    color 160ms ease,
+    background 160ms ease;
+
+  &:hover {
+    border-color: var(--border-subtle);
+    color: var(--text-primary);
+    background: var(--tint-soft);
+  }
+}
+
+.iconSwap {
+  position: relative;
+  width: 18px;
+  height: 18px;
+
+  svg {
+    position: absolute;
+    inset: 0;
+    width: 18px;
+    height: 18px;
+    transition:
+      opacity 200ms ease,
+      transform 320ms cubic-bezier(0.2, 0, 0, 1);
+  }
+}
+
+// Default (dark): moon shown, sun tucked away.
+.sun {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.5);
+}
+.moon {
+  opacity: 1;
+  transform: rotate(0) scale(1);
+}
+
+.iconSwap[data-resolved="light"] {
+  .sun {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+  }
+  .moon {
+    opacity: 0;
+    transform: rotate(90deg) scale(0.5);
+  }
+}

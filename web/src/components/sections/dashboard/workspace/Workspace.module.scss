@@ -27,7 +27,7 @@
   align-items: flex-start;
   gap: 16px;
   padding: 20px 22px;
-  border: 1px solid $green-border;
+  border: 1px solid var(--green-border);
   border-radius: var(--radius-xl);
   background:
     radial-gradient(120% 140% at 0% 0%, var(--green-dim), transparent 60%), var(--bg-surface);
@@ -42,7 +42,7 @@
   width: 46px;
   height: 46px;
   border-radius: 50%;
-  border: 1px solid $green-border;
+  border: 1px solid var(--green-border);
   background: var(--green-dim);
   color: var(--green);
 }
@@ -87,7 +87,7 @@
 
   &:hover {
     color: var(--text-primary);
-    background: oklch(1 0 0 / 0.06);
+    background: var(--tint-medium);
   }
 
   &:focus-visible {
@@ -200,7 +200,7 @@
   background:
     radial-gradient(85% 130% at 0% 0%, var(--green-dim), transparent 58%),
     radial-gradient(75% 120% at 100% 0%, var(--blue-dim), transparent 60%), var(--bg-surface);
-  box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.04);
+  box-shadow: inset 0 1px 0 var(--edge-highlight);
   animation: wsIn 0.44s $ease-out both;
 
   @include breakpoint-down(lg) {
@@ -266,7 +266,7 @@
   padding: 11px 12px;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  background: oklch(1 0 0 / 0.035);
+  background: var(--tint-weak);
 
   strong {
     font-family: var(--font-mono);
@@ -316,9 +316,7 @@
   padding: 11px 12px;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  background:
-    linear-gradient(180deg, oklch(1 0 0 / 0.035), transparent),
-    color-mix(in oklch, var(--bg-base) 76%, black);
+  background: linear-gradient(180deg, var(--tint-weak), transparent), var(--bg-base);
 }
 
 .changeIcon {
@@ -333,7 +331,7 @@
 
   &[data-tone="good"] {
     color: var(--green);
-    border-color: $green-border;
+    border-color: var(--green-border);
     background: var(--green-dim);
   }
 
@@ -415,7 +413,7 @@
   align-items: center;
   gap: 8px;
   padding: 10px 14px;
-  border: 1px solid $green-border;
+  border: 1px solid var(--green-border);
   border-radius: var(--radius-md);
   background: var(--green-dim);
   color: var(--green);
@@ -523,12 +521,12 @@
   &[data-tone="green"] {
     color: var(--green);
     background: var(--green-dim);
-    border-color: $green-border;
+    border-color: var(--green-border);
   }
   &[data-tone="violet"] {
     color: var(--violet);
     background: var(--violet-dim);
-    border-color: $violet-border;
+    border-color: var(--violet-border);
   }
 }
 
@@ -648,12 +646,10 @@
   padding: 4px;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
-  background:
-    linear-gradient(180deg, oklch(1 0 0 / 0.035), transparent),
-    color-mix(in oklch, var(--bg-base) 86%, black);
+  background: linear-gradient(180deg, var(--tint-weak), transparent), var(--bg-base);
   box-shadow:
-    inset 0 1px 0 oklch(1 0 0 / 0.04),
-    0 10px 24px oklch(0 0 0 / 0.12);
+    inset 0 1px 0 var(--edge-highlight),
+    var(--shadow-md);
 }
 
 .trendTab {
@@ -694,7 +690,7 @@
 
   &:hover {
     color: var(--text-primary);
-    background: oklch(1 0 0 / 0.035);
+    background: var(--tint-weak);
   }
   &:focus-visible {
     @include focus-ring($offset: 2px);
@@ -707,8 +703,8 @@
   background:
     radial-gradient(110% 140% at 0% 0%, var(--blue-dim), transparent 62%), var(--bg-elevated);
   box-shadow:
-    0 8px 18px oklch(0 0 0 / 0.18),
-    inset 0 1px 0 oklch(1 0 0 / 0.06);
+    var(--shadow-md),
+    inset 0 1px 0 var(--edge-highlight);
 
   &::before {
     background: var(--blue);
@@ -1078,7 +1074,7 @@
   flex-shrink: 0;
   padding: 2px 8px;
   border-radius: 99px;
-  border: 1px solid $green-border;
+  border: 1px solid var(--green-border);
   background: var(--green-dim);
   color: var(--green);
   font-size: 0.68rem;
@@ -1509,11 +1505,11 @@
 }
 
 .quotaCard[data-tone="warn"] .quotaMeter span {
-  background: linear-gradient(90deg, $severity-moderate, var(--blue));
+  background: linear-gradient(90deg, var(--severity-moderate), var(--blue));
 }
 
 .quotaCard[data-tone="danger"] .quotaMeter span {
-  background: linear-gradient(90deg, $severity-critical, $severity-serious);
+  background: linear-gradient(90deg, var(--severity-critical), var(--severity-serious));
 }
 
 .quotaMeta {
@@ -2083,7 +2079,7 @@
   justify-content: center;
   padding: 5vh 20px 24px;
   overflow-y: auto;
-  background: oklch(0 0 0 / 0.6);
+  background: var(--scrim);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   animation: fadeIn 0.18s ease both;
@@ -2175,7 +2171,7 @@
 
   &:hover {
     color: var(--text-primary);
-    background: oklch(1 0 0 / 0.06);
+    background: var(--tint-medium);
   }
 
   &:focus-visible {
@@ -2728,7 +2724,7 @@
   display: grid;
   place-items: center;
   padding: 18px;
-  background: oklch(0 0 0 / 0.62);
+  background: var(--scrim);
   backdrop-filter: blur(10px);
   animation: wsIn 0.18s $ease-out both;
 }
@@ -2956,7 +2952,7 @@
   flex-wrap: wrap;
   gap: 10px 14px;
   padding: 12px 16px;
-  border: 1px solid $green-border;
+  border: 1px solid var(--green-border);
   border-radius: var(--radius-lg);
   background: var(--green-dim);
   animation: wsIn 0.3s $ease-out both;
@@ -3014,7 +3010,7 @@
 
   button {
     padding: 4px 10px;
-    border: 1px solid $green-border;
+    border: 1px solid var(--green-border);
     border-radius: 99px;
     background: transparent;
     color: var(--green);

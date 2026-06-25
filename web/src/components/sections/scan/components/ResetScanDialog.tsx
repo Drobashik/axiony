@@ -1,5 +1,6 @@
 "use client";
 
+import { createPortal } from "react-dom";
 import { Button } from "@/components/ui";
 import cn from "classnames";
 import { RefreshIcon } from "./icons";
@@ -20,7 +21,11 @@ export const ResetScanDialog = ({ mode, url, onCancel, onConfirm }: ResetScanDia
       : "The scan in progress will stop and the current progress will be cleared.";
   const cancelLabel = mode === "report" ? "Keep report" : "Keep scanning";
 
-  return (
+  if (typeof document === "undefined") return null;
+
+  // Portal to <body> so the full-viewport backdrop can't be trapped by an
+  // ancestor's stacking/containing context.
+  return createPortal(
     <div className={styles.dialogLayer} role="presentation" onMouseDown={onCancel}>
       <section
         className={cn(styles.dialog, styles.dialogConfirm)}
@@ -50,6 +55,7 @@ export const ResetScanDialog = ({ mode, url, onCancel, onConfirm }: ResetScanDia
           </Button>
         </div>
       </section>
-    </div>
+    </div>,
+    document.body,
   );
 };
