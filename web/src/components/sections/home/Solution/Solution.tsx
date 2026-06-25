@@ -1,5 +1,5 @@
 import { Section } from "@/components/layout";
-import { Button, Container } from "@/components/ui";
+import { Button, Container, Icon } from "@/components/ui";
 import cn from "classnames";
 import { ReleaseSim } from "./components/ReleaseSim";
 import { SOLUTION_STEPS } from "./data";
@@ -41,7 +41,10 @@ export const Solution = () => (
           every pull request.
         </p>
         <div className={styles.ctaButtons}>
-          <Button href="/scan">Lock your baseline</Button>
+          <Button href="/scan">
+            Scan your site now
+            <Icon name="arrow" size={16} />
+          </Button>
           <Button href="#pricing" variant="secondary">
             See pricing
           </Button>

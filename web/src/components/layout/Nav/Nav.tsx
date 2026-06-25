@@ -174,7 +174,7 @@ export const Nav = () => {
           )}
           <Button href="/scan" size="sm" className={styles.scanCta}>
             <ScanIcon />
-            <span className={styles.ctaText}>Start scanning</span>
+            <span className={styles.ctaText}>Scan your site</span>
           </Button>
         </div>
 
@@ -241,7 +241,7 @@ export const Nav = () => {
 
         <Button href="/scan" size="lg" block onClick={close} className={styles.mobileCta}>
           <ScanIcon />
-          Start scanning free
+          Scan your site
         </Button>
       </div>
 

@@ -23,6 +23,7 @@ export const FinalCta = () => (
       <div className={styles.actions}>
         <Button href="/scan" size="lg">
           Scan your site now
+          <Icon name="arrow" size={16} />
         </Button>
         <WorkspaceCta />
       </div>
