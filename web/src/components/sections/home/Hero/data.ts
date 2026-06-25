@@ -4,8 +4,8 @@ export const TITLE_LINE_THREE = "gets";
 export const TITLE_WORD_SQUIGGLED = "worse.";
 
 export const SUBTITLE =
-  "Axiony scans your site and remembers every accessibility issue that already exists. " +
-  "Old ones become your to-do list. New ones? They don't merge.";
+  "An accessibility scanner that runs in CI. It locks today's issues as your " +
+  "baseline, then blocks any new ones from merging.";
 
 export const VALUE_POINTS = [
   "free & open-source to start",
