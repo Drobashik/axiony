@@ -94,7 +94,9 @@ $theme-light: (
   // Text — cool near-black, matched secondary/muted hues.
   "text-primary": #14151b,
   "text-secondary": #565869,
-  "text-muted": #8a8c9c,
+  // Bumped from #8a8c9c (~3:1) so muted text clears WCAG AA (≥4.5:1) on every
+  // surface incl. the darker bg-muted. See UX-IMPROVEMENTS.md P0-1.
+  "text-muted": #686a7a,
   "text-code": #38415c,
   // Accents — same hue, deepened a step so fills/text clear contrast on white.
   "blue": oklch(0.55 0.21 245),
