@@ -1,6 +1,7 @@
 import { Section } from "@/components/layout";
 import { Container } from "@/components/ui";
 import cn from "classnames";
+import { TypewriterEyebrow } from "../components/TypewriterEyebrow";
 import { ProblemExplorer } from "./components/ProblemExplorer";
 import styles from "./Problem.module.scss";
 
@@ -8,7 +9,7 @@ export const Problem = () => (
   <Section surface>
     <Container>
       <div className={cn(styles.intro, "reveal")}>
-        <span className={styles.eyebrow}>{"// the problem"}</span>
+        <TypewriterEyebrow className={styles.eyebrow} text="// the problem" />
         <h2 className={styles.heading}>
           You&apos;d fix these bugs in a minute.
           <br />

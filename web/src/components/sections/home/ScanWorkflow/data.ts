@@ -1,36 +1,9 @@
-import { blank, txt } from "@/components/ui";
-import type { TerminalLine } from "@/components/ui";
 import type { StepDef } from "./types";
-
-export const SCAN_LINES: TerminalLine[] = [
-  [txt("$", "prompt"), txt(" "), txt("npx axiony-cli scan https://acme.com --ci", "cmd")],
-  [txt("  Axiony CLI v0.3.0 · axe-core + Playwright · free & open-source", "dim")],
-  blank,
-  [txt("  ✓ Loaded page · waited for stable DOM", "output")],
-  [txt("  ✓ Ran axe-core ruleset · 142 checks", "success")],
-  [txt("  ✓ Compared against baseline · 47 known issues", "output")],
-  blank,
-  [txt("  2 new issues", "output"), txt("   · 47 known (tracked, not blocking)", "dim")],
-  [txt("  ├─ ", "dim"), txt("1 critical", "error"), txt("   color-contrast", "output")],
-  [txt("  └─ ", "dim"), txt("1 serious", "warn"), txt("    button-name", "output")],
-  blank,
-  [txt("  Exit 1", "warn"), txt("  · new issues found — fails this check", "dim")],
-  [txt("  (set as a required check to block the merge)", "dim")],
-];
 
 export const STEPS: readonly StepDef[] = [
   {
-    key: "scan",
-    n: "01",
-    title: "Scan in CI",
-    tag: "CLI · Free",
-    accent: "green",
-    caption:
-      "Every push runs the free, open-source CLI in your pipeline. It scans the real DOM with axe-core, compares against your baseline, and fails the check only on new issues — so known debt never blocks a release. No account needed.",
-  },
-  {
     key: "site",
-    n: "02",
+    n: "01",
     title: "Scan the whole site",
     tag: "Cloud · Pro",
     accent: "blue",
@@ -39,7 +12,7 @@ export const STEPS: readonly StepDef[] = [
   },
   {
     key: "team",
-    n: "03",
+    n: "02",
     title: "Roll out to the team",
     tag: "Cloud · Team",
     accent: "violet",

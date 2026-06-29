@@ -8,10 +8,10 @@
 .eyebrow {
   display: block;
   margin-bottom: 14px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   font-family: var(--font-mono);
-  font-size: 0.8rem;
-  font-weight: 500;
+  font-size: 0.92rem;
+  font-weight: 600;
 }
 
 .headingAccent {
@@ -28,9 +28,9 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 20px;
-  max-width: 1000px;
+  max-width: 680px;
   margin: 0 auto;
 }
 

@@ -33,7 +33,7 @@ export const ScanWorkflowPlayer = () => {
   return (
     <div ref={ref}>
       <WorkflowStepper active={active} onSelect={select} steps={STEPS} />
-      <WorkflowStage active={active} inView={inView} reduce={reduce} steps={STEPS} />
+      <WorkflowStage active={active} reduce={reduce} steps={STEPS} />
 
       <p className={styles.hint}>
         {auto ? "Auto-playing — tap any step to take over" : "Step through the workflow above"}

@@ -211,6 +211,74 @@ pre {
   }
 }
 
+// ── Comment-style section labels ────────────────────────────────────
+// Section eyebrows read like developer comments. Their text is clipped to
+// 0ch by default, then typed once the existing reveal observer marks the
+// surrounding block as visible.
+.typed-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.35em;
+  white-space: nowrap;
+}
+
+.typed-eyebrow__text {
+  display: inline-block;
+  max-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.typed-eyebrow__cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.05em;
+  margin-left: 3px;
+  border-radius: 2px;
+  background: var(--blue);
+  opacity: 0;
+  transform: translateY(0.12em);
+}
+
+.reveal.visible,
+.reveal-left.visible,
+.reveal-right.visible,
+.reveal-scale.visible {
+  .typed-eyebrow__text {
+    animation: typedEyebrow var(--typed-eyebrow-duration, 0.8s)
+      steps(var(--typed-eyebrow-steps, 24), end) var(--typed-eyebrow-delay, 0.12s) both;
+  }
+
+  .typed-eyebrow__cursor {
+    animation:
+      typedEyebrowCursorBlink 0.72s steps(1, end) var(--typed-eyebrow-delay, 0.12s) infinite,
+      typedEyebrowCursorDone 0.01s linear var(--typed-eyebrow-cursor-end, 1s) both;
+  }
+}
+
+@keyframes typedEyebrow {
+  to {
+    max-width: var(--typed-eyebrow-width, 24ch);
+  }
+}
+
+@keyframes typedEyebrowCursorBlink {
+  0%,
+  48% {
+    opacity: 1;
+  }
+  49%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes typedEyebrowCursorDone {
+  to {
+    opacity: 0;
+  }
+}
+
 // ── Reduced motion ───────────────────────────────────────────────────
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -228,5 +296,13 @@ pre {
   .reveal-scale {
     opacity: 1;
     transform: none;
+  }
+
+  .typed-eyebrow__text {
+    max-width: var(--typed-eyebrow-width, 24ch);
+  }
+
+  .typed-eyebrow__cursor {
+    display: none;
   }
 }

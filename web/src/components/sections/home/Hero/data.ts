@@ -1,53 +1,80 @@
-export const TITLE_LINE_ONE = "Today is the last day";
-export const TITLE_LINE_TWO = "your accessibility";
-export const TITLE_LINE_THREE = "gets";
-export const TITLE_WORD_SQUIGGLED = "worse.";
+export const TITLE_LINE_ONE = "Stop shipping";
+export const TITLE_ACCENT_TEXT = "inaccessible";
+export const TITLE_WORD_SQUIGGLED = "UI.";
 
 export const SUBTITLE =
-  "An accessibility scanner that runs in CI. It locks today's issues as your " +
-  "baseline, then blocks any new ones from merging.";
+  "Axiony shows accessibility barriers in context, locks your baseline, and blocks new regressions before they merge.";
 
-export const VALUE_POINTS = [
-  "free & open-source to start",
-  "hosted scans + AI fixes",
-  "PR checks for your team",
-] as const;
+export const VALUE_POINTS = ["CLI", "Cloud + AI", "PR gates"] as const;
 
 export const INSTALL_COMMAND = "npm i -g axiony-cli";
 
-// ── Demo terminal script ─────────────────────────────────────────────
-// The hero terminal "runs" this scan on mount: the command is typed
-// character by character, then each line streams in after its delay.
+// ── Live site-scan demo ──────────────────────────────────────────────
+// The hero's right column renders a miniature landing page inside a
+// browser and audits it on load: a scan line sweeps top → bottom, the
+// percentage climbs, and real a11y issues get flagged on the page.
+//
+// Each flag is visually justified by the mock page itself (the flagged
+// menu links really are faint, the flagged button really is unlabelled), so
+// it reads as a genuine audit rather than a decoration.
 
-export const SCAN_COMMAND = "axiony scan https://acme.com";
+export const SCAN_HOST = "acme.com";
 
-export type TerminalSeverity = "critical" | "serious" | "moderate";
+export type Severity = "critical" | "serious" | "moderate";
 
-export type TerminalLineKind = "info" | "success" | "error" | "finding" | "section" | "exit";
+/** How the affected person perceives the page: screen reader vs. low vision. */
+export type AssistiveVia = "sr" | "eye";
 
-export interface TerminalLine {
-  kind: TerminalLineKind;
-  /** Milliseconds after the previous line appears. */
-  delay: number;
-  text?: string;
-  /** Dim annotation — right-aligned, except on `exit` lines where it trails the text. */
-  aside?: string;
-  /** Section rule only: append today's real date ("locked jun 10"). */
-  withDate?: boolean;
-  sev?: TerminalSeverity;
-  rule?: string;
-  where?: string;
+export interface ScanIssue {
+  /** Plain-language flag a non-technical visitor understands. */
+  label: string;
+  sev: Severity;
+  /** Progress (%) at which the scan line reaches it. */
+  at: number;
+  via: AssistiveVia;
+  /** The actual broken output assistive tech gives — what the user gets. */
+  heard: string;
+  /** Compact proof shown in the audit rail. */
+  evidence: string;
+  /** Who it blocks, in plain language — the real-world consequence. */
+  impact: string;
 }
 
-export const TERMINAL_SCRIPT: readonly TerminalLine[] = [
-  { kind: "info", delay: 480, text: "crawling acme.com", aside: "14 pages" },
-  { kind: "success", delay: 850, text: "scan complete", aside: "14/14 · 3.8s" },
-  { kind: "section", delay: 420, text: "findings" },
-  { kind: "finding", delay: 220, sev: "critical", rule: "color-contrast", where: ".cta-banner" },
-  { kind: "finding", delay: 170, sev: "serious", rule: "button-name", where: "header" },
-  { kind: "finding", delay: 170, sev: "moderate", rule: "heading-order", where: "/pricing" },
-  { kind: "section", delay: 430, text: "baseline", withDate: true },
-  { kind: "success", delay: 240, text: "9 known issues", aside: "tracked · not blocking" },
-  { kind: "error", delay: 380, text: "2 new issues since main" },
-  { kind: "exit", delay: 540, text: "exit 1", aside: "— merge blocked" },
+export const SCAN_ISSUES: readonly ScanIssue[] = [
+  {
+    label: "low contrast",
+    sev: "critical",
+    at: 12,
+    via: "eye",
+    heard: "1.9 : 1",
+    evidence: "1.9:1 · needs 4.5:1",
+    impact: "The menu links disappear into the header for many low-vision visitors.",
+  },
+  {
+    label: "no alt text",
+    sev: "serious",
+    at: 48,
+    via: "sr",
+    heard: "image",
+    evidence: 'screen reader: "image"',
+    impact: "A blind visitor gets no description of the product preview.",
+  },
+  {
+    label: "no button name",
+    sev: "serious",
+    at: 67,
+    via: "sr",
+    heard: "button",
+    evidence: 'screen reader: "button"',
+    impact: "The icon looks clear, but its purpose is invisible to assistive tech.",
+  },
+  {
+    label: "missing label",
+    sev: "moderate",
+    at: 86,
+    via: "sr",
+    heard: "edit, blank",
+    evidence: 'screen reader: "edit, blank"',
+    impact: "The placeholder disappears while typing, leaving the field unidentified.",
+  },
 ];

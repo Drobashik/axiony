@@ -48,16 +48,4 @@ export const STEPS: QuickStep[] = [
       </>
     ),
   },
-  {
-    n: "03",
-    title: "Block it in CI",
-    command: "axiony scan https://your-site.com --ci",
-    accent: "violet",
-    note: (
-      <>
-        Exits non-zero on new issues (anything not in your baseline), so the build fails before
-        regressions ship.
-      </>
-    ),
-  },
 ];

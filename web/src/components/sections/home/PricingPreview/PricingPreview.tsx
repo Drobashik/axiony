@@ -1,6 +1,7 @@
 import { Section } from "@/components/layout";
 import { Container } from "@/components/ui";
 import cn from "classnames";
+import { TypewriterEyebrow } from "../components/TypewriterEyebrow";
 import { PricingPlans } from "./components/PricingPlans";
 import styles from "./PricingPreview.module.scss";
 
@@ -8,7 +9,7 @@ export const PricingPreview = () => (
   <Section id="pricing">
     <Container>
       <div className={cn(styles.intro, "reveal")}>
-        <span className={styles.eyebrow}>{"// pricing"}</span>
+        <TypewriterEyebrow className={styles.eyebrow} text="// pricing" />
         <h2>
           Free to start.
           <br />

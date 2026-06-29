@@ -1,6 +1,7 @@
 import { Section } from "@/components/layout";
 import { Button, Container, Icon } from "@/components/ui";
 import cn from "classnames";
+import { TypewriterEyebrow } from "../components/TypewriterEyebrow";
 import { ReleaseSim } from "./components/ReleaseSim";
 import { SOLUTION_STEPS } from "./data";
 import styles from "./Solution.module.scss";
@@ -9,7 +10,7 @@ export const Solution = () => (
   <Section>
     <Container>
       <div className={cn(styles.intro, "reveal")}>
-        <span className={styles.eyebrow}>{"// the fix"}</span>
+        <TypewriterEyebrow className={styles.eyebrow} text="// the fix" />
         <h2 className={styles.heading}>
           Your score gets one new rule:
           <br />
@@ -36,10 +37,6 @@ export const Solution = () => (
       </ol>
 
       <div className={cn(styles.cta, "reveal")}>
-        <p>
-          The CLI is free and runs anywhere. The cloud remembers — history, trends, and the gate in
-          every pull request.
-        </p>
         <div className={styles.ctaButtons}>
           <Button href="/scan">
             Scan your site now

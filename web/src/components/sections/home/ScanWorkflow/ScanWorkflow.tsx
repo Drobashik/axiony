@@ -1,6 +1,7 @@
 import { Section } from "@/components/layout";
 import { Container } from "@/components/ui";
 import cn from "classnames";
+import { TypewriterEyebrow } from "../components/TypewriterEyebrow";
 import { ScanWorkflowPlayer } from "./components/ScanWorkflowPlayer";
 import styles from "./ScanWorkflow.module.scss";
 
@@ -8,7 +9,7 @@ export const ScanWorkflow = () => (
   <Section id="workflow" className={styles.workflow}>
     <Container>
       <div className={cn(styles.header, "reveal")}>
-        <span className={styles.eyebrow}>{"// from your terminal to your team"}</span>
+        <TypewriterEyebrow className={styles.eyebrow} text="// from your terminal to your team" />
         <h2>
           Run it free in your terminal —
           <br />

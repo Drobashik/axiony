@@ -1,6 +1,7 @@
 import { Section } from "@/components/layout";
 import { Button, Container } from "@/components/ui";
 import cn from "classnames";
+import { TypewriterEyebrow } from "../components/TypewriterEyebrow";
 import { FaqList } from "./components/FaqList";
 import styles from "./Faq.module.scss";
 
@@ -9,7 +10,7 @@ export const Faq = () => (
     <Container>
       <div className={styles.grid}>
         <div className={cn(styles.aside, "reveal-left")}>
-          <span className={styles.eyebrow}>{"// faq"}</span>
+          <TypewriterEyebrow className={styles.eyebrow} text="// faq" />
           <h2>
             Questions,
             <br />

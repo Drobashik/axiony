@@ -1,14 +1,13 @@
 import { Button, Container } from "@/components/ui";
 import { WorkspaceCta } from "../WorkspaceCta";
-import { ArrowRightIcon, CheckIcon } from "./components/icons";
+import { CloudScanner } from "./components/CloudScanner";
+import { ArrowRightIcon, CloudIcon, ShieldIcon, TerminalIcon } from "./components/icons";
 import { InstallCommand } from "./components/InstallCommand";
-import { LiveTerminal } from "./components/LiveTerminal";
 import { RevealLine } from "./components/RevealLine";
 import {
   SUBTITLE,
+  TITLE_ACCENT_TEXT,
   TITLE_LINE_ONE,
-  TITLE_LINE_THREE,
-  TITLE_LINE_TWO,
   TITLE_WORD_SQUIGGLED,
   VALUE_POINTS,
 } from "./data";
@@ -16,6 +15,8 @@ import styles from "./Hero.module.scss";
 
 const SQUIGGLE_PATH =
   "M2 6.2 C7 1.9 12 1.9 17 6.2 S27 10.5 32 6.2 S42 1.9 47 6.2 S57 10.5 62 6.2 S72 1.9 77 6.2 S87 10.5 98 5.2";
+
+const VALUE_POINT_ICONS = [TerminalIcon, CloudIcon, ShieldIcon] as const;
 
 export const Hero = () => (
   <section className={styles.hero}>
@@ -26,32 +27,20 @@ export const Hero = () => (
 
     <Container className={styles.container}>
       <div className={styles.copy}>
-        {/* The comment every codebase has — except here "later" finally loses. */}
-        <div className={styles.todo}>
-          <span className={styles.todoComment}>{"// TODO: fix accessibility"}</span>
-          <s className={styles.todoLater} aria-hidden="true">
-            later
-          </s>
-          <span className={styles.todoToday}>today.</span>
-        </div>
-
         <h1 className={styles.title}>
           <RevealLine text={TITLE_LINE_ONE} startDelay={0.15} />
           <br />
           <em className={styles.titleAccent}>
-            <RevealLine text={TITLE_LINE_TWO} startDelay={0.6} />
-            <br />
-            <RevealLine text={TITLE_LINE_THREE} startDelay={0.98} />{" "}
             <span className={styles.squiggleWrap}>
-              <RevealLine text={TITLE_WORD_SQUIGGLED} startDelay={1.1} />
-              {/* Lint-style squiggle: the word is "flagged", like an error in your editor */}
+              <RevealLine text={TITLE_ACCENT_TEXT} startDelay={0.6} />
+              {/* Lint-style squiggle: the product is flagging inaccessible UI like an editor error. */}
               <svg
                 className={styles.squiggle}
                 viewBox="0 0 100 12"
                 preserveAspectRatio="none"
                 aria-hidden="true"
               >
-                <mask id="hero-worse-squiggle-mask" maskUnits="userSpaceOnUse">
+                <mask id="hero-inaccessible-squiggle-mask" maskUnits="userSpaceOnUse">
                   <rect
                     className={styles.squiggleMask}
                     x="0"
@@ -62,12 +51,13 @@ export const Hero = () => (
                     transform="scale(0 1)"
                   />
                 </mask>
-                <g mask="url(#hero-worse-squiggle-mask)">
+                <g mask="url(#hero-inaccessible-squiggle-mask)">
                   <path className={styles.squiggleGlow} d={SQUIGGLE_PATH} />
                   <path className={styles.squiggleMain} d={SQUIGGLE_PATH} />
                 </g>
               </svg>
-            </span>
+            </span>{" "}
+            <RevealLine text={TITLE_WORD_SQUIGGLED} startDelay={0.98} />
           </em>
           <span className={styles.titleCaret} aria-hidden="true" />
         </h1>
@@ -75,12 +65,18 @@ export const Hero = () => (
         <p className={styles.subtitle}>{SUBTITLE}</p>
 
         <ul className={styles.valuePoints} aria-label="Why Axiony">
-          {VALUE_POINTS.map((point) => (
-            <li key={point}>
-              <CheckIcon />
-              {point}
-            </li>
-          ))}
+          {VALUE_POINTS.map((point, index) => {
+            const Icon = VALUE_POINT_ICONS[index];
+
+            return (
+              <li key={point}>
+                <span className={styles.valueIcon}>
+                  <Icon />
+                </span>
+                <span>{point}</span>
+              </li>
+            );
+          })}
         </ul>
 
         <div className={styles.actions}>
@@ -94,7 +90,7 @@ export const Hero = () => (
         <InstallCommand />
       </div>
 
-      <LiveTerminal />
+      <CloudScanner />
     </Container>
   </section>
 );

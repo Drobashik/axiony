@@ -1,6 +1,7 @@
 import { Section } from "@/components/layout";
 import { Container } from "@/components/ui";
 import cn from "classnames";
+import { TypewriterEyebrow } from "../components/TypewriterEyebrow";
 import { QuickStartFlow } from "./components/QuickStartFlow";
 import styles from "./QuickStart.module.scss";
 
@@ -8,7 +9,7 @@ export const QuickStart = () => (
   <Section surface id="quickstart">
     <Container>
       <div className={cn(styles.intro, "reveal")}>
-        <span className={styles.eyebrow}>{"// quick start"}</span>
+        <TypewriterEyebrow className={styles.eyebrow} text="// quick start" />
         <h2>
           Your first scan,
           <br />
