@@ -1,6 +1,6 @@
 .intro {
-  max-width: 760px;
-  margin: 0 auto 52px;
+  max-width: 780px;
+  margin: 0 auto clamp(38px, 5vw, 56px);
   text-align: center;
 }
 
@@ -35,14 +35,15 @@
 // ── Layout ───────────────────────────────────────────────────────────
 .explorer {
   display: grid;
-  grid-template-columns: minmax(0, 0.92fr) minmax(400px, 1.08fr);
-  gap: 22px;
+  grid-template-columns: minmax(0, 0.88fr) minmax(460px, 1.12fr);
+  gap: clamp(22px, 2.4vw, 32px);
   align-items: start;
 }
 
 .rail {
   display: grid;
-  gap: 12px;
+  gap: 14px;
+  align-content: start;
 }
 
 .list {
@@ -159,36 +160,66 @@
 
 // ── Score line: the "fix all four" game ──────────────────────────────
 .score {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  background: var(--bg-surface);
+}
+
+.scoreHead {
   display: flex;
-  flex-wrap: wrap;
   align-items: baseline;
-  gap: 6px 12px;
-  margin: 0;
-  border: 1px dashed var(--border-default);
-  border-radius: var(--radius-md);
-  padding: 10px 14px;
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
+  justify-content: space-between;
+  gap: 10px;
 }
 
-.scoreCount {
-  color: var(--text-primary);
-  font-weight: 700;
-}
-
-.scoreHint {
+.scoreLabel {
   color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
-.scoreDone {
-  color: var(--green);
-  font-weight: 700;
-  animation: scorePop 0.45s cubic-bezier(0.3, 1.4, 0.4, 1) both;
+.scoreMeta {
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+
+  strong {
+    color: var(--text-primary);
+  }
+}
+
+.scoreSegments {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.scoreSegment {
+  height: 7px;
+  border-radius: 99px;
+  background: var(--bg-muted);
+  box-shadow: inset 0 0 0 1px var(--border-subtle);
+  transition:
+    background 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.scoreSegment_fixed {
+  background: var(--green);
+  box-shadow: 0 0 18px oklch(0.72 0.18 145 / 0.24);
+  transform: translateY(-1px);
 }
 
 .scoreThanks {
   display: inline-block;
-  color: var(--text-secondary);
+  color: var(--green);
   font-family: var(--font-hand);
   font-size: 1.12rem;
   line-height: 1;
@@ -216,17 +247,6 @@
   clip: rect(0 0 0 0);
   white-space: nowrap;
   border: 0;
-}
-
-@keyframes scorePop {
-  from {
-    opacity: 0;
-    transform: scale(0.85);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
 }
 
 // ── Panel shell: a little app window, same chrome as the hero terminal ──
@@ -882,7 +902,7 @@
   .headline,
   .demo,
   .item,
-  .scoreDone,
+  .scoreSegment,
   .scoreThanks,
   .chromeBadge i {
     animation: none !important;
@@ -902,6 +922,7 @@
   .toggleThumb,
   .toggleTrack,
   .srIconBtn,
+  .scoreSegment,
   .kbField {
     transition: none !important;
   }
@@ -913,11 +934,11 @@
 @media (max-width: 980px) {
   .explorer {
     grid-template-columns: 1fr;
-    gap: 14px;
+    gap: 16px;
   }
 
   .rail {
-    gap: 10px;
+    gap: 12px;
   }
 
   .list {
@@ -982,11 +1003,6 @@
     display: none;
   }
 
-  .score {
-    padding: 8px 12px;
-    font-size: 0.74rem;
-  }
-
   .panel {
     position: relative;
     top: auto;
@@ -1005,6 +1021,19 @@
 
   .panel {
     --panel-pad: 16px;
+  }
+
+  .score {
+    padding: 12px;
+  }
+
+  .scoreHead {
+    align-items: flex-start;
+  }
+
+  .scoreThanks {
+    max-width: 12rem;
+    text-align: right;
   }
 
   .panelChrome {

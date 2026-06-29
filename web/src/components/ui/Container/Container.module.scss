@@ -5,3 +5,7 @@
 .narrow {
   @include container($container-narrow-max);
 }
+
+.wide {
+  @include container(1240px);
+}

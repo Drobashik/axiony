@@ -7,17 +7,16 @@ import styles from "./Problem.module.scss";
 
 export const Problem = () => (
   <Section surface>
-    <Container>
+    <Container variant="wide">
       <div className={cn(styles.intro, "reveal")}>
         <TypewriterEyebrow className={styles.eyebrow} text="// the problem" />
         <h2 className={styles.heading}>
-          You&apos;d fix these bugs in a minute.
+          You&apos;d fix these fast.
           <br />
-          <em className={styles.headingAccent}>You just never see them.</em>
+          <em className={styles.headingAccent}>They just stay hidden.</em>
         </h2>
         <p className={styles.lead}>
-          Over a billion people browse with a disability — and hit walls like these every day. The
-          four demos below are broken on purpose. Try each one, then flip the fix.
+          Accessibility barriers hide in everyday UI. Try the four broken demos, then flip each fix.
         </p>
       </div>
 

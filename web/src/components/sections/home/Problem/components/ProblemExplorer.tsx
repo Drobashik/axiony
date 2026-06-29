@@ -28,6 +28,27 @@ export const ProblemExplorer = () => {
   return (
     <div className={cn(styles.explorer, "reveal")}>
       <div className={styles.rail}>
+        <div className={styles.score} role="status">
+          <div className={styles.scoreHead}>
+            <span className={styles.scoreLabel}>Your fixes</span>
+            {allFixed ? (
+              <span className={styles.scoreThanks}>all four fixed — thank you ✓</span>
+            ) : (
+              <span className={styles.scoreMeta}>
+                <strong>{fixedCount}</strong> / {PROBLEMS.length} fixed
+              </span>
+            )}
+          </div>
+          <div className={styles.scoreSegments} aria-hidden="true">
+            {PROBLEMS.map((item, index) => (
+              <span
+                key={item.rule}
+                className={cn(styles.scoreSegment, fixed[index] && styles.scoreSegment_fixed)}
+              />
+            ))}
+          </div>
+        </div>
+
         <div
           className={styles.list}
           role="group"
@@ -69,24 +90,6 @@ export const ProblemExplorer = () => {
             );
           })}
         </div>
-
-        <p className={styles.score} role="status">
-          {allFixed ? (
-            <>
-              <span className={styles.scoreDone}>✓ exit 0 — all four fixed</span>
-              <span className={styles.scoreThanks}>your users thank you</span>
-            </>
-          ) : (
-            <>
-              <span className={styles.scoreCount}>
-                {fixedCount}/{PROBLEMS.length} fixed
-              </span>
-              <span className={styles.scoreHint}>
-                {fixedCount === 0 ? "go on, fix one" : "keep going"}
-              </span>
-            </>
-          )}
-        </p>
       </div>
 
       <div className={styles.panel}>
