@@ -27,20 +27,26 @@ export const TierCard = ({ tier, cycle, action }: TierCardProps) => {
   const sub = free
     ? "free forever · no card"
     : annual
-      ? `billed $${tier.priceAnnual}/yr · save 17%`
+      ? `billed $${tier.priceAnnual}/yr`
       : "billed monthly";
 
   return (
     <article
       className={cn(styles.card, styles[`card_${tier.accent}`], tier.featured && styles.featured)}
     >
+      {tier.featured && <span className={styles.badge}>Most popular</span>}
+
       <div className={styles.head}>
         <span className={styles.name}>{tier.name}</span>
         <span className={styles.audience}>{tier.audience}</span>
       </div>
 
       <div className={styles.priceRow}>
-        <span className={styles.price}>${perMonth}</span>
+        {annual && !free && <span className={styles.was}>${tier.priceMonthly}</span>}
+        <span className={styles.price}>
+          <span className={styles.currency}>$</span>
+          {perMonth}
+        </span>
         <span className={styles.period}>{free ? "forever" : "/ mo"}</span>
       </div>
       <span className={styles.sub}>{sub}</span>
@@ -58,19 +64,21 @@ export const TierCard = ({ tier, cycle, action }: TierCardProps) => {
         </span>
       </div>
 
-      <Button href={tierAction.href} variant={buttonVariant} block>
-        {tierAction.cta}
-      </Button>
-
       <ul className={styles.features}>
         {tier.inherits && <li className={styles.inherits}>{tier.inherits}</li>}
         {tier.highlights.map((highlight) => (
           <li key={highlight}>
-            <Icon name="check" size={15} className={styles.check} />
+            <span className={styles.check} aria-hidden="true">
+              <Icon name="check" size={12} />
+            </span>
             <span>{highlight}</span>
           </li>
         ))}
       </ul>
+
+      <Button href={tierAction.href} variant={buttonVariant} block className={styles.cta}>
+        {tierAction.cta}
+      </Button>
     </article>
   );
 };

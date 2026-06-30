@@ -1,6 +1,7 @@
 import { Button, Container, Icon } from "@/components/ui";
 import { WorkspaceCta } from "../WorkspaceCta";
 import cn from "classnames";
+import { TypewriterEyebrow } from "../components/TypewriterEyebrow";
 import styles from "./FinalCta.module.scss";
 
 const REASSURANCES = ["Free, open-source CLI", "No credit card", "Cloud in development"] as const;
@@ -9,7 +10,7 @@ export const FinalCta = () => (
   <section className={styles.cta}>
     <div className={styles.glow} aria-hidden="true" />
     <Container className={cn(styles.inner, "reveal")}>
-      <span className={styles.eyebrow}>{"// get started today"}</span>
+      <TypewriterEyebrow className={styles.eyebrow} text="// get started today" />
       <h2>
         Make accessibility part of
         <br />

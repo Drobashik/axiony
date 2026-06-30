@@ -8,21 +8,31 @@ import styles from "../Faq.module.scss";
 
 export const FaqList = () => {
   const [open, setOpen] = useState<number | null>(0);
+  const openLabel =
+    open === null ? "Pick a checkpoint" : `Checkpoint ${String(open + 1).padStart(2, "0")}`;
 
   return (
-    <ul className={cn(styles.list, "reveal-right")}>
-      {FAQS.map((item, index) => {
-        const isOpen = open === index;
+    <div className={cn(styles.listShell, "reveal-right")}>
+      <div className={styles.listHeader}>
+        <span>Answer queue</span>
+        <strong>{openLabel}</strong>
+      </div>
 
-        return (
-          <FaqItem
-            key={item.q}
-            item={item}
-            isOpen={isOpen}
-            onToggle={() => setOpen(isOpen ? null : index)}
-          />
-        );
-      })}
-    </ul>
+      <ul className={styles.list}>
+        {FAQS.map((item, index) => {
+          const isOpen = open === index;
+
+          return (
+            <FaqItem
+              key={item.q}
+              item={item}
+              index={index}
+              isOpen={isOpen}
+              onToggle={() => setOpen(isOpen ? null : index)}
+            />
+          );
+        })}
+      </ul>
+    </div>
   );
 };

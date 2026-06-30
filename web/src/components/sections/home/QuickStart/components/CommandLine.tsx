@@ -24,8 +24,10 @@ export const CommandLine = ({ command }: CommandLineProps) => {
   };
 
   return (
-    <div className={styles.cmd}>
-      <span className={styles.prompt}>$</span>
+    <div className={styles.cmdRow}>
+      <span className={styles.prompt} aria-hidden="true">
+        $
+      </span>
       <code className={styles.cmdText}>{command}</code>
       <button
         type="button"
@@ -33,7 +35,7 @@ export const CommandLine = ({ command }: CommandLineProps) => {
         onClick={copy}
         aria-label={copied ? "Copied" : "Copy command"}
       >
-        {copied ? <Icon name="check" size={15} /> : <CopyIcon />}
+        {copied ? <Icon name="check" size={14} /> : <CopyIcon />}
       </button>
     </div>
   );

@@ -1,55 +1,60 @@
 import { Section } from "@/components/layout";
 import { Button, Container, Icon } from "@/components/ui";
 import cn from "classnames";
-import { ReleaseSim } from "./components/ReleaseSim";
-import { SOLUTION_STEPS } from "./data";
+import { TypewriterEyebrow } from "../components/TypewriterEyebrow";
+import { FixCommandCenter } from "./components/FixCommandCenter";
+import { SOLUTION_STATS, SOLUTION_STEPS } from "./data";
 import styles from "./Solution.module.scss";
 
 export const Solution = () => (
-  <Section>
-    <Container>
-      <div className={cn(styles.intro, "reveal")}>
-        <span className={styles.eyebrow}>{"// the fix"}</span>
-        <h2 className={styles.heading}>
-          Your score gets one new rule:
-          <br />
-          <em className={styles.headingAccent}>it only goes up.</em>
-        </h2>
-        <p className={styles.lead}>
-          The first scan locks today as your baseline — old issues become tracked debt, new ones
-          don&apos;t merge. Below are the same ten releases shipped twice, with the gate and
-          without. Press the button and watch them drift apart.
-        </p>
+  <Section className={styles.section}>
+    <Container variant="wide">
+      <div className={styles.hero}>
+        <div className={cn(styles.intro, "reveal")}>
+          <TypewriterEyebrow className={styles.eyebrow} text="// the fix" />
+          <h2 className={styles.heading}>
+            Fix accessibility like
+            <br />
+            <em className={styles.headingAccent}>a product workflow.</em>
+          </h2>
+          <p className={styles.lead}>
+            Axiony connects scans, AI fixes, issue tracking, GitHub/GitLab checks, and a dashboard
+            that shows whether your baseline is actually improving.
+          </p>
+          <div className={styles.heroActions}>
+            <Button href="/scan" size="lg">
+              Scan your site now
+              <Icon name="arrow" size={16} />
+            </Button>
+            <Button href="#pricing" variant="secondary" size="lg">
+              See pricing
+            </Button>
+          </div>
+        </div>
+
+        <div className={cn(styles.statGrid, "reveal d1")} aria-label="Axiony product highlights">
+          {SOLUTION_STATS.map((stat) => (
+            <article key={stat.value} className={styles.statCard}>
+              <strong>{stat.value}</strong>
+              <span>{stat.label}</span>
+            </article>
+          ))}
+        </div>
       </div>
 
-      <div className="reveal">
-        <ReleaseSim />
+      <div className={cn(styles.commandReveal, "reveal d2")}>
+        <FixCommandCenter />
       </div>
 
-      <ol className={cn(styles.steps, "reveal")} aria-label="How the baseline works">
+      <ol className={cn(styles.steps, "reveal d3")} aria-label="How Axiony helps teams fix issues">
         {SOLUTION_STEPS.map((step) => (
           <li key={step.tag} className={styles.step}>
             <code className={styles.stepTag}>{step.tag}</code>
-            <span className={styles.stepText}>{step.text}</span>
+            <strong>{step.title}</strong>
+            <span>{step.text}</span>
           </li>
         ))}
       </ol>
-
-      <div className={cn(styles.cta, "reveal")}>
-        <p>
-          The CLI is free and runs anywhere. The cloud remembers — history, trends, and the gate in
-          every pull request.
-        </p>
-        <div className={styles.ctaButtons}>
-          <Button href="/scan">
-            Scan your site now
-            <Icon name="arrow" size={16} />
-          </Button>
-          <Button href="#pricing" variant="secondary">
-            See pricing
-          </Button>
-        </div>
-      </div>
     </Container>
   </Section>
 );

@@ -1,5 +1,4 @@
 import cn from "classnames";
-import { ScanViz } from "./ScanViz";
 import { ScannerViz } from "./ScannerViz";
 import { TeamViz } from "./TeamViz";
 import type { StepDef } from "../types";
@@ -7,7 +6,6 @@ import styles from "../ScanWorkflow.module.scss";
 
 interface WorkflowStageProps {
   active: number;
-  inView: boolean;
   reduce: boolean;
   steps: readonly StepDef[];
 }
@@ -16,7 +14,7 @@ interface WorkflowStageProps {
 // grid cell. The panel is therefore always as tall as the biggest step, so
 // switching between Free, Pro and Team crossfades the content without ever
 // changing the panel's height — the page can't jump.
-export const WorkflowStage = ({ active, inView, reduce, steps }: WorkflowStageProps) => {
+export const WorkflowStage = ({ active, reduce, steps }: WorkflowStageProps) => {
   const accent = steps[active].accent;
 
   return (
@@ -46,13 +44,10 @@ export const WorkflowStage = ({ active, inView, reduce, steps }: WorkflowStagePr
               aria-hidden={!isActive}
               className={cn(styles.vizSlot, isActive && styles.vizSlotActive)}
             >
-              {/* Keyed by active state so the scan re-types and the team week
-                  replays each time their step is opened. */}
-              {index === 0 && (
-                <ScanViz key={`scan-${isActive}`} start={inView && isActive} reduce={reduce} />
-              )}
-              {index === 1 && <ScannerViz />}
-              {index === 2 && (
+              {/* Keyed by active state so the team week replays each time the
+                  step is opened. */}
+              {index === 0 && <ScannerViz />}
+              {index === 1 && (
                 <TeamViz key={`team-${isActive}`} reduce={reduce} active={isActive} />
               )}
             </div>

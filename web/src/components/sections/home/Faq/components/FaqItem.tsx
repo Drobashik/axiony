@@ -4,6 +4,7 @@ import styles from "../Faq.module.scss";
 
 interface FaqItemProps {
   item: QA;
+  index: number;
   isOpen: boolean;
   onToggle: () => void;
 }
@@ -25,16 +26,33 @@ const ChevronIcon = () => (
   </svg>
 );
 
-export const FaqItem = ({ item, isOpen, onToggle }: FaqItemProps) => (
-  <li className={cn(styles.item, isOpen && styles.item_open)}>
-    <button type="button" className={styles.question} aria-expanded={isOpen} onClick={onToggle}>
-      <span>{item.q}</span>
-      <ChevronIcon />
-    </button>
-    <div className={styles.answer}>
-      <div className={styles.answerInner}>
-        <p>{item.a}</p>
+export const FaqItem = ({ item, index, isOpen, onToggle }: FaqItemProps) => {
+  const answerId = `faq-answer-${index}`;
+  const number = String(index + 1).padStart(2, "0");
+
+  return (
+    <li className={cn(styles.item, isOpen && styles.itemOpen)}>
+      <button
+        type="button"
+        className={styles.question}
+        aria-expanded={isOpen}
+        aria-controls={answerId}
+        onClick={onToggle}
+      >
+        <span className={styles.questionMain}>
+          <span className={styles.questionIndex}>{number}</span>
+          <span className={styles.questionText}>{item.q}</span>
+        </span>
+        <span className={styles.questionAction}>
+          <span>{isOpen ? "Active" : "Inspect"}</span>
+          <ChevronIcon />
+        </span>
+      </button>
+      <div id={answerId} className={styles.answer} aria-hidden={!isOpen}>
+        <div className={styles.answerInner}>
+          <p>{item.a}</p>
+        </div>
       </div>
-    </div>
-  </li>
-);
+    </li>
+  );
+};

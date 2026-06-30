@@ -21,7 +21,7 @@ const COPY: Record<BillingPlan, TierCopy> = {
       "A plain-English fix for every issue",
       "Baseline file — new issues fail CI",
     ],
-    cta: "Start free",
+    cta: "Scan your site free",
     href: "/scan",
   },
   pro: {
@@ -32,7 +32,7 @@ const COPY: Record<BillingPlan, TierCopy> = {
       "Compare any two runs · email alerts",
       "AI fix suggestions · exportable reports",
     ],
-    cta: "Start Pro now",
+    cta: "Get Pro",
     href: "/signup",
   },
   team: {
@@ -43,7 +43,7 @@ const COPY: Record<BillingPlan, TierCopy> = {
       "GitHub / GitLab checks + PR comments",
       "Branch baselines · Slack alerts",
     ],
-    cta: "Start Team now",
+    cta: "Get Team",
     href: "/signup",
   },
 };
