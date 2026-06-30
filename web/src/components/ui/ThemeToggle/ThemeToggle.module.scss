@@ -72,10 +72,22 @@
 }
 
 // ── Icon button (light ⇄ dark) — marketing header ─────────────────────
+$toggle-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
 .iconButton {
+  --toggle-accent: var(--blue);
+  --toggle-accent-soft: var(--blue-dim);
+  --toggle-cut: var(--bg-base);
+  --moon-opacity: 1;
+  --moon-transform: translateY(0) rotate(-8deg) scale(1);
+  --sun-opacity: 0;
+  --sun-transform: translateY(9px) rotate(-80deg) scale(0.54);
+
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  isolation: isolate;
   flex-shrink: 0;
   width: 36px;
   height: 36px;
@@ -84,51 +96,146 @@
   color: var(--text-secondary);
   background: transparent;
   cursor: pointer;
+  overflow: hidden;
   transition:
     border-color 160ms ease,
-    color 160ms ease,
-    background 160ms ease;
+    color 180ms ease,
+    background 160ms ease,
+    box-shadow 180ms ease,
+    transform 220ms $toggle-spring;
 
   &:hover {
     border-color: var(--border-subtle);
     color: var(--text-primary);
     background: var(--tint-soft);
+    box-shadow: inset 0 1px 0 var(--edge-highlight);
+  }
+
+  &:hover .iconGlow {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  &:active {
+    transform: scale(0.94);
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+
+  &[data-resolved="light"] {
+    --toggle-accent: var(--green);
+    --toggle-accent-soft: var(--green-dim);
+    --toggle-cut: color-mix(in oklch, var(--bg-base) 76%, var(--green));
+    --moon-opacity: 0;
+    --moon-transform: translateY(-9px) rotate(80deg) scale(0.56);
+    --sun-opacity: 1;
+    --sun-transform: translateY(0) rotate(0deg) scale(1);
   }
 }
 
-.iconSwap {
+.iconGlow {
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--toggle-accent-soft), transparent 68%);
+  filter: blur(1px);
+  opacity: 0.55;
+  pointer-events: none;
+  transform: scale(0.78);
+  transition:
+    opacity 180ms ease,
+    transform 220ms $toggle-spring;
+}
+
+.iconFrame {
   position: relative;
-  width: 18px;
-  height: 18px;
+  z-index: 1;
+  display: grid;
+  width: 19px;
+  height: 19px;
+  place-items: center;
+}
+
+.iconGlyph {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--toggle-accent);
+  filter: drop-shadow(0 0 8px color-mix(in oklch, var(--toggle-accent) 32%, transparent));
+  transition:
+    opacity 180ms ease,
+    transform 360ms $toggle-spring;
 
   svg {
-    position: absolute;
-    inset: 0;
-    width: 18px;
-    height: 18px;
-    transition:
-      opacity 200ms ease,
-      transform 320ms cubic-bezier(0.2, 0, 0, 1);
+    display: block;
+    width: 19px;
+    height: 19px;
+    overflow: visible;
   }
 }
 
-// Default (dark): moon shown, sun tucked away.
-.sun {
-  opacity: 0;
-  transform: rotate(-90deg) scale(0.5);
-}
-.moon {
-  opacity: 1;
-  transform: rotate(0) scale(1);
+.moonGlyph {
+  opacity: var(--moon-opacity);
+  transform: var(--moon-transform);
 }
 
-.iconSwap[data-resolved="light"] {
-  .sun {
-    opacity: 1;
-    transform: rotate(0) scale(1);
-  }
-  .moon {
-    opacity: 0;
-    transform: rotate(90deg) scale(0.5);
+.sunGlyph {
+  opacity: var(--sun-opacity);
+  transform: var(--sun-transform);
+}
+
+.sunHalo,
+.sunRays,
+.sunCore,
+.moonBody,
+.moonCrater,
+.moonSpark {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.sunHalo {
+  fill: var(--toggle-accent-soft);
+}
+
+.sunRays,
+.moonBody {
+  fill: none;
+}
+
+.moonBody {
+  fill: currentColor;
+}
+
+.sunRays {
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-width: 1.75;
+}
+
+.sunCore,
+.moonSpark {
+  fill: color-mix(in oklch, var(--toggle-accent) 46%, white);
+}
+
+.sunCut {
+  fill: none;
+  stroke: var(--toggle-cut);
+  stroke-linecap: round;
+  stroke-width: 1.45;
+}
+
+.moonCrater {
+  fill: var(--toggle-cut);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iconButton,
+  .iconGlow,
+  .iconGlyph {
+    transition: none;
   }
 }

@@ -1861,19 +1861,46 @@
     font-size: 1rem;
   }
 
+  // Mobile: collapse the 3 stacked cards into one tight strip of icon
+  // pills. Removes the near-empty-box look and lifts the CTA + live scan
+  // higher up the first screen. Wraps gracefully on very narrow phones.
   .valuePoints {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-wrap: wrap;
     gap: 8px;
-    max-width: 360px;
+    max-width: none;
 
     li {
-      min-height: 46px;
-      padding-block: 9px;
+      display: inline-flex;
+      align-items: center;
+      width: auto;
+      min-height: 0;
+      grid-template-columns: none;
+      gap: 8px;
+      padding: 7px 14px 7px 9px;
+      border-radius: 999px;
       font-size: 0.76rem;
+      // Drop the inset left accent bar — it reads wrong on a rounded pill.
+      box-shadow:
+        inset 0 1px 0 var(--edge-highlight),
+        var(--shadow-sm);
 
+      // Hide the "01/02/03" counter and the desktop connector dash.
+      &::before,
       &::after {
         display: none;
       }
+    }
+  }
+
+  .valueIcon {
+    width: 22px;
+    height: 22px;
+    border-radius: 7px;
+
+    svg {
+      width: 13px;
+      height: 13px;
     }
   }
 

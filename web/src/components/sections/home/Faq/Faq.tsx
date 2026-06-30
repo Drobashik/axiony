@@ -6,17 +6,21 @@ import { FaqList } from "./components/FaqList";
 import styles from "./Faq.module.scss";
 
 export const Faq = () => (
-  <Section surface id="faq">
+  <Section surface id="faq" className={styles.section}>
     <Container>
       <div className={styles.grid}>
         <div className={cn(styles.aside, "reveal-left")}>
           <TypewriterEyebrow className={styles.eyebrow} text="// faq" />
           <h2>
-            Questions,
+            Your launch
             <br />
-            <em className={styles.headingAccent}>answered.</em>
+            <em className={styles.headingAccent}>checkpoints.</em>
           </h2>
-          <p className={styles.asideLead}>Everything worth knowing before your first scan.</p>
+          <p className={styles.asideLead}>
+            The questions teams usually ask right before accessibility becomes part of their release
+            flow.
+          </p>
+
           <div className={styles.help}>
             <span className={styles.helpLabel}>Still curious?</span>
             <div className={styles.helpLinks}>

@@ -1,9 +1,11 @@
-import type { ReactNode } from "react";
+import type { IconName } from "@/types";
 
-export interface QuickStep {
-  n: string;
-  title: string;
+// One thing you can point the CLI at — a live URL, an HTML file, or a
+// React component. Drives the "scan anything" trio under the terminal.
+export interface ScanTarget {
+  icon: IconName;
+  label: string;
   command: string;
-  note: ReactNode;
+  desc: string;
   accent: "green" | "blue" | "violet";
 }

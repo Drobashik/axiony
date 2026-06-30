@@ -7,7 +7,7 @@ import styles from "./QuickStart.module.scss";
 
 export const QuickStart = () => (
   <Section surface id="quickstart">
-    <Container>
+    <Container variant="wide">
       <div className={cn(styles.intro, "reveal")}>
         <TypewriterEyebrow className={styles.eyebrow} text="// quick start" />
         <h2>

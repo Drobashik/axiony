@@ -2,7 +2,6 @@ import { Button, Container } from "@/components/ui";
 import { WorkspaceCta } from "../WorkspaceCta";
 import { CloudScanner } from "./components/CloudScanner";
 import { ArrowRightIcon, CloudIcon, ShieldIcon, TerminalIcon } from "./components/icons";
-import { InstallCommand } from "./components/InstallCommand";
 import { RevealLine } from "./components/RevealLine";
 import {
   SUBTITLE,
@@ -86,8 +85,6 @@ export const Hero = () => (
           </Button>
           <WorkspaceCta />
         </div>
-
-        <InstallCommand />
       </div>
 
       <CloudScanner />
