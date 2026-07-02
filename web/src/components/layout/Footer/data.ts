@@ -4,10 +4,11 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
   {
     heading: "Product",
     links: [
-      { href: "/#features", label: "Features" },
-      { href: "/pricing", label: "Pricing" },
-      { href: "/#changelog", label: "Changelog" },
-      { href: "#", label: "Roadmap" },
+      { href: "/#workflow", label: "How it works" },
+      { href: "/#quickstart", label: "Quick start" },
+      { href: "/#pricing", label: "Pricing" },
+      { href: "/#faq", label: "FAQ" },
+      { href: "/scan", label: "Scan studio" },
     ],
   },
   {
@@ -41,6 +42,6 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
 ];
 
 export const FOOTER_BADGES: FooterBadge[] = [
-  { tone: "green", label: "SOC 2 Ready" },
-  { tone: "blue", label: "WCAG 2.2" },
+  { tone: "green", label: "MIT-licensed CLI" },
+  { tone: "blue", label: "WCAG 2.2 checks" },
 ];
