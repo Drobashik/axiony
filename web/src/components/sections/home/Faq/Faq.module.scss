@@ -184,10 +184,6 @@
       color: var(--blue);
     }
 
-    .questionAction span {
-      color: var(--green);
-    }
-
     .chevron {
       transform: rotate(180deg);
       color: var(--blue);
@@ -263,15 +259,6 @@
   flex: none;
   gap: 10px;
   color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-
-  span {
-    transition: color 160ms ease;
-  }
 }
 
 .chevron {
@@ -345,10 +332,6 @@
 
   .question {
     padding-inline: 14px;
-  }
-
-  .questionAction span {
-    display: none;
   }
 
   .answerInner p {

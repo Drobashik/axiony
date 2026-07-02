@@ -44,7 +44,6 @@ export const FaqItem = ({ item, index, isOpen, onToggle }: FaqItemProps) => {
           <span className={styles.questionText}>{item.q}</span>
         </span>
         <span className={styles.questionAction}>
-          <span>{isOpen ? "Active" : "Inspect"}</span>
           <ChevronIcon />
         </span>
       </button>

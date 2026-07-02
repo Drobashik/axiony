@@ -12,9 +12,9 @@ export const Faq = () => (
         <div className={cn(styles.aside, "reveal-left")}>
           <TypewriterEyebrow className={styles.eyebrow} text="// faq" />
           <h2>
-            Your launch
+            Answers, before
             <br />
-            <em className={styles.headingAccent}>checkpoints.</em>
+            <em className={styles.headingAccent}>you commit.</em>
           </h2>
           <p className={styles.asideLead}>
             The questions teams usually ask right before accessibility becomes part of their release

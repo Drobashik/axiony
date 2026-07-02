@@ -8,14 +8,12 @@ import styles from "../Faq.module.scss";
 
 export const FaqList = () => {
   const [open, setOpen] = useState<number | null>(0);
-  const openLabel =
-    open === null ? "Pick a checkpoint" : `Checkpoint ${String(open + 1).padStart(2, "0")}`;
 
   return (
     <div className={cn(styles.listShell, "reveal-right")}>
       <div className={styles.listHeader}>
-        <span>Answer queue</span>
-        <strong>{openLabel}</strong>
+        <span>faq</span>
+        <strong>{String(FAQS.length).padStart(2, "0")} questions</strong>
       </div>
 
       <ul className={styles.list}>

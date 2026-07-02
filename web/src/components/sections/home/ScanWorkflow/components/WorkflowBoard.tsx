@@ -11,7 +11,6 @@ import {
   SCAN_SEQUENCE,
   WORKFLOW_ACTIVITY,
   WORKFLOW_COLUMNS,
-  WORKFLOW_METRICS,
   WORKFLOW_TABS,
 } from "../data";
 import type { ScanLine } from "../data";
@@ -21,13 +20,6 @@ type WorkflowTab = (typeof WORKFLOW_TABS)[number];
 type WorkflowTabKey = WorkflowTab["key"];
 
 const AUTO_TAB_MS = 5600;
-
-const TabStatus = ({ tab }: { tab: WorkflowTab }) => (
-  <span className={cn(styles.flowStatus, styles[`flowStatus_${tab.accent}`])}>
-    <span aria-hidden="true" />
-    {tab.status}
-  </span>
-);
 
 const SCAN_GLYPHS: Record<ScanLine["type"], string> = {
   cmd: "$",
@@ -130,6 +122,7 @@ const RunPanel = ({ active }: { active: boolean }) => (
         <article key={item.label} className={styles.summaryCard}>
           <strong>{item.value}</strong>
           <span>{item.label}</span>
+          <code>{item.note}</code>
         </article>
       ))}
       <div className={styles.integrationStrip}>
@@ -178,10 +171,10 @@ const ReviewPanel = () => (
       ))}
     </section>
 
-    <aside className={styles.sidePanel} aria-label="Workflow activity and integrations">
+    <div className={styles.reviewSide}>
       <TrendBlock />
       <ActivityBlock />
-    </aside>
+    </div>
   </div>
 );
 
@@ -288,8 +281,11 @@ export const WorkflowBoard = () => {
   const [isPaused, setIsPaused] = useState(false);
   const [isInView, setIsInView] = useState(false);
   const isInViewRef = useRef(false);
-  const activeTab = WORKFLOW_TABS.find((tab) => tab.key === activeKey) ?? WORKFLOW_TABS[0];
-  const cycleClass = cycleKey % 2 === 0 ? styles.flowTab_cycleA : styles.flowTab_cycleB;
+  // Entering the viewport restarts the tour from "run" — but never over a
+  // tab the visitor picked themselves.
+  const userSelectedRef = useRef(false);
+  const activeIndex = WORKFLOW_TABS.findIndex((tab) => tab.key === activeKey);
+  const cycleClass = cycleKey % 2 === 0 ? styles.step_cycleA : styles.step_cycleB;
 
   useEffect(() => {
     const el = boardRef.current;
@@ -309,7 +305,7 @@ export const WorkflowBoard = () => {
       ([entry]) => {
         const nextInView = entry.isIntersecting;
 
-        if (nextInView && !isInViewRef.current) {
+        if (nextInView && !isInViewRef.current && !userSelectedRef.current) {
           setActiveKey("run");
           setCycleKey((key) => key + 1);
         }
@@ -326,6 +322,7 @@ export const WorkflowBoard = () => {
   }, []);
 
   const selectTab = (key: WorkflowTabKey) => {
+    userSelectedRef.current = true;
     setActiveKey(key);
     setCycleKey((cycle) => cycle + 1);
   };
@@ -356,91 +353,148 @@ export const WorkflowBoard = () => {
         }
       }}
     >
-      <div className={styles.flowTabs} role="tablist" aria-label="Axiony workflow">
-        {WORKFLOW_TABS.map((tab) => {
-          const isActive = tab.key === activeKey;
-
-          return (
-            <button
-              key={tab.key}
-              type="button"
-              role="tab"
-              id={`workflow-tab-${tab.key}`}
-              aria-selected={isActive}
-              aria-controls={`workflow-panel-${tab.key}`}
-              className={cn(
-                styles.flowTab,
-                styles[`flowTab_${tab.accent}`],
-                isActive && styles.flowTab_active,
-                isActive && cycleClass,
-              )}
-              onClick={() => selectTab(tab.key)}
-            >
-              <code>{tab.n}</code>
-              <span className={styles.flowTabCopy}>
-                <strong>{tab.label}</strong>
-                <small>{tab.title}</small>
-              </span>
-              <span
-                className={styles.flowTabProgress}
-                aria-hidden="true"
-                onAnimationEnd={(event) => handleTabProgressEnd(event, tab.key)}
-              />
-            </button>
-          );
-        })}
-      </div>
-
-      <div className={styles.workspacePreview}>
-        <div className={styles.workspaceTop}>
-          <div className={styles.workspaceCopyStack}>
-            {WORKFLOW_TABS.map((tab) => {
-              const isActive = tab.key === activeKey;
-
-              return (
-                <div
+      <div className={styles.shell}>
+        {/* One product window: browser chrome on top, step rail + stage below. */}
+        <div className={styles.chrome}>
+          <span className={styles.chromeDots} aria-hidden="true">
+            <i />
+            <i />
+            <i />
+          </span>
+          <span className={styles.chromeUrl}>
+            <span className={styles.chromeHost}>app.axiony.dev</span>
+            <span className={styles.chromePathStack} aria-hidden="true">
+              {WORKFLOW_TABS.map((tab) => (
+                <b
                   key={tab.key}
-                  className={cn(styles.workspaceCopy, isActive && styles.workspaceCopy_active)}
-                  aria-hidden={!isActive}
+                  className={cn(
+                    styles.chromePath,
+                    tab.key === activeKey && styles.chromePath_active,
+                  )}
                 >
-                  <span className={styles.workspaceKicker}>acme · accessibility workspace</span>
-                  <h3>{tab.title}</h3>
-                  <p>{tab.text}</p>
-                </div>
-              );
-            })}
-          </div>
-          <TabStatus tab={activeTab} />
-        </div>
-
-        <div className={styles.metricGrid}>
-          {WORKFLOW_METRICS.map((metric) => (
-            <div key={metric.label} className={cn(styles.metric, styles[`metric_${metric.tone}`])}>
-              <strong>{metric.value}</strong>
-              <span>{metric.label}</span>
-            </div>
-          ))}
-        </div>
-
-        <div className={styles.flowPanel}>
-          {WORKFLOW_TABS.map((tab) => {
-            const isActive = tab.key === activeKey;
-
-            return (
-              <div
+                  {tab.path}
+                </b>
+              ))}
+            </span>
+          </span>
+          <span className={styles.chromeStatus}>
+            {WORKFLOW_TABS.map((tab) => (
+              <span
                 key={tab.key}
-                id={`workflow-panel-${tab.key}`}
-                role="tabpanel"
-                aria-labelledby={`workflow-tab-${tab.key}`}
-                aria-hidden={!isActive}
-                className={cn(styles.flowPanelItem, isActive && styles.flowPanelItem_active)}
+                aria-hidden={tab.key !== activeKey}
+                className={cn(
+                  styles.flowStatus,
+                  styles[`flowStatus_${tab.accent}`],
+                  styles.chromeStatusItem,
+                  tab.key === activeKey && styles.chromeStatusItem_active,
+                )}
               >
-                {tab.key === "run" && <RunPanel active={isInView && isActive} />}
-                {tab.key === "review" && <ReviewPanel />}
-                {tab.key === "fix" && <FixPanel />}
-              </div>
-            );
-          })}
+                <span aria-hidden="true" />
+                {tab.status}
+              </span>
+            ))}
+          </span>
+        </div>
+
+        <div className={styles.board}>
+          <div className={styles.rail}>
+            <div
+              className={styles.steps}
+              role="tablist"
+              aria-label="Axiony workflow"
+              aria-orientation="vertical"
+            >
+              {WORKFLOW_TABS.map((tab, index) => {
+                const isActive = tab.key === activeKey;
+                const state = isActive ? "active" : index < activeIndex ? "done" : "todo";
+
+                return (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    role="tab"
+                    id={`workflow-tab-${tab.key}`}
+                    aria-selected={isActive}
+                    aria-controls={`workflow-panel-${tab.key}`}
+                    data-state={state}
+                    className={cn(
+                      styles.step,
+                      styles[`step_${tab.accent}`],
+                      isActive && styles.step_active,
+                      isActive && cycleClass,
+                    )}
+                    onClick={() => selectTab(tab.key)}
+                  >
+                    <span className={styles.stepMarker} aria-hidden="true">
+                      <code>{tab.n}</code>
+                    </span>
+                    <span className={styles.stepCopy}>
+                      <strong>{tab.label}</strong>
+                      <small>{tab.hint}</small>
+                      <span
+                        className={styles.stepProgress}
+                        aria-hidden="true"
+                        onAnimationEnd={(event) => handleTabProgressEnd(event, tab.key)}
+                      />
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* All three descriptions share one grid cell, so the rail never
+                changes height while the tour advances. */}
+            <div className={styles.railCopyStack}>
+              {WORKFLOW_TABS.map((tab) => {
+                const isActive = tab.key === activeKey;
+
+                return (
+                  <div
+                    key={tab.key}
+                    className={cn(styles.railCopy, isActive && styles.railCopy_active)}
+                    aria-hidden={!isActive}
+                  >
+                    <h3>{tab.title}</h3>
+                    <p>{tab.text}</p>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* The section's thesis: one baseline, present in every step. */}
+            <div className={styles.railNote}>
+              <span className={styles.railNoteLabel}>shared context</span>
+              <span className={styles.railNoteValue}>
+                baseline <b>84</b>
+                <Icon name="arrow" size={13} />
+                <b>92</b>
+              </span>
+              <small>carried from your terminal to your team</small>
+            </div>
+          </div>
+
+          <div className={styles.stage}>
+            <div className={styles.flowPanel}>
+              {WORKFLOW_TABS.map((tab) => {
+                const isActive = tab.key === activeKey;
+
+                return (
+                  <div
+                    key={tab.key}
+                    id={`workflow-panel-${tab.key}`}
+                    role="tabpanel"
+                    aria-labelledby={`workflow-tab-${tab.key}`}
+                    aria-hidden={!isActive}
+                    className={cn(styles.flowPanelItem, isActive && styles.flowPanelItem_active)}
+                  >
+                    {tab.key === "run" && <RunPanel active={isInView && isActive} />}
+                    {tab.key === "review" && <ReviewPanel />}
+                    {tab.key === "fix" && <FixPanel />}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
     </div>
