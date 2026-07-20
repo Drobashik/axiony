@@ -79,12 +79,23 @@
   padding: 24px 0 36px;
 }
 
+@include breakpoint-down(lg) {
+  .backdrop {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .main {
+    place-items: start center;
+  }
+}
+
 @include breakpoint-down(sm) {
   .backdrop {
     padding: 12px;
   }
 
   .main {
-    padding: 18px 0 24px;
+    padding: 12px 0 24px;
   }
 }

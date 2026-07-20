@@ -578,6 +578,72 @@
   flex-wrap: wrap;
   margin-bottom: 16px;
   animation: fadeUp 0.6s $ease-out 0.72s both;
+
+  > * {
+    min-height: 52px;
+    justify-content: center;
+  }
+}
+
+// Hero-specific secondary action. It stays visually consistent on desktop,
+// tablet and phone; only its surrounding layout changes at the breakpoints.
+.workspaceCta {
+  position: relative;
+  border-color: color-mix(in oklch, var(--violet) 28%, var(--border-default));
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in oklch, var(--violet) 10%, transparent),
+      color-mix(in oklch, var(--blue) 7%, transparent)
+    ),
+    color-mix(in oklch, var(--bg-surface) 82%, transparent);
+  box-shadow:
+    inset 0 1px 0 var(--edge-highlight),
+    0 10px 28px color-mix(in oklch, var(--violet) 9%, transparent);
+  backdrop-filter: blur(12px);
+
+  &::after {
+    content: "↗";
+    display: grid;
+    width: 24px;
+    height: 24px;
+    place-items: center;
+    border: 1px solid color-mix(in oklch, var(--violet) 24%, var(--border-subtle));
+    border-radius: 8px;
+    background: color-mix(in oklch, var(--violet) 10%, var(--bg-muted));
+    color: var(--violet);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    line-height: 1;
+    transition:
+      transform var(--transition),
+      border-color var(--transition),
+      background var(--transition);
+  }
+
+  &:disabled::after {
+    opacity: 0;
+  }
+
+  &:hover:not(:disabled) {
+    border-color: color-mix(in oklch, var(--violet) 52%, var(--border-strong));
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in oklch, var(--violet) 15%, transparent),
+        color-mix(in oklch, var(--blue) 10%, transparent)
+      ),
+      color-mix(in oklch, var(--bg-surface) 88%, transparent);
+    box-shadow:
+      inset 0 1px 0 var(--edge-highlight),
+      0 14px 34px color-mix(in oklch, var(--violet) 13%, transparent);
+
+    &::after {
+      border-color: color-mix(in oklch, var(--violet) 42%, var(--border-default));
+      background: color-mix(in oklch, var(--violet) 16%, var(--bg-muted));
+      transform: translate(2px, -2px);
+    }
+  }
 }
 
 .install {
@@ -1843,18 +1909,110 @@
   }
 
   .scanWrap {
-    padding-top: 72px;
+    padding-top: 88px;
   }
 
   .scanTodo {
     top: 0;
-    left: 0;
-    max-width: 100%;
+    left: 50%;
+    width: max-content;
+    max-width: calc(100% - 24px);
+    justify-content: center;
+    transform: translateX(-50%);
+
+    // A short guide line makes the note feel attached to the scanner instead
+    // of floating as an unrelated label.
+    &::after {
+      content: "";
+      position: absolute;
+      top: calc(100% + 1px);
+      left: 50%;
+      width: 1px;
+      height: 24px;
+      background: linear-gradient(
+        to bottom,
+        color-mix(in oklch, var(--blue) 44%, var(--border-default)),
+        transparent
+      );
+    }
+
+    .todo {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid color-mix(in oklch, var(--blue) 20%, var(--border-default));
+      border-radius: 12px;
+      padding: 10px 14px;
+      background:
+        linear-gradient(
+          135deg,
+          color-mix(in oklch, var(--blue) 7%, transparent),
+          color-mix(in oklch, var(--violet) 5%, transparent)
+        ),
+        color-mix(in oklch, var(--bg-surface) 88%, transparent);
+      box-shadow:
+        inset 0 1px 0 var(--edge-highlight),
+        0 12px 30px color-mix(in oklch, var(--blue) 8%, transparent);
+      backdrop-filter: blur(12px);
+
+      &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 14px;
+        width: 52px;
+        height: 1px;
+        background: linear-gradient(90deg, var(--blue), var(--violet), transparent);
+        opacity: 0.72;
+      }
+    }
   }
 
   .annotation,
   .annotationArrow {
     display: none;
+  }
+}
+
+// Tablet and phone: once the scanner becomes a full-width second row, the copy
+// reads more naturally as one centered composition above it.
+@media (max-width: 1120px) {
+  .container {
+    gap: 64px;
+  }
+
+  .copy {
+    width: 100%;
+    max-width: 760px;
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .title {
+    max-width: 740px;
+    margin: 0 auto 22px;
+    font-size: clamp(3rem, 7vw, 3.8rem);
+    line-height: 1.04;
+    letter-spacing: -0.04em;
+    text-wrap: balance;
+  }
+
+  .subtitle {
+    max-width: 620px;
+    margin: 0 auto 24px;
+    font-size: 1.1rem;
+    text-wrap: balance;
+  }
+
+  .valuePoints {
+    justify-content: center;
+    margin-inline: auto;
+    margin-bottom: 30px;
+  }
+
+  .actions {
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 0;
   }
 }
 
@@ -1903,7 +2061,27 @@
   .hero {
     --hero-grid-size: 56px;
     --hero-grid-sub-size: 14px;
-    padding: 56px 0 84px;
+    padding: 48px 0 78px;
+  }
+
+  .container {
+    gap: 52px;
+  }
+
+  .scanWrap {
+    padding-top: 112px;
+  }
+
+  .copy {
+    max-width: 36rem;
+  }
+
+  .title {
+    max-width: 25rem;
+    margin-bottom: 18px;
+    font-size: clamp(2.35rem, 11vw, 2.9rem);
+    line-height: 1.04;
+    letter-spacing: -0.04em;
   }
 
   .grid {
@@ -1931,7 +2109,11 @@
   }
 
   .subtitle {
+    max-width: 33rem;
+    margin-inline: auto;
+    margin-bottom: 22px;
     font-size: 1rem;
+    line-height: 1.55;
   }
 
   // Mobile: keep the rail as wrap-friendly icon pills so the CTA + live
@@ -1939,8 +2121,11 @@
   .valuePoints {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     gap: 8px;
     max-width: none;
+    margin-inline: auto;
+    margin-bottom: 26px;
 
     li {
       display: inline-flex;
@@ -1981,10 +2166,10 @@
   .actions {
     flex-direction: column;
     align-items: stretch;
+    gap: 10px;
 
     > * {
       width: 100%;
-      justify-content: center;
     }
   }
 
@@ -2001,8 +2186,14 @@
   }
 
   .todo {
-    gap: 7px;
-    font-size: 0.8rem;
+    display: inline-flex;
+    width: max-content;
+    max-width: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 5px 7px;
+    padding: 11px 15px;
+    font-size: 0.78rem;
 
     .todoToday {
       font-size: 1.28rem;

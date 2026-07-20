@@ -14,7 +14,7 @@ export interface BootGateProps {
 
 let hasBootedOnce = false;
 
-const waitForUsableFirstPaint = (onReady: () => void): (() => void) => {
+const waitForPageLoadAndPaint = (onReady: () => void): (() => void) => {
   let cancelled = false;
   let firstFrame = 0;
   let secondFrame = 0;
@@ -22,8 +22,9 @@ const waitForUsableFirstPaint = (onReady: () => void): (() => void) => {
   const finish = () => {
     if (cancelled) return;
 
-    // Effects run after hydration. Two RAFs let the browser commit layout and
-    // paint the hydrated app before we remove the boot overlay.
+    // `load` means the document and its dependent resources are ready. Two
+    // frames then let the hydrated app commit a usable paint before the overlay
+    // is removed; there is no synthetic minimum duration.
     firstFrame = window.requestAnimationFrame(() => {
       secondFrame = window.requestAnimationFrame(() => {
         if (!cancelled) onReady();
@@ -31,15 +32,15 @@ const waitForUsableFirstPaint = (onReady: () => void): (() => void) => {
     });
   };
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", finish, { once: true });
-  } else {
+  if (document.readyState === "complete") {
     finish();
+  } else {
+    window.addEventListener("load", finish, { once: true });
   }
 
   return () => {
     cancelled = true;
-    document.removeEventListener("DOMContentLoaded", finish);
+    window.removeEventListener("load", finish);
     window.cancelAnimationFrame(firstFrame);
     window.cancelAnimationFrame(secondFrame);
   };
@@ -51,7 +52,7 @@ export const BootGate = ({ disabled, children }: BootGateProps) => {
   const [loaded, setLoaded] = useState(startsLoaded);
 
   useEffect(() => {
-    if (!ready) return waitForUsableFirstPaint(() => setReady(true));
+    if (!ready) return waitForPageLoadAndPaint(() => setReady(true));
   }, [ready]);
 
   useEffect(() => {

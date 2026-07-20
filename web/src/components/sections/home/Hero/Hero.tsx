@@ -84,7 +84,7 @@ export const Hero = () => (
             Scan your site now
             <ArrowRightIcon />
           </Button>
-          <WorkspaceCta />
+          <WorkspaceCta className={styles.workspaceCta} />
         </div>
       </div>
 

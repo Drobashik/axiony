@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import cn from "classnames";
 import { LogoLockup } from "../LogoMark";
 import styles from "./LoadingScreen.module.scss";
@@ -10,47 +10,20 @@ export interface LoadingScreenProps {
   ready?: boolean;
 }
 
-type Phase = "enter" | "visible" | "exit";
-
-const EXIT_MS = 500;
-
 export const LoadingScreen = ({ onDone, ready = false }: LoadingScreenProps) => {
-  const [phase, setPhase] = useState<Phase>("enter");
-
-  useEffect(() => {
-    const frame = window.requestAnimationFrame(() => setPhase("visible"));
-    return () => window.cancelAnimationFrame(frame);
-  }, []);
-
   useEffect(() => {
     if (!ready) return;
 
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const doneDelay = reduceMotion ? 0 : EXIT_MS;
-    let timer = 0;
-
-    const frame = window.requestAnimationFrame(() => {
-      setPhase("exit");
-      timer = window.setTimeout(() => onDone?.(), doneDelay);
-    });
-
-    return () => {
-      window.cancelAnimationFrame(frame);
-      window.clearTimeout(timer);
-    };
+    // Let the completed bar/status reach one painted frame, then reveal the
+    // already-rendered page immediately—no minimum timeout or delayed exit.
+    const frame = window.requestAnimationFrame(() => onDone?.());
+    return () => window.cancelAnimationFrame(frame);
   }, [onDone, ready]);
 
-  const hidden = phase === "exit";
-  const visible = phase !== "enter";
   const status = ready ? "Ready" : "Loading Axiony...";
 
   return (
-    <div
-      className={cn(styles.screen, hidden && styles.hidden)}
-      role="status"
-      aria-live="polite"
-      aria-label="Loading Axiony"
-    >
+    <div className={styles.screen} role="status" aria-live="polite" aria-label="Loading Axiony">
       <div className={styles.rings} aria-hidden="true">
         {[300, 460, 620].map((size, i) => (
           <span
@@ -68,17 +41,11 @@ export const LoadingScreen = ({ onDone, ready = false }: LoadingScreenProps) => 
         <span className={styles.glow} />
       </div>
 
-      <div className={cn(styles.logoWrap, visible && styles.logoReady)}>
+      <div className={cn(styles.logoWrap, styles.logoReady)}>
         <LogoLockup markSize={86} />
       </div>
 
-      <div
-        className={cn(
-          styles.progress,
-          visible && styles.progressReady,
-          ready && styles.progressComplete,
-        )}
-      >
+      <div className={cn(styles.progress, styles.progressReady, ready && styles.progressComplete)}>
         <div className={styles.bar}>
           <div className={styles.fill} />
         </div>

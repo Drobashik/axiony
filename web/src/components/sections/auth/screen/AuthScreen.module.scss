@@ -22,6 +22,8 @@
   isolation: isolate;
   overflow: hidden;
   display: flex;
+  grid-column: 1;
+  grid-row: 1;
   padding: 48px 42px;
   // Calmer + a touch darker than the form panel, so it reads as supporting
   // context and the form is what stands out.
@@ -257,6 +259,8 @@
 .panel {
   position: relative;
   display: flex;
+  grid-column: 2;
+  grid-row: 1;
   min-width: 0;
   padding: 52px 46px;
   background:
@@ -841,12 +845,12 @@
   }
 
   .aside {
-    padding: 34px 32px;
-    border-right: none;
-    border-bottom: 1px solid var(--border-subtle);
+    display: none;
   }
 
   .panel {
+    grid-column: 1;
+    grid-row: 1;
     padding: 34px 32px;
   }
 
@@ -856,16 +860,8 @@
 }
 
 @include breakpoint-down(sm) {
-  .aside {
-    padding: 28px 24px;
-  }
-
   .panel {
-    padding: 28px 24px;
-  }
-
-  .points {
-    display: none;
+    padding: 24px 20px 26px;
   }
 
   .oauthRow {
