@@ -71,53 +71,58 @@
   pointer-events: none;
 }
 
-// ── Icon button (light ⇄ dark) — marketing header ─────────────────────
+// ── Theme command chip (light ⇄ dark) — marketing header ──────────────
 $toggle-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
 .iconButton {
   --toggle-accent: var(--blue);
   --toggle-accent-soft: var(--blue-dim);
-  --toggle-cut: var(--bg-base);
   --moon-opacity: 1;
-  --moon-transform: translateY(0) rotate(-8deg) scale(1);
+  --moon-transform: translateY(0) rotate(-7deg) scale(1);
   --sun-opacity: 0;
-  --sun-transform: translateY(9px) rotate(-80deg) scale(0.54);
+  --sun-transform: translateY(7px) rotate(-55deg) scale(0.65);
+  --rail-position: 0;
 
   position: relative;
-  display: inline-flex;
+  display: inline-grid;
+  grid-template-columns: 25px auto;
   align-items: center;
-  justify-content: center;
+  gap: 6px;
   isolation: isolate;
   flex-shrink: 0;
-  width: 36px;
   height: 36px;
-  border: 1px solid transparent;
-  border-radius: var(--radius-md);
+  min-width: 82px;
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  padding: 4px 9px 5px 4px;
   color: var(--text-secondary);
-  background: transparent;
+  background:
+    linear-gradient(145deg, var(--tint-soft), transparent 58%),
+    color-mix(in oklch, var(--bg-surface) 78%, transparent);
+  box-shadow:
+    inset 0 1px 0 var(--edge-highlight),
+    var(--shadow-sm);
   cursor: pointer;
   overflow: hidden;
   transition:
-    border-color 160ms ease,
-    color 180ms ease,
-    background 160ms ease,
-    box-shadow 180ms ease,
-    transform 220ms $toggle-spring;
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 200ms ease,
+    transform 200ms $toggle-spring;
 
   &:hover {
-    border-color: var(--border-subtle);
-    color: var(--text-primary);
-    background: var(--tint-soft);
-    box-shadow: inset 0 1px 0 var(--edge-highlight);
-  }
-
-  &:hover .iconGlow {
-    opacity: 1;
-    transform: scale(1);
+    border-color: color-mix(in oklch, var(--toggle-accent) 42%, var(--border-default));
+    background:
+      linear-gradient(145deg, var(--toggle-accent-soft), transparent 62%), var(--bg-surface);
+    box-shadow:
+      inset 0 1px 0 var(--edge-highlight),
+      var(--shadow-md),
+      0 0 18px color-mix(in oklch, var(--toggle-accent) 10%, transparent);
+    transform: translateY(-1px);
   }
 
   &:active {
-    transform: scale(0.94);
+    transform: translateY(0) scale(0.97);
   }
 
   &:focus-visible {
@@ -127,115 +132,118 @@ $toggle-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   &[data-resolved="light"] {
     --toggle-accent: var(--green);
     --toggle-accent-soft: var(--green-dim);
-    --toggle-cut: color-mix(in oklch, var(--bg-base) 76%, var(--green));
     --moon-opacity: 0;
-    --moon-transform: translateY(-9px) rotate(80deg) scale(0.56);
+    --moon-transform: translateY(-7px) rotate(55deg) scale(0.65);
     --sun-opacity: 1;
     --sun-transform: translateY(0) rotate(0deg) scale(1);
+    --rail-position: 44px;
   }
 }
 
-.iconGlow {
-  position: absolute;
-  inset: 5px;
-  border-radius: 50%;
-  background: radial-gradient(circle, var(--toggle-accent-soft), transparent 68%);
-  filter: blur(1px);
-  opacity: 0.55;
-  pointer-events: none;
-  transform: scale(0.78);
-  transition:
-    opacity 180ms ease,
-    transform 220ms $toggle-spring;
-}
-
-.iconFrame {
+.modeIcon {
   position: relative;
   z-index: 1;
   display: grid;
-  width: 19px;
-  height: 19px;
+  width: 25px;
+  height: 25px;
   place-items: center;
+  border: 1px solid color-mix(in oklch, var(--toggle-accent) 26%, var(--border-subtle));
+  border-radius: 7px;
+  background:
+    radial-gradient(circle at 35% 24%, var(--toggle-accent-soft), transparent 62%), var(--bg-base);
+  box-shadow:
+    inset 0 1px 0 var(--edge-highlight),
+    0 0 12px color-mix(in oklch, var(--toggle-accent) 9%, transparent);
+  transition:
+    border-color 180ms ease,
+    background 180ms ease;
 }
 
-.iconGlyph {
+.modeGlyph {
   position: absolute;
-  inset: 0;
+  inset: 4px;
   display: grid;
   place-items: center;
   color: var(--toggle-accent);
-  filter: drop-shadow(0 0 8px color-mix(in oklch, var(--toggle-accent) 32%, transparent));
+  filter: drop-shadow(0 0 5px color-mix(in oklch, var(--toggle-accent) 38%, transparent));
   transition:
     opacity 180ms ease,
-    transform 360ms $toggle-spring;
+    transform 320ms $toggle-spring;
 
   svg {
     display: block;
-    width: 19px;
-    height: 19px;
+    width: 15px;
+    height: 15px;
     overflow: visible;
+    stroke-width: 1.8;
   }
 }
 
-.moonGlyph {
+.modeMoon {
   opacity: var(--moon-opacity);
   transform: var(--moon-transform);
 }
 
-.sunGlyph {
+.modeSun {
   opacity: var(--sun-opacity);
   transform: var(--sun-transform);
 }
 
-.sunHalo,
-.sunRays,
-.sunCore,
-.moonBody,
-.moonCrater,
-.moonSpark {
-  transform-box: fill-box;
-  transform-origin: center;
+.modeCopy {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
 }
 
-.sunHalo {
-  fill: var(--toggle-accent-soft);
+.modeKey {
+  color: var(--text-muted);
+  font-size: 0.48rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
-.sunRays,
-.moonBody {
-  fill: none;
+.modeValue {
+  color: var(--toggle-accent);
+  font-size: 0.65rem;
+  transition: color 180ms ease;
 }
 
-.moonBody {
-  fill: currentColor;
-}
+.modeRail {
+  position: absolute;
+  right: 7px;
+  bottom: 3px;
+  left: 7px;
+  height: 1px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--border-subtle);
 
-.sunRays {
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-width: 1.75;
-}
-
-.sunCore,
-.moonSpark {
-  fill: color-mix(in oklch, var(--toggle-accent) 46%, white);
-}
-
-.sunCut {
-  fill: none;
-  stroke: var(--toggle-cut);
-  stroke-linecap: round;
-  stroke-width: 1.45;
-}
-
-.moonCrater {
-  fill: var(--toggle-cut);
+  span {
+    display: block;
+    width: 18px;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--toggle-accent);
+    box-shadow: 0 0 7px var(--toggle-accent);
+    transform: translateX(var(--rail-position));
+    transition:
+      background 180ms ease,
+      transform 320ms $toggle-spring;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .iconButton,
-  .iconGlow,
-  .iconGlyph {
+  .modeIcon,
+  .modeGlyph,
+  .modeValue,
+  .modeRail span {
     transition: none;
   }
 }
