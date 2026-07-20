@@ -3,15 +3,17 @@
 import cn from "classnames";
 import { PACKAGE_MANAGERS, installCommand } from "../data";
 import type { PackageManager } from "../data";
+import type { ScanTarget } from "../types";
 import { CommandLine } from "./CommandLine";
 import styles from "../QuickStart.module.scss";
 
 interface QuickTerminalProps {
   pm: PackageManager;
+  target: ScanTarget;
   onSelect: (pm: PackageManager) => void;
 }
 
-export const QuickTerminal = ({ pm, onSelect }: QuickTerminalProps) => (
+export const QuickTerminal = ({ pm, target, onSelect }: QuickTerminalProps) => (
   <div className={styles.terminal}>
     <div className={styles.termHead}>
       <span className={styles.dots} aria-hidden="true">
@@ -43,14 +45,18 @@ export const QuickTerminal = ({ pm, onSelect }: QuickTerminalProps) => (
       <p className={styles.comment}># 2 · grab the headless browser, once</p>
       <CommandLine command="axiony install" />
 
-      <p className={styles.comment}># 3 · scan your first page</p>
-      <CommandLine command="axiony scan https://your-site.com" />
-
-      <p className={cn(styles.output, styles.outputFirst)}>
-        <span className={styles.ok}>✓</span> scanned your-site.com · 1 page, 132 elements
+      {/* Step 3 follows the selected target — keyed so the swapped lines
+          re-enter with a small rise instead of blinking in place. */}
+      <p key={`step-${target.key}`} className={cn(styles.comment, styles.swap)}>
+        # 3 · {target.step3}
       </p>
-      <p className={styles.output}>
-        <span className={styles.score}>78 / 100</span> · 11 issues — 6 ready as AI patches
+      <CommandLine key={`cmd-${target.key}`} className={styles.swap} command={target.command} />
+
+      <p key={`ok-${target.key}`} className={cn(styles.output, styles.outputFirst, styles.swap)}>
+        <span className={styles.ok}>✓</span> {target.scanned}
+      </p>
+      <p key={`verdict-${target.key}`} className={cn(styles.output, styles.swap)}>
+        <span className={styles.score}>{target.score}</span> · {target.verdict}
       </p>
 
       <p className={styles.idle}>

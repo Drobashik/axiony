@@ -8,9 +8,10 @@ import styles from "../QuickStart.module.scss";
 
 interface CommandLineProps {
   command: string;
+  className?: string;
 }
 
-export const CommandLine = ({ command }: CommandLineProps) => {
+export const CommandLine = ({ command, className }: CommandLineProps) => {
   const [copied, setCopied] = useState(false);
 
   const copy = async () => {
@@ -24,7 +25,7 @@ export const CommandLine = ({ command }: CommandLineProps) => {
   };
 
   return (
-    <div className={styles.cmdRow}>
+    <div className={cn(styles.cmdRow, className)}>
       <span className={styles.prompt} aria-hidden="true">
         $
       </span>

@@ -1,19 +1,110 @@
 .cta {
-  text-align: center;
-  padding: 120px 0;
+  --cta-grid-line: color-mix(in oklch, var(--text-primary) 6%, transparent);
   position: relative;
   overflow: hidden;
+  isolation: isolate;
+  padding: 120px 0;
+  text-align: center;
+
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+  }
+
+  &::before {
+    inset: -80px;
+    background-image:
+      linear-gradient(var(--cta-grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--cta-grid-line) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse 76% 76% at 50% 66%, black, transparent 84%);
+    opacity: 0.68;
+  }
+
+  &::after {
+    inset: -28% -14%;
+    background:
+      radial-gradient(
+        ellipse 44% 54% at 34% 78%,
+        color-mix(in oklch, var(--blue) 13%, transparent),
+        transparent 72%
+      ),
+      radial-gradient(
+        ellipse 42% 50% at 68% 76%,
+        color-mix(in oklch, var(--violet) 11%, transparent),
+        transparent 72%
+      ),
+      radial-gradient(
+        ellipse 28% 34% at 50% 72%,
+        color-mix(in oklch, var(--green) 7%, transparent),
+        transparent 72%
+      );
+  }
 }
 
 .glow {
   position: absolute;
-  bottom: -100px;
+  bottom: -140px;
   left: 50%;
-  transform: translateX(-50%);
-  width: 700px;
-  height: 400px;
+  width: min(980px, 110vw);
+  height: 520px;
   pointer-events: none;
-  background: radial-gradient(ellipse at 50% 100%, oklch(0.62 0.22 240 / 0.12) 0%, transparent 65%);
+  background: radial-gradient(
+    ellipse at 50% 100%,
+    color-mix(in oklch, var(--blue) 18%, transparent) 0%,
+    transparent 68%
+  );
+  transform: translateX(-50%);
+  filter: blur(12px);
+}
+
+@keyframes ctaGridParallax {
+  from {
+    transform: translate3d(0, 28px, 0);
+  }
+  to {
+    transform: translate3d(0, -28px, 0);
+  }
+}
+
+@keyframes ctaAuroraParallax {
+  from {
+    transform: translate3d(0, -5%, 0) scale(1.02);
+  }
+  to {
+    transform: translate3d(0, 5%, 0) scale(1.1);
+  }
+}
+
+@keyframes ctaGlowParallax {
+  from {
+    transform: translate3d(-50%, 8%, 0) scale(0.94);
+  }
+  to {
+    transform: translate3d(-50%, -8%, 0) scale(1.08);
+  }
+}
+
+@supports (animation-timeline: view()) {
+  .cta::before {
+    animation: ctaGridParallax linear both;
+    animation-timeline: view();
+    animation-range: entry 0% exit 100%;
+  }
+
+  .cta::after {
+    animation: ctaAuroraParallax linear both;
+    animation-timeline: view();
+    animation-range: entry 0% exit 100%;
+  }
+
+  .glow {
+    animation: ctaGlowParallax linear both;
+    animation-timeline: view();
+    animation-range: entry 0% exit 100%;
+  }
 }
 
 .inner {
@@ -81,10 +172,51 @@
 @media (max-width: 640px) {
   .cta {
     padding: 88px 0;
+
+    &::before {
+      inset: -56px;
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 120% 70% at 50% 66%, black, transparent 88%);
+      opacity: 0.48;
+      animation: none;
+      transform: none;
+    }
+
+    &::after {
+      inset: -14% -62%;
+      opacity: 0.74;
+      animation: none;
+      transform: none;
+    }
+  }
+
+  .glow {
+    bottom: -180px;
+    width: 150vw;
+    height: 460px;
+    animation: none;
+    transform: translateX(-50%);
   }
 
   .actions > * {
     width: 100%;
     justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cta::before,
+  .cta::after,
+  .glow {
+    animation: none !important;
+  }
+
+  .cta::before,
+  .cta::after {
+    transform: none !important;
+  }
+
+  .glow {
+    transform: translateX(-50%) !important;
   }
 }

@@ -1,3 +1,84 @@
+.section {
+  --quick-grid-line: color-mix(in oklch, var(--text-primary) 5%, transparent);
+  --quick-grid-node: color-mix(in oklch, var(--green) 28%, transparent);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+  }
+
+  &::before {
+    inset: -18% -12%;
+    background:
+      radial-gradient(
+        ellipse 44% 38% at 18% 42%,
+        color-mix(in oklch, var(--blue) 11%, transparent),
+        transparent 72%
+      ),
+      radial-gradient(
+        ellipse 38% 34% at 88% 68%,
+        color-mix(in oklch, var(--green) 9%, transparent),
+        transparent 72%
+      );
+  }
+
+  &::after {
+    inset: -12% -8%;
+    background-image:
+      radial-gradient(circle at 1px 1px, var(--quick-grid-node) 0 1.15px, transparent 1.7px),
+      linear-gradient(var(--quick-grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--quick-grid-line) 1px, transparent 1px);
+    background-size:
+      84px 84px,
+      42px 42px,
+      42px 42px;
+    mask-image: linear-gradient(90deg, transparent 2%, black 24%, black 78%, transparent 98%);
+    opacity: 0.58;
+  }
+
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+@keyframes quickGlowParallax {
+  from {
+    transform: translate3d(0, -5%, 0) scale(1.04);
+  }
+  to {
+    transform: translate3d(0, 5%, 0) scale(1.1);
+  }
+}
+
+@keyframes quickGridParallax {
+  from {
+    transform: translate3d(-16px, 24px, 0);
+  }
+  to {
+    transform: translate3d(16px, -24px, 0);
+  }
+}
+
+@supports (animation-timeline: view()) {
+  .section::before {
+    animation: quickGlowParallax linear both;
+    animation-timeline: view();
+    animation-range: entry 0% exit 100%;
+  }
+
+  .section::after {
+    animation: quickGridParallax linear both;
+    animation-timeline: view();
+    animation-range: entry 0% exit 100%;
+  }
+}
+
 // =====================================================================
 // Quick start — a copy-paste terminal as the centerpiece (PM toggle in
 // the title bar, copyable command rows, a realistic payoff), then the
@@ -28,20 +109,36 @@
 .lead {
   margin-top: 14px;
   color: var(--text-secondary);
-  font-size: 1.05rem;
+  font-size: 1.08rem;
   line-height: 1.7;
 }
 
 // Two columns to match the width/density of the neighbouring wide
 // sections: the terminal on the left, the "scan anything" rail on the
-// right, and a full-width footer underneath.
+// right with the no-install runner pinned to its foot.
 .flow {
   display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(290px, 0.8fr);
+  grid-template-columns: minmax(0, 1.42fr) minmax(300px, 0.82fr);
   align-items: stretch;
   gap: 20px;
   max-width: 1180px;
   margin: 0 auto;
+}
+
+.rail {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.railFoot {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+  margin-top: auto;
+  border-top: 1px dashed var(--border-default);
+  padding-top: 16px;
 }
 
 // ── Terminal ─────────────────────────────────────────────────────────
@@ -169,11 +266,11 @@
   display: grid;
   flex: 1;
   align-content: start;
-  gap: 7px;
-  padding: 18px 18px 16px;
+  gap: 9px;
+  padding: 20px 20px 18px;
   font-family: var(--font-mono);
-  font-size: 0.85rem;
-  line-height: 1.5;
+  font-size: 0.95rem;
+  line-height: 1.55;
 }
 
 .comment {
@@ -181,7 +278,7 @@
   color: var(--term-dim);
 
   &:not(:first-child) {
-    margin-top: 7px;
+    margin-top: 10px;
   }
 }
 
@@ -192,7 +289,7 @@
   gap: 10px;
   margin: 0 -6px;
   border-radius: var(--radius-sm);
-  padding: 5px 6px 5px 8px;
+  padding: 6px 6px 6px 8px;
   transition: background 150ms ease;
 
   &:hover {
@@ -223,8 +320,8 @@
   display: grid;
   place-items: center;
   flex: none;
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border: 1px solid var(--term-line);
   border-radius: var(--radius-sm);
   background: var(--term-row);
@@ -293,9 +390,26 @@
   }
 }
 
+// Lines that follow the selected target re-enter with a small rise.
+.swap {
+  animation: qsSwap 0.28s $ease-out both;
+}
+
+@keyframes qsSwap {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 // ── "Point it at anything" trio ──────────────────────────────────────
-// A vertical rail of horizontal cards — fills the right column, and
-// stays readable when it drops below the terminal on narrow screens.
+// A vertical rail of clickable cards: picking one points the terminal's
+// step 3 at that target. Stays readable when it drops below the terminal
+// on narrow screens.
 .targets {
   display: grid;
   align-content: start;
@@ -304,8 +418,9 @@
 
 .targetsLabel {
   margin: 0;
-  color: var(--text-secondary);
-  font-size: 0.95rem;
+  color: var(--text-primary);
+  font-size: 1.02rem;
+  font-weight: 600;
 }
 
 .targetGrid {
@@ -316,20 +431,39 @@
 .target {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  gap: 12px;
+  gap: 13px;
   align-items: start;
+  width: 100%;
   border: 1px solid var(--border-subtle);
   border-left: 2px solid var(--accent);
   border-radius: var(--radius-lg);
-  padding: 14px;
+  padding: 15px 16px;
   background: var(--bg-base);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
   transition:
     border-color 180ms ease,
+    background 180ms ease,
     transform 180ms ease;
 
   &:hover {
     border-color: var(--accent-border);
     transform: translateX(2px);
+  }
+
+  &:focus-visible {
+    @include focus-ring(var(--accent), 3px);
+  }
+}
+
+.targetActive {
+  border-color: var(--accent-border);
+  background: linear-gradient(90deg, var(--accent-dim), transparent 72%), var(--bg-base);
+
+  &:hover {
+    transform: none;
   }
 }
 
@@ -340,7 +474,7 @@
 
   strong {
     color: var(--text-primary);
-    font-size: 0.98rem;
+    font-size: 1.04rem;
   }
 
   code {
@@ -348,11 +482,11 @@
     max-width: 100%;
     overflow-x: auto;
     border-radius: var(--radius-sm);
-    padding: 5px 8px;
+    padding: 5px 9px;
     background: var(--bg-muted);
     color: var(--text-code);
     font-family: var(--font-mono);
-    font-size: 0.76rem;
+    font-size: 0.8rem;
     white-space: nowrap;
     scrollbar-width: none;
 
@@ -360,19 +494,18 @@
       display: none;
     }
   }
+}
 
-  p {
-    margin: 0;
-    color: var(--text-secondary);
-    font-size: 0.84rem;
-    line-height: 1.5;
-  }
+.targetDesc {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
 }
 
 .targetIcon {
   display: grid;
-  width: 34px;
-  height: 34px;
+  width: 38px;
+  height: 38px;
   place-items: center;
   border: 1px solid var(--accent-border);
   border-radius: var(--radius-md);
@@ -390,53 +523,78 @@
   @include accent("violet");
 }
 
-// ── Footer ───────────────────────────────────────────────────────────
-.footer {
-  grid-column: 1 / -1;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 12px 22px;
-  margin-top: 6px;
-}
-
 .runner {
   margin: 0;
   color: var(--text-muted);
-  font-size: 0.9rem;
+  font-size: 0.92rem;
 
   code {
     color: var(--text-code);
     font-family: var(--font-mono);
-    font-size: 0.84rem;
+    font-size: 0.86rem;
   }
 }
 
 // Below the two-column threshold the terminal goes full width and the
 // rail drops underneath it, centered to match.
 @media (max-width: 860px) {
+  .section {
+    &::before {
+      animation: none;
+      transform: none;
+    }
+
+    &::after {
+      mask-image: radial-gradient(ellipse 120% 76% at 50% 48%, black, transparent 88%);
+      opacity: 0.48;
+      animation: none;
+      transform: none;
+    }
+  }
+
   .flow {
     grid-template-columns: minmax(0, 1fr);
     max-width: 640px;
   }
-
-  .targetsLabel {
-    text-align: center;
-  }
 }
 
 @media (max-width: 480px) {
+  .section {
+    &::before {
+      inset: -6% -46%;
+      opacity: 0.74;
+      animation: none;
+      transform: none;
+    }
+
+    &::after {
+      inset-inline: -24%;
+      background-size:
+        64px 64px,
+        32px 32px,
+        32px 32px;
+      opacity: 0.38;
+      animation: none;
+      transform: none;
+    }
+  }
+
   .termPath {
     display: none;
   }
 
   .termBody {
-    font-size: 0.8rem;
+    font-size: 0.88rem;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .section::before,
+  .section::after {
+    animation: none !important;
+    transform: none !important;
+  }
+
   .pmBtn,
   .cmdRow,
   .copy,
@@ -444,7 +602,8 @@
     transition: none;
   }
 
-  .caret {
+  .caret,
+  .swap {
     animation: none;
   }
 }

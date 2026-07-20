@@ -304,9 +304,29 @@ test('fails clearly when a URL scan lands on an access-denied page', async () =>
   `);
 
   try {
-    await assert.rejects(() => scanUrl(url), {
-      message: BLOCKED_SCAN_PAGE_ERROR,
-    });
+    await assert.rejects(
+      () => scanUrl(url),
+      (error: unknown) => {
+        assert.ok(error instanceof Error);
+        assert.equal(error.message, BLOCKED_SCAN_PAGE_ERROR);
+        assert.equal(error.name, 'ScanDiagnosticError');
+
+        const diagnostic = (
+          error as Error & {
+            diagnostic?: {
+              finalUrl?: string;
+              title?: string;
+              textLength?: number;
+            };
+          }
+        ).diagnostic;
+
+        assert.equal(diagnostic?.finalUrl, new URL(url).href);
+        assert.equal(diagnostic?.title, 'Access Denied');
+        assert.ok((diagnostic?.textLength ?? 0) > 0);
+        return true;
+      },
+    );
   } finally {
     await closeServer(server);
   }

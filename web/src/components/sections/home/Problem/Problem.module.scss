@@ -1,3 +1,85 @@
+.section {
+  --problem-grid-line: color-mix(in oklch, var(--text-primary) 5.5%, transparent);
+  --problem-grid-node: color-mix(in oklch, var(--blue) 26%, transparent);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+  }
+
+  &::before {
+    inset: -18% -12%;
+    background:
+      radial-gradient(
+        ellipse 38% 34% at 12% 30%,
+        color-mix(in oklch, var(--violet) 10%, transparent),
+        transparent 72%
+      ),
+      radial-gradient(
+        ellipse 42% 38% at 90% 70%,
+        color-mix(in oklch, var(--blue) 11%, transparent),
+        transparent 72%
+      );
+    opacity: 0.9;
+  }
+
+  &::after {
+    inset: -10% -8%;
+    background-image:
+      radial-gradient(circle at 1px 1px, var(--problem-grid-node) 0 1.1px, transparent 1.7px),
+      linear-gradient(var(--problem-grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--problem-grid-line) 1px, transparent 1px);
+    background-size:
+      96px 96px,
+      48px 48px,
+      48px 48px;
+    mask-image: radial-gradient(ellipse 88% 72% at 50% 56%, black 10%, transparent 82%);
+    opacity: 0.7;
+  }
+
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+@keyframes problemGlowParallax {
+  from {
+    transform: translate3d(0, -5%, 0) scale(1.04);
+  }
+  to {
+    transform: translate3d(0, 5%, 0) scale(1.1);
+  }
+}
+
+@keyframes problemGridParallax {
+  from {
+    transform: translate3d(0, 3%, 0);
+  }
+  to {
+    transform: translate3d(0, -3%, 0);
+  }
+}
+
+@supports (animation-timeline: view()) {
+  .section::before {
+    animation: problemGlowParallax linear both;
+    animation-timeline: view();
+    animation-range: entry 0% exit 100%;
+  }
+
+  .section::after {
+    animation: problemGridParallax linear both;
+    animation-timeline: view();
+    animation-range: entry 0% exit 100%;
+  }
+}
+
 .intro {
   max-width: 780px;
   margin: 0 auto clamp(38px, 5vw, 56px);
@@ -28,7 +110,7 @@
   max-width: 640px;
   margin-inline: auto;
   color: var(--text-secondary);
-  font-size: 1.05rem;
+  font-size: 1.08rem;
   line-height: 1.75;
 }
 
@@ -108,7 +190,7 @@
 .rule {
   color: var(--text-code);
   font-family: var(--font-mono);
-  font-size: 0.78rem;
+  font-size: 0.84rem;
   transition:
     color 180ms ease,
     text-decoration-color 180ms ease;
@@ -140,22 +222,22 @@
 
 .titleFull {
   color: var(--text-primary);
-  font-size: 0.99rem;
+  font-size: 1.06rem;
   line-height: 1.35;
 }
 
 .titleShort {
   display: none;
   color: inherit;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   font-weight: 600;
   white-space: nowrap;
 }
 
 .itemDesc {
   color: var(--text-secondary);
-  font-size: 0.88rem;
-  line-height: 1.55;
+  font-size: 0.94rem;
+  line-height: 1.6;
 }
 
 // ── Score line: the "fix all four" game ──────────────────────────────
@@ -187,7 +269,7 @@
 .scoreMeta {
   color: var(--text-secondary);
   font-family: var(--font-mono);
-  font-size: 0.82rem;
+  font-size: 0.86rem;
 
   strong {
     color: var(--text-primary);
@@ -300,7 +382,7 @@
   @include truncate;
   color: var(--text-muted);
   font-family: var(--font-mono);
-  font-size: 0.76rem;
+  font-size: 0.8rem;
 }
 
 .chromeBadge {
@@ -344,7 +426,7 @@
 
 .headline {
   margin-bottom: 18px;
-  font-size: 1.3rem;
+  font-size: 1.36rem;
   letter-spacing: -0.01em;
 }
 
@@ -374,7 +456,7 @@
 .takeaway {
   margin: 0;
   color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   line-height: 1.6;
 
   strong {
@@ -394,7 +476,7 @@
   background: var(--blue-dim);
   color: var(--blue);
   font-family: var(--font-sans);
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   font-weight: 800;
   cursor: pointer;
   transition:
@@ -430,7 +512,7 @@
   border-radius: var(--radius-md);
   background: transparent;
   color: var(--text-secondary);
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   font-weight: 700;
   cursor: pointer;
   transition:
@@ -454,7 +536,7 @@
   gap: 9px;
   cursor: pointer;
   color: var(--text-secondary);
-  font-size: 0.84rem;
+  font-size: 0.88rem;
   font-weight: 700;
   user-select: none;
 
@@ -709,7 +791,7 @@
   font-family: var(--font-mono);
 
   strong {
-    font-size: 1.05rem;
+    font-size: 1.1rem;
     transition: color 160ms ease;
   }
 }
@@ -787,7 +869,7 @@
   align-items: center;
   justify-content: space-between;
   color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-size: 0.94rem;
 }
 
 .kbChevron {
@@ -874,12 +956,12 @@
   flex: 1;
   color: var(--text-secondary);
   font-family: var(--font-mono);
-  font-size: 0.86rem;
+  font-size: 0.9rem;
 }
 
 .statusWord {
   color: var(--text-muted);
-  font-size: 0.72rem;
+  font-size: 0.76rem;
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -899,6 +981,12 @@
 
 // ── Reduced motion ───────────────────────────────────────────────────
 @media (prefers-reduced-motion: reduce) {
+  .section::before,
+  .section::after {
+    animation: none !important;
+    transform: none !important;
+  }
+
   .headline,
   .demo,
   .item,
@@ -1011,12 +1099,33 @@
 }
 
 @media (max-width: 640px) {
+  .section {
+    &::before {
+      inset: -8% -36%;
+      opacity: 0.7;
+      animation: none;
+      transform: none;
+    }
+
+    &::after {
+      inset-inline: -24%;
+      background-size:
+        80px 80px,
+        40px 40px,
+        40px 40px;
+      mask-image: radial-gradient(ellipse 120% 74% at 50% 50%, black, transparent 86%);
+      opacity: 0.48;
+      animation: none;
+      transform: none;
+    }
+  }
+
   .intro {
     margin-bottom: 30px;
   }
 
   .lead {
-    font-size: 0.98rem;
+    font-size: 1rem;
   }
 
   .panel {
@@ -1042,7 +1151,7 @@
   }
 
   .headline {
-    font-size: 1.15rem;
+    font-size: 1.22rem;
   }
 
   .contrastControls {

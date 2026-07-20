@@ -222,15 +222,15 @@ const FixPanel = () => (
           ))}
         </div>
       </div>
-      <TrendBlock compact />
+      <GateBlock />
     </aside>
   </div>
 );
 
 const TREND_LINE_PATH = "M12 88 L58 82 L104 84 L150 63 L196 54 L248 34";
 
-const TrendBlock = ({ compact }: { compact?: boolean }) => (
-  <div className={cn(styles.sideBlock, compact && styles.sideBlock_compact)}>
+const TrendBlock = () => (
+  <div className={styles.sideBlock}>
     <div className={styles.sideHead}>
       <span>Baseline trend</span>
       <code>last 7 days</code>
@@ -249,6 +249,38 @@ const TrendBlock = ({ compact }: { compact?: boolean }) => (
     <div className={styles.trendMeta}>
       <strong>84 → 92</strong>
       <span>new issues blocked, fixed work counted</span>
+    </div>
+  </div>
+);
+
+// The gate in action, on one looping 8s clock: a clean PR crosses and
+// merges into main, the PR with new issues stops at the bar, a second
+// clean one passes. Complements the review tab's trend chart instead of
+// repeating it.
+const GateBlock = () => (
+  <div className={styles.sideBlock}>
+    <div className={styles.sideHead}>
+      <span>Merge gate</span>
+      <code>protecting main</code>
+    </div>
+
+    <div className={styles.gateViz} aria-hidden="true">
+      <span className={styles.gateTrack} />
+      <span className={cn(styles.gateDot, styles.gateDot_first)} />
+      <span className={cn(styles.gateDot, styles.gateDot_blocked)} />
+      <span className={cn(styles.gateDot, styles.gateDot_second)} />
+      <span className={styles.gateBar}>
+        <i className={styles.gateFlashPass} />
+        <i className={styles.gateFlashBlock} />
+      </span>
+      <span className={styles.gateFlag}>2 new · blocked</span>
+      <span className={styles.gateMain}>main</span>
+      <span className={styles.gateLabel}>feature branches</span>
+    </div>
+
+    <div className={styles.gateMeta}>
+      <strong>Only new issues block.</strong>
+      <span>Existing debt never fails a PR.</span>
     </div>
   </div>
 );
