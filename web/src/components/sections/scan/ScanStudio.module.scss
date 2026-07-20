@@ -914,6 +914,68 @@
   border-top: 1px solid var(--border-subtle);
 }
 
+.diagnosticExplanation {
+  display: grid;
+  gap: 7px;
+  margin-top: 12px;
+  border: 1px solid color-mix(in oklch, var(--severity-critical) 24%, var(--border-subtle));
+  border-radius: var(--radius-md);
+  padding: 13px 14px;
+  background:
+    radial-gradient(
+      circle at 0 0,
+      color-mix(in oklch, var(--severity-critical) 10%, transparent),
+      transparent 58%
+    ),
+    var(--bg-surface);
+
+  strong {
+    color: var(--text-primary);
+    font-size: 0.94rem;
+    line-height: 1.35;
+  }
+}
+
+.diagnosticKicker {
+  color: var(--severity-critical);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.diagnosticReason {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.diagnosticAction {
+  display: grid;
+  gap: 3px;
+  margin-top: 3px;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 9px;
+
+  > span {
+    color: var(--green);
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  p {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 0.78rem;
+    line-height: 1.55;
+  }
+}
+
 .diagnosticGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

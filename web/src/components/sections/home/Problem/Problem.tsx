@@ -6,7 +6,7 @@ import { ProblemExplorer } from "./components/ProblemExplorer";
 import styles from "./Problem.module.scss";
 
 export const Problem = () => (
-  <Section surface>
+  <Section surface id="problem" className={styles.section}>
     <Container variant="wide">
       <div className={cn(styles.intro, "reveal")}>
         <TypewriterEyebrow className={styles.eyebrow} text="// the problem" />

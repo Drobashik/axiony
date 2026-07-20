@@ -8,6 +8,12 @@
 // =====================================================================
 
 .hero {
+  --hero-grid-size: 72px;
+  --hero-grid-sub-size: 18px;
+  --hero-grid-minor: color-mix(in oklch, var(--text-primary) 7%, transparent);
+  --hero-grid-major: color-mix(in oklch, var(--blue) 19%, transparent);
+  --hero-grid-node: color-mix(in oklch, var(--violet) 42%, transparent);
+  --hero-grid-sweep: color-mix(in oklch, var(--blue) 11%, transparent);
   position: relative;
   display: flex;
   align-items: center;
@@ -17,14 +23,66 @@
   isolation: isolate;
 }
 
-// ── Background: dot grid, two asymmetric glows, film grain ──────────
+// Light mode needs a touch more ink in the fine grid, while keeping the
+// blue major lines airy enough that they never compete with the headline.
+:global(:root[data-theme="light"]) .hero {
+  --hero-grid-minor: color-mix(in oklch, var(--text-primary) 9%, transparent);
+  --hero-grid-major: color-mix(in oklch, var(--blue) 16%, transparent);
+  --hero-grid-node: color-mix(in oklch, var(--violet) 26%, transparent);
+  --hero-grid-sweep: color-mix(in oklch, var(--blue) 8%, transparent);
+}
+
+@media (prefers-color-scheme: light) {
+  :global(:root:not([data-theme])) .hero {
+    --hero-grid-minor: color-mix(in oklch, var(--text-primary) 9%, transparent);
+    --hero-grid-major: color-mix(in oklch, var(--blue) 16%, transparent);
+    --hero-grid-node: color-mix(in oklch, var(--violet) 26%, transparent);
+    --hero-grid-sweep: color-mix(in oklch, var(--blue) 8%, transparent);
+  }
+}
+
+// ── Background: dimensional grid, moving light, glows, film grain ───
 .grid {
   @include absolute-fill;
+  inset: calc(var(--hero-grid-size) * -1);
   pointer-events: none;
-  background-image: radial-gradient(var(--tint-soft) 1px, transparent 1.6px);
-  background-size: 30px 30px;
-  mask-image: radial-gradient(ellipse 95% 68% at 56% 28%, black, transparent 76%);
-  animation: heroFadeIn 0.9s $ease-out both;
+  background-image:
+    radial-gradient(circle at 1px 1px, var(--hero-grid-node) 0 1.15px, transparent 1.7px),
+    linear-gradient(var(--hero-grid-major) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hero-grid-major) 1px, transparent 1px),
+    linear-gradient(var(--hero-grid-minor) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hero-grid-minor) 1px, transparent 1px);
+  background-size:
+    var(--hero-grid-size) var(--hero-grid-size),
+    var(--hero-grid-size) var(--hero-grid-size),
+    var(--hero-grid-size) var(--hero-grid-size),
+    var(--hero-grid-sub-size) var(--hero-grid-sub-size),
+    var(--hero-grid-sub-size) var(--hero-grid-sub-size);
+  mask-image: radial-gradient(ellipse 104% 78% at 56% 32%, black 16%, transparent 80%);
+  opacity: 0;
+  will-change: transform;
+  animation:
+    heroGridFade 0.9s $ease-out 0.05s both,
+    heroGridDrift 32s linear 1s infinite;
+}
+
+// A low-contrast "scan" occasionally passes across the grid. It is a single
+// composited layer, so the effect stays inexpensive even on small devices.
+.gridSweep {
+  position: absolute;
+  inset: -24% -42%;
+  pointer-events: none;
+  background: linear-gradient(
+    112deg,
+    transparent 43%,
+    var(--hero-grid-sweep) 48.5%,
+    color-mix(in oklch, var(--violet) 7%, transparent) 51%,
+    transparent 56%
+  );
+  mask-image: radial-gradient(ellipse 72% 66% at 54% 36%, black, transparent 78%);
+  opacity: 0;
+  will-change: transform, opacity;
+  animation: heroGridSweep 12s cubic-bezier(0.45, 0, 0.55, 1) 2.2s infinite;
 }
 
 .glow {
@@ -36,7 +94,10 @@
   pointer-events: none;
   background: radial-gradient(ellipse at center, oklch(0.62 0.22 240 / 0.13), transparent 64%);
   filter: blur(28px);
-  animation: heroFadeIn 1.3s $ease-out both;
+  will-change: transform;
+  animation:
+    heroFadeIn 1.3s $ease-out both,
+    heroGlowDrift 16s ease-in-out 1.3s infinite alternate;
 }
 
 .glowAlt {
@@ -48,7 +109,10 @@
   pointer-events: none;
   background: radial-gradient(ellipse at center, oklch(0.62 0.2 290 / 0.08), transparent 62%);
   filter: blur(30px);
-  animation: heroFadeIn 1.6s $ease-out both;
+  will-change: transform;
+  animation:
+    heroFadeIn 1.6s $ease-out both,
+    heroGlowAltDrift 20s ease-in-out 1.6s infinite alternate;
 }
 
 // Barely-there grain so large dark areas don't read as flat vector fill.
@@ -57,6 +121,47 @@
   pointer-events: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   opacity: 0.04;
+}
+
+@keyframes heroGridFade {
+  to {
+    opacity: 0.92;
+  }
+}
+
+@keyframes heroGridDrift {
+  to {
+    transform: translate3d(var(--hero-grid-size), var(--hero-grid-size), 0);
+  }
+}
+
+@keyframes heroGridSweep {
+  0%,
+  18% {
+    opacity: 0;
+    transform: translate3d(-24%, -3%, 0);
+  }
+  36%,
+  55% {
+    opacity: 0.9;
+  }
+  76%,
+  100% {
+    opacity: 0;
+    transform: translate3d(24%, 3%, 0);
+  }
+}
+
+@keyframes heroGlowDrift {
+  to {
+    transform: translate3d(-4%, 5%, 0) scale(1.06);
+  }
+}
+
+@keyframes heroGlowAltDrift {
+  to {
+    transform: translate3d(7%, -4%, 0) scale(1.08);
+  }
 }
 
 @keyframes heroFadeIn {
@@ -400,11 +505,11 @@
 }
 
 .valuePoints {
-  counter-reset: value-point;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  max-width: 610px;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 11px;
+  max-width: 100%;
   margin: 0 0 28px;
   padding: 0;
   list-style: none;
@@ -413,63 +518,24 @@
   li {
     --point-color: var(--blue);
     position: relative;
-    counter-increment: value-point;
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
+    display: inline-flex;
     align-items: center;
-    min-height: 54px;
-    gap: 9px;
-    overflow: visible;
-    border: 1px solid color-mix(in oklch, var(--point-color) 22%, var(--border-subtle));
-    border-radius: 12px;
-    padding: 10px 24px 10px 10px;
-    background:
-      radial-gradient(
-        110% 130% at 0% 0%,
-        color-mix(in oklch, var(--point-color) 13%, transparent),
-        transparent 56%
-      ),
-      linear-gradient(
-        180deg,
-        color-mix(in oklch, var(--edge-highlight) 48%, transparent),
-        transparent 52%
-      ),
-      var(--bg-surface);
-    box-shadow:
-      inset 0 1px 0 var(--edge-highlight),
-      inset 3px 0 0 color-mix(in oklch, var(--point-color) 74%, transparent),
-      var(--shadow-sm);
+    gap: 7px;
+    min-width: 0;
+    padding: 0;
     color: var(--text-primary);
     font-family: var(--font-mono);
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     font-weight: 650;
-    line-height: 1.25;
-
-    &::before {
-      content: "0" counter(value-point);
-      position: absolute;
-      top: 7px;
-      right: 9px;
-      color: color-mix(in oklch, var(--point-color) 74%, var(--text-muted));
-      font-size: 0.56rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      opacity: 0.72;
-    }
+    line-height: 1.1;
 
     &:not(:last-child)::after {
-      content: "";
-      position: absolute;
-      top: 50%;
-      right: -13px;
-      z-index: 1;
-      width: 14px;
-      height: 1px;
-      background: linear-gradient(
-        90deg,
-        color-mix(in oklch, var(--point-color) 42%, var(--border-default)),
-        transparent
-      );
+      content: "→";
+      margin-left: 3px;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 600;
+      opacity: 0.58;
     }
 
     &:nth-child(1) {
@@ -493,24 +559,16 @@
 
 .valueIcon {
   display: grid;
-  width: 27px;
-  height: 27px;
+  width: 22px;
+  height: 22px;
   place-items: center;
-  border: 1px solid color-mix(in oklch, var(--point-color) 28%, var(--border-subtle));
-  border-radius: 8px;
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in oklch, var(--edge-highlight) 35%, transparent),
-      transparent
-    ),
-    color-mix(in oklch, var(--point-color) 11%, var(--bg-muted));
+  border-radius: 7px;
+  background: color-mix(in oklch, var(--point-color) 9%, transparent);
   color: var(--point-color);
-  box-shadow: 0 0 0 3px color-mix(in oklch, var(--point-color) 5%, transparent);
 
   svg {
-    width: 15px;
-    height: 15px;
+    width: 13px;
+    height: 13px;
   }
 }
 
@@ -584,6 +642,7 @@
 // see the headline reveal.
 :global([data-boot-loaded="false"]) {
   .grid,
+  .gridSweep,
   .glow,
   .glowAlt,
   .todo,
@@ -698,7 +757,12 @@
   position: relative;
   width: 100%;
   min-width: 0;
-  @include elevated-panel(var(--radius-xl), var(--shadow-panel));
+  border: 1px solid var(--border-default);
+  border-radius: 14px;
+  background: var(--bg-surface);
+  box-shadow:
+    0 16px 48px rgb(0 0 0 / 0.34),
+    inset 0 1px 0 var(--edge-highlight);
   overflow: hidden;
   animation: cardIn 0.7s $ease-out 0.25s both;
 }
@@ -718,31 +782,31 @@
 .browserBar {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 9px 13px;
+  gap: 9px;
+  padding: 8px 12px;
   border-bottom: 1px solid var(--border-subtle);
-  background: var(--bg-muted);
+  background: color-mix(in oklch, var(--bg-muted) 72%, var(--bg-surface));
 }
 
 .dots {
   display: inline-flex;
-  gap: 6px;
+  gap: 5px;
   flex: none;
 
   span {
-    width: 10px;
-    height: 10px;
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
-    background: var(--tint-strong);
+    background: var(--border-strong);
 
     &:first-child {
-      background: oklch(0.72 0.2 20 / 0.8);
+      background: color-mix(in oklch, var(--severity-critical) 58%, var(--border-strong));
     }
     &:nth-child(2) {
-      background: oklch(0.75 0.15 80 / 0.8);
+      background: color-mix(in oklch, var(--severity-moderate) 52%, var(--border-strong));
     }
     &:nth-child(3) {
-      background: oklch(0.72 0.18 145 / 0.8);
+      background: color-mix(in oklch, var(--green) 52%, var(--border-strong));
     }
   }
 }
@@ -753,13 +817,13 @@
   gap: 6px;
   flex: 1;
   min-width: 0;
-  padding: 4px 11px;
+  padding: 4px 10px;
   border-radius: 99px;
   border: 1px solid var(--border-subtle);
-  background: var(--bg-base);
+  background: color-mix(in oklch, var(--bg-base) 82%, var(--bg-muted));
   color: var(--text-secondary);
   font-family: var(--font-mono);
-  font-size: 0.8rem;
+  font-size: 0.76rem;
   @include truncate;
 
   svg {
@@ -773,16 +837,16 @@
   align-items: center;
   gap: 6px;
   flex: none;
-  color: var(--blue);
+  color: var(--text-secondary);
   font-family: var(--font-mono);
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   font-weight: 600;
 
   i {
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: currentColor;
+    background: var(--blue);
     animation: livePulse 1.1s ease-in-out infinite;
   }
 
@@ -810,11 +874,11 @@
   flex: none;
   border: 1px solid var(--border-default);
   border-radius: 99px;
-  padding: 3px 11px;
+  padding: 3px 10px;
   background: transparent;
   color: var(--text-muted);
   font-family: var(--font-mono);
-  font-size: 0.76rem;
+  font-size: 0.72rem;
   font-weight: 600;
   cursor: pointer;
   transition:
@@ -831,7 +895,7 @@
 // ── Slim audit progress bar ──────────────────────────────────────────
 .scanProgress {
   position: relative;
-  height: 3px;
+  height: 2px;
   overflow: hidden;
   background: var(--bg-muted);
 }
@@ -852,8 +916,8 @@
 // ── Scan workspace: inspected page + plain-language audit rail ───────
 .scanWorkspace {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 270px;
-  height: 492px;
+  grid-template-columns: minmax(0, 1fr) 250px;
+  height: 468px;
 }
 
 // ── Viewport: the mock page being scanned ───────────────────────────
@@ -862,7 +926,7 @@
   min-width: 0;
   height: 100%;
   overflow: hidden;
-  background: #f5f6fb;
+  background: radial-gradient(circle at 72% 28%, rgb(105 91 244 / 0.1), transparent 34%), #f7f8fc;
   // Size container so the scan line can travel on the GPU via 1cqh units.
   container-type: size;
 }
@@ -880,12 +944,12 @@
   &::before {
     content: "";
     position: absolute;
-    top: 20%;
-    right: -14%;
-    width: 68%;
-    height: 62%;
+    top: 18%;
+    right: -16%;
+    width: 62%;
+    height: 56%;
     border-radius: 50%;
-    background: radial-gradient(circle, rgb(105 91 244 / 0.14), transparent 68%);
+    background: radial-gradient(circle, rgb(105 91 244 / 0.08), transparent 70%);
   }
 }
 
@@ -915,7 +979,7 @@
   flex: none;
 
   b {
-    font-size: 0.82rem;
+    font-size: 0.78rem;
     letter-spacing: -0.03em;
   }
 }
@@ -926,8 +990,8 @@
   width: 24px;
   height: 24px;
   border-radius: 7px;
-  background: linear-gradient(135deg, var(--blue), var(--violet));
-  box-shadow: 0 5px 12px rgb(105 91 244 / 0.24);
+  background: #20243a;
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.5) inset;
   color: #fff;
   font-size: 0.66rem;
   font-weight: 800;
@@ -962,7 +1026,7 @@
   flex: none;
   border: 1px solid #dfe2eb;
   border-radius: 6px;
-  background: rgb(255 255 255 / 0.72);
+  background: rgb(255 255 255 / 0.78);
   color: #3d4356;
   font-size: 0.64rem;
   font-weight: 600;
@@ -1023,8 +1087,8 @@
 .demoCta {
   min-width: 72px;
   padding-inline: 10px;
-  background: linear-gradient(135deg, var(--blue), var(--violet));
-  box-shadow: 0 6px 14px rgb(105 91 244 / 0.23);
+  background: #5f57ee;
+  box-shadow: 0 6px 14px rgb(77 72 190 / 0.14);
   font-size: clamp(0.54rem, 0.68vw, 0.64rem);
   font-weight: 700;
 }
@@ -1035,7 +1099,7 @@
   overflow: visible;
   width: 30px;
   background: #171a2c;
-  box-shadow: 0 5px 12px rgb(24 27 46 / 0.16);
+  box-shadow: 0 5px 12px rgb(24 27 46 / 0.12);
   font-size: 0.82rem;
   font-weight: 700;
 }
@@ -1049,18 +1113,17 @@
   width: 30%;
   height: 38%;
   overflow: visible;
-  transform: rotate(2deg);
 }
 
 .media {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  border: 1px solid rgb(255 255 255 / 0.75);
-  border-radius: 14px;
-  background: linear-gradient(165deg, rgb(255 255 255 / 0.94), rgb(242 240 255 / 0.94)), #fff;
+  border: 1px solid rgb(219 224 237 / 0.9);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 0.88);
   box-shadow:
-    0 18px 38px rgb(50 42 120 / 0.16),
+    0 12px 28px rgb(50 42 120 / 0.1),
     inset 0 1px 0 #fff;
 }
 
@@ -1115,7 +1178,7 @@
     flex: 1;
     min-width: 3px;
     border-radius: 4px 4px 2px 2px;
-    background: linear-gradient(180deg, #7769fa, #a69dfd);
+    background: rgb(105 91 244 / 0.58);
 
     &:nth-child(1) {
       height: 35%;
@@ -1180,7 +1243,7 @@
   padding-inline: 8px;
   border: 1px solid #e2e4ec;
   border-radius: 6px;
-  background: rgb(255 255 255 / 0.82);
+  background: rgb(255 255 255 / 0.78);
   color: #a3a8b6;
   font-size: clamp(0.52rem, 0.65vw, 0.61rem);
 }
@@ -1192,7 +1255,7 @@
   height: 100%;
   padding-inline: 8px;
   border-radius: 6px;
-  background: #1b1e31;
+  background: #20243a;
   color: #fff;
   font-size: clamp(0.48rem, 0.6vw, 0.56rem);
   font-weight: 600;
@@ -1223,7 +1286,7 @@
   inset: 0;
   transform-origin: top;
   transform: scaleY(calc(var(--p) / 100));
-  background: oklch(0.62 0.22 240 / 0.05);
+  background: oklch(0.62 0.22 240 / 0.035);
   pointer-events: none;
 }
 
@@ -1232,11 +1295,11 @@
   left: 0;
   right: 0;
   top: 0;
-  height: 2px;
+  height: 1px;
   z-index: 4;
   transform: translateY(calc(var(--p) * 1cqh));
   background: linear-gradient(90deg, transparent, var(--blue) 30%, var(--violet) 70%, transparent);
-  box-shadow: 0 0 12px 1px oklch(0.62 0.22 240 / 0.5);
+  box-shadow: 0 0 10px oklch(0.62 0.22 240 / 0.38);
   pointer-events: none;
   transition:
     transform 0.12s linear,
@@ -1253,9 +1316,8 @@
   inset: var(--issue-inset, 0);
   z-index: 6;
   border-radius: var(--issue-radius, 7px);
-  // Faint full frame; the bright part is the corner reticle (::before).
-  border: 1px solid color-mix(in oklch, var(--sev) 38%, transparent);
-  background: color-mix(in oklch, var(--sev) 9%, transparent);
+  border: 1px solid color-mix(in oklch, var(--sev) 48%, transparent);
+  background: color-mix(in oklch, var(--sev) 6%, transparent);
   opacity: 0;
   transform: scale(0.97);
   transition:
@@ -1274,22 +1336,13 @@
     --sev: var(--severity-moderate);
   }
 
-  // Detection reticle — four bright corner brackets around the element.
   &::before {
     content: "";
     position: absolute;
-    inset: -2px;
+    inset: -4px;
+    border: 1px solid color-mix(in oklch, var(--sev) 22%, transparent);
+    border-radius: calc(var(--issue-radius, 7px) + 4px);
     pointer-events: none;
-    background:
-      linear-gradient(var(--sev), var(--sev)) 0 0 / 11px 2px no-repeat,
-      linear-gradient(var(--sev), var(--sev)) 0 0 / 2px 11px no-repeat,
-      linear-gradient(var(--sev), var(--sev)) 100% 0 / 11px 2px no-repeat,
-      linear-gradient(var(--sev), var(--sev)) 100% 0 / 2px 11px no-repeat,
-      linear-gradient(var(--sev), var(--sev)) 0 100% / 11px 2px no-repeat,
-      linear-gradient(var(--sev), var(--sev)) 0 100% / 2px 11px no-repeat,
-      linear-gradient(var(--sev), var(--sev)) 100% 100% / 11px 2px no-repeat,
-      linear-gradient(var(--sev), var(--sev)) 100% 100% / 2px 11px no-repeat;
-    filter: drop-shadow(0 0 4px color-mix(in oklch, var(--sev) 55%, transparent));
   }
 }
 
@@ -1305,14 +1358,14 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 3px 8px;
+  padding: 3px 7px;
   border-radius: 6px;
-  border: 1px solid color-mix(in oklch, var(--sev) 45%, var(--border-subtle));
-  background: var(--bg-elevated);
-  box-shadow: var(--shadow-sm);
+  border: 1px solid color-mix(in oklch, var(--sev) 36%, var(--border-subtle));
+  background: color-mix(in oklch, var(--bg-elevated) 88%, transparent);
+  box-shadow: 0 4px 12px rgb(9 9 11 / 0.14);
   color: var(--text-primary);
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   font-weight: 700;
   white-space: nowrap;
   transform: translateY(-100%);
@@ -1360,10 +1413,8 @@
 .browserDone .issueActive {
   opacity: 1;
   border-color: color-mix(in oklch, var(--sev) 70%, transparent);
-  background: color-mix(in oklch, var(--sev) 15%, transparent);
-  box-shadow:
-    0 0 0 3px color-mix(in oklch, var(--sev) 18%, transparent),
-    0 0 26px color-mix(in oklch, var(--sev) 50%, transparent);
+  background: color-mix(in oklch, var(--sev) 11%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--sev) 14%, transparent);
 }
 
 // Assistive-tech read-out pinned over the spotlit element: the literal,
@@ -1378,14 +1429,14 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 11px;
-  border-radius: 8px;
-  border: 1px solid var(--border-strong);
+  padding: 4px 9px;
+  border-radius: 7px;
+  border: 1px solid var(--border-default);
   background: var(--bg-elevated);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 8px 20px rgb(9 9 11 / 0.22);
   color: var(--text-primary);
   font-family: var(--font-mono);
-  font-size: 0.82rem;
+  font-size: 0.76rem;
   font-weight: 600;
   white-space: nowrap;
   transform: translateX(-50%);
@@ -1422,11 +1473,11 @@
 // ── Audit rail ───────────────────────────────────────────────────────
 .auditPanel {
   display: grid;
-  grid-template-rows: 88px minmax(0, 1fr) 136px;
+  grid-template-rows: 76px minmax(0, 1fr) auto;
   min-width: 0;
   height: 100%;
   border-left: 1px solid var(--border-subtle);
-  background: var(--bg-surface);
+  background: color-mix(in oklch, var(--bg-surface) 88%, var(--bg-muted));
 }
 
 .auditHeader {
@@ -1435,7 +1486,7 @@
   justify-content: space-between;
   gap: 10px;
   min-height: 0;
-  padding: 15px 17px;
+  padding: 13px 14px;
   border-bottom: 1px solid var(--border-subtle);
 
   > span:first-child {
@@ -1447,7 +1498,7 @@
   small {
     color: var(--text-muted);
     font-family: var(--font-mono);
-    font-size: 0.76rem;
+    font-size: 0.66rem;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -1455,23 +1506,24 @@
 
   strong {
     color: var(--text-primary);
-    font-size: 1.12rem;
+    font-size: 1rem;
     letter-spacing: -0.02em;
   }
 }
 
 .auditScore {
   display: grid;
-  width: 46px;
-  height: 46px;
+  min-width: 42px;
+  height: 30px;
+  padding-inline: 10px;
   flex: none;
   place-items: center;
-  border: 2px solid var(--green);
-  border-radius: 50%;
-  background: color-mix(in oklch, var(--green) 10%, transparent);
+  border: 1px solid color-mix(in oklch, var(--green) 34%, var(--border-subtle));
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--green) 8%, transparent);
   color: var(--green);
   font-family: var(--font-mono);
-  font-size: 0.88rem;
+  font-size: 0.78rem;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   transition:
@@ -1481,36 +1533,36 @@
 }
 
 .auditScoreWarn {
-  border-color: var(--severity-serious);
-  background: color-mix(in oklch, var(--severity-serious) 10%, transparent);
+  border-color: color-mix(in oklch, var(--severity-serious) 34%, var(--border-subtle));
+  background: color-mix(in oklch, var(--severity-serious) 8%, transparent);
   color: var(--severity-serious);
 }
 
 .auditScoreDone {
-  border-color: var(--severity-critical);
-  background: color-mix(in oklch, var(--severity-critical) 10%, transparent);
+  border-color: color-mix(in oklch, var(--severity-critical) 34%, var(--border-subtle));
+  background: color-mix(in oklch, var(--severity-critical) 8%, transparent);
   color: var(--severity-critical);
 }
 
 .auditList {
   display: grid;
   grid-template-rows: repeat(4, minmax(0, 1fr));
-  gap: 4px;
+  gap: 3px;
   min-height: 0;
-  padding: 8px;
+  padding: 7px;
 }
 
 .auditItem {
   --sev: var(--text-muted);
   display: grid;
-  grid-template-columns: 34px minmax(0, 1fr) auto;
-  gap: 9px;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  gap: 8px;
   align-items: center;
   width: 100%;
   min-height: 0;
   border: 1px solid transparent;
-  border-radius: 9px;
-  padding: 8px 9px;
+  border-radius: 7px;
+  padding: 7px;
   background: transparent;
   color: var(--text-muted);
   text-align: left;
@@ -1552,35 +1604,22 @@
 
   &:hover {
     border-color: color-mix(in oklch, var(--sev) 30%, var(--border-subtle));
-    background: color-mix(in oklch, var(--sev) 7%, transparent);
-    transform: translateX(-2px);
+    background: color-mix(in oklch, var(--sev) 6%, transparent);
   }
 }
 
 .auditItemActive {
   border-color: color-mix(in oklch, var(--sev) 45%, var(--border-subtle));
-  background: color-mix(in oklch, var(--sev) 10%, transparent);
-  box-shadow: inset 2px 0 0 var(--sev);
-}
-
-// On desktop the selected row runs flush into the panel edge, like a
-// proper inspector selection instead of a floating card with a dead gutter.
-@media (min-width: 701px) {
-  .auditItemActive {
-    width: calc(100% + 8px);
-    border-right: 0;
-    border-radius: 9px 0 0 9px;
-  }
+  background: color-mix(in oklch, var(--sev) 8%, transparent);
 }
 
 .auditItemIcon {
   display: grid;
-  width: 34px;
-  height: 34px;
+  width: 28px;
+  height: 28px;
   place-items: center;
-  border: 1px solid color-mix(in oklch, var(--sev) 30%, var(--border-subtle));
-  border-radius: 8px;
-  background: color-mix(in oklch, var(--sev) 9%, transparent);
+  border-radius: 7px;
+  background: color-mix(in oklch, var(--sev) 8%, transparent);
   color: var(--sev);
 }
 
@@ -1595,7 +1634,7 @@
   }
 
   strong {
-    font-size: 0.92rem;
+    font-size: 0.86rem;
     font-weight: 650;
     text-transform: capitalize;
   }
@@ -1603,7 +1642,7 @@
   small {
     color: var(--text-muted);
     font-family: var(--font-mono);
-    font-size: 0.72rem;
+    font-size: 0.68rem;
   }
 }
 
@@ -1627,16 +1666,12 @@
 .impact {
   position: relative;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
-  gap: 8px;
-  height: 136px;
-  min-height: 0;
-  overflow: hidden;
-  padding: 15px 17px 16px;
+  grid-template-rows: auto auto auto;
+  gap: 7px;
+  min-height: 138px;
+  padding: 13px 14px;
   border-top: 1px solid var(--border-subtle);
-  background:
-    linear-gradient(145deg, color-mix(in oklch, var(--blue) 7%, transparent), transparent 58%),
-    var(--bg-muted);
+  background: var(--bg-muted);
 }
 
 .impactEyebrow {
@@ -1645,23 +1680,20 @@
   gap: 7px;
   color: var(--text-muted);
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.66rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 
   &::after {
-    content: "";
-    flex: 1;
-    height: 1px;
-    background: var(--border-subtle);
+    display: none;
   }
 }
 
 .impactText {
   margin: 0;
   color: var(--text-primary);
-  font-size: 0.9rem;
+  font-size: 0.84rem;
   font-weight: 500;
   line-height: 1.45;
 }
@@ -1775,13 +1807,28 @@
   .impact {
     animation: none !important;
   }
+
+  .gridSweep {
+    display: none;
+  }
 }
 
 // ── Responsive ───────────────────────────────────────────────────────
 @media (max-width: 1120px) {
   .hero {
+    --hero-grid-size: 64px;
+    --hero-grid-sub-size: 16px;
     min-height: auto;
     padding: 68px 0 96px;
+  }
+
+  .grid {
+    mask-image: radial-gradient(ellipse 118% 88% at 50% 38%, black 14%, transparent 88%);
+    animation-duration: 0.9s, 36s;
+  }
+
+  .gridSweep {
+    mask-image: radial-gradient(ellipse 82% 74% at 50% 38%, black, transparent 84%);
   }
 
   .container {
@@ -1826,7 +1873,7 @@
   }
 
   .auditPanel {
-    grid-template-rows: 78px auto 132px;
+    grid-template-rows: 78px auto auto;
     height: auto;
     border-top: 1px solid var(--border-subtle);
     border-left: 0;
@@ -1848,22 +1895,47 @@
   }
 
   .impact {
-    height: 132px;
+    min-height: 132px;
   }
 }
 
 @media (max-width: 640px) {
   .hero {
+    --hero-grid-size: 56px;
+    --hero-grid-sub-size: 14px;
     padding: 56px 0 84px;
+  }
+
+  .grid {
+    mask-image: radial-gradient(ellipse 138% 86% at 50% 34%, black 10%, transparent 90%);
+    animation-duration: 0.9s, 42s;
+  }
+
+  .gridSweep {
+    inset-inline: -76%;
+    animation-duration: 15s;
+  }
+
+  .glow {
+    top: -8%;
+    right: -32%;
+    width: 92%;
+    height: 58%;
+  }
+
+  .glowAlt {
+    bottom: -12%;
+    left: -34%;
+    width: 82%;
+    height: 48%;
   }
 
   .subtitle {
     font-size: 1rem;
   }
 
-  // Mobile: collapse the 3 stacked cards into one tight strip of icon
-  // pills. Removes the near-empty-box look and lifts the CTA + live scan
-  // higher up the first screen. Wraps gracefully on very narrow phones.
+  // Mobile: keep the rail as wrap-friendly icon pills so the CTA + live
+  // scan stay higher up the first screen.
   .valuePoints {
     display: flex;
     flex-wrap: wrap;
@@ -1877,8 +1949,10 @@
       min-height: 0;
       grid-template-columns: none;
       gap: 8px;
+      border: 1px solid color-mix(in oklch, var(--point-color) 18%, var(--border-subtle));
       padding: 7px 14px 7px 9px;
       border-radius: 999px;
+      background: color-mix(in oklch, var(--point-color) 8%, var(--bg-surface));
       font-size: 0.76rem;
       // Drop the inset left accent bar — it reads wrong on a rounded pill.
       box-shadow:

@@ -1,6 +1,9 @@
 .section {
+  --faq-grid-line: color-mix(in oklch, var(--text-primary) 5%, transparent);
+  --faq-grid-node: color-mix(in oklch, var(--blue) 24%, transparent);
   position: relative;
   overflow: hidden;
+  isolation: isolate;
 
   &::before,
   &::after {
@@ -10,21 +13,65 @@
   }
 
   &::before {
-    inset: 0;
-    background-image: radial-gradient(var(--tint-soft) 1px, transparent 1.5px);
-    background-size: 28px 28px;
-    mask-image: radial-gradient(ellipse 76% 58% at 50% 42%, black, transparent 78%);
-    opacity: 0.6;
+    inset: -64px;
+    background-image:
+      radial-gradient(circle at 1px 1px, var(--faq-grid-node) 0 1.05px, transparent 1.6px),
+      linear-gradient(var(--faq-grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--faq-grid-line) 1px, transparent 1px);
+    background-size:
+      64px 64px,
+      32px 32px,
+      32px 32px;
+    mask-image: radial-gradient(ellipse 86% 72% at 58% 46%, black 8%, transparent 84%);
+    opacity: 0.58;
   }
 
   &::after {
-    top: 8%;
-    right: -14%;
-    width: 44%;
-    height: 62%;
-    background: radial-gradient(ellipse at center, var(--blue-dim), transparent 66%);
-    filter: blur(26px);
-    opacity: 0.75;
+    inset: -16% -12%;
+    background:
+      radial-gradient(
+        ellipse 40% 42% at 88% 34%,
+        color-mix(in oklch, var(--blue) 11%, transparent),
+        transparent 72%
+      ),
+      radial-gradient(
+        ellipse 34% 36% at 12% 82%,
+        color-mix(in oklch, var(--violet) 8%, transparent),
+        transparent 72%
+      );
+    opacity: 0.9;
+  }
+}
+
+@keyframes faqGridParallax {
+  from {
+    transform: translate3d(-14px, 26px, 0);
+  }
+  to {
+    transform: translate3d(14px, -26px, 0);
+  }
+}
+
+@keyframes faqGlowParallax {
+  from {
+    transform: translate3d(0, -5%, 0) scale(1.04);
+  }
+  to {
+    transform: translate3d(0, 5%, 0) scale(1.1);
+  }
+}
+
+@supports (animation-timeline: view()) {
+  .section::before {
+    animation: faqGridParallax linear both;
+    animation-timeline: view();
+    animation-range: entry 0% exit 100%;
+  }
+
+  .section::after {
+    animation: faqGlowParallax linear both;
+    animation-timeline: view();
+    animation-range: entry 0% exit 100%;
   }
 }
 
@@ -307,6 +354,12 @@
 
 // ── Reduced motion ───────────────────────────────────────────────────
 @media (prefers-reduced-motion: reduce) {
+  .section::before,
+  .section::after {
+    animation: none !important;
+    transform: none !important;
+  }
+
   .answer,
   .chevron,
   .item::before,
@@ -317,6 +370,26 @@
 
 // ── Responsive ───────────────────────────────────────────────────────
 @media (max-width: 860px) {
+  .section {
+    &::before {
+      background-size:
+        52px 52px,
+        26px 26px,
+        26px 26px;
+      mask-image: radial-gradient(ellipse 120% 72% at 50% 46%, black, transparent 88%);
+      opacity: 0.42;
+      animation: none;
+      transform: none;
+    }
+
+    &::after {
+      inset-inline: -46%;
+      opacity: 0.72;
+      animation: none;
+      transform: none;
+    }
+  }
+
   .grid {
     grid-template-columns: 1fr;
     gap: 28px;

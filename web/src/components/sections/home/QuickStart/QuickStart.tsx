@@ -6,7 +6,7 @@ import { QuickStartFlow } from "./components/QuickStartFlow";
 import styles from "./QuickStart.module.scss";
 
 export const QuickStart = () => (
-  <Section surface id="quickstart">
+  <Section surface id="quickstart" className={styles.section}>
     <Container variant="wide">
       <div className={cn(styles.intro, "reveal")}>
         <TypewriterEyebrow className={styles.eyebrow} text="// quick start" />

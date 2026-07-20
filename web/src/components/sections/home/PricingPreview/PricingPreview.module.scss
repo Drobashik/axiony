@@ -8,17 +8,85 @@
 // =====================================================================
 
 .section {
+  --pricing-ring: color-mix(in oklch, var(--text-primary) 5%, transparent);
   position: relative;
+  overflow: hidden;
   isolation: isolate;
 
-  // Soft glow behind the cards so the featured tier lifts off the page.
-  &::before {
+  &::before,
+  &::after {
     content: "";
     position: absolute;
-    inset: 0;
-    z-index: -1;
     pointer-events: none;
-    background: radial-gradient(ellipse 58% 50% at 50% 38%, var(--blue-dim), transparent 70%);
+  }
+
+  &::before {
+    inset: -16% -8%;
+    background:
+      radial-gradient(
+        ellipse 30% 42% at 18% 56%,
+        color-mix(in oklch, var(--green) 9%, transparent),
+        transparent 72%
+      ),
+      radial-gradient(
+        ellipse 36% 50% at 50% 48%,
+        color-mix(in oklch, var(--blue) 13%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        ellipse 30% 42% at 82% 56%,
+        color-mix(in oklch, var(--violet) 10%, transparent),
+        transparent 72%
+      );
+  }
+
+  &::after {
+    inset: -20% -8%;
+    background: repeating-radial-gradient(
+      ellipse at 50% 48%,
+      transparent 0 76px,
+      var(--pricing-ring) 77px,
+      transparent 78px 116px
+    );
+    mask-image: radial-gradient(ellipse 72% 66% at 50% 48%, black, transparent 82%);
+    opacity: 0.66;
+  }
+
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+@keyframes pricingGlowParallax {
+  from {
+    transform: translate3d(0, -5%, 0) scale(1.04);
+  }
+  to {
+    transform: translate3d(0, 5%, 0) scale(1.1);
+  }
+}
+
+@keyframes pricingRingParallax {
+  from {
+    transform: translate3d(0, 3%, 0) scale(0.96);
+  }
+  to {
+    transform: translate3d(0, -3%, 0) scale(1.04);
+  }
+}
+
+@supports (animation-timeline: view()) {
+  .section::before {
+    animation: pricingGlowParallax linear both;
+    animation-timeline: view();
+    animation-range: entry 0% exit 100%;
+  }
+
+  .section::after {
+    animation: pricingRingParallax linear both;
+    animation-timeline: view();
+    animation-range: entry 0% exit 100%;
   }
 }
 
@@ -365,6 +433,23 @@
 }
 
 @media (max-width: 900px) {
+  .section {
+    &::before {
+      inset-inline: -42%;
+      opacity: 0.76;
+      animation: none;
+      transform: none;
+    }
+
+    &::after {
+      inset-inline: -34%;
+      mask-image: radial-gradient(ellipse 116% 66% at 50% 50%, black, transparent 86%);
+      opacity: 0.46;
+      animation: none;
+      transform: none;
+    }
+  }
+
   .grid {
     grid-template-columns: 1fr;
     max-width: 420px;
@@ -374,5 +459,13 @@
   // No vertical offset when stacked — the badge already marks the tier.
   .featured {
     transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .section::before,
+  .section::after {
+    animation: none !important;
+    transform: none !important;
   }
 }

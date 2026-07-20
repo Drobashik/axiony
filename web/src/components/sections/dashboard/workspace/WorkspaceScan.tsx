@@ -373,6 +373,7 @@ export const WorkspaceScan = ({
               lines={engine.lines}
               reduce={engine.reduce}
               status="failed"
+              error={engine.error}
               diagnostic={engine.diagnostic}
             />
           </div>

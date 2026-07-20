@@ -21,6 +21,24 @@ const formatNavigationError = (error: unknown): string =>
     ? 'Page load timed out. Check the URL and try again.'
     : 'Could not open the page. Check the URL and try again.';
 
+const withPageDiagnostic = async (
+  error: unknown,
+  page: Parameters<typeof captureScanDiagnostic>[0],
+  requestedUrl: string,
+  httpStatus?: number,
+): Promise<ScanDiagnosticError> => {
+  if (error instanceof ScanDiagnosticError) return error;
+
+  const message = error instanceof Error ? error.message : 'Scan failed before returning a report.';
+  const diagnosticError = new ScanDiagnosticError(
+    message,
+    await captureScanDiagnostic(page, requestedUrl, httpStatus),
+  ) as ScanDiagnosticError & { cause?: unknown };
+  diagnosticError.cause = error;
+
+  return diagnosticError;
+};
+
 const buildScanUrlMetadata = (
   selector: string | undefined,
   warnings: string[],
@@ -66,11 +84,10 @@ export async function scanUrl(url: string, options: ScanUrlOptions = {}): Promis
     onProgressPrint('Opening page');
 
     const page = await createScanPage(browser, { cookies: storedCookies });
+    let responseStatus: number | undefined;
 
     try {
       await addAxeInitScript(page);
-
-      let responseStatus: number | undefined;
 
       try {
         const response = await page.goto(url, {
@@ -83,7 +100,7 @@ export async function scanUrl(url: string, options: ScanUrlOptions = {}): Promis
           cause?: unknown;
         };
         navigationError.cause = error;
-        throw navigationError;
+        throw await withPageDiagnostic(navigationError, page, url, responseStatus);
       }
 
       const initialChallengeResolution = await waitForChallengeResolution(page);
@@ -143,6 +160,8 @@ export async function scanUrl(url: string, options: ScanUrlOptions = {}): Promis
         issues: result.issues,
         manualChecks: result.manualChecks,
       };
+    } catch (error) {
+      throw await withPageDiagnostic(error, page, url, responseStatus);
     } finally {
       await page
         .context()

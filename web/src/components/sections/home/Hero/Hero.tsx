@@ -20,6 +20,7 @@ const VALUE_POINT_ICONS = [TerminalIcon, CloudIcon, ShieldIcon] as const;
 export const Hero = () => (
   <section className={styles.hero}>
     <div className={styles.grid} aria-hidden="true" />
+    <div className={styles.gridSweep} aria-hidden="true" />
     <div className={styles.glow} aria-hidden="true" />
     <div className={styles.glowAlt} aria-hidden="true" />
     <div className={styles.noise} aria-hidden="true" />
