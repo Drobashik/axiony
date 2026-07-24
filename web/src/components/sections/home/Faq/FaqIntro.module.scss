@@ -1,0 +1,137 @@
+.section {
+  --faq-grid-line: color-mix(in oklch, var(--text-primary) 5%, transparent);
+  --faq-grid-node: color-mix(in oklch, var(--blue) 24%, transparent);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+
+  &::before,
+  &::after {
+    position: absolute;
+    pointer-events: none;
+    content: "";
+  }
+
+  &::before {
+    inset: -64px;
+    background-image:
+      radial-gradient(circle at 1px 1px, var(--faq-grid-node) 0 1.05px, transparent 1.6px),
+      linear-gradient(var(--faq-grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--faq-grid-line) 1px, transparent 1px);
+    background-size:
+      64px 64px,
+      32px 32px,
+      32px 32px;
+    mask-image: radial-gradient(ellipse 86% 72% at 58% 46%, black 8%, transparent 84%);
+    opacity: 0.58;
+  }
+
+  &::after {
+    inset: -16% -12%;
+    background:
+      radial-gradient(
+        ellipse 40% 42% at 88% 34%,
+        color-mix(in oklch, var(--blue) 11%, transparent),
+        transparent 72%
+      ),
+      radial-gradient(
+        ellipse 34% 36% at 12% 82%,
+        color-mix(in oklch, var(--violet) 8%, transparent),
+        transparent 72%
+      );
+    opacity: 0.9;
+  }
+}
+
+.grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(280px, 0.78fr) minmax(0, 1.22fr);
+  gap: clamp(32px, 5vw, 68px);
+  align-items: start;
+}
+
+.aside {
+  position: sticky;
+  top: calc(var(--nav-height) + 32px);
+
+  h2 {
+    margin-top: 0;
+  }
+}
+
+.eyebrow {
+  display: block;
+  margin-bottom: 14px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.headingAccent {
+  color: var(--blue);
+  font-style: normal;
+}
+
+.asideLead {
+  margin-top: 14px;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.help {
+  margin-top: 26px;
+  padding-top: 22px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.helpLabel {
+  display: block;
+  margin-bottom: 12px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.helpLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+@media (max-width: 860px) {
+  .section {
+    &::before {
+      background-size:
+        52px 52px,
+        26px 26px,
+        26px 26px;
+      mask-image: radial-gradient(ellipse 120% 72% at 50% 46%, black, transparent 88%);
+      opacity: 0.42;
+    }
+
+    &::after {
+      inset-inline: -46%;
+      opacity: 0.72;
+    }
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .aside {
+    position: static;
+  }
+
+  .helpLinks {
+    gap: 8px;
+  }
+}

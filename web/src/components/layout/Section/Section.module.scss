@@ -1,5 +1,9 @@
 .section {
   padding: 72px 0;
+  // Keep each decorative section in its own paint boundary. `content-visibility`
+  // used to defer layout here, but it caused visible stalls when several large
+  // sections materialised during a fast scroll.
+  contain: paint;
   // Keep anchored sections clear of the fixed header on jump.
   scroll-margin-top: var(--nav-height);
 

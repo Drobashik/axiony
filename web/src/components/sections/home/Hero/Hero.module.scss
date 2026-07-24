@@ -17,9 +17,10 @@
   position: relative;
   display: flex;
   align-items: center;
-  min-height: calc(100svh - var(--nav-height));
+  min-height: 100svh;
+  margin-top: calc(var(--nav-height) * -1);
   overflow: hidden;
-  padding: clamp(56px, 7svh, 84px) 0 clamp(72px, 8svh, 104px);
+  padding: calc(var(--nav-height) + clamp(56px, 7svh, 84px)) 0 clamp(72px, 8svh, 104px);
   isolation: isolate;
 }
 
@@ -61,9 +62,7 @@
   mask-image: radial-gradient(ellipse 104% 78% at 56% 32%, black 16%, transparent 80%);
   opacity: 0;
   will-change: transform;
-  animation:
-    heroGridFade 0.9s $ease-out 0.05s both,
-    heroGridDrift 32s linear 1s infinite;
+  animation: heroGridFade 0.55s $ease-out 0.03s both;
 }
 
 // A low-contrast "scan" occasionally passes across the grid. It is a single
@@ -82,7 +81,7 @@
   mask-image: radial-gradient(ellipse 72% 66% at 54% 36%, black, transparent 78%);
   opacity: 0;
   will-change: transform, opacity;
-  animation: heroGridSweep 12s cubic-bezier(0.45, 0, 0.55, 1) 2.2s infinite;
+  animation: heroGridSweep 1.5s cubic-bezier(0.45, 0, 0.55, 1) 0.22s 1 both;
 }
 
 .glow {
@@ -96,8 +95,8 @@
   filter: blur(28px);
   will-change: transform;
   animation:
-    heroFadeIn 1.3s $ease-out both,
-    heroGlowDrift 16s ease-in-out 1.3s infinite alternate;
+    heroFadeIn 0.65s $ease-out both,
+    heroGlowDrift 18s ease-in-out 0.65s infinite alternate;
 }
 
 .glowAlt {
@@ -111,8 +110,8 @@
   filter: blur(30px);
   will-change: transform;
   animation:
-    heroFadeIn 1.6s $ease-out both,
-    heroGlowAltDrift 20s ease-in-out 1.6s infinite alternate;
+    heroFadeIn 0.72s $ease-out both,
+    heroGlowAltDrift 22s ease-in-out 0.72s infinite alternate;
 }
 
 // Barely-there grain so large dark areas don't read as flat vector fill.
@@ -132,6 +131,17 @@
 @keyframes heroGridDrift {
   to {
     transform: translate3d(var(--hero-grid-size), var(--hero-grid-size), 0);
+  }
+}
+
+// Keep the ambient grid motion for precise pointer devices only. Touch
+// devices get the same dimensional grid without a full-viewport compositor
+// layer running indefinitely.
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .grid {
+    animation:
+      heroGridFade 0.55s $ease-out 0.03s both,
+      heroGridDrift 38s linear 0.58s infinite;
   }
 }
 
@@ -203,7 +213,7 @@
   font-size: 0.88rem;
   font-weight: 500;
   white-space: nowrap;
-  animation: fadeUp 0.35s $ease-out 0.2s both;
+  animation: fadeUp 0.28s $ease-out 0.08s both;
 }
 
 .todoComment {
@@ -219,7 +229,7 @@
   max-width: 0;
   overflow: hidden;
   white-space: nowrap;
-  animation: todoType 1.16s steps(26, end) 0.42s both;
+  animation: todoType 0.52s steps(26, end) 0.12s both;
 }
 
 .todoCursor {
@@ -231,8 +241,8 @@
   background: var(--blue);
   transform: translateY(0.12em);
   animation:
-    todoCursorBlink 0.72s steps(1, end) infinite,
-    todoCursorDone 0.01s linear 1.72s both;
+    todoCursorBlink 0.58s steps(1, end) infinite,
+    todoCursorDone 0.01s linear 0.66s both;
 }
 
 .todoPatch {
@@ -242,7 +252,7 @@
   color: var(--text-muted);
   opacity: 0;
   transform: translateY(3px);
-  animation: todoPatchIn 0.18s $ease-out 1.66s both;
+  animation: todoPatchIn 0.16s $ease-out 0.62s both;
 }
 
 .todoLater {
@@ -253,7 +263,7 @@
   color: var(--text-muted);
   text-decoration: none;
   white-space: nowrap;
-  animation: todoLaterType 0.34s steps(5, end) 1.72s both;
+  animation: todoLaterType 0.18s steps(5, end) 0.68s both;
 
   // Self-drawing red strike — the correction happens in front of you.
   &::after {
@@ -267,7 +277,7 @@
     background: var(--severity-critical);
     transform: scaleX(0);
     transform-origin: left center;
-    animation: todoStrike 0.3s $ease-out 2.12s both;
+    animation: todoStrike 0.2s $ease-out 0.86s both;
   }
 }
 
@@ -277,7 +287,7 @@
   font-family: var(--font-hand);
   font-size: 1.42rem;
   line-height: 1;
-  animation: todoToday 0.4s cubic-bezier(0.3, 1.4, 0.4, 1) 2.46s both;
+  animation: todoToday 0.28s cubic-bezier(0.3, 1.4, 0.4, 1) 1.02s both;
 }
 
 @keyframes todoType {
@@ -336,12 +346,21 @@
 // ── Title: per-char reveal, lint squiggle, blinking caret ────────────
 .title {
   margin: 0 0 18px;
-  font-size: clamp(1.95rem, 2.6vw + 0.9rem, 3.15rem);
-  line-height: 1.1;
-  letter-spacing: -0.025em;
+  font-size: clamp(2.15rem, 2.8vw + 0.85rem, 3.45rem);
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+}
+
+.accentLine {
+  display: inline-flex;
+  align-items: baseline;
+  max-width: 100%;
+  font-size: 0.94em;
+  white-space: nowrap;
 }
 
 .titleAccent {
+  display: inline-block;
   font-style: normal;
   color: var(--blue);
 }
@@ -353,27 +372,21 @@
 
 .char {
   display: inline-block;
-  animation: charReveal 0.5s cubic-bezier(0.2, 0, 0, 1) both;
+  animation: charReveal 0.32s cubic-bezier(0.2, 0, 0, 1) both;
 }
 
 @keyframes charReveal {
   0% {
     opacity: 0;
-    transform: translateY(18px);
-    filter: blur(6px);
-    text-shadow: 0 0 8px oklch(0.62 0.22 240 / 0);
+    transform: translateY(12px);
   }
-  35% {
+  55% {
     opacity: 1;
-    transform: translateY(2px);
-    filter: blur(0);
-    text-shadow: 0 0 10px oklch(0.62 0.22 240 / 0.8);
+    transform: translateY(1px);
   }
   100% {
     opacity: 1;
     transform: translateY(0);
-    filter: blur(0);
-    text-shadow: 0 0 8px oklch(0.62 0.22 240 / 0);
   }
 }
 
@@ -392,7 +405,7 @@
   overflow: visible;
   opacity: 0;
   pointer-events: none;
-  animation: squiggleWake 0.01s linear 1.64s both;
+  animation: squiggleWake 0.01s linear 0.64s both;
 
   path {
     fill: none;
@@ -405,20 +418,20 @@
   transform: scaleX(0);
   transform-box: fill-box;
   transform-origin: 0 50%;
-  animation: squiggleReveal 0.7s cubic-bezier(0.2, 0, 0, 1) 1.66s both;
+  animation: squiggleReveal 0.42s cubic-bezier(0.2, 0, 0, 1) 0.66s both;
 }
 
 .squiggleGlow {
   opacity: 0.3;
   stroke: oklch(0.72 0.2 20 / 0.34);
   stroke-width: 5.4;
-  animation: squiggleGlowSettle 0.62s ease-out 2.04s both;
+  animation: squiggleGlowSettle 0.3s ease-out 0.82s both;
 }
 
 .squiggleMain {
   stroke: var(--severity-critical);
   stroke-width: 2.15;
-  animation: squiggleSettle 0.52s ease-out 2.16s both;
+  animation: squiggleSettle 0.3s ease-out 0.9s both;
 }
 
 @keyframes squiggleWake {
@@ -467,8 +480,8 @@
   background: var(--blue);
   transform: translateY(0.06em);
   animation:
-    caretIn 0.25s $ease-out 2.12s both,
-    caretBlink 1.15s linear 2.42s infinite;
+    caretIn 0.18s $ease-out 0.76s both,
+    caretBlink 1.15s linear 0.96s infinite;
 }
 
 @keyframes caretIn {
@@ -501,7 +514,7 @@
   color: var(--text-secondary);
   font-size: 1.08rem;
   line-height: 1.65;
-  animation: fadeUp 0.6s $ease-out 0.5s both;
+  animation: fadeUp 0.4s $ease-out 0.16s both;
 }
 
 .valuePoints {
@@ -513,7 +526,7 @@
   margin: 0 0 28px;
   padding: 0;
   list-style: none;
-  animation: fadeUp 0.6s $ease-out 0.62s both;
+  animation: fadeUp 0.4s $ease-out 0.24s both;
 
   li {
     --point-color: var(--blue);
@@ -575,9 +588,9 @@
 .actions {
   display: flex;
   gap: 12px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   margin-bottom: 16px;
-  animation: fadeUp 0.6s $ease-out 0.72s both;
+  animation: fadeUp 0.4s $ease-out 0.32s both;
 
   > * {
     min-height: 52px;
@@ -661,7 +674,7 @@
   transition:
     border-color var(--transition),
     color var(--transition);
-  animation: fadeUp 0.6s $ease-out 0.82s both;
+  animation: fadeUp 0.4s $ease-out 0.4s both;
 
   code {
     color: var(--text-code);
@@ -773,7 +786,7 @@
   line-height: 1.15;
   white-space: nowrap;
   transform: rotate(-2deg);
-  animation: fadeUp 0.7s $ease-out 2s both;
+  animation: fadeUp 0.38s $ease-out 0.62s both;
 }
 
 // Anchored to the terminal box (terminalWrap), not the note — so the tip
@@ -800,12 +813,12 @@
 .annotationCurve {
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
-  animation: annotationDraw 0.35s ease-out 2.4s both;
+  animation: annotationDraw 0.26s ease-out 0.86s both;
 }
 
 .annotationHead {
   opacity: 0;
-  animation: caretIn 0.2s ease-out 2.72s both;
+  animation: caretIn 0.14s ease-out 1.06s both;
 }
 
 @keyframes annotationDraw {
@@ -830,7 +843,7 @@
     0 16px 48px rgb(0 0 0 / 0.34),
     inset 0 1px 0 var(--edge-highlight);
   overflow: hidden;
-  animation: cardIn 0.7s $ease-out 0.25s both;
+  animation: cardIn 0.48s $ease-out 0.1s both;
 }
 
 @keyframes cardIn {
@@ -934,7 +947,7 @@
 }
 
 .statusReplay {
-  display: inline-flex;
+  display: none;
   align-items: center;
   gap: 6px;
   flex: none;
@@ -958,6 +971,16 @@
   }
 }
 
+.browserDone {
+  .statusLive {
+    display: none;
+  }
+
+  .statusReplay {
+    display: inline-flex;
+  }
+}
+
 // ── Slim audit progress bar ──────────────────────────────────────────
 .scanProgress {
   position: relative;
@@ -972,7 +995,7 @@
   transform: scaleX(calc(var(--p) / 100));
   transform-origin: left;
   background: linear-gradient(90deg, var(--blue), var(--violet));
-  transition: transform 0.12s linear;
+  transition: transform 0.16s linear;
 }
 
 .browserDone .scanProgressFill {
@@ -1492,7 +1515,7 @@
   bottom: calc(100% + 5px);
   left: 50%;
   z-index: 5;
-  display: inline-flex;
+  display: none;
   align-items: center;
   gap: 6px;
   padding: 4px 9px;
@@ -1518,6 +1541,10 @@
   &[data-via="eye"] svg {
     color: var(--severity-moderate);
   }
+}
+
+.issueActive .heard {
+  display: inline-flex;
 }
 
 .issueTagBelow .heard {
@@ -1885,12 +1912,12 @@
     --hero-grid-size: 64px;
     --hero-grid-sub-size: 16px;
     min-height: auto;
-    padding: 68px 0 96px;
+    padding: calc(var(--nav-height) + 68px) 0 96px;
   }
 
   .grid {
     mask-image: radial-gradient(ellipse 118% 88% at 50% 38%, black 14%, transparent 88%);
-    animation-duration: 0.9s, 36s;
+    animation-duration: 0.55s, 38s;
   }
 
   .gridSweep {
@@ -1990,7 +2017,7 @@
   .title {
     max-width: 740px;
     margin: 0 auto 22px;
-    font-size: clamp(3rem, 7vw, 3.8rem);
+    font-size: clamp(3.1rem, 7.2vw, 4.05rem);
     line-height: 1.04;
     letter-spacing: -0.04em;
     text-wrap: balance;
@@ -2017,6 +2044,99 @@
 }
 
 @media (max-width: 700px) {
+  // Mobile Lighthouse runs on a heavily throttled CPU. Keep the first viewport
+  // fully visible as soon as the boot overlay clears instead of making the LCP
+  // headline wait for dozens of per-character animations.
+  .grid {
+    animation: heroGridFade 0.55s $ease-out 0.03s both;
+    transform: none;
+    will-change: auto;
+  }
+
+  .glow {
+    animation: heroFadeIn 0.55s $ease-out both;
+    transform: none;
+    will-change: auto;
+  }
+
+  .glowAlt {
+    animation: heroFadeIn 0.6s $ease-out both;
+    transform: none;
+    will-change: auto;
+  }
+
+  .char,
+  .subtitle,
+  .valuePoints,
+  .actions,
+  .browser {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .titleCaret {
+    animation: caretBlink 1.15s linear 0.2s infinite;
+  }
+
+  .gridSweep {
+    display: none;
+  }
+
+  .noise {
+    display: none;
+  }
+
+  // Finish below-the-fold decorative sequences immediately on phones. This
+  // retains the visual treatment without competing with initial hydration.
+  .todo,
+  .todoTyped,
+  .todoCursor,
+  .todoPatch,
+  .todoLater,
+  .todoLater::after,
+  .todoToday,
+  .squiggle,
+  .squiggleMask,
+  .squiggleGlow,
+  .squiggleMain {
+    animation: none;
+  }
+
+  .todoTyped {
+    max-width: 26ch;
+  }
+
+  .todoCursor {
+    display: none;
+  }
+
+  .todoPatch {
+    opacity: 1;
+    transform: none;
+  }
+
+  .todoLater {
+    max-width: 5ch;
+  }
+
+  .todoLater::after {
+    transform: scaleX(1);
+  }
+
+  .todoToday {
+    opacity: 1;
+    transform: rotate(-2deg);
+  }
+
+  .squiggle {
+    opacity: 1;
+  }
+
+  .squiggleMask {
+    transform: scaleX(1);
+  }
+
   .scanTodo {
     width: 100%;
   }
@@ -2061,7 +2181,7 @@
   .hero {
     --hero-grid-size: 56px;
     --hero-grid-sub-size: 14px;
-    padding: 48px 0 78px;
+    padding: calc(var(--nav-height) + 48px) 0 78px;
   }
 
   .container {
@@ -2079,19 +2199,19 @@
   .title {
     max-width: 25rem;
     margin-bottom: 18px;
-    font-size: clamp(2.35rem, 11vw, 2.9rem);
+    font-size: clamp(2.45rem, 11.5vw, 3.1rem);
     line-height: 1.04;
     letter-spacing: -0.04em;
   }
 
-  .grid {
-    mask-image: radial-gradient(ellipse 138% 86% at 50% 34%, black 10%, transparent 90%);
-    animation-duration: 0.9s, 42s;
+  .accentLine {
+    // Keep both the phrase and caret together, shrinking only as much as the
+    // available phone width requires.
+    font-size: min(0.94em, 8.2vw);
   }
 
-  .gridSweep {
-    inset-inline: -76%;
-    animation-duration: 15s;
+  .grid {
+    mask-image: radial-gradient(ellipse 138% 86% at 50% 34%, black 10%, transparent 90%);
   }
 
   .glow {
@@ -2164,6 +2284,7 @@
   }
 
   .actions {
+    display: flex;
     flex-direction: column;
     align-items: stretch;
     gap: 10px;

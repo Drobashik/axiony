@@ -1,0 +1,98 @@
+.host {
+  width: 100%;
+  min-width: 0;
+}
+
+.placeholder {
+  position: relative;
+  min-height: var(--deferred-height);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  background:
+    linear-gradient(120deg, transparent 24%, var(--tint-weak) 48%, transparent 72%),
+    color-mix(in oklch, var(--bg-surface) 46%, transparent);
+  background-size:
+    220% 100%,
+    100% 100%;
+  contain: strict;
+
+  &::before {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    left: 18px;
+    height: 1px;
+    background: linear-gradient(90deg, var(--blue-border), transparent 72%);
+    content: "";
+  }
+
+  span {
+    position: absolute;
+    left: 18px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--border-subtle);
+
+    &:nth-child(1) {
+      top: 42px;
+      width: min(32%, 210px);
+    }
+
+    &:nth-child(2) {
+      top: 62px;
+      width: min(54%, 360px);
+    }
+
+    &:nth-child(3) {
+      top: 82px;
+      width: min(42%, 280px);
+    }
+  }
+}
+
+.problem {
+  --deferred-height: 620px;
+}
+
+.workflow {
+  --deferred-height: 690px;
+}
+
+.quickstart {
+  --deferred-height: 520px;
+}
+
+.pricing {
+  --deferred-height: 610px;
+}
+
+.faq {
+  --deferred-height: 480px;
+}
+
+@media (max-width: 700px) {
+  .placeholder {
+    border-radius: var(--radius-lg);
+  }
+
+  .problem {
+    --deferred-height: 680px;
+  }
+
+  .workflow {
+    --deferred-height: 620px;
+  }
+
+  .quickstart {
+    --deferred-height: 580px;
+  }
+
+  .pricing {
+    --deferred-height: 760px;
+  }
+
+  .faq {
+    --deferred-height: 520px;
+  }
+}

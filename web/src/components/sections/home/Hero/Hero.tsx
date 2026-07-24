@@ -28,38 +28,40 @@ export const Hero = () => (
     <Container className={styles.container}>
       <div className={styles.copy}>
         <h1 className={styles.title}>
-          <RevealLine text={TITLE_LINE_ONE} startDelay={0.15} />
+          <RevealLine text={TITLE_LINE_ONE} startDelay={0.06} />
           <br />
-          <em className={styles.titleAccent}>
-            <span className={styles.squiggleWrap}>
-              <RevealLine text={TITLE_ACCENT_TEXT} startDelay={0.6} />
-              {/* Lint-style squiggle: the product is flagging inaccessible UI like an editor error. */}
-              <svg
-                className={styles.squiggle}
-                viewBox="0 0 100 12"
-                preserveAspectRatio="none"
-                aria-hidden="true"
-              >
-                <mask id="hero-inaccessible-squiggle-mask" maskUnits="userSpaceOnUse">
-                  <rect
-                    className={styles.squiggleMask}
-                    x="0"
-                    y="-2"
-                    width="100"
-                    height="16"
-                    fill="white"
-                    transform="scale(0 1)"
-                  />
-                </mask>
-                <g mask="url(#hero-inaccessible-squiggle-mask)">
-                  <path className={styles.squiggleGlow} d={SQUIGGLE_PATH} />
-                  <path className={styles.squiggleMain} d={SQUIGGLE_PATH} />
-                </g>
-              </svg>
-            </span>{" "}
-            <RevealLine text={TITLE_WORD_SQUIGGLED} startDelay={0.98} />
-          </em>
-          <span className={styles.titleCaret} aria-hidden="true" />
+          <span className={styles.accentLine}>
+            <em className={styles.titleAccent}>
+              <RevealLine text={TITLE_ACCENT_TEXT} startDelay={0.18} />{" "}
+              <span className={styles.squiggleWrap}>
+                <RevealLine text={TITLE_WORD_SQUIGGLED} startDelay={0.32} />
+                {/* Lint-style squiggle: regressions are flagged like an editor error. */}
+                <svg
+                  className={styles.squiggle}
+                  viewBox="0 0 100 12"
+                  preserveAspectRatio="none"
+                  aria-hidden="true"
+                >
+                  <mask id="hero-regressions-squiggle-mask" maskUnits="userSpaceOnUse">
+                    <rect
+                      className={styles.squiggleMask}
+                      x="0"
+                      y="-2"
+                      width="100"
+                      height="16"
+                      fill="white"
+                      transform="scale(0 1)"
+                    />
+                  </mask>
+                  <g mask="url(#hero-regressions-squiggle-mask)">
+                    <path className={styles.squiggleGlow} d={SQUIGGLE_PATH} />
+                    <path className={styles.squiggleMain} d={SQUIGGLE_PATH} />
+                  </g>
+                </svg>
+              </span>
+            </em>
+            <span className={styles.titleCaret} aria-hidden="true" />
+          </span>
         </h1>
 
         <p className={styles.subtitle}>{SUBTITLE}</p>
@@ -80,7 +82,7 @@ export const Hero = () => (
         </ul>
 
         <div className={styles.actions}>
-          <Button href="/scan" size="lg">
+          <Button href="/scan" prefetch={false} size="lg">
             Scan your site now
             <ArrowRightIcon />
           </Button>

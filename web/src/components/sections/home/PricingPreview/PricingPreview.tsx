@@ -2,8 +2,8 @@ import { Section } from "@/components/layout";
 import { Container } from "@/components/ui";
 import cn from "classnames";
 import { TypewriterEyebrow } from "../components/TypewriterEyebrow";
-import { PricingPlans } from "./components/PricingPlans";
-import styles from "./PricingPreview.module.scss";
+import { DeferredHomeWidget } from "../components/DeferredHomeWidget";
+import styles from "./PricingPreviewIntro.module.scss";
 
 export const PricingPreview = () => (
   <Section id="pricing" className={styles.section}>
@@ -21,7 +21,7 @@ export const PricingPreview = () => (
         </p>
       </div>
 
-      <PricingPlans />
+      <DeferredHomeWidget widget="pricing" />
     </Container>
   </Section>
 );

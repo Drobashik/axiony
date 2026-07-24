@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui";
-import { useSession } from "@/lib/auth-client";
+import { useSessionStatus } from "@/lib/auth/useSessionStatus";
 import cn from "classnames";
 import styles from "./WorkspaceCta.module.scss";
 
@@ -14,7 +14,7 @@ interface WorkspaceCtaProps {
 }
 
 export const WorkspaceCta = ({ className }: WorkspaceCtaProps) => {
-  const { data: session, isPending } = useSession();
+  const { authenticated, pending: isPending } = useSessionStatus();
 
   if (isPending) {
     return (
@@ -30,12 +30,12 @@ export const WorkspaceCta = ({ className }: WorkspaceCtaProps) => {
     );
   }
 
-  return session?.user ? (
-    <Button href="/dashboard" variant="secondary" size="lg" className={className}>
+  return authenticated ? (
+    <Button href="/dashboard" prefetch={false} variant="secondary" size="lg" className={className}>
       Go to dashboard
     </Button>
   ) : (
-    <Button href="/signup" variant="secondary" size="lg" className={className}>
+    <Button href="/signup" prefetch={false} variant="secondary" size="lg" className={className}>
       Create your workspace
     </Button>
   );

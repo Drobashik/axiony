@@ -1,20 +1,5 @@
-// Keep the actual page mounted from the initial static HTML response. The
-// boot loader is only a fixed overlay above it.
+// Keep the actual page mounted and fully painted under the fixed boot overlay.
+// It can therefore replace the loader in one frame without a second fade.
 .app {
-  animation: appFadeIn 0.35s ease both;
-}
-
-@keyframes appFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .app {
-    animation: none;
-  }
+  min-width: 0;
 }

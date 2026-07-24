@@ -1,25 +1,9 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 import cn from "classnames";
-import { useBootStatus } from "@/components/layout";
 import { SCAN_HOST, SCAN_ISSUES } from "../data";
+import { CloudScannerController } from "./CloudScannerController";
 import { EyeOffIcon, ImageIcon, LockIcon, ReplayIcon, SpeakerIcon } from "./icons";
 import styles from "../Hero.module.scss";
-
-// The audit plays out over this window once the page is interactive.
-const RUN_MS = 3600;
-const START_PAUSE_MS = 420;
-// Once it finishes, the spotlight steps through each issue's real-world impact.
-const IMPACT_STEP_MS = 2600;
-
-// Ease-in-out (smootherstep): a gentle start, steady sweep, soft finish —
-// reads as a scanner working through the page, not a linear bar.
-const ease = (t: number): number => t * t * t * (t * (t * 6 - 15) + 10);
-
-const prefersReducedMotion = (): boolean =>
-  typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const ViaIcon = ({ via }: { via: "sr" | "eye" }) =>
   via === "sr" ? <SpeakerIcon /> : <EyeOffIcon />;
@@ -28,91 +12,17 @@ const ISSUE_LOW_CONTRAST = 0;
 const ISSUE_NO_ALT_TEXT = 1;
 const ISSUE_BUTTON_NAME = 2;
 const ISSUE_MISSING_LABEL = 3;
+const BROWSER_ID = "hero-cloud-scanner";
 
 export const CloudScanner = () => {
-  const { loaded } = useBootStatus();
-  const [runId, setRunId] = useState(0);
-  const [progress, setProgress] = useState(0);
-  const [done, setDone] = useState(false);
-  const [active, setActive] = useState(0);
-  const [autoCycle, setAutoCycle] = useState(true);
-
-  // Hold the run until the boot overlay clears so the visitor sees 0 → 100.
-  // `runId` re-arms it on replay; the reset to 0 lives in the click handler, so
-  // the effect itself only ever schedules async work (no synchronous setState).
-  useEffect(() => {
-    if (!loaded) return;
-
-    if (prefersReducedMotion()) {
-      const frame = requestAnimationFrame(() => {
-        setProgress(100);
-        setDone(true);
-      });
-      return () => cancelAnimationFrame(frame);
-    }
-
-    let raf = 0;
-    let startedAt = 0;
-
-    const tick = (now: number) => {
-      if (!startedAt) startedAt = now;
-      const t = Math.min(1, (now - startedAt) / RUN_MS);
-      setProgress(Math.round(ease(t) * 100));
-      if (t < 1) {
-        raf = requestAnimationFrame(tick);
-      } else {
-        setDone(true);
-      }
-    };
-
-    const startTimer = setTimeout(() => {
-      raf = requestAnimationFrame(tick);
-    }, START_PAUSE_MS);
-
-    return () => {
-      clearTimeout(startTimer);
-      cancelAnimationFrame(raf);
-    };
-  }, [loaded, runId]);
-
-  // After the scan, walk through each issue's impact one at a time.
-  useEffect(() => {
-    if (!done || !autoCycle || prefersReducedMotion()) return;
-    const id = setInterval(() => {
-      setActive((i) => (i + 1) % SCAN_ISSUES.length);
-    }, IMPACT_STEP_MS);
-    return () => clearInterval(id);
-  }, [autoCycle, done]);
-
-  const replay = () => {
-    setProgress(0);
-    setDone(false);
-    setActive(0);
-    setAutoCycle(true);
-    setRunId((id) => id + 1);
-  };
-
-  const selectIssue = (index: number) => {
-    setActive(index);
-    setAutoCycle(false);
-  };
-
-  const shown = done ? 100 : progress;
-  const spotlight = SCAN_ISSUES[active];
-  const found = SCAN_ISSUES.filter((issue) => shown >= issue.at).length;
-
   const renderIssue = (idx: number, options?: { tagPlacement?: "below" }) => {
     const issue = SCAN_ISSUES[idx];
 
     return (
       <span
-        className={cn(
-          styles.issue,
-          options?.tagPlacement === "below" && styles.issueTagBelow,
-          shown >= issue.at && styles.issueOn,
-          done && idx === active && styles.issueActive,
-        )}
+        className={cn(styles.issue, options?.tagPlacement === "below" && styles.issueTagBelow)}
         data-sev={issue.sev}
+        data-scan-marker={idx}
         aria-hidden="true"
       >
         <span className={styles.issueTag}>
@@ -120,12 +30,10 @@ export const CloudScanner = () => {
           {issue.label}
         </span>
 
-        {done && idx === active && (
-          <span className={styles.heard} data-via={issue.via}>
-            <ViaIcon via={issue.via} />
-            {issue.via === "sr" ? `“${issue.heard}”` : issue.heard}
-          </span>
-        )}
+        <span className={styles.heard} data-via={issue.via}>
+          <ViaIcon via={issue.via} />
+          {issue.via === "sr" ? `“${issue.heard}”` : issue.heard}
+        </span>
       </span>
     );
   };
@@ -160,10 +68,7 @@ export const CloudScanner = () => {
         <path className={styles.annotationHead} d="M43 39 L31 43 L36 29" />
       </svg>
 
-      <div
-        className={cn(styles.browser, done && styles.browserDone)}
-        style={{ "--p": shown } as CSSProperties}
-      >
+      <div id={BROWSER_ID} className={styles.browser} style={{ "--p": 0 } as CSSProperties}>
         {/* ── Browser chrome ── */}
         <div className={styles.browserBar}>
           <span className={styles.dots} aria-hidden="true">
@@ -175,22 +80,19 @@ export const CloudScanner = () => {
             <LockIcon />
             {SCAN_HOST}
           </span>
-          {done ? (
-            <button
-              type="button"
-              className={styles.statusReplay}
-              onClick={replay}
-              aria-label="Replay the scan"
-            >
-              <ReplayIcon />
-              scan again
-            </button>
-          ) : (
-            <span className={styles.statusLive} aria-hidden="true">
-              <i />
-              scanning <b>{shown}%</b>
-            </span>
-          )}
+          <span className={styles.statusLive} aria-hidden="true">
+            <i />
+            scanning <b data-scan-progress>0%</b>
+          </span>
+          <button
+            type="button"
+            className={styles.statusReplay}
+            data-scan-replay
+            aria-label="Replay the scan"
+          >
+            <ReplayIcon />
+            scan again
+          </button>
         </div>
 
         {/* slim audit progress bar */}
@@ -290,35 +192,24 @@ export const CloudScanner = () => {
             <div className={styles.auditHeader}>
               <span>
                 <small>accessibility audit</small>
-                <strong>{done ? "4 issues found" : `${found} of 4 found`}</strong>
+                <strong data-scan-found>0 of 4 found</strong>
               </span>
-              <span
-                className={cn(
-                  styles.auditScore,
-                  found > 0 && styles.auditScoreWarn,
-                  done && styles.auditScoreDone,
-                )}
-              >
-                {Math.max(61, 100 - found * 13)}
+              <span className={styles.auditScore} data-scan-score>
+                100
               </span>
             </div>
 
             <div className={styles.auditList}>
               {SCAN_ISSUES.map((issue, idx) => {
-                const isFound = shown >= issue.at;
                 return (
                   <button
                     key={issue.label}
                     type="button"
-                    className={cn(
-                      styles.auditItem,
-                      isFound && styles.auditItemFound,
-                      done && idx === active && styles.auditItemActive,
-                    )}
+                    className={styles.auditItem}
                     data-sev={issue.sev}
-                    disabled={!done}
-                    aria-pressed={done && idx === active}
-                    onClick={() => selectIssue(idx)}
+                    data-scan-issue={idx}
+                    disabled
+                    aria-pressed="false"
                   >
                     <span className={styles.auditItemIcon}>
                       <ViaIcon via={issue.via} />
@@ -333,16 +224,19 @@ export const CloudScanner = () => {
               })}
             </div>
 
-            <div className={styles.impact} data-via={spotlight.via}>
+            <div className={styles.impact} data-via={SCAN_ISSUES[0].via} data-scan-impact>
               <span className={styles.impactEyebrow}>why this matters</span>
-              <p className={styles.impactText}>{spotlight.impact}</p>
-              <span className={styles.impactHint}>
-                {done ? "Select an issue to inspect it" : "Scanning the visible page"}
+              <p className={styles.impactText} data-scan-impact-text>
+                {SCAN_ISSUES[0].impact}
+              </p>
+              <span className={styles.impactHint} data-scan-impact-hint>
+                Scanning the visible page
               </span>
             </div>
           </aside>
         </div>
       </div>
+      <CloudScannerController browserId={BROWSER_ID} />
     </div>
   );
 };
