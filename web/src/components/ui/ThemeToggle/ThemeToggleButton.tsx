@@ -16,23 +16,25 @@ export const ThemeToggleButton = ({ className }: { className?: string }) => {
       className={cn(styles.iconButton, className)}
       onClick={toggleTheme}
       aria-label={label}
+      aria-pressed={resolvedTheme === "dark"}
       title={label}
       data-resolved={resolvedTheme}
     >
-      <span className={styles.modeIcon} aria-hidden="true">
-        <span className={cn(styles.modeGlyph, styles.modeMoon)}>
-          <MoonIcon />
+      <span className={styles.orbit} aria-hidden="true">
+        <span className={styles.stars}>
+          <span />
+          <span />
+          <span />
         </span>
-        <span className={cn(styles.modeGlyph, styles.modeSun)}>
-          <SunIcon />
+        <span className={styles.horizon} />
+        <span className={styles.orbitThumb}>
+          <span className={cn(styles.modeGlyph, styles.modeMoon)}>
+            <MoonIcon />
+          </span>
+          <span className={cn(styles.modeGlyph, styles.modeSun)}>
+            <SunIcon />
+          </span>
         </span>
-      </span>
-      <span className={styles.modeCopy} aria-hidden="true">
-        <span className={styles.modeKey}>theme</span>
-        <span className={styles.modeValue}>{resolvedTheme}</span>
-      </span>
-      <span className={styles.modeRail} aria-hidden="true">
-        <span />
       </span>
     </button>
   );

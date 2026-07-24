@@ -23,7 +23,7 @@ export const viewport: Viewport = {
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-space-grotesk",
   display: "swap",
 });
@@ -31,7 +31,7 @@ const spaceGrotesk = Space_Grotesk({
 const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
-  style: ["normal", "italic"],
+  style: "normal",
   variable: "--font-ibm-plex-mono",
   display: "swap",
 });
@@ -41,6 +41,7 @@ const shortStack = Short_Stack({
   weight: "400",
   variable: "--font-short-stack",
   display: "swap",
+  preload: false,
 });
 
 const RootLayout = ({ children }: { children: ReactNode }) => (
@@ -58,7 +59,10 @@ const RootLayout = ({ children }: { children: ReactNode }) => (
       */}
       <script dangerouslySetInnerHTML={{ __html: THEME_NO_FLASH_SCRIPT }} />
       <ThemeProvider>
-        <BootGate>{children}</BootGate>
+        <div data-boot-root data-boot-loaded="false" style={{ minWidth: 0 }}>
+          {children}
+        </div>
+        <BootGate />
         <Suspense fallback={null}>
           <RouteLoadingIndicator />
         </Suspense>

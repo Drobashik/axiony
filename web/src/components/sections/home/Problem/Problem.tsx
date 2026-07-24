@@ -2,8 +2,8 @@ import { Section } from "@/components/layout";
 import { Container } from "@/components/ui";
 import cn from "classnames";
 import { TypewriterEyebrow } from "../components/TypewriterEyebrow";
-import { ProblemExplorer } from "./components/ProblemExplorer";
-import styles from "./Problem.module.scss";
+import { DeferredHomeWidget } from "../components/DeferredHomeWidget";
+import styles from "./ProblemIntro.module.scss";
 
 export const Problem = () => (
   <Section surface id="problem" className={styles.section}>
@@ -20,7 +20,7 @@ export const Problem = () => (
         </p>
       </div>
 
-      <ProblemExplorer />
+      <DeferredHomeWidget widget="problem" />
     </Container>
   </Section>
 );

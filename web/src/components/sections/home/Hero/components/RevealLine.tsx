@@ -7,7 +7,7 @@ interface RevealLineProps {
 }
 
 export const RevealLine = ({ text, startDelay }: RevealLineProps) => {
-  const perChar = 0.025;
+  const perChar = 0.012;
   const words = text.split(" ");
   let cumulativeIndex = 0;
 

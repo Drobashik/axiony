@@ -1,9 +1,9 @@
-export const TITLE_LINE_ONE = "Stop shipping";
-export const TITLE_ACCENT_TEXT = "inaccessible";
-export const TITLE_WORD_SQUIGGLED = "UI.";
+export const TITLE_LINE_ONE = "Find barriers.";
+export const TITLE_ACCENT_TEXT = "Prevent";
+export const TITLE_WORD_SQUIGGLED = "regressions.";
 
 export const SUBTITLE =
-  "Axiony shows accessibility barriers in context, locks your baseline, and blocks new regressions before they merge.";
+  "See barriers in context, get AI-suggested fixes, and protect your baseline in every pull request.";
 
 export const VALUE_POINTS = ["CLI", "Cloud + AI", "PR gates"] as const;
 

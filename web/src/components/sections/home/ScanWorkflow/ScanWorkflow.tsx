@@ -2,8 +2,8 @@ import { Section } from "@/components/layout";
 import { Container } from "@/components/ui";
 import cn from "classnames";
 import { TypewriterEyebrow } from "../components/TypewriterEyebrow";
-import { WorkflowBoard } from "./components/WorkflowBoard";
-import styles from "./ScanWorkflow.module.scss";
+import { DeferredHomeWidget } from "../components/DeferredHomeWidget";
+import styles from "./ScanWorkflowIntro.module.scss";
 
 export const ScanWorkflow = () => (
   <Section id="workflow" className={styles.workflow}>
@@ -21,7 +21,7 @@ export const ScanWorkflow = () => (
         </p>
       </div>
 
-      <WorkflowBoard />
+      <DeferredHomeWidget widget="workflow" />
     </Container>
   </Section>
 );

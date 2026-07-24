@@ -1,58 +1,42 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import type { ReactNode } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { LoadingScreen } from "@/components/ui";
-import { BootContext } from "./boot-context";
-import type { BootStatus } from "./boot-context";
-import styles from "./BootGate.module.scss";
 
 export interface BootGateProps {
   disabled?: boolean;
-  children: ReactNode;
 }
 
 let hasBootedOnce = false;
 
-const waitForPageLoadAndPaint = (onReady: () => void): (() => void) => {
+const waitForHydrationPaint = (onReady: () => void): (() => void) => {
   let cancelled = false;
   let firstFrame = 0;
   let secondFrame = 0;
 
-  const finish = () => {
-    if (cancelled) return;
-
-    // `load` means the document and its dependent resources are ready. Two
-    // frames then let the hydrated app commit a usable paint before the overlay
-    // is removed; there is no synthetic minimum duration.
-    firstFrame = window.requestAnimationFrame(() => {
-      secondFrame = window.requestAnimationFrame(() => {
-        if (!cancelled) onReady();
-      });
+  // Reaching this effect means React has hydrated the page. Two paint frames
+  // let that interactive UI commit before the overlay leaves, without waiting
+  // for unrelated late resources covered by the broader `window.load` event.
+  firstFrame = window.requestAnimationFrame(() => {
+    secondFrame = window.requestAnimationFrame(() => {
+      if (!cancelled) onReady();
     });
-  };
-
-  if (document.readyState === "complete") {
-    finish();
-  } else {
-    window.addEventListener("load", finish, { once: true });
-  }
+  });
 
   return () => {
     cancelled = true;
-    window.removeEventListener("load", finish);
     window.cancelAnimationFrame(firstFrame);
     window.cancelAnimationFrame(secondFrame);
   };
 };
 
-export const BootGate = ({ disabled, children }: BootGateProps) => {
+export const BootGate = ({ disabled }: BootGateProps) => {
   const startsLoaded = Boolean(disabled || hasBootedOnce);
   const [ready, setReady] = useState(startsLoaded);
   const [loaded, setLoaded] = useState(startsLoaded);
 
   useEffect(() => {
-    if (!ready) return waitForPageLoadAndPaint(() => setReady(true));
+    if (!ready) return waitForHydrationPaint(() => setReady(true));
   }, [ready]);
 
   useEffect(() => {
@@ -72,14 +56,11 @@ export const BootGate = ({ disabled, children }: BootGateProps) => {
     setLoaded(true);
   }, []);
 
-  const status = useMemo<BootStatus>(() => ({ loaded }), [loaded]);
+  useEffect(() => {
+    const app = document.querySelector<HTMLElement>("[data-boot-root]");
+    app?.setAttribute("data-boot-loaded", String(loaded));
+    if (loaded) window.dispatchEvent(new Event("axiony:boot-ready"));
+  }, [loaded]);
 
-  return (
-    <BootContext.Provider value={status}>
-      <div className={styles.app} data-boot-loaded={loaded ? "true" : "false"}>
-        {children}
-      </div>
-      {!loaded && <LoadingScreen ready={ready} onDone={finishBoot} />}
-    </BootContext.Provider>
-  );
+  return !loaded ? <LoadingScreen ready={ready} onDone={finishBoot} /> : null;
 };

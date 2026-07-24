@@ -2,8 +2,8 @@ import { Section } from "@/components/layout";
 import { Button, Container } from "@/components/ui";
 import cn from "classnames";
 import { TypewriterEyebrow } from "../components/TypewriterEyebrow";
-import { FaqList } from "./components/FaqList";
-import styles from "./Faq.module.scss";
+import { DeferredHomeWidget } from "../components/DeferredHomeWidget";
+import styles from "./FaqIntro.module.scss";
 
 export const Faq = () => (
   <Section surface id="faq" className={styles.section}>
@@ -40,7 +40,7 @@ export const Faq = () => (
           </div>
         </div>
 
-        <FaqList />
+        <DeferredHomeWidget widget="faq" />
       </div>
     </Container>
   </Section>

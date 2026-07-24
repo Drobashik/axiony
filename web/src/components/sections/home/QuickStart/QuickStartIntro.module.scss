@@ -1,0 +1,100 @@
+.section {
+  --quick-grid-line: color-mix(in oklch, var(--text-primary) 5%, transparent);
+  --quick-grid-node: color-mix(in oklch, var(--green) 28%, transparent);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+
+  &::before,
+  &::after {
+    position: absolute;
+    pointer-events: none;
+    content: "";
+  }
+
+  &::before {
+    inset: -18% -12%;
+    background:
+      radial-gradient(
+        ellipse 44% 38% at 18% 42%,
+        color-mix(in oklch, var(--blue) 11%, transparent),
+        transparent 72%
+      ),
+      radial-gradient(
+        ellipse 38% 34% at 88% 68%,
+        color-mix(in oklch, var(--green) 9%, transparent),
+        transparent 72%
+      );
+  }
+
+  &::after {
+    inset: -12% -8%;
+    background-image:
+      radial-gradient(circle at 1px 1px, var(--quick-grid-node) 0 1.15px, transparent 1.7px),
+      linear-gradient(var(--quick-grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--quick-grid-line) 1px, transparent 1px);
+    background-size:
+      84px 84px,
+      42px 42px,
+      42px 42px;
+    mask-image: linear-gradient(90deg, transparent 2%, black 24%, black 78%, transparent 98%);
+    opacity: 0.58;
+  }
+
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+.intro {
+  max-width: 680px;
+  margin: 0 auto 40px;
+  text-align: center;
+}
+
+.eyebrow {
+  display: block;
+  margin-bottom: 14px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.headingAccent {
+  color: var(--blue);
+  font-style: normal;
+}
+
+.lead {
+  margin-top: 14px;
+  color: var(--text-secondary);
+  font-size: 1.08rem;
+  line-height: 1.7;
+}
+
+@media (max-width: 860px) {
+  .section::after {
+    mask-image: radial-gradient(ellipse 120% 76% at 50% 48%, black, transparent 88%);
+    opacity: 0.48;
+  }
+}
+
+@media (max-width: 480px) {
+  .section {
+    &::before {
+      inset: -6% -46%;
+      opacity: 0.74;
+    }
+
+    &::after {
+      inset-inline: -24%;
+      background-size:
+        64px 64px,
+        32px 32px,
+        32px 32px;
+      opacity: 0.38;
+    }
+  }
+}

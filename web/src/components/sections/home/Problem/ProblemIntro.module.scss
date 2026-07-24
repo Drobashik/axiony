@@ -1,0 +1,108 @@
+.section {
+  --problem-grid-line: color-mix(in oklch, var(--text-primary) 5.5%, transparent);
+  --problem-grid-node: color-mix(in oklch, var(--blue) 26%, transparent);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+
+  &::before,
+  &::after {
+    position: absolute;
+    pointer-events: none;
+    content: "";
+  }
+
+  &::before {
+    inset: -18% -12%;
+    background:
+      radial-gradient(
+        ellipse 38% 34% at 12% 30%,
+        color-mix(in oklch, var(--violet) 10%, transparent),
+        transparent 72%
+      ),
+      radial-gradient(
+        ellipse 42% 38% at 90% 70%,
+        color-mix(in oklch, var(--blue) 11%, transparent),
+        transparent 72%
+      );
+    opacity: 0.9;
+  }
+
+  &::after {
+    inset: -10% -8%;
+    background-image:
+      radial-gradient(circle at 1px 1px, var(--problem-grid-node) 0 1.1px, transparent 1.7px),
+      linear-gradient(var(--problem-grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--problem-grid-line) 1px, transparent 1px);
+    background-size:
+      96px 96px,
+      48px 48px,
+      48px 48px;
+    mask-image: radial-gradient(ellipse 88% 72% at 50% 56%, black 10%, transparent 82%);
+    opacity: 0.7;
+  }
+
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+.intro {
+  max-width: 780px;
+  margin: 0 auto clamp(38px, 5vw, 56px);
+  text-align: center;
+}
+
+.eyebrow {
+  display: block;
+  margin-bottom: 14px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.heading {
+  margin: 0;
+}
+
+.headingAccent {
+  color: var(--blue);
+  font-style: normal;
+}
+
+.lead {
+  max-width: 640px;
+  margin: 14px auto 0;
+  color: var(--text-secondary);
+  font-size: 1.08rem;
+  line-height: 1.75;
+}
+
+@media (max-width: 640px) {
+  .section {
+    &::before {
+      inset: -8% -36%;
+      opacity: 0.7;
+    }
+
+    &::after {
+      inset-inline: -24%;
+      background-size:
+        80px 80px,
+        40px 40px,
+        40px 40px;
+      mask-image: radial-gradient(ellipse 120% 74% at 50% 50%, black, transparent 86%);
+      opacity: 0.48;
+    }
+  }
+
+  .intro {
+    margin-bottom: 30px;
+  }
+
+  .lead {
+    font-size: 1rem;
+  }
+}
