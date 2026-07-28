@@ -1,0 +1,15 @@
+@use "abstracts" as *;
+
+@media (prefers-reduced-motion: reduce) {
+  .pmBtn,
+  .cmdRow,
+  .copy,
+  .target {
+    transition: none;
+  }
+
+  .caret,
+  .swap {
+    animation: none;
+  }
+}

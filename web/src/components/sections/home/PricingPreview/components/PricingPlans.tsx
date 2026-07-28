@@ -48,7 +48,7 @@ export const PricingPlans = () => {
   const currentPlanName = planDefinition(currentPlan).name;
 
   return (
-    <div className={cn(styles.plans, "reveal")}>
+    <div className="reveal">
       {signedIn && (
         <div className={styles.accountNote} role="status">
           <span>Signed in</span>

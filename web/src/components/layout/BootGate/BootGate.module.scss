@@ -1,5 +1,0 @@
-// Keep the actual page mounted and fully painted under the fixed boot overlay.
-// It can therefore replace the loader in one frame without a second fade.
-.app {
-  min-width: 0;
-}

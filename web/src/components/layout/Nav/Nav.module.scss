@@ -48,6 +48,29 @@
   }
 }
 
+.progress {
+  position: absolute;
+  z-index: 3;
+  right: 12px;
+  bottom: -1px;
+  left: 12px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--blue), var(--violet));
+  box-shadow: 0 0 10px color-mix(in oklch, var(--blue) 40%, transparent);
+  pointer-events: none;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition:
+    background 240ms ease,
+    box-shadow 240ms ease;
+}
+
+.progressDone {
+  background: var(--green);
+  box-shadow: 0 0 10px color-mix(in oklch, var(--green) 46%, transparent);
+}
+
 .logo {
   display: inline-flex;
   align-items: center;
@@ -758,7 +781,7 @@
 
 .mobileUtility {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 7px;
 }
 
@@ -775,24 +798,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 7px 8px 7px 12px;
-
-  > span {
-    display: grid;
-    gap: 3px;
-  }
+  gap: 8px;
+  min-width: 0;
+  padding: 7px 8px 7px 10px;
 
   strong {
     color: var(--text-primary);
     font-size: 0.72rem;
     font-weight: 700;
-  }
-
-  small {
-    color: var(--text-muted);
-    font-family: var(--font-mono);
-    font-size: 0.53rem;
   }
 }
 
@@ -800,22 +813,35 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 0 13px;
-  color: var(--text-primary);
-  font-size: 0.74rem;
-  font-weight: 700;
+  gap: 8px;
+  min-width: 0;
+  border-color: var(--blue-border);
+  padding: 0 12px;
+  color: var(--blue);
+  background: var(--blue-dim);
+  box-shadow: inset 0 1px 0 var(--edge-highlight);
+  font-size: 0.8rem;
+  font-weight: 760;
   text-decoration: none;
   white-space: nowrap;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
 
   svg {
     color: var(--blue);
   }
 
   &:hover {
-    border-color: var(--blue-border);
-    background: var(--blue-dim);
+    border-color: color-mix(in oklch, var(--blue) 62%, var(--border-default));
+    background: color-mix(in oklch, var(--blue) 15%, var(--bg-base));
+    box-shadow:
+      inset 0 1px 0 var(--edge-highlight),
+      0 8px 20px color-mix(in oklch, var(--blue) 14%, transparent);
     text-decoration: none;
+    transform: translateY(-1px);
   }
 
   &:focus-visible {
@@ -824,7 +850,7 @@
 }
 
 .mobileAuthSkeleton {
-  width: 82px;
+  width: 100%;
   background: linear-gradient(
     90deg,
     var(--border-subtle),
@@ -1020,13 +1046,8 @@
     grid-template-columns: 1fr;
   }
 
-  .mobileUtility {
-    grid-template-columns: 1fr;
-  }
-
   .mobileAccount,
   .mobileAuthSkeleton {
-    width: 100%;
     min-height: 46px;
   }
 }

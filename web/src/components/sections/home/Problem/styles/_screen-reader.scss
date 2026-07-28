@@ -1,0 +1,82 @@
+@use "abstracts" as *;
+
+.srStage {
+  display: grid;
+  gap: 14px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  background: var(--bg-muted);
+}
+
+.srToolbar {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  background: var(--bg-base);
+}
+
+.srIconBtn {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 44px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+
+  &:hover {
+    border-color: var(--border-strong);
+    color: var(--text-primary);
+  }
+
+  &.srIconBtn_active {
+    border-color: var(--blue);
+    color: var(--blue);
+    box-shadow: 0 0 0 3px var(--blue-dim);
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+.srReader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  background: var(--bg-base);
+  font-family: var(--font-mono);
+
+  strong {
+    font-size: 1.1rem;
+    transition: color 160ms ease;
+  }
+}
+
+.srReaderLabel {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.srBad {
+  color: var(--severity-critical);
+}
+.srGood {
+  color: var(--green);
+}

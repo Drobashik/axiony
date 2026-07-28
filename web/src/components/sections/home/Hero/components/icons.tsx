@@ -130,7 +130,6 @@ export const LockIcon = () => (
   </svg>
 );
 
-// Screen-reader / audio output — "this is what a blind user hears".
 export const SpeakerIcon = () => (
   <svg
     width="13"
@@ -149,7 +148,6 @@ export const SpeakerIcon = () => (
   </svg>
 );
 
-// Low-vision / "hard to see" — a struck-through eye.
 export const EyeOffIcon = () => (
   <svg
     width="13"
@@ -169,7 +167,6 @@ export const EyeOffIcon = () => (
   </svg>
 );
 
-// Decorative "hero image" glyph for the mock page's media block.
 export const ImageIcon = () => (
   <svg
     width="22"

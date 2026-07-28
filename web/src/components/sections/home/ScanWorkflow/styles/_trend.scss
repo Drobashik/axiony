@@ -1,0 +1,102 @@
+@use "abstracts" as *;
+
+.trendChart {
+  display: block;
+  width: 100%;
+  height: auto;
+  padding: 10px 12px 0;
+  overflow: visible;
+}
+
+.trendGrid {
+  fill: none;
+  stroke: var(--border-subtle);
+  stroke-dasharray: 4 6;
+}
+
+.trendArea {
+  fill: var(--green);
+  opacity: 0.1;
+}
+
+.trendLine {
+  fill: none;
+  stroke: var(--green);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 360;
+  stroke-dashoffset: 360;
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--green) 30%, transparent));
+  animation: drawTrend 1.35s $ease-out 0.25s both;
+}
+
+.trendPulse {
+  fill: none;
+  stroke: color-mix(in srgb, var(--green) 70%, white);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 9 100;
+  stroke-dashoffset: 0;
+  opacity: 0;
+  filter: drop-shadow(0 0 5px var(--green));
+  animation: trendPulse 2.8s linear 1.5s infinite;
+}
+
+.trendDot {
+  fill: var(--board-surface);
+  stroke: var(--green);
+  stroke-width: 2;
+  opacity: 0;
+  animation: dotIn 0.35s $ease-out 1.15s both;
+}
+
+@keyframes drawTrend {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes trendPulse {
+  0% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.9;
+  }
+  55% {
+    stroke-dashoffset: -100;
+    opacity: 0.9;
+  }
+  68%,
+  100% {
+    stroke-dashoffset: -100;
+    opacity: 0;
+  }
+}
+
+@keyframes dotIn {
+  to {
+    opacity: 1;
+  }
+}
+
+.trendMeta {
+  display: grid;
+  gap: 2px;
+  padding: 0 13px 13px;
+
+  strong {
+    color: var(--green);
+    font-family: var(--font-mono);
+    font-size: 1.35rem;
+  }
+
+  span {
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    line-height: 1.45;
+  }
+}

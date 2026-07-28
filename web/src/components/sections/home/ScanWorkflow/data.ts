@@ -114,9 +114,6 @@ export const WORKFLOW_TABS = [
   },
 ] as const;
 
-// Looping CLI scene: scan a site, surface an issue, generate an AI fix
-// (shown as a diff), then re-scan clean. `delay` is the pause before the
-// line appears, in ms. The whole thing cycles — see ScanTerminal.
 export type ScanLineType = "cmd" | "muted" | "run" | "ok" | "warn" | "add" | "remove" | "done";
 
 export type ScanLine = {

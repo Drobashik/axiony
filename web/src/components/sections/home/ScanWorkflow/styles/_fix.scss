@@ -1,0 +1,214 @@
+@use "abstracts" as *;
+
+.fixSide {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+.aiPatchPanel {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 14px;
+  padding: 16px;
+  background:
+    radial-gradient(ellipse 70% 54% at 50% 0%, var(--violet-dim), transparent 72%),
+    var(--board-surface);
+}
+
+.aiPatchHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  > span {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--violet-border);
+    border-radius: var(--radius-md);
+    background: var(--violet-dim);
+    color: var(--violet);
+    animation: aiPulse 2.4s ease-in-out infinite;
+  }
+
+  code {
+    color: var(--violet);
+    font-size: 0.78rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  h4 {
+    margin: 4px 0 0;
+    font-size: clamp(1.16rem, 2.1vw, 1.46rem);
+  }
+}
+
+@keyframes aiPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--violet) 0%, transparent);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 8px color-mix(in srgb, var(--violet) 12%, transparent);
+    transform: scale(1.03);
+  }
+}
+
+.aiReason {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  background: var(--board-soft);
+
+  span {
+    color: var(--green);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  p {
+    margin-top: 6px;
+    color: var(--text-secondary);
+    font-size: 0.96rem;
+    line-height: 1.55;
+  }
+}
+
+.patch {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 2px;
+  margin: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px 0;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--bg-base) 74%, var(--bg-surface));
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent, var(--tint-medium), transparent);
+    transform: translateX(-100%);
+    animation: patchSweep 4.8s ease-in-out infinite;
+  }
+
+  code {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr);
+    gap: 8px;
+    padding: 2px 13px 2px 0;
+    color: var(--text-code);
+    font-family: var(--font-mono);
+    font-size: 0.84rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+    opacity: 0;
+    transform: translateX(-6px);
+    animation: patchLineIn 0.36s $ease-out both;
+
+    @for $i from 1 through 8 {
+      &:nth-child(#{$i}) {
+        animation-delay: #{0.08 + $i * 0.08}s;
+      }
+    }
+
+    span {
+      text-align: center;
+      color: var(--text-muted);
+    }
+  }
+}
+
+@keyframes patchLineIn {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes patchSweep {
+  0%,
+  42% {
+    transform: translateX(-100%);
+  }
+  72%,
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.patch_add {
+  background: var(--green-dim);
+
+  span {
+    color: var(--green) !important;
+  }
+}
+
+.patch_remove {
+  background: oklch(0.72 0.2 20 / 0.09);
+  color: var(--severity-critical) !important;
+
+  span {
+    color: var(--severity-critical) !important;
+  }
+}
+
+.prList {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+}
+
+.prCard {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 9px;
+  border: 1px solid var(--green-border);
+  border-radius: var(--radius-md);
+  padding: 9px;
+  background: linear-gradient(90deg, var(--green-dim), transparent 78%), var(--board-soft);
+  animation: cardRise 0.46s $ease-out both;
+
+  @for $i from 1 through 3 {
+    &:nth-child(#{$i}) {
+      animation-delay: #{0.18 + $i * 0.1}s;
+    }
+  }
+
+  span {
+    grid-row: span 2;
+    align-self: center;
+    border-radius: var(--radius-sm);
+    padding: 5px 7px;
+    background: var(--board-muted);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    font-weight: 800;
+  }
+
+  strong {
+    color: var(--text-primary);
+    font-size: 0.88rem;
+  }
+
+  small {
+    color: var(--text-muted);
+    font-size: 0.76rem;
+  }
+}

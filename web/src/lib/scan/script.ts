@@ -1,7 +1,6 @@
 import { blank, txt } from "@/components/ui/Terminal";
 import type { TerminalLine } from "@/components/ui/Terminal";
 
-/** Terminal output that plays back during a scan (/scan demo). */
 export const buildScanLines = (url: string): TerminalLine[] => [
   [txt("$", "prompt"), txt(" "), txt(`axiony scan ${url} --format json`, "cmd")],
   [txt("  Axiony v1.4.2  ·  WCAG 2.2 AA", "dim")],
@@ -23,7 +22,6 @@ export const buildScanLines = (url: string): TerminalLine[] => [
   [txt("  ✓ Scan complete  ·  2.4s", "success")],
 ];
 
-/** Index of the line at which each progress step transitions. */
 export const STEP_AT_LINE: Record<number, number> = {
   3: 1,
   8: 2,

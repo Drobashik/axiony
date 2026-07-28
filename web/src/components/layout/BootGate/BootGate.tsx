@@ -14,9 +14,6 @@ const waitForHydrationPaint = (onReady: () => void): (() => void) => {
   let firstFrame = 0;
   let secondFrame = 0;
 
-  // Reaching this effect means React has hydrated the page. Two paint frames
-  // let that interactive UI commit before the overlay leaves, without waiting
-  // for unrelated late resources covered by the broader `window.load` event.
   firstFrame = window.requestAnimationFrame(() => {
     secondFrame = window.requestAnimationFrame(() => {
       if (!cancelled) onReady();

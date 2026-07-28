@@ -1,0 +1,162 @@
+@use "abstracts" as *;
+
+.stage {
+  position: relative;
+  @include grid-overlay(42px, 0.035);
+  min-width: 0;
+  padding: clamp(14px, 1.8vw, 20px);
+  background: var(--board-surface);
+}
+
+.flowStatus {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--status-border);
+  border-radius: 999px;
+  padding: 6px 11px;
+  background: var(--status-dim);
+  color: var(--status);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 800;
+  white-space: nowrap;
+
+  span {
+    position: relative;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 0 4px color-mix(in srgb, currentColor 16%, transparent);
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: -7px;
+      border: 1px solid currentColor;
+      border-radius: inherit;
+      opacity: 0;
+      animation: syncPulse 1.9s ease-out infinite;
+    }
+  }
+}
+
+@keyframes syncPulse {
+  0% {
+    opacity: 0.45;
+    transform: scale(0.45);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.2);
+  }
+}
+
+.flowStatus_green {
+  --status: var(--green);
+  --status-border: var(--green-border);
+  --status-dim: var(--green-dim);
+}
+
+.flowStatus_blue {
+  --status: var(--blue);
+  --status-border: var(--blue-border);
+  --status-dim: var(--blue-dim);
+}
+
+.flowStatus_violet {
+  --status: var(--violet);
+  --status-border: var(--violet-border);
+  --status-dim: var(--violet-dim);
+}
+
+@keyframes cardRise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.flowPanel {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  min-width: 0;
+  height: 100%;
+}
+
+.flowPanelItem {
+  grid-area: 1 / 1;
+  display: grid;
+  min-width: 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition:
+    opacity 0.3s $ease-out,
+    transform 0.3s $ease-out,
+    visibility 0s linear 0.3s;
+}
+
+.flowPanelItem_active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+  will-change: opacity, transform;
+  transition:
+    opacity 0.3s $ease-out,
+    transform 0.3s $ease-out,
+    visibility 0s linear 0s;
+}
+
+.flowPanelItem:not(.flowPanelItem_active) {
+  * {
+    animation-play-state: paused !important;
+  }
+}
+
+.runGrid,
+.fixGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.32fr) minmax(272px, 0.68fr);
+  gap: 14px;
+  align-items: stretch;
+  height: 100%;
+}
+
+.reviewGrid {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.reviewSide {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 14px;
+  align-items: stretch;
+}
+
+.terminalPanel,
+.runSummary,
+.aiPatchPanel,
+.fixSide {
+  min-width: 0;
+}
+
+.terminalPanel,
+.aiPatchPanel {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--board-surface);
+  box-shadow: inset 0 1px 0 var(--edge-highlight);
+  overflow: hidden;
+}

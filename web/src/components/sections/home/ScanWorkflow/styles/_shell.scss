@@ -1,0 +1,397 @@
+@use "abstracts" as *;
+
+.boardWrap {
+  max-width: 1240px;
+  margin-inline: auto;
+}
+
+.boardWrap_paused .stepProgress {
+  animation-play-state: paused;
+}
+
+.shell {
+  --board-surface: color-mix(in srgb, var(--bg-elevated) 90%, var(--bg-surface));
+  --board-soft: color-mix(in srgb, var(--bg-surface) 86%, var(--bg-muted));
+  --board-muted: color-mix(in srgb, var(--bg-muted) 76%, var(--bg-surface));
+
+  position: relative;
+  @include elevated-panel(var(--radius-xl), var(--shadow-panel));
+  overflow: hidden;
+}
+
+.chrome {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 11px 16px;
+  background: color-mix(in srgb, var(--bg-muted) 46%, var(--bg-surface));
+}
+
+.chromeDots {
+  display: inline-flex;
+  flex: none;
+  gap: 6px;
+
+  i {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #28c840;
+
+    &:first-child {
+      background: #ff5f57;
+    }
+
+    &:nth-child(2) {
+      background: #febc2e;
+    }
+  }
+}
+
+.chromeUrl {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  padding: 5px 13px;
+  background: color-mix(in srgb, var(--bg-base) 55%, var(--bg-surface));
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.chromeHost {
+  color: var(--text-muted);
+}
+
+.chromePathStack {
+  display: inline-grid;
+  min-width: 0;
+}
+
+.chromePath {
+  grid-area: 1 / 1;
+  justify-self: start;
+  color: var(--text-secondary);
+  font-weight: 700;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(5px);
+  transition:
+    opacity 0.3s $ease-out,
+    transform 0.3s $ease-out;
+}
+
+.chromePath_active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.chromeStatus {
+  display: grid;
+  flex: none;
+  justify-items: end;
+  margin-left: auto;
+}
+
+.chromeStatusItem {
+  grid-area: 1 / 1;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(5px);
+  transition:
+    opacity 0.3s $ease-out,
+    transform 0.3s $ease-out,
+    visibility 0s linear 0.3s;
+}
+
+.chromeStatusItem_active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition:
+    opacity 0.3s $ease-out,
+    transform 0.3s $ease-out,
+    visibility 0s linear 0s;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: 318px minmax(0, 1fr);
+  align-items: stretch;
+}
+
+.rail {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+  border-right: 1px solid var(--border-subtle);
+  padding: 20px 18px;
+  background: color-mix(in srgb, var(--bg-surface) 64%, var(--bg-elevated));
+}
+
+.steps {
+  position: relative;
+  display: grid;
+  gap: 8px;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 26px;
+    bottom: 26px;
+    left: 27px;
+    width: 1px;
+    background: linear-gradient(
+      180deg,
+      var(--green-border),
+      var(--blue-border),
+      var(--violet-border)
+    );
+  }
+}
+
+.step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  min-width: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  padding: 9px 11px;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease;
+
+  &:hover {
+    border-color: var(--border-subtle);
+    background: var(--board-soft);
+  }
+
+  &:focus-visible {
+    @include focus-ring(var(--step), 3px);
+  }
+
+  strong {
+    color: var(--text-primary);
+    font-size: 0.99rem;
+    line-height: 1.2;
+  }
+
+  small {
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.73rem;
+    line-height: 1.45;
+  }
+}
+
+.step_active {
+  border-color: var(--step-border);
+  background: linear-gradient(90deg, var(--step-dim), transparent 74%), var(--board-soft);
+}
+
+.stepMarker {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  background: var(--board-surface);
+  color: var(--text-muted);
+  transition:
+    border-color 200ms ease,
+    background 200ms ease,
+    color 200ms ease,
+    box-shadow 200ms ease;
+
+  code {
+    font-size: 0.7rem;
+    font-weight: 900;
+  }
+}
+
+.step[data-state="done"] .stepMarker {
+  border-color: var(--step-border);
+  background: var(--step-dim);
+  color: var(--step);
+}
+
+.step[data-state="active"] .stepMarker {
+  border-color: var(--step-border);
+  background: var(--step-dim);
+  color: var(--step);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--step) 13%, transparent);
+}
+
+.stepCopy {
+  position: relative;
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+  padding-bottom: 7px;
+}
+
+.stepProgress {
+  position: absolute;
+  right: 4px;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--step);
+  opacity: 0;
+  pointer-events: none;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.step_active .stepProgress {
+  opacity: 0.72;
+  animation-duration: var(--workflow-tab-ms, 5600ms);
+  animation-fill-mode: both;
+  animation-timing-function: linear;
+}
+
+.step_active.step_cycleA .stepProgress {
+  animation-name: tabProgressA;
+}
+
+.step_active.step_cycleB .stepProgress {
+  animation-name: tabProgressB;
+}
+
+@keyframes tabProgressA {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes tabProgressB {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.step_green {
+  --step: var(--green);
+  --step-border: var(--green-border);
+  --step-dim: var(--green-dim);
+}
+
+.step_blue {
+  --step: var(--blue);
+  --step-border: var(--blue-border);
+  --step-dim: var(--blue-dim);
+}
+
+.step_violet {
+  --step: var(--violet);
+  --step-border: var(--violet-border);
+  --step-dim: var(--violet-dim);
+}
+
+.railCopyStack {
+  display: grid;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 16px;
+}
+
+.railCopy {
+  grid-area: 1 / 1;
+  min-width: 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px);
+  transition:
+    opacity 0.32s $ease-out,
+    transform 0.32s $ease-out,
+    visibility 0s linear 0.32s;
+
+  h3 {
+    margin: 0 0 7px;
+    font-size: 1.16rem;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+  }
+
+  p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.92rem;
+    line-height: 1.65;
+  }
+}
+
+.railCopy_active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition:
+    opacity 0.32s $ease-out,
+    transform 0.32s $ease-out,
+    visibility 0s linear 0s;
+}
+
+.railNote {
+  display: grid;
+  gap: 5px;
+  margin-top: auto;
+  border: 1px solid var(--violet-border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  background: linear-gradient(120deg, var(--violet-dim), transparent 72%), var(--board-soft);
+
+  small {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    line-height: 1.5;
+  }
+}
+
+.railNoteLabel {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.railNoteValue {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  font-weight: 700;
+
+  b {
+    color: var(--violet);
+    font-weight: 900;
+  }
+
+  svg {
+    color: var(--violet);
+  }
+}

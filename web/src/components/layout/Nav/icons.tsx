@@ -101,25 +101,3 @@ export function BookIcon({ className }: IconProps) {
     </svg>
   );
 }
-
-export function HelpIcon({ className }: IconProps) {
-  return (
-    <svg
-      className={className}
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
-      aria-hidden="true"
-    >
-      <circle cx="8" cy="8" r="5.75" stroke="currentColor" strokeWidth="1.3" />
-      <path
-        d="M6.55 6.25A1.55 1.55 0 0 1 8.1 4.9c.95 0 1.65.55 1.65 1.4 0 1.05-.7 1.35-1.25 1.7-.45.28-.65.58-.65 1.05"
-        stroke="currentColor"
-        strokeWidth="1.3"
-        strokeLinecap="round"
-      />
-      <circle cx="7.85" cy="11.25" r=".7" fill="currentColor" />
-    </svg>
-  );
-}

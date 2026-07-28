@@ -8,12 +8,17 @@
   &::before,
   &::after {
     position: absolute;
+    contain: paint;
     pointer-events: none;
+    transform: translateZ(0);
     content: "";
   }
 
   &::before {
-    inset: -64px;
+    top: -64px;
+    right: -64px;
+    left: -64px;
+    height: clamp(680px, 92svh, 920px);
     background-image:
       radial-gradient(circle at 1px 1px, var(--faq-grid-node) 0 1.05px, transparent 1.6px),
       linear-gradient(var(--faq-grid-line) 1px, transparent 1px),
@@ -27,7 +32,10 @@
   }
 
   &::after {
-    inset: -16% -12%;
+    top: -120px;
+    right: -12%;
+    left: -12%;
+    height: clamp(760px, 105svh, 980px);
     background:
       radial-gradient(
         ellipse 40% 42% at 88% 34%,
@@ -108,17 +116,24 @@
 @media (max-width: 860px) {
   .section {
     &::before {
+      top: -32px;
+      right: -32px;
+      left: -32px;
+      height: 760px;
       background-size:
         52px 52px,
         26px 26px,
         26px 26px;
-      mask-image: radial-gradient(ellipse 120% 72% at 50% 46%, black, transparent 88%);
-      opacity: 0.42;
+      mask-image: none;
+      opacity: 0.24;
     }
 
     &::after {
-      inset-inline: -46%;
-      opacity: 0.72;
+      top: -80px;
+      right: -24%;
+      left: -24%;
+      height: 680px;
+      opacity: 0.58;
     }
   }
 

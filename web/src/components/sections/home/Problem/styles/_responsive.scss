@@ -1,0 +1,129 @@
+@use "abstracts" as *;
+
+@media (max-width: 980px) {
+  .explorer {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .rail {
+    gap: 12px;
+  }
+
+  .list {
+    display: flex;
+    gap: 8px;
+    padding: 2px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .item {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 8px;
+    min-height: 42px;
+    width: auto;
+    padding: 8px 15px;
+    border-radius: 999px;
+    scroll-snap-align: start;
+
+    &:hover,
+    &:focus-visible,
+    &.item_active {
+      transform: none;
+    }
+  }
+
+  .itemTop {
+    display: contents;
+  }
+
+  .sevDot {
+    order: 0;
+  }
+
+  .titleShort {
+    display: inline;
+    order: 1;
+  }
+
+  .state {
+    order: 2;
+    margin-left: 2px;
+  }
+
+  .rule,
+  .titleFull,
+  .itemDesc {
+    display: none;
+  }
+
+  .panel {
+    position: relative;
+    top: auto;
+    min-height: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .panel {
+    --panel-pad: 16px;
+  }
+
+  .score {
+    padding: 12px;
+  }
+
+  .scoreHead {
+    align-items: flex-start;
+  }
+
+  .scoreThanks {
+    max-width: 12rem;
+    text-align: right;
+  }
+
+  .panelChrome {
+    margin-bottom: 14px;
+    padding: 10px 14px;
+  }
+
+  .headline {
+    font-size: 1.22rem;
+  }
+
+  .contrastControls {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    justify-items: stretch;
+  }
+
+  .readout {
+    grid-auto-flow: column;
+    justify-content: start;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .actionBtn {
+    width: 100%;
+  }
+
+  .srToolbar {
+    gap: 8px;
+  }
+
+  .srIconBtn {
+    width: 100%;
+  }
+}

@@ -5,7 +5,6 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useSyncExternalStore,
 } from "react";
@@ -22,45 +21,37 @@ import {
 } from "./theme-store";
 
 interface ThemeContextValue {
-  /** The user's choice. `system` tracks the OS preference. */
   theme: ThemeChoice;
-  /** The theme actually applied to the document. */
   resolvedTheme: ResolvedTheme;
   setTheme: (choice: ThemeChoice) => void;
-  /** Flip between light and dark as an explicit choice. */
   toggleTheme: () => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-// Browser-chrome colour (mobile address bar) per theme — mirrors `--bg-base`.
 const META_COLOR: Record<ResolvedTheme, string> = {
   dark: "#09090b",
   light: "#f3f4f7",
 };
 
-// Runs before paint on the client, no-op on the server. Applying the theme in a
-// layout effect re-asserts it after React hydration (which resets attributes the
-// no-flash boot script set), with no visible flash.
-const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
-
-// The single writer of the document's theme.
-const applyTheme = (resolved: ResolvedTheme): void => {
+const applyTheme = (theme: ResolvedTheme): void => {
   const root = document.documentElement;
-  root.setAttribute("data-theme", resolved);
-  root.style.colorScheme = resolved;
-  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", META_COLOR[resolved]);
+
+  root.setAttribute("data-theme", theme);
+
+  root.style.colorScheme = theme;
+
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", META_COLOR[theme]);
 };
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  // SSR-safe reactive reads of the persisted choice and the OS preference.
   const theme = useSyncExternalStore(subscribeChoice, readChoice, serverChoice);
+
   const system = useSyncExternalStore(subscribeSystem, readSystem, serverSystem);
+
   const resolvedTheme: ResolvedTheme = theme === "light" || theme === "dark" ? theme : system;
 
-  // One mechanism covers every path: mount, user action, OS change, other tabs —
-  // each updates `resolvedTheme`, which re-applies the document theme here.
-  useIsomorphicLayoutEffect(() => {
+  useEffect(() => {
     applyTheme(resolvedTheme);
   }, [resolvedTheme]);
 
@@ -81,6 +72,8 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
 export const useTheme = (): ThemeContextValue => {
   const context = useContext(ThemeContext);
+
   if (!context) throw new Error("useTheme must be used within a ThemeProvider");
+
   return context;
 };

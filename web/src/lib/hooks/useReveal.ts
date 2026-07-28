@@ -2,9 +2,9 @@
 
 import { useEffect } from "react";
 
-export const useReveal = (
-  selectors: string = ".reveal, .reveal-left, .reveal-right, .reveal-scale",
-): void => {
+const REVEAL_SELECTORS = ".reveal, .reveal-left, .reveal-right, .reveal-scale";
+
+export const useReveal = (selectors: string = REVEAL_SELECTORS) => {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -15,6 +15,7 @@ export const useReveal = (
         for (const entry of entries) {
           if (entry.isIntersecting) {
             entry.target.classList.add("visible");
+
             observer.unobserve(entry.target);
           }
         }
@@ -24,6 +25,7 @@ export const useReveal = (
 
     const observeReveal = (el: Element) => {
       if (observed.has(el) || el.classList.contains("visible")) return;
+
       observed.add(el);
       observer.observe(el);
     };
@@ -40,7 +42,9 @@ export const useReveal = (
           if (node.nodeType !== Node.ELEMENT_NODE) return;
 
           const element = node as Element;
+
           if (element.matches(selectors)) observeReveal(element);
+
           observeTree(element);
         });
       }

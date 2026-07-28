@@ -50,19 +50,16 @@ const ScanTerminal = ({ active }: { active: boolean }) => {
     const justActivated = !wasActiveRef.current;
     wasActiveRef.current = true;
 
-    // Reduced motion: skip the stream and reveal the finished scan.
     if (reduced) {
       const frame = requestAnimationFrame(() => setStep(SCAN_SEQUENCE.length));
       return () => cancelAnimationFrame(frame);
     }
 
-    // Restart from the top each time the Run tab becomes active.
     if (justActivated && step !== 0) {
       const frame = requestAnimationFrame(() => setStep(0));
       return () => cancelAnimationFrame(frame);
     }
 
-    // Stream the lines once, then hold on the final frame — no loop.
     if (step >= SCAN_SEQUENCE.length) return;
 
     const next = window.setTimeout(() => setStep((value) => value + 1), SCAN_SEQUENCE[step].delay);
@@ -242,7 +239,6 @@ const TrendBlock = () => (
         d="M12 88 L58 82 L104 84 L150 63 L196 54 L248 34 L248 106 L12 106 Z"
       />
       <path className={styles.trendLine} d={TREND_LINE_PATH} />
-      {/* Cycled "live data" pulse — a short glow travels the line on a loop. */}
       <path className={styles.trendPulse} d={TREND_LINE_PATH} pathLength={100} />
       <circle className={styles.trendDot} cx="248" cy="34" r="5" />
     </svg>
@@ -253,10 +249,6 @@ const TrendBlock = () => (
   </div>
 );
 
-// The gate in action, on one looping 8s clock: a clean PR crosses and
-// merges into main, the PR with new issues stops at the bar, a second
-// clean one passes. Complements the review tab's trend chart instead of
-// repeating it.
 const GateBlock = () => (
   <div className={styles.sideBlock}>
     <div className={styles.sideHead}>
@@ -307,15 +299,15 @@ const ActivityBlock = () => (
 );
 
 export const WorkflowBoard = () => {
-  const boardRef = useRef<HTMLDivElement | null>(null);
   const [activeKey, setActiveKey] = useState<WorkflowTabKey>("run");
   const [cycleKey, setCycleKey] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [isInView, setIsInView] = useState(false);
+
+  const boardRef = useRef<HTMLDivElement | null>(null);
   const isInViewRef = useRef(false);
-  // Entering the viewport restarts the tour from "run" — but never over a
-  // tab the visitor picked themselves.
   const userSelectedRef = useRef(false);
+
   const activeIndex = WORKFLOW_TABS.findIndex((tab) => tab.key === activeKey);
   const cycleClass = cycleKey % 2 === 0 ? styles.step_cycleA : styles.step_cycleB;
 
@@ -375,18 +367,8 @@ export const WorkflowBoard = () => {
       ref={boardRef}
       className={cn(styles.boardWrap, (isPaused || !isInView) && styles.boardWrap_paused)}
       style={{ "--workflow-tab-ms": `${AUTO_TAB_MS}ms` } as CSSProperties}
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-      onFocusCapture={() => setIsPaused(true)}
-      onBlurCapture={(event) => {
-        const nextTarget = event.relatedTarget;
-        if (!(nextTarget instanceof Node) || !event.currentTarget.contains(nextTarget)) {
-          setIsPaused(false);
-        }
-      }}
     >
       <div className={styles.shell}>
-        {/* One product window: browser chrome on top, step rail + stage below. */}
         <div className={styles.chrome}>
           <span className={styles.chromeDots} aria-hidden="true">
             <i />
@@ -435,6 +417,20 @@ export const WorkflowBoard = () => {
               role="tablist"
               aria-label="Axiony workflow"
               aria-orientation="vertical"
+              onMouseEnter={() => setIsPaused(true)}
+              onMouseLeave={(event) => {
+                if (!event.currentTarget.contains(document.activeElement)) setIsPaused(false);
+              }}
+              onFocusCapture={() => setIsPaused(true)}
+              onBlurCapture={(event) => {
+                const nextTarget = event.relatedTarget;
+                if (
+                  (!(nextTarget instanceof Node) || !event.currentTarget.contains(nextTarget)) &&
+                  !event.currentTarget.matches(":hover")
+                ) {
+                  setIsPaused(false);
+                }
+              }}
             >
               {WORKFLOW_TABS.map((tab, index) => {
                 const isActive = tab.key === activeKey;
@@ -474,8 +470,6 @@ export const WorkflowBoard = () => {
               })}
             </div>
 
-            {/* All three descriptions share one grid cell, so the rail never
-                changes height while the tour advances. */}
             <div className={styles.railCopyStack}>
               {WORKFLOW_TABS.map((tab) => {
                 const isActive = tab.key === activeKey;
@@ -493,7 +487,6 @@ export const WorkflowBoard = () => {
               })}
             </div>
 
-            {/* The section's thesis: one baseline, present in every step. */}
             <div className={styles.railNote}>
               <span className={styles.railNoteLabel}>shared context</span>
               <span className={styles.railNoteValue}>

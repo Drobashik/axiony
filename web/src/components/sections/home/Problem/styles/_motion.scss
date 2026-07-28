@@ -1,0 +1,63 @@
+@use "abstracts" as *;
+
+@keyframes thanksPop {
+  from {
+    opacity: 0;
+    transform: rotate(-7deg) scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-2deg) scale(1);
+  }
+}
+
+@keyframes brokenPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes panelReveal {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .headline,
+  .demo,
+  .item,
+  .scoreSegment,
+  .scoreThanks,
+  .chromeBadge i {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .scoreThanks {
+    transform: rotate(-2deg) !important;
+  }
+
+  .contrastKicker,
+  .contrastText,
+  .contrastButton,
+  .cvdStage,
+  .srReader strong,
+  .toggleThumb,
+  .toggleTrack,
+  .srIconBtn,
+  .scoreSegment,
+  .kbField {
+    transition: none !important;
+  }
+}

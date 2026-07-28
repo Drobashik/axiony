@@ -40,7 +40,6 @@ export const CloudScanner = () => {
 
   return (
     <div className={styles.scanWrap}>
-      {/* A dev note parked just left of the mini browser. */}
       <div className={styles.scanTodo}>
         <div
           className={styles.todo}
@@ -59,7 +58,6 @@ export const CloudScanner = () => {
         </div>
       </div>
 
-      {/* The one deliberately handwritten thing on the page. */}
       <div className={styles.annotation} aria-hidden="true">
         issues highlighted in context
       </div>
@@ -69,7 +67,6 @@ export const CloudScanner = () => {
       </svg>
 
       <div id={BROWSER_ID} className={styles.browser} style={{ "--p": 0 } as CSSProperties}>
-        {/* ── Browser chrome ── */}
         <div className={styles.browserBar}>
           <span className={styles.dots} aria-hidden="true">
             <span />
@@ -95,13 +92,11 @@ export const CloudScanner = () => {
           </button>
         </div>
 
-        {/* slim audit progress bar */}
         <div className={styles.scanProgress} aria-hidden="true">
           <span className={styles.scanProgressFill} />
         </div>
 
         <div className={styles.scanWorkspace}>
-          {/* ── The page being scanned ── */}
           <div
             className={styles.viewport}
             role="img"
@@ -135,12 +130,9 @@ export const CloudScanner = () => {
 
               <span className={styles.demoActions}>
                 <span className={styles.demoCta}>Start free</span>
-                {/* Intentionally icon-only: visually understandable, unnamed
-                    to a screen reader. */}
                 <span className={styles.demoIconButton}>↗{renderIssue(ISSUE_BUTTON_NAME)}</span>
               </span>
 
-              {/* A polished image can still be inaccessible when alt is absent. */}
               <span className={styles.mediaTarget}>
                 <span className={styles.media}>
                   <span className={styles.mediaTop}>
@@ -166,7 +158,6 @@ export const CloudScanner = () => {
                 {renderIssue(ISSUE_NO_ALT_TEXT)}
               </span>
 
-              {/* Placeholder-only field: it looks labelled until somebody types. */}
               <span className={styles.demoForm}>
                 <span className={styles.demoInput}>
                   Work email
@@ -181,13 +172,10 @@ export const CloudScanner = () => {
               </span>
             </div>
 
-            {/* Scan overlays: a dimmed "already scanned" region + the line. */}
             <span className={styles.scanned} aria-hidden="true" />
             <span className={styles.beam} aria-hidden="true" />
           </div>
 
-          {/* A compact audit rail makes the relationship between the highlighted
-              element, the technical evidence, and the human cost explicit. */}
           <aside className={styles.auditPanel} aria-label="Accessibility issues found">
             <div className={styles.auditHeader}>
               <span>

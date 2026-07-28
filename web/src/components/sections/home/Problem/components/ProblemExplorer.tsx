@@ -14,8 +14,6 @@ export const ProblemExplorer = () => {
   const fixedCount = fixed.filter(Boolean).length;
   const allFixed = fixedCount === PROBLEMS.length;
 
-  // Once a visitor fixes a bug it stays fixed — breaking it again on
-  // purpose shouldn't take the win away.
   const markFixed = () => {
     setFixed((prev) => {
       if (prev[activeIndex]) return prev;
@@ -81,8 +79,6 @@ export const ProblemExplorer = () => {
                   </span>
                   {isFixed && <span className={styles.srOnly}>fixed</span>}
                 </span>
-                {/* Exactly one of these is rendered per breakpoint; display:none
-                    keeps the hidden one out of the accessibility tree too. */}
                 <strong className={styles.titleFull}>{item.title}</strong>
                 <strong className={styles.titleShort}>{item.short}</strong>
                 <span className={styles.itemDesc}>{item.description}</span>

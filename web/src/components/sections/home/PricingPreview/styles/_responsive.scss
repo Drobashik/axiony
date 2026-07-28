@@ -1,0 +1,13 @@
+@use "abstracts" as *;
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+    max-width: 420px;
+    gap: 30px;
+  }
+
+  .featured {
+    transform: none;
+  }
+}

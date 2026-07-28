@@ -1,0 +1,26 @@
+@use "abstracts" as *;
+
+.flow {
+  display: grid;
+  grid-template-columns: minmax(0, 1.42fr) minmax(300px, 0.82fr);
+  align-items: stretch;
+  gap: 20px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.rail {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.railFoot {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+  margin-top: auto;
+  border-top: 1px dashed var(--border-default);
+  padding-top: 16px;
+}
