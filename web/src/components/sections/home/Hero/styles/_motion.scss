@@ -1,0 +1,134 @@
+@use "abstracts" as *;
+
+:global([data-boot-loaded="false"]) {
+  .grid,
+  .gridSweep,
+  .glow,
+  .glowAlt,
+  .todo,
+  .todoTyped,
+  .todoCursor,
+  .todoPatch,
+  .todoLater,
+  .todoLater::after,
+  .todoToday,
+  .char,
+  .squiggle,
+  .squiggleMask,
+  .squiggleGlow,
+  .squiggleMain,
+  .titleCaret,
+  .subtitle,
+  .valuePoints,
+  .actions,
+  .annotation,
+  .annotationCurve,
+  .annotationHead,
+  .browser,
+  .statusLive i {
+    animation-play-state: paused;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grid,
+  .glow,
+  .glowAlt,
+  .todo,
+  .todoTyped,
+  .todoCursor,
+  .todoPatch,
+  .todoLater,
+  .char,
+  .titleCaret,
+  .subtitle,
+  .valuePoints,
+  .actions,
+  .annotation,
+  .annotationHead,
+  .browser,
+  .statusLive i,
+  .statusReplay {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+    filter: none;
+    text-shadow: none;
+  }
+
+  .annotation {
+    transform: rotate(-2deg);
+  }
+
+  .todoLater::after {
+    animation: none !important;
+    transform: scaleX(1);
+  }
+
+  .todoTyped {
+    max-width: 26ch;
+  }
+
+  .todoLater {
+    max-width: 5ch;
+  }
+
+  .todoCursor {
+    display: none;
+  }
+
+  .todoPatch {
+    opacity: 1;
+    transform: none;
+  }
+
+  .todoToday {
+    animation: none !important;
+    opacity: 1;
+    transform: rotate(-2deg);
+  }
+
+  .squiggle path,
+  .squiggle,
+  .squiggleMask,
+  .annotationCurve {
+    animation: none !important;
+  }
+
+  .annotationCurve {
+    stroke-dashoffset: 0;
+  }
+
+  .squiggle {
+    opacity: 1;
+  }
+
+  .squiggleMask {
+    transform: scaleX(1);
+  }
+
+  .squiggleGlow {
+    opacity: 0.28;
+  }
+
+  .squiggleMain {
+    filter: none;
+  }
+
+  .scanProgressFill,
+  .beam,
+  .scanned,
+  .issue,
+  .page {
+    transition: none;
+  }
+
+  .heard,
+  .impact {
+    animation: none !important;
+  }
+
+  .gridSweep {
+    display: none;
+  }
+}

@@ -1,0 +1,425 @@
+@use "abstracts" as *;
+
+.terminalPanel {
+  --tp-bg: color-mix(in srgb, var(--bg-base) 18%, #06130f);
+  --tp-body: color-mix(in srgb, var(--bg-base) 14%, #06130f);
+  --tp-head: color-mix(in srgb, #07110e 86%, var(--bg-base));
+  --tp-line: color-mix(in srgb, var(--green) 18%, transparent);
+  --tp-text: color-mix(in srgb, white 80%, var(--green));
+  --tp-dim: color-mix(in srgb, white 46%, var(--green));
+  --tp-chrome-text: color-mix(in srgb, white 74%, var(--green));
+  --tp-cmd: color-mix(in srgb, var(--blue) 62%, white);
+  --tp-warn: color-mix(in srgb, var(--severity-moderate) 78%, white);
+  --tp-remove: color-mix(in srgb, var(--severity-critical) 82%, white);
+  --tp-done: color-mix(in srgb, var(--violet) 58%, white);
+  --tp-grid: color-mix(in srgb, var(--green) 5%, transparent);
+  --tp-glow: color-mix(in srgb, var(--green) 18%, transparent);
+  --tp-text-shadow: 0 0 14px color-mix(in srgb, var(--green) 18%, transparent);
+  --tp-edge: color-mix(in srgb, white 13%, transparent);
+  --tp-badge-text: color-mix(in srgb, var(--green) 72%, white);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-color: color-mix(in srgb, var(--green) 22%, var(--border-subtle));
+  background: var(--tp-bg);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--green) 10%, transparent),
+    inset 0 1px 0 var(--tp-edge),
+    0 18px 50px color-mix(in srgb, var(--green) 10%, transparent);
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: auto 18px 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--green), transparent);
+    opacity: 0.45;
+    animation: terminalGlow 3.2s ease-in-out infinite;
+  }
+}
+
+@keyframes terminalGlow {
+  0%,
+  100% {
+    transform: scaleX(0.2);
+    opacity: 0.15;
+  }
+  50% {
+    transform: scaleX(1);
+    opacity: 0.55;
+  }
+}
+
+@mixin scan-terminal-light {
+  --tp-bg: #ffffff;
+  --tp-body: #fafdfb;
+  --tp-head: #f1f6f3;
+  --tp-line: color-mix(in srgb, var(--green) 26%, transparent);
+  --tp-text: #1d2c25;
+  --tp-dim: #5d6e66;
+  --tp-chrome-text: #2c3a33;
+  --tp-cmd: var(--blue);
+  --tp-warn: var(--severity-serious);
+  --tp-remove: var(--severity-critical);
+  --tp-done: var(--violet);
+  --tp-grid: color-mix(in srgb, var(--green) 12%, transparent);
+  --tp-glow: color-mix(in srgb, var(--green) 9%, transparent);
+  --tp-text-shadow: none;
+  --tp-edge: oklch(0 0 0 / 0.04);
+  --tp-badge-text: var(--green);
+}
+
+:global(:root[data-theme="light"]) .terminalPanel {
+  @include scan-terminal-light;
+}
+
+@media (prefers-color-scheme: light) {
+  :global(:root:not([data-theme])) .terminalPanel {
+    @include scan-terminal-light;
+  }
+}
+
+.terminalChrome {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 11px;
+  border-bottom: 1px solid var(--tp-line);
+  padding: 12px 14px;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--green) 10%, transparent), transparent 45%),
+    var(--tp-head);
+
+  code {
+    color: var(--tp-chrome-text);
+    font-size: 0.82rem;
+    font-weight: 800;
+  }
+}
+
+.terminalDots {
+  display: inline-flex;
+  flex: none;
+  gap: 6px;
+
+  i {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #28c840;
+
+    &:first-child {
+      background: #ff5f57;
+    }
+
+    &:nth-child(2) {
+      background: #febc2e;
+    }
+  }
+}
+
+.terminalBadge {
+  margin-left: auto;
+  border: 1px solid color-mix(in srgb, var(--green) 34%, transparent);
+  border-radius: 999px;
+  padding: 4px 8px;
+  background: color-mix(in srgb, var(--green) 14%, transparent);
+  color: var(--tp-badge-text);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.scanTerm {
+  position: relative;
+  display: grid;
+  flex: 1;
+  gap: 7px;
+  padding: 22px;
+  min-height: 330px;
+  align-content: start;
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, var(--tp-grid) 1px, transparent 1px),
+    radial-gradient(ellipse 75% 92% at 14% 0%, var(--tp-glow), transparent 68%), var(--tp-body);
+  background-size:
+    42px 42px,
+    auto,
+    auto;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(180deg, transparent, var(--green-dim), transparent);
+    opacity: 0.65;
+    transform: translateY(-100%);
+    animation: terminalSweep 4.6s ease-in-out infinite;
+  }
+}
+
+.scanLine {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  gap: 10px;
+  align-items: baseline;
+  color: var(--tp-text);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+  text-shadow: var(--tp-text-shadow);
+  opacity: 0;
+  transform: translateY(6px);
+  animation: lineIn 0.34s $ease-out both;
+}
+
+.scanGlyph {
+  text-align: center;
+  font-weight: 900;
+}
+
+.scanText {
+  min-width: 0;
+}
+
+.scanSpinner {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border: 1.6px solid color-mix(in srgb, var(--green) 28%, transparent);
+  border-top-color: var(--green);
+  border-radius: 50%;
+  vertical-align: -1px;
+  animation: scanSpin 0.7s linear infinite;
+}
+
+@keyframes scanSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.scanCaret {
+  display: inline-block;
+  width: 0.5em;
+  height: 1em;
+  margin-left: 0.3em;
+  border-radius: 1px;
+  background: currentColor;
+  vertical-align: -0.12em;
+  animation: cursorBlink 1s steps(2, end) infinite;
+}
+
+.scan_cmd {
+  color: var(--tp-cmd);
+  font-weight: 800;
+
+  .scanGlyph {
+    color: var(--green);
+  }
+}
+
+.scan_muted {
+  color: var(--tp-dim);
+}
+
+.scan_run .scanGlyph,
+.scan_ok .scanGlyph {
+  color: var(--green);
+}
+
+.scan_warn {
+  color: var(--tp-warn);
+
+  .scanGlyph {
+    color: var(--severity-moderate);
+  }
+}
+
+.scan_add,
+.scan_remove {
+  margin: 1px 0;
+  padding: 1px 8px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.84rem;
+}
+
+.scan_add {
+  background: var(--green-dim);
+
+  .scanGlyph {
+    color: var(--green);
+  }
+}
+
+.scan_remove {
+  background: oklch(0.72 0.2 20 / 0.09);
+  color: var(--tp-remove);
+
+  .scanGlyph {
+    color: var(--severity-critical);
+  }
+}
+
+.scan_done {
+  color: var(--tp-done);
+  font-weight: 800;
+
+  .scanGlyph {
+    color: var(--violet);
+  }
+}
+
+@keyframes lineIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes terminalSweep {
+  0%,
+  44% {
+    transform: translateY(-105%);
+  }
+  72%,
+  100% {
+    transform: translateY(105%);
+  }
+}
+
+@keyframes cursorBlink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.runSummary {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+}
+
+.summaryCard {
+  position: relative;
+  display: grid;
+  flex: 1;
+  gap: 4px;
+  align-content: center;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  background: var(--board-soft);
+  overflow: hidden;
+  animation: summaryIn 0.52s $ease-out both;
+
+  &:nth-child(2) {
+    animation-delay: 0.12s;
+  }
+
+  &:nth-child(3) {
+    animation-delay: 0.24s;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at 18% 0%, var(--green-dim), transparent 58%);
+    opacity: 0;
+    animation: summaryGlow 4.2s ease-in-out infinite;
+  }
+
+  strong {
+    position: relative;
+    z-index: 1;
+    color: var(--green);
+    font-family: var(--font-mono);
+    font-size: 1.85rem;
+    line-height: 1;
+  }
+
+  span {
+    position: relative;
+    z-index: 1;
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+  }
+
+  code {
+    position: relative;
+    z-index: 1;
+    width: fit-content;
+    margin-top: 5px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    padding: 2px 9px;
+    background: var(--board-muted);
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+}
+
+@keyframes summaryIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes summaryGlow {
+  0%,
+  52%,
+  100% {
+    opacity: 0;
+  }
+  72% {
+    opacity: 0.85;
+  }
+}
+
+.integrationStrip {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--green-border);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  background: linear-gradient(90deg, var(--green-dim), transparent 70%), var(--board-soft);
+
+  span {
+    opacity: 0;
+    transform: translateX(-8px);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 0.84rem;
+    font-weight: 800;
+    animation: chipIn 0.42s $ease-out both;
+
+    @for $i from 1 through 3 {
+      &:nth-child(#{$i}) {
+        animation-delay: #{0.5 + $i * 0.1}s;
+      }
+    }
+  }
+}
+
+@keyframes chipIn {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

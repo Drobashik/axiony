@@ -1,0 +1,68 @@
+@use "abstracts" as *;
+
+@media (prefers-reduced-motion: reduce) {
+  .stepProgress,
+  .flowPanelItem,
+  .flowStatus span::after,
+  .issueCard,
+  .terminalPanel::after,
+  .scanTerm::before,
+  .scanLine,
+  .scanSpinner,
+  .scanCaret,
+  .summaryCard,
+  .summaryCard::after,
+  .integrationStrip span,
+  .aiPatchHead > span,
+  .patch::after,
+  .patch code,
+  .prCard,
+  .trendLine,
+  .trendPulse,
+  .trendDot {
+    animation: none !important;
+  }
+
+  .trendPulse {
+    display: none;
+  }
+
+  .issueCard,
+  .scanLine,
+  .integrationStrip span,
+  .patch code {
+    opacity: 1;
+    transform: none !important;
+    filter: none !important;
+  }
+
+  .flowPanelItem {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .trendLine {
+    stroke-dashoffset: 0;
+  }
+
+  .trendDot {
+    opacity: 1;
+  }
+
+  .gateDot,
+  .gateBar i,
+  .gateFlag,
+  .gateMain::after {
+    animation: none !important;
+  }
+
+  .gateDot_blocked {
+    opacity: 1;
+    transform: translateX(var(--gate-x));
+  }
+
+  .gateFlag {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}

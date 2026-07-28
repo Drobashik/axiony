@@ -1,25 +1,13 @@
 @use "animations";
 
-// =====================================================================
-// Globals
-// ---------------------------------------------------------------------
-// Resets, design tokens (CSS custom properties), base typography.
-// Component-specific styling lives in CSS Modules.
-// =====================================================================
-
-// ── Reset ─────────────────────────────────────────────────────────────
 *,
 *::before,
 *::after {
-  box-sizing: border-box;
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
-// ── CSS variables (runtime tokens) ───────────────────────────────────
-// Theme-varying colour/elevation tokens come from the theme maps in
-// `_themes.scss`; structural tokens (radii, fonts, motion, layout) are
-// identical across themes and declared inline here.
 :root {
   @include emit-theme($theme-dark);
 
@@ -39,13 +27,11 @@
   color-scheme: dark;
 }
 
-// Light theme — applied when the runtime sets `data-theme="light"`.
 :root[data-theme="light"] {
   @include emit-theme($theme-light);
   color-scheme: light;
 }
 
-// No-JS fallback: honour the OS preference until an explicit choice is set.
 @media (prefers-color-scheme: light) {
   :root:not([data-theme]) {
     @include emit-theme($theme-light);
@@ -65,12 +51,9 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   text-wrap: pretty;
-  // Off-screen reveal transforms and decorative glows must never make the
-  // page horizontally scrollable on touch devices.
   overflow-x: clip;
 }
 
-// ── Scrollbar ────────────────────────────────────────────────────────
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -83,14 +66,12 @@ body {
   border-radius: 99px;
 }
 
-// ── Focus ────────────────────────────────────────────────────────────
 :focus-visible {
   outline: 2px solid var(--blue);
   outline-offset: 3px;
   border-radius: var(--radius-sm);
 }
 
-// ── Typography ───────────────────────────────────────────────────────
 h1,
 h2,
 h3,
@@ -139,10 +120,6 @@ pre {
   font-family: var(--font-mono);
 }
 
-// ── Forms on small screens ───────────────────────────────────────────
-// iOS Safari auto-zooms into focused controls rendered below 16px.
-// Component modules style inputs at 12–15px, so force a floor here;
-// `!important` is deliberate — it must beat the module class styles.
 @media (max-width: $bp-md) {
   input,
   select,
@@ -150,11 +127,6 @@ pre {
     font-size: max(16px, 1em) !important;
   }
 }
-
-// ── Scroll-reveal helpers ────────────────────────────────────────────
-// Powered by `useReveal()` which adds `.visible` once an element enters
-// the viewport. Default is fade + slide-up; `-left`/`-right`/`-scale`
-// are alternative entry directions; `.d1` … `.d9` add stagger delays.
 
 %reveal-base {
   opacity: 0;
@@ -211,10 +183,21 @@ pre {
   }
 }
 
-// ── Comment-style section labels ────────────────────────────────────
-// Section eyebrows read like developer comments. Their text is clipped to
-// 0ch by default, then typed once the existing reveal observer marks the
-// surrounding block as visible.
+html[data-anchor-scrolling="true"] {
+  *,
+  *::before,
+  *::after {
+    animation-play-state: paused !important;
+  }
+
+  .reveal,
+  .reveal-left,
+  .reveal-right,
+  .reveal-scale {
+    transition: none !important;
+  }
+}
+
 .typed-eyebrow {
   display: inline-flex;
   align-items: center;
@@ -279,7 +262,6 @@ pre {
   }
 }
 
-// ── Reduced motion ───────────────────────────────────────────────────
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

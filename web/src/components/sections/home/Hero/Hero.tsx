@@ -35,7 +35,6 @@ export const Hero = () => (
               <RevealLine text={TITLE_ACCENT_TEXT} startDelay={0.18} />{" "}
               <span className={styles.squiggleWrap}>
                 <RevealLine text={TITLE_WORD_SQUIGGLED} startDelay={0.32} />
-                {/* Lint-style squiggle: regressions are flagged like an editor error. */}
                 <svg
                   className={styles.squiggle}
                   viewBox="0 0 100 12"

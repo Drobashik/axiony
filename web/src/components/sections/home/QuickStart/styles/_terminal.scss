@@ -1,0 +1,259 @@
+@use "abstracts" as *;
+
+.terminal {
+  --term-bg: #0b0c11;
+  --term-head: oklch(1 0 0 / 0.02);
+  --term-line: oklch(1 0 0 / 0.08);
+  --term-text: oklch(0.96 0 0);
+  --term-dim: oklch(0.96 0 0 / 0.42);
+  --term-cmd: oklch(0.96 0 0);
+  --term-row: oklch(1 0 0 / 0.04);
+  --term-row-strong: oklch(1 0 0 / 0.1);
+  --term-glow: 0 0 60px oklch(0.62 0.22 240 / 0.1);
+
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--term-line);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background: var(--term-bg);
+  box-shadow: var(--shadow-lg), var(--term-glow);
+}
+
+@mixin quick-terminal-light {
+  --term-bg: #ffffff;
+  --term-head: #f5f6f9;
+  --term-line: oklch(0 0 0 / 0.09);
+  --term-text: #14151b;
+  --term-dim: #565869;
+  --term-cmd: #2c3a5c;
+  --term-row: oklch(0 0 0 / 0.04);
+  --term-row-strong: oklch(0 0 0 / 0.07);
+  --term-glow: 0 0 0 transparent;
+}
+
+:global(:root[data-theme="light"]) .terminal {
+  @include quick-terminal-light;
+}
+
+@media (prefers-color-scheme: light) {
+  :global(:root:not([data-theme])) .terminal {
+    @include quick-terminal-light;
+  }
+}
+
+.termHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--term-line);
+  background: var(--term-head);
+}
+
+.dots {
+  display: inline-flex;
+  flex: none;
+  gap: 6px;
+
+  i {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: #28c840;
+
+    &:first-child {
+      background: #ff5f57;
+    }
+
+    &:nth-child(2) {
+      background: #febc2e;
+    }
+  }
+}
+
+.termPath {
+  color: var(--term-dim);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+
+.pm {
+  display: flex;
+  gap: 2px;
+  margin-left: auto;
+  padding: 3px;
+  border: 1px solid var(--term-line);
+  border-radius: 99px;
+  background: var(--term-row);
+}
+
+.pmBtn {
+  border: 0;
+  border-radius: 99px;
+  padding: 4px 12px;
+  background: transparent;
+  color: var(--term-dim);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    color 150ms ease,
+    background 150ms ease;
+
+  &:hover {
+    color: var(--term-text);
+  }
+
+  &:focus-visible {
+    @include focus-ring(var(--blue), 2px);
+  }
+}
+
+.pmActive {
+  background: var(--term-row-strong);
+  color: var(--term-text);
+}
+
+.termBody {
+  display: grid;
+  flex: 1;
+  align-content: start;
+  gap: 9px;
+  padding: 20px 20px 18px;
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.comment {
+  margin: 0;
+  color: var(--term-dim);
+
+  &:not(:first-child) {
+    margin-top: 10px;
+  }
+}
+
+.cmdRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 -6px;
+  border-radius: var(--radius-sm);
+  padding: 6px 6px 6px 8px;
+  transition: background 150ms ease;
+
+  &:hover {
+    background: var(--term-row);
+  }
+}
+
+.prompt {
+  flex: none;
+  color: var(--green);
+  font-weight: 800;
+}
+
+.cmdText {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  color: var(--term-cmd);
+  white-space: nowrap;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.copy {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--term-line);
+  border-radius: var(--radius-sm);
+  background: var(--term-row);
+  color: var(--term-dim);
+  cursor: pointer;
+  transition:
+    color 150ms ease,
+    border-color 150ms ease,
+    background 150ms ease;
+
+  &:hover {
+    color: var(--term-text);
+    border-color: var(--border-strong);
+  }
+
+  &:focus-visible {
+    @include focus-ring(var(--blue), 2px);
+  }
+}
+
+.copied {
+  border-color: var(--green-border);
+  color: var(--green);
+}
+
+.output {
+  margin: 0;
+  padding-left: 2px;
+  color: var(--term-dim);
+}
+
+.outputFirst {
+  margin-top: 9px;
+}
+
+.ok {
+  margin-right: 6px;
+  color: var(--green);
+  font-weight: 800;
+}
+
+.score {
+  color: var(--green);
+  font-weight: 800;
+}
+
+.idle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0 0;
+}
+
+.caret {
+  display: inline-block;
+  width: 8px;
+  height: 1.05em;
+  border-radius: 1px;
+  background: var(--blue);
+  animation: qsCaret 1.1s steps(2, end) infinite;
+}
+
+@keyframes qsCaret {
+  50% {
+    opacity: 0;
+  }
+}
+
+.swap {
+  animation: qsSwap 0.28s $ease-out both;
+}
+
+@keyframes qsSwap {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

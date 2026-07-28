@@ -7,36 +7,19 @@ export const SUBTITLE =
 
 export const VALUE_POINTS = ["CLI", "Cloud + AI", "PR gates"] as const;
 
-export const INSTALL_COMMAND = "npm i -g axiony-cli";
-
-// ── Live site-scan demo ──────────────────────────────────────────────
-// The hero's right column renders a miniature landing page inside a
-// browser and audits it on load: a scan line sweeps top → bottom, the
-// percentage climbs, and real a11y issues get flagged on the page.
-//
-// Each flag is visually justified by the mock page itself (the flagged
-// menu links really are faint, the flagged button really is unlabelled), so
-// it reads as a genuine audit rather than a decoration.
-
 export const SCAN_HOST = "acme.com";
 
 export type Severity = "critical" | "serious" | "moderate";
 
-/** How the affected person perceives the page: screen reader vs. low vision. */
 export type AssistiveVia = "sr" | "eye";
 
 export interface ScanIssue {
-  /** Plain-language flag a non-technical visitor understands. */
   label: string;
   sev: Severity;
-  /** Progress (%) at which the scan line reaches it. */
   at: number;
   via: AssistiveVia;
-  /** The actual broken output assistive tech gives — what the user gets. */
   heard: string;
-  /** Compact proof shown in the audit rail. */
   evidence: string;
-  /** Who it blocks, in plain language — the real-world consequence. */
   impact: string;
 }
 

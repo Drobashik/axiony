@@ -45,8 +45,6 @@ export const QuickTerminal = ({ pm, target, onSelect }: QuickTerminalProps) => (
       <p className={styles.comment}># 2 · grab the headless browser, once</p>
       <CommandLine command="axiony install" />
 
-      {/* Step 3 follows the selected target — keyed so the swapped lines
-          re-enter with a small rise instead of blinking in place. */}
       <p key={`step-${target.key}`} className={cn(styles.comment, styles.swap)}>
         # 3 · {target.step3}
       </p>

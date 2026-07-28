@@ -5,10 +5,6 @@ import { useSessionStatus } from "@/lib/auth/useSessionStatus";
 import cn from "classnames";
 import styles from "./WorkspaceCta.module.scss";
 
-// Auth-aware landing CTA: guests create a workspace, signed-in users jump
-// straight to their dashboard. While the session resolves we keep the exact
-// button footprint (widest label, hidden) so the section never shifts or
-// flashes the wrong link — same approach as the nav.
 interface WorkspaceCtaProps {
   className?: string;
 }

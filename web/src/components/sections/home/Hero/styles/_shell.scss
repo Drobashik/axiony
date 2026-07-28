@@ -1,0 +1,183 @@
+@use "abstracts" as *;
+
+.hero {
+  --hero-grid-size: 72px;
+  --hero-grid-sub-size: 18px;
+  --hero-grid-minor: color-mix(in oklch, var(--text-primary) 7%, transparent);
+  --hero-grid-major: color-mix(in oklch, var(--blue) 19%, transparent);
+  --hero-grid-node: color-mix(in oklch, var(--violet) 42%, transparent);
+  --hero-grid-sweep: color-mix(in oklch, var(--blue) 11%, transparent);
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 100svh;
+  margin-top: calc(var(--nav-height) * -1);
+  overflow: hidden;
+  padding: calc(var(--nav-height) + clamp(56px, 7svh, 84px)) 0 clamp(72px, 8svh, 104px);
+  isolation: isolate;
+}
+
+:global(:root[data-theme="light"]) .hero {
+  --hero-grid-minor: color-mix(in oklch, var(--text-primary) 9%, transparent);
+  --hero-grid-major: color-mix(in oklch, var(--blue) 16%, transparent);
+  --hero-grid-node: color-mix(in oklch, var(--violet) 26%, transparent);
+  --hero-grid-sweep: color-mix(in oklch, var(--blue) 8%, transparent);
+}
+
+@media (prefers-color-scheme: light) {
+  :global(:root:not([data-theme])) .hero {
+    --hero-grid-minor: color-mix(in oklch, var(--text-primary) 9%, transparent);
+    --hero-grid-major: color-mix(in oklch, var(--blue) 16%, transparent);
+    --hero-grid-node: color-mix(in oklch, var(--violet) 26%, transparent);
+    --hero-grid-sweep: color-mix(in oklch, var(--blue) 8%, transparent);
+  }
+}
+
+.grid {
+  @include absolute-fill;
+  inset: calc(var(--hero-grid-size) * -1);
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 1px 1px, var(--hero-grid-node) 0 1.15px, transparent 1.7px),
+    linear-gradient(var(--hero-grid-major) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hero-grid-major) 1px, transparent 1px),
+    linear-gradient(var(--hero-grid-minor) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hero-grid-minor) 1px, transparent 1px);
+  background-size:
+    var(--hero-grid-size) var(--hero-grid-size),
+    var(--hero-grid-size) var(--hero-grid-size),
+    var(--hero-grid-size) var(--hero-grid-size),
+    var(--hero-grid-sub-size) var(--hero-grid-sub-size),
+    var(--hero-grid-sub-size) var(--hero-grid-sub-size);
+  mask-image: radial-gradient(ellipse 104% 78% at 56% 32%, black 16%, transparent 80%);
+  opacity: 0;
+  will-change: transform;
+  animation: heroGridFade 0.55s $ease-out 0.03s both;
+}
+
+.gridSweep {
+  position: absolute;
+  inset: -24% -42%;
+  pointer-events: none;
+  background: linear-gradient(
+    112deg,
+    transparent 43%,
+    var(--hero-grid-sweep) 48.5%,
+    color-mix(in oklch, var(--violet) 7%, transparent) 51%,
+    transparent 56%
+  );
+  mask-image: radial-gradient(ellipse 72% 66% at 54% 36%, black, transparent 78%);
+  opacity: 0;
+  will-change: transform, opacity;
+  animation: heroGridSweep 1.5s cubic-bezier(0.45, 0, 0.55, 1) 0.22s 1 both;
+}
+
+.glow {
+  position: absolute;
+  top: -14%;
+  right: -10%;
+  width: 58%;
+  height: 88%;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, oklch(0.62 0.22 240 / 0.13), transparent 64%);
+  filter: blur(28px);
+  will-change: transform;
+  animation:
+    heroFadeIn 0.65s $ease-out both,
+    heroGlowDrift 18s ease-in-out 0.65s infinite alternate;
+}
+
+.glowAlt {
+  position: absolute;
+  bottom: -28%;
+  left: -12%;
+  width: 46%;
+  height: 70%;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, oklch(0.62 0.2 290 / 0.08), transparent 62%);
+  filter: blur(30px);
+  will-change: transform;
+  animation:
+    heroFadeIn 0.72s $ease-out both,
+    heroGlowAltDrift 22s ease-in-out 0.72s infinite alternate;
+}
+
+.noise {
+  @include absolute-fill;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.04;
+}
+
+@keyframes heroGridFade {
+  to {
+    opacity: 0.92;
+  }
+}
+
+@keyframes heroGridDrift {
+  to {
+    transform: translate3d(var(--hero-grid-size), var(--hero-grid-size), 0);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .grid {
+    animation:
+      heroGridFade 0.55s $ease-out 0.03s both,
+      heroGridDrift 38s linear 0.58s infinite;
+  }
+}
+
+@keyframes heroGridSweep {
+  0%,
+  18% {
+    opacity: 0;
+    transform: translate3d(-24%, -3%, 0);
+  }
+  36%,
+  55% {
+    opacity: 0.9;
+  }
+  76%,
+  100% {
+    opacity: 0;
+    transform: translate3d(24%, 3%, 0);
+  }
+}
+
+@keyframes heroGlowDrift {
+  to {
+    transform: translate3d(-4%, 5%, 0) scale(1.06);
+  }
+}
+
+@keyframes heroGlowAltDrift {
+  to {
+    transform: translate3d(7%, -4%, 0) scale(1.08);
+  }
+}
+
+@keyframes heroFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.container {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  width: 100%;
+  max-width: 1360px;
+  grid-template-columns: minmax(400px, 0.76fr) minmax(680px, 1.24fr);
+  gap: clamp(36px, 3vw, 48px);
+  align-items: center;
+}
+
+.copy {
+  text-align: left;
+}

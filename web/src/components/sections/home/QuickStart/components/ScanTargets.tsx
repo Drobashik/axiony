@@ -9,8 +9,6 @@ interface ScanTargetsProps {
   onSelect: (target: ScanTarget) => void;
 }
 
-// The trio doubles as a control: picking a card points the terminal's
-// step 3 at that target.
 export const ScanTargets = ({ active, onSelect }: ScanTargetsProps) => (
   <div className={styles.targets}>
     <p className={styles.targetsLabel} id="quickstart-targets-label">

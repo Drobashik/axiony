@@ -2,9 +2,6 @@ import { PLAN_DEFINITIONS, PLAN_ENTITLEMENTS } from "@/lib/billing";
 import type { BillingPlan } from "@/lib/billing";
 import type { PricingTier } from "./types";
 
-// Marketing-curated copy per plan. The numbers (price, domains, scans) come
-// straight from the billing model so this section can never drift from what
-// the dashboard actually grants.
 interface TierCopy {
   audience: string;
   inherits?: string;

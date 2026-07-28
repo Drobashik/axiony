@@ -1,10 +1,5 @@
 @use "variables" as *;
 
-// =====================================================================
-// Mixins — small, single-purpose helpers used by component modules.
-// =====================================================================
-
-// ── Responsive breakpoints (mobile-first style, max-width queries) ──
 @mixin breakpoint-down($size) {
   @if $size == sm {
     @media (max-width: $bp-sm) {
@@ -25,20 +20,17 @@
   }
 }
 
-// ── Centered, padded container ──
 @mixin container($max: $container-max) {
   max-width: $max;
   margin-inline: auto;
   padding-inline: 24px;
 }
 
-// ── Common interaction/focus affordance ──
 @mixin focus-ring($color: var(--blue), $offset: 2px) {
   outline: 2px solid $color;
   outline-offset: $offset;
 }
 
-// ── Absolute centering helpers ──
 @mixin absolute-center {
   position: absolute;
   top: 50%;
@@ -51,7 +43,6 @@
   inset: 0;
 }
 
-// ── Shared elevated panel shell ──
 @mixin elevated-panel($radius: var(--radius-xl), $shadow: var(--shadow-panel)) {
   border: 1px solid var(--border-default);
   border-radius: $radius;
@@ -62,7 +53,6 @@
     inset 0 1px 0 var(--edge-highlight);
 }
 
-// ── Decorative grid overlay for dark surfaces ──
 @mixin grid-overlay(
   $size: 44px,
   $opacity: 0.04,
@@ -81,10 +71,6 @@
   }
 }
 
-// ── Accent theme custom properties ──
-// Exposes --accent / --accent-border / --accent-dim from one place so
-// section cards can theme themselves by brand colour without repeating
-// the colour triple in every module.
 @mixin accent($name) {
   @if $name == "green" {
     --accent: var(--green);
@@ -101,7 +87,6 @@
   }
 }
 
-// ── Single-line ellipsis truncation ──
 @mixin truncate {
   white-space: nowrap;
   overflow: hidden;

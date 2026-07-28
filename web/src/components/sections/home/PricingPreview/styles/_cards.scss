@@ -1,0 +1,222 @@
+@use "abstracts" as *;
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  max-width: 1040px;
+  margin: 0 auto;
+  align-items: stretch;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-2xl);
+  padding: 28px 26px;
+  background: var(--bg-surface);
+  box-shadow: inset 0 1px 0 var(--edge-highlight);
+  transition:
+    border-color 200ms ease,
+    transform 200ms ease,
+    box-shadow 200ms ease;
+
+  &:hover {
+    border-color: var(--accent-border);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+.card_green {
+  @include accent("green");
+}
+.card_blue {
+  @include accent("blue");
+}
+.card_violet {
+  @include accent("violet");
+}
+
+.featured {
+  border-color: var(--accent-border);
+  background: linear-gradient(180deg, var(--accent-dim), transparent 38%), var(--bg-surface);
+  box-shadow:
+    var(--shadow-panel),
+    inset 0 1px 0 var(--edge-highlight);
+
+  &:hover {
+    transform: translateY(-4px);
+  }
+
+  @media (min-width: 901px) {
+    transform: translateY(-14px);
+
+    &:hover {
+      transform: translateY(-18px);
+    }
+  }
+}
+
+.badge {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 1px solid var(--accent-border);
+  border-radius: 99px;
+  padding: 5px 13px;
+  background: var(--bg-elevated);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  box-shadow: var(--shadow-sm);
+}
+
+.head {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.name {
+  color: var(--text-primary);
+  font-size: 1.24rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.audience {
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.priceRow {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  margin-bottom: 5px;
+}
+
+.was {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: line-through;
+  text-decoration-color: var(--accent-border);
+}
+
+.price {
+  display: inline-flex;
+  align-items: baseline;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 2.6rem;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.currency {
+  margin-right: 1px;
+  color: var(--text-muted);
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.period {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.sub {
+  display: block;
+  margin-bottom: 22px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  @include truncate;
+}
+
+.meter {
+  display: flex;
+  align-items: stretch;
+  margin-bottom: 22px;
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.meterItem {
+  display: grid;
+  flex: 1;
+  gap: 2px;
+  padding: 14px 0;
+  line-height: 1.15;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+
+  strong {
+    color: var(--accent);
+    font-size: 1.5rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.meterDivider {
+  width: 1px;
+  margin: 12px 18px;
+  background: var(--border-subtle);
+}
+
+.features {
+  display: grid;
+  gap: 12px;
+  margin: 0 0 24px;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: grid;
+    grid-template-columns: 18px 1fr;
+    gap: 10px;
+    align-items: start;
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+    line-height: 1.45;
+  }
+}
+
+.inherits {
+  display: block !important;
+  margin-bottom: 2px;
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.check {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+.cta {
+  margin-top: auto;
+}

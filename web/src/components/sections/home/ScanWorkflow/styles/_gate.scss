@@ -1,0 +1,372 @@
+@use "abstracts" as *;
+
+.gateViz {
+  container-type: inline-size;
+  position: relative;
+  height: 104px;
+  margin: 4px 12px 0;
+  --gate-x: calc(56cqw - 16px);
+  --main-x: calc(100cqw - 46px);
+}
+
+.gateTrack {
+  position: absolute;
+  top: 50%;
+  right: 44px;
+  left: 4px;
+  height: 2px;
+  margin-top: -1px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    var(--border-strong),
+    color-mix(in srgb, var(--violet) 38%, var(--border-strong)) 56%,
+    var(--green-border)
+  );
+}
+
+.gateDot {
+  position: absolute;
+  top: 50%;
+  left: 8px;
+  width: 12px;
+  height: 12px;
+  margin-top: -6px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--green) 15%, transparent),
+    0 0 12px var(--green-dim);
+  opacity: 0;
+}
+
+.gateDot_first {
+  animation: gatePassFirst 8s linear infinite;
+}
+
+.gateDot_second {
+  animation: gatePassSecond 8s linear infinite;
+}
+
+.gateDot_blocked {
+  background: var(--severity-critical);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--severity-critical) 16%, transparent),
+    0 0 12px color-mix(in srgb, var(--severity-critical) 24%, transparent);
+  animation: gateBlockedRun 8s linear infinite;
+}
+
+@keyframes gatePassFirst {
+  0%,
+  2% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+  5% {
+    opacity: 1;
+  }
+  21% {
+    opacity: 1;
+    transform: translateX(var(--main-x));
+  }
+  24%,
+  100% {
+    opacity: 0;
+    transform: translateX(var(--main-x));
+  }
+}
+
+@keyframes gatePassSecond {
+  0%,
+  72% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+  75% {
+    opacity: 1;
+  }
+  91% {
+    opacity: 1;
+    transform: translateX(var(--main-x));
+  }
+  94%,
+  100% {
+    opacity: 0;
+    transform: translateX(var(--main-x));
+  }
+}
+
+@keyframes gateBlockedRun {
+  0%,
+  34% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+  37% {
+    opacity: 1;
+  }
+  50% {
+    transform: translateX(var(--gate-x));
+  }
+  52% {
+    transform: translateX(calc(var(--gate-x) - 7px));
+  }
+  54% {
+    transform: translateX(var(--gate-x));
+  }
+  56% {
+    transform: translateX(calc(var(--gate-x) - 4px));
+  }
+  58%,
+  66% {
+    opacity: 1;
+    transform: translateX(var(--gate-x));
+  }
+  70%,
+  100% {
+    opacity: 0;
+    transform: translateX(var(--gate-x));
+  }
+}
+
+.gateBar {
+  position: absolute;
+  top: 50%;
+  left: 56cqw;
+  width: 4px;
+  height: 46px;
+  margin-top: -23px;
+  margin-left: -2px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--violet) 58%, var(--border-strong));
+  box-shadow: 0 0 14px var(--violet-dim);
+
+  i {
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    opacity: 0;
+  }
+}
+
+.gateFlashPass {
+  background: var(--green);
+  box-shadow: 0 0 16px var(--green);
+  animation: gateFlashPass 8s linear infinite;
+}
+
+.gateFlashBlock {
+  background: var(--severity-critical);
+  box-shadow: 0 0 16px var(--severity-critical);
+  animation: gateFlashBlock 8s linear infinite;
+}
+
+@keyframes gateFlashPass {
+  0%,
+  18% {
+    opacity: 0;
+  }
+  21% {
+    opacity: 0.9;
+  }
+  25%,
+  88% {
+    opacity: 0;
+  }
+  91% {
+    opacity: 0.9;
+  }
+  95%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes gateFlashBlock {
+  0%,
+  49% {
+    opacity: 0;
+  }
+  52% {
+    opacity: 0.95;
+  }
+  62% {
+    opacity: 0.7;
+  }
+  68%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.gateFlag {
+  position: absolute;
+  top: 4px;
+  left: 56cqw;
+  border: 1px solid color-mix(in srgb, var(--severity-critical) 42%, transparent);
+  border-radius: 999px;
+  padding: 3px 9px;
+  background: color-mix(in srgb, var(--severity-critical) 13%, var(--board-surface));
+  color: var(--severity-critical);
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  font-weight: 800;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-50%, 5px);
+  animation: gateFlagPop 8s linear infinite;
+}
+
+@keyframes gateFlagPop {
+  0%,
+  50% {
+    opacity: 0;
+    transform: translate(-50%, 5px);
+  }
+  54%,
+  72% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  77%,
+  100% {
+    opacity: 0;
+    transform: translate(-50%, 0);
+  }
+}
+
+.gateMain {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin-top: -20px;
+  border: 1px solid var(--green-border);
+  border-radius: 50%;
+  background: var(--green-dim);
+  color: var(--green);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 800;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border: 1.5px solid var(--green);
+    border-radius: inherit;
+    opacity: 0;
+    transform: scale(0.72);
+    animation: gateMergePulse 8s linear infinite;
+  }
+}
+
+@keyframes gateMergePulse {
+  0%,
+  20% {
+    opacity: 0;
+    transform: scale(0.72);
+  }
+  23% {
+    opacity: 0.85;
+    transform: scale(1);
+  }
+  29% {
+    opacity: 0;
+    transform: scale(1.28);
+  }
+  30%,
+  90% {
+    opacity: 0;
+    transform: scale(0.72);
+  }
+  93% {
+    opacity: 0.85;
+    transform: scale(1);
+  }
+  99%,
+  100% {
+    opacity: 0;
+    transform: scale(1.28);
+  }
+}
+
+.gateLabel {
+  position: absolute;
+  bottom: 2px;
+  left: 4px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.gateMeta {
+  display: grid;
+  gap: 2px;
+  padding: 2px 13px 13px;
+
+  strong {
+    color: var(--text-primary);
+    font-size: 0.95rem;
+  }
+
+  span {
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    line-height: 1.5;
+  }
+}
+
+.activityList {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+}
+
+.activityItem {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 9px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 9px;
+  background: var(--board-soft);
+
+  span {
+    grid-row: span 2;
+    align-self: center;
+    border-radius: var(--radius-sm);
+    padding: 5px 7px;
+    background: var(--board-muted);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    font-weight: 800;
+  }
+
+  strong {
+    color: var(--text-primary);
+    font-size: 0.8rem;
+  }
+
+  small {
+    color: var(--text-muted);
+    font-size: 0.7rem;
+  }
+}
+
+.activity_blocked {
+  border-color: oklch(0.72 0.2 20 / 0.26);
+}
+.activity_merged {
+  border-color: var(--green-border);
+}
+.activity_scheduled {
+  border-color: var(--blue-border);
+}

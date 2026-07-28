@@ -1,0 +1,126 @@
+@use "abstracts" as *;
+
+.targets {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+
+.targetsLabel {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.02rem;
+  font-weight: 600;
+}
+
+.targetGrid {
+  display: grid;
+  gap: 10px;
+}
+
+.target {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 13px;
+  align-items: start;
+  width: 100%;
+  border: 1px solid var(--border-subtle);
+  border-left: 2px solid var(--accent);
+  border-radius: var(--radius-lg);
+  padding: 15px 16px;
+  background: var(--bg-base);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    transform 180ms ease;
+
+  &:hover {
+    border-color: var(--accent-border);
+    transform: translateX(2px);
+  }
+
+  &:focus-visible {
+    @include focus-ring(var(--accent), 3px);
+  }
+}
+
+.targetActive {
+  border-color: var(--accent-border);
+  background: linear-gradient(90deg, var(--accent-dim), transparent 72%), var(--bg-base);
+
+  &:hover {
+    transform: none;
+  }
+}
+
+.targetBody {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+
+  strong {
+    color: var(--text-primary);
+    font-size: 1.04rem;
+  }
+
+  code {
+    width: fit-content;
+    max-width: 100%;
+    overflow-x: auto;
+    border-radius: var(--radius-sm);
+    padding: 5px 9px;
+    background: var(--bg-muted);
+    color: var(--text-code);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    white-space: nowrap;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+}
+
+.targetDesc {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.targetIcon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-md);
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+.accent_green {
+  @include accent("green");
+}
+.accent_blue {
+  @include accent("blue");
+}
+.accent_violet {
+  @include accent("violet");
+}
+
+.runner {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+
+  code {
+    color: var(--text-code);
+    font-family: var(--font-mono);
+    font-size: 0.86rem;
+  }
+}
