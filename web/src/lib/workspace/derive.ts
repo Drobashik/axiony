@@ -123,6 +123,7 @@ export const issuePersistenceKey = (issue: TrackedIssue): string => {
  * module never imports the scan component types. */
 interface ReportLike {
   url: string;
+  siteIcon?: string;
   level: WcagLevel;
   score: number;
   counts: SeverityCounts;
@@ -150,6 +151,7 @@ export const pendingFromReport = (report: ReportLike): PendingScan => {
 
   return {
     url: report.url,
+    siteIcon: report.siteIcon,
     host: hostFromUrl(report.url),
     path: pathFromUrl(report.url),
     level: report.level,
@@ -298,6 +300,8 @@ export const workspaceSummary = (ws: Workspace): WorkspaceSummary | null => {
 export interface WorkspaceChangeEvent {
   id: string;
   host: string;
+  iconUrl?: string;
+  url: string;
   path: string;
   label: string;
   scannedAt: string;
@@ -346,6 +350,8 @@ export const workspaceChangeDigest = (
         allEvents.push({
           id: scan.id,
           host: project.host,
+          iconUrl: project.iconUrl,
+          url: page.url,
           path: page.path,
           label: pageLabel(project.host, page.path),
           scannedAt: scan.scannedAt,
@@ -405,6 +411,8 @@ export const latestScannedPage = (ws: Workspace): LocatedPage | null => {
 
 export interface LocatedIssue {
   host: string;
+  iconUrl?: string;
+  url: string;
   path: string;
   issue: TrackedIssue;
   isRegression: boolean;
@@ -442,6 +450,8 @@ export const aggregateCurrentIssues = (ws: Workspace): LocatedIssue[] => {
       for (const issue of page.open) {
         out.push({
           host: project.host,
+          iconUrl: project.iconUrl,
+          url: page.url,
           path: page.path,
           issue,
           isRegression: !baselineTitles.has(issue.title),
@@ -467,6 +477,8 @@ export const aggregateResolvedIssues = (ws: Workspace): LocatedIssue[] => {
         for (const issue of scan.resolvedIssues ?? []) {
           out.push({
             host: project.host,
+            iconUrl: project.iconUrl,
+            url: page.url,
             path: page.path,
             issue: { ...issue, status: "resolved" },
             isRegression: !baselineTitles.has(issue.title),

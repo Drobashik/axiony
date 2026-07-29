@@ -1,0 +1,243 @@
+@use "abstracts" as *;
+
+.tabWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tabHead {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  h2 {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+  }
+}
+
+.listCard {
+  padding: 6px 20px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+}
+
+.projectCard {
+  --accent: var(--blue);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 22px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  background:
+    radial-gradient(
+      120% 120% at 0% 0%,
+      color-mix(in oklch, var(--accent) 7%, transparent),
+      transparent 42%
+    ),
+    var(--bg-surface);
+  overflow: hidden;
+  transition:
+    transform var(--transition),
+    border-color var(--transition),
+    box-shadow var(--transition);
+
+  // Top hairline accent — tied to the project's identity colour, lit on hover.
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), transparent 70%);
+    opacity: 0.5;
+    transition: opacity var(--transition);
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: var(--border-default);
+    box-shadow: var(--shadow-md);
+
+    &::before {
+      opacity: 1;
+    }
+  }
+}
+
+.projectTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.projectIdentityButton {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+.projectActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.projectRemove {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    color var(--transition),
+    border-color var(--transition),
+    background var(--transition);
+
+  &:hover {
+    border-color: oklch(0.72 0.2 20 / 0.42);
+    background: oklch(0.72 0.2 20 / 0.1);
+    color: var(--severity-critical);
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+.projectId {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.projectName {
+  font-size: 1.12rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  @include truncate;
+}
+
+.projectUrl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  @include truncate;
+}
+
+.projectDivider {
+  width: 3px;
+  height: 3px;
+  flex: none;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.5;
+}
+
+.projectSeverities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.projectMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+}
+
+.metaDot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+
+// ── Severity chips (project card summary) ────────────────────────────
+.sevChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 8px;
+  border: 1px solid var(--border-default);
+  border-radius: 99px;
+  background: var(--bg-base);
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.sevCount {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+// Zero-count severities recede so the real problems stand out.
+.sevChipEmpty {
+  border-color: var(--border-subtle);
+  background: transparent;
+  color: var(--text-muted);
+
+  .sevDot {
+    opacity: 0.4;
+  }
+  .sevCount {
+    color: var(--text-muted);
+  }
+}
+
+// All-clear state.
+.sevChipClean {
+  gap: 7px;
+  border-color: color-mix(in oklch, var(--green) 38%, transparent);
+  background: var(--green-dim);
+  color: var(--green);
+
+  svg {
+    color: var(--green);
+  }
+}
+
+.sevDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}

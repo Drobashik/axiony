@@ -1,0 +1,137 @@
+@use "abstracts" as *;
+
+// ── Recent re-scan chips (scan tab) ──────────────────────────────────
+.recentRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.recentLabel {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.recentChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border: 1px solid var(--border-default);
+  border-radius: 99px;
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition:
+    color var(--transition),
+    border-color var(--transition),
+    background var(--transition);
+
+  &:hover:not(:disabled) {
+    color: var(--text-primary);
+    border-color: var(--blue-border);
+    background: var(--bg-elevated);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+// ── Auto-save confirmation (scan tab) ────────────────────────────────
+.savedBanner {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  padding: 12px 16px;
+  border: 1px solid var(--green-border);
+  border-radius: var(--radius-lg);
+  background: var(--green-dim);
+  animation: wsIn 0.3s $ease-out both;
+}
+
+.savedBannerLocked {
+  border-color: var(--blue-border);
+  background:
+    radial-gradient(100% 160% at 0% 0%, var(--blue-dim), transparent 62%), var(--bg-surface);
+
+  .savedIcon {
+    background: var(--blue);
+    color: #07121f;
+  }
+
+  .savedLinks button {
+    border-color: var(--blue-border);
+    color: var(--blue);
+
+    &:hover {
+      background: var(--blue-dim);
+    }
+  }
+}
+
+.savedIcon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--green);
+  color: #06140d;
+}
+
+.savedText {
+  flex: 1;
+  // A real floor (not 0) so the quick links wrap to their own row on
+  // narrow screens instead of squeezing this text one word per line.
+  min-width: 16ch;
+  color: var(--text-primary);
+  font-size: 0.88rem;
+
+  strong {
+    font-weight: 600;
+  }
+}
+
+.savedLinks {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+
+  button {
+    padding: 4px 10px;
+    border: 1px solid var(--green-border);
+    border-radius: 99px;
+    background: transparent;
+    color: var(--green);
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition);
+
+    &:hover {
+      background: oklch(0.72 0.18 145 / 0.16);
+    }
+
+    &:focus-visible {
+      @include focus-ring;
+    }
+  }
+}

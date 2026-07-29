@@ -1,0 +1,32 @@
+.portfolio {
+  width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.heroGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(300px, 0.8fr);
+  gap: 14px;
+
+  @include breakpoint-down(xl) {
+    grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.8fr);
+  }
+
+  @include breakpoint-down(lg) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.lowerGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+  gap: 14px;
+
+  @include breakpoint-down(lg) {
+    grid-template-columns: 1fr;
+  }
+}

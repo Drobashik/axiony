@@ -10,20 +10,17 @@ import { SEVERITY_COLOR, SEVERITY_LABEL, SEVERITY_ORDER } from "@/lib/scan/issue
 import { pageModel, projectModel, relativeTime } from "@/lib/workspace";
 import type { Project, ProjectPage, Workspace } from "@/lib/workspace";
 import { RefreshIcon } from "@/components/sections/scan/components/icons";
-import { ScoreRing, colorForScore } from "../shared/ScoreRing";
-import styles from "./Workspace.module.scss";
+import { ProjectIcon } from "../../../shared/ProjectIcon";
+import { ScoreRing, colorForScore } from "../../../shared/ScoreRing";
+import styles from "../../styles/Workspace.module.scss";
 
 const nextPlan = (plan: BillingPlan): Exclude<BillingPlan, "free"> | null => {
   if (plan === "free") return "pro";
+
   if (plan === "pro") return "team";
+
   return null;
 };
-
-const monogramOf = (host: string): string =>
-  host
-    .replace(/^www\./, "")
-    .charAt(0)
-    .toUpperCase() || "•";
 
 const ProjectCard = ({
   project,
@@ -74,9 +71,12 @@ const ProjectCard = ({
       <article className={styles.projectCard} style={{ "--accent": accent } as CSSProperties}>
         <div className={styles.projectTop}>
           <button type="button" className={styles.projectIdentityButton} onClick={onOpen}>
-            <span className={styles.projectMonogram} aria-hidden="true">
-              {monogramOf(project.host)}
-            </span>
+            <ProjectIcon
+              host={project.host}
+              url={project.pages[0]?.url}
+              iconUrl={project.iconUrl}
+              size={42}
+            />
             <span className={styles.projectId}>
               <span className={styles.projectName}>
                 {project.host}

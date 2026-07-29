@@ -104,6 +104,13 @@
   right: 0;
 }
 
+.menuFloating {
+  position: fixed;
+  z-index: 230;
+  min-width: 0;
+  max-width: calc(100vw - 16px);
+}
+
 @keyframes selectIn {
   from {
     opacity: 0;
@@ -142,9 +149,18 @@
   gap: 7px;
   flex: 1;
   min-width: 0;
+  overflow: hidden;
+}
+
+.optionText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .optionHint {
+  flex-shrink: 0;
   color: var(--text-muted);
   font-family: var(--font-mono);
   font-size: 0.74rem;

@@ -12,9 +12,10 @@ import {
 } from "@/lib/workspace";
 import type { IssueStatus, LocatedIssue, Workspace } from "@/lib/workspace";
 import type { Severity } from "@/types";
-import { STATUS_OPTIONS, statusMeta } from "./issue-status";
-import { IssueDetail } from "./IssueDetail";
-import styles from "./Workspace.module.scss";
+import { ProjectIcon } from "../../../shared/ProjectIcon";
+import { STATUS_OPTIONS, statusMeta } from "./issueStatus";
+import { IssueDetail } from "./components/IssueDetail";
+import styles from "../../styles/Workspace.module.scss";
 
 type Filter = "open" | "resolved" | "all";
 
@@ -308,7 +309,15 @@ export const WorkspaceIssues = ({ workspace, refreshWorkspace }: WorkspaceIssues
                     </span>
                   </button>
 
-                  <div className={styles.issueTableProject}>{project}</div>
+                  <div className={styles.issueTableProject}>
+                    <ProjectIcon
+                      host={host}
+                      url={located.url}
+                      iconUrl={located.iconUrl}
+                      size={22}
+                    />
+                    <span>{project}</span>
+                  </div>
 
                   <div className={styles.issueAssigneeCell}>
                     {assignedToCurrentUser ? (

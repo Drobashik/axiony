@@ -1,0 +1,280 @@
+@use "abstracts" as *;
+
+// ── Projects grid + pages ────────────────────────────────────────────
+.projectGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+
+  @include breakpoint-down(lg) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.projectGridSingle {
+  grid-template-columns: 1fr;
+  max-width: 660px;
+}
+
+.projectOpen {
+  width: 100%;
+  padding: 4px;
+  margin: -4px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--transition);
+
+  &:hover {
+    background: var(--border-subtle);
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+.projectArrow {
+  display: inline-block;
+  margin-left: 6px;
+  color: var(--blue);
+  opacity: 0;
+  transform: translateX(-2px);
+  transition:
+    opacity var(--transition),
+    transform var(--transition);
+
+  .projectIdentityButton:hover & {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.pageList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 5px;
+  list-style: none;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: color-mix(in oklch, var(--bg-base) 55%, transparent);
+}
+
+.pageRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 9px;
+  border-radius: var(--radius-md);
+  transition: background var(--transition);
+
+  &:hover {
+    background: var(--bg-elevated);
+  }
+}
+
+.pagePath {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 6px;
+  margin: -4px -6px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  font-family: var(--font-mono);
+  font-size: 0.84rem;
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+  @include truncate;
+
+  &:hover {
+    color: var(--blue);
+    background: var(--blue-dim);
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+.confirmOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 260;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: var(--scrim);
+  backdrop-filter: blur(10px);
+  animation: wsIn 0.18s $ease-out both;
+}
+
+.confirmDialog {
+  width: min(420px, 100%);
+  padding: 22px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-lg);
+
+  h3 {
+    margin: 12px 0 6px;
+    color: var(--text-primary);
+    font-size: 1.16rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+}
+
+.confirmUrl {
+  margin-bottom: 8px !important;
+  overflow: hidden;
+  color: var(--text-primary) !important;
+  font-family: var(--font-mono);
+  font-size: 0.82rem !important;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.confirmIcon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid oklch(0.72 0.2 20 / 0.42);
+  border-radius: var(--radius-lg);
+  background: oklch(0.72 0.2 20 / 0.1);
+  color: var(--severity-critical);
+}
+
+.confirmActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.confirmCancel,
+.confirmDanger {
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+.confirmCancel {
+  border: 1px solid var(--border-default);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+}
+
+.confirmDanger {
+  border: 1px solid oklch(0.72 0.2 20 / 0.42);
+  background: oklch(0.72 0.2 20 / 0.14);
+  color: var(--severity-critical);
+}
+
+.pageScore {
+  flex-shrink: 0;
+  min-width: 38px;
+  padding: 3px 8px;
+  border: 1px solid color-mix(in oklch, currentColor 30%, transparent);
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklch, currentColor 12%, var(--bg-base));
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.pageMeta {
+  flex-shrink: 0;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+
+  @include breakpoint-down(md) {
+    display: none;
+  }
+}
+
+.pageRescan {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  padding: 6px 11px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    color var(--transition),
+    border-color var(--transition),
+    background var(--transition);
+
+  &:hover:not(:disabled) {
+    color: var(--blue);
+    border-color: var(--blue-border);
+    background: var(--blue-dim);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+
+  @include breakpoint-down(sm) {
+    padding: 6px;
+  }
+}
+
+.pageRescanLabel {
+  @include breakpoint-down(sm) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
+.spin {
+  animation: wsSpin 0.8s linear infinite;
+}
+
+@keyframes wsSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -5,6 +5,7 @@ import { LogoMark, Select } from "@/components/ui";
 import cn from "classnames";
 import type { BillingPlan } from "@/lib/billing";
 import { DashboardTab } from "@/lib/data/dashboard";
+import { ProjectIcon } from "../shared/ProjectIcon";
 import { ChevronDownIcon, SignOutIcon, TAB_ICONS } from "./sidebar-icons";
 import styles from "./Sidebar.module.scss";
 
@@ -43,7 +44,15 @@ export interface SidebarProps {
   billingPlan?: BillingPlan;
   onUpgrade?: (plan?: Exclude<BillingPlan, "free">) => void;
   /** Workspace mode: project switcher that scopes the dashboard. */
-  projects?: { id: string; host: string }[];
+  projects?: {
+    id: string;
+    host: string;
+    url?: string;
+    iconUrl?: string;
+    pageCount: number;
+    avgScore: number;
+    openIssues: number;
+  }[];
   pages?: { path: string; openIssues: number }[];
   selectedProjectId?: string | null;
   selectedPagePath?: string | null;
@@ -53,6 +62,23 @@ export interface SidebarProps {
 
 const ALL_PROJECTS = "__all__";
 const ALL_PAGES = "__all_pages__";
+
+const ScopeIcon = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.7"
+    aria-hidden="true"
+  >
+    <rect x="3" y="3" width="7" height="7" rx="1.5" />
+    <rect x="14" y="3" width="7" height="7" rx="1.5" />
+    <rect x="3" y="14" width="7" height="7" rx="1.5" />
+    <rect x="14" y="14" width="7" height="7" rx="1.5" />
+  </svg>
+);
 
 export function Sidebar({
   activeTab,
@@ -75,6 +101,9 @@ export function Sidebar({
   onSelectProject,
   onSelectPage,
 }: SidebarProps) {
+  const projectCount = projects?.length ?? 0;
+  const hasMultipleProjects = projectCount > 1;
+  const onlyProject = projectCount === 1 ? projects?.[0] : undefined;
   const primary: NavItem[] = [
     { id: "overview", label: "Overview" },
     { id: "projects", label: "Projects" },
@@ -131,24 +160,67 @@ export function Sidebar({
       </Link>
 
       <div className={styles.section}>
-        <div className={styles.label}>{projects ? "Project" : "Workspace"}</div>
+        <div className={styles.label}>
+          {projects ? (hasMultipleProjects ? "Scope" : "Project") : "Workspace"}
+        </div>
         {projects ? (
           <div className={styles.scopeControls}>
-            <Select
-              block
-              ariaLabel="Select project"
-              value={selectedProjectId ?? ALL_PROJECTS}
-              options={[
-                { value: ALL_PROJECTS, label: "All projects" },
-                ...projects.map((p) => ({ value: p.id, label: p.host })),
-              ]}
-              onChange={(v) => onSelectProject?.(v === ALL_PROJECTS ? null : v)}
-            />
-            {selectedProjectId && pages && pages.length > 0 && (
+            {hasMultipleProjects ? (
+              <Select
+                block
+                floating
+                menuMinWidth={300}
+                ariaLabel="Select project scope"
+                value={selectedProjectId ?? ALL_PROJECTS}
+                options={[
+                  {
+                    value: ALL_PROJECTS,
+                    label: "All projects",
+                    hint: `${projectCount} projects`,
+                    icon: <ScopeIcon />,
+                  },
+                  ...projects.map((project) => ({
+                    value: project.id,
+                    label: project.host,
+                    hint: `${project.avgScore} score · ${project.openIssues} open`,
+                    icon: (
+                      <ProjectIcon
+                        host={project.host}
+                        url={project.url}
+                        iconUrl={project.iconUrl}
+                        size={18}
+                      />
+                    ),
+                  })),
+                ]}
+                onChange={(value) => onSelectProject?.(value === ALL_PROJECTS ? null : value)}
+              />
+            ) : onlyProject ? (
+              <div className={styles.singleProject}>
+                <ProjectIcon
+                  host={onlyProject.host}
+                  url={onlyProject.url}
+                  iconUrl={onlyProject.iconUrl}
+                  size={29}
+                />
+                <span className={styles.singleProjectCopy}>
+                  <strong>{onlyProject.host}</strong>
+                  <span>
+                    {onlyProject.pageCount} {onlyProject.pageCount === 1 ? "page" : "pages"} ·{" "}
+                    {onlyProject.openIssues} open
+                  </span>
+                </span>
+              </div>
+            ) : (
+              <div className={styles.noProject}>No projects yet</div>
+            )}
+            {selectedProjectId && pages && pages.length > 1 && (
               <div className={styles.pageScope}>
                 <div className={styles.scopeLabel}>Page</div>
                 <Select
                   block
+                  floating
+                  menuMinWidth={260}
                   ariaLabel="Select page"
                   value={selectedPagePath ?? ALL_PAGES}
                   options={[

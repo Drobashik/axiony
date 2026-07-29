@@ -1,0 +1,54 @@
+.icon {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid color-mix(in oklch, var(--border-strong) 78%, transparent);
+  border-radius: 22%;
+  background: var(--bg-elevated);
+  box-shadow:
+    inset 0 1px 0 var(--edge-highlight),
+    0 1px 2px oklch(0.12 0.015 255 / 0.14);
+}
+
+.fallback,
+.imagePlate {
+  position: absolute;
+  inset: 0;
+}
+
+.fallback {
+  display: grid;
+  place-items: center;
+  background: var(--blue-dim);
+  color: var(--blue);
+  font-family: var(--font-mono);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.imagePlate {
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 24% 16%, var(--tint-medium), transparent 58%),
+    linear-gradient(145deg, var(--bg-elevated), var(--bg-muted));
+}
+
+.image {
+  width: 76%;
+  height: 76%;
+  object-fit: contain;
+  image-rendering: auto;
+}
+
+.imageWide {
+  width: 88%;
+  height: 64%;
+}
+
+.fallbackOnly {
+  border-color: var(--blue-border);
+}

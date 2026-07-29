@@ -49,6 +49,7 @@ export interface TrackedIssue {
 /** A scan result captured at the point the user chose to save it. */
 export interface PendingScan {
   url: string;
+  siteIcon?: string;
   host: string;
   path: string;
   level: WcagLevel;
@@ -107,6 +108,7 @@ export interface ProjectPage {
 export interface Project {
   id: string;
   host: string; // "acme.com"
+  iconUrl?: string;
   createdAt: string; // ISO
   pages: ProjectPage[];
 }
@@ -117,6 +119,7 @@ export type OnboardingStepId = "baseline" | "connect" | "ci" | "invite";
 export interface JustCreated {
   kind: "project" | "page";
   host: string;
+  iconUrl?: string;
   path: string;
 }
 
