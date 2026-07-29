@@ -16,6 +16,7 @@ export type ScanResult = {
     disabledRules?: string[];
     profile?: string;
     selector?: string;
+    siteIcon?: string;
     warnings?: string[];
   };
   issues: ScanIssue[];

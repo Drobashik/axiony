@@ -8,11 +8,14 @@ import type { Workspace } from "@/lib/workspace";
 import type { IconName } from "@/types";
 import { BillingGate, BillingSettings } from "../billing";
 import { ComingSoon } from "../shared/ComingSoon";
-import { WorkspaceOverview } from "./WorkspaceOverview";
-import { WorkspaceProjects } from "./WorkspaceProjects";
-import { WorkspaceIssues } from "./WorkspaceIssues";
-import { WorkspaceScan } from "./WorkspaceScan";
-import styles from "./Workspace.module.scss";
+import {
+  PortfolioOverview,
+  WorkspaceIssues,
+  WorkspaceOverview,
+  WorkspaceProjects,
+  WorkspaceScan,
+} from "./components";
+import styles from "./styles/Workspace.module.scss";
 
 const COMING_SOON: DashboardTab[] = ["reports", "alerts", "team", "settings"];
 
@@ -244,6 +247,20 @@ export const WorkspaceContent = ({
     const scoped = selectedProjectId ? { ...workspace, projects: scopedProjects } : workspace;
 
     if (tab === "overview") {
+      if (!selectedProjectId && workspace.projects.length > 1) {
+        return (
+          <PortfolioOverview
+            workspace={workspace}
+            onProjects={() => onTab("projects")}
+            onIssues={() => onTab("issues")}
+            onScan={() => onTab("scan")}
+            onOpenProject={(projectId) => {
+              onSelectProject(projectId);
+              onSelectPage(null);
+            }}
+          />
+        );
+      }
       return <WorkspaceOverview workspace={scoped} onTab={onTab} />;
     }
 

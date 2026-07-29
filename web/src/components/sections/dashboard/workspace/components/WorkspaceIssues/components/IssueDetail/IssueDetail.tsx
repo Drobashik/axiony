@@ -7,8 +7,9 @@ import { formatHtmlSnippet, looksLikeHtml, tokenizeHtmlLine } from "@/lib/scan/h
 import { CopyButton } from "@/components/sections/scan/components/CopyButton";
 import type { IssueStatus, LocatedIssue } from "@/lib/workspace";
 import { pageLabel } from "@/lib/workspace";
-import { STATUS_OPTIONS } from "./issue-status";
-import styles from "./Workspace.module.scss";
+import { ProjectIcon } from "@/components/sections/dashboard/shared/ProjectIcon";
+import { STATUS_OPTIONS } from "../../issueStatus";
+import styles from "../../../../styles/Workspace.module.scss";
 
 interface IssueDetailProps {
   located: LocatedIssue;
@@ -157,7 +158,10 @@ export const IssueDetail = ({ located, onClose, onStatus }: IssueDetailProps) =>
         <div className={styles.dialogMeta}>
           <div className={styles.dialogMetaItem}>
             <span className={styles.dialogMetaLabel}>Page</span>
-            <span className={styles.dialogMetaValue}>{page}</span>
+            <span className={`${styles.dialogMetaValue} ${styles.dialogProjectValue}`}>
+              <ProjectIcon host={host} url={located.url} iconUrl={located.iconUrl} size={20} />
+              <span>{page}</span>
+            </span>
           </div>
           <div className={styles.dialogMetaItem}>
             <span className={styles.dialogMetaLabel}>Rule</span>

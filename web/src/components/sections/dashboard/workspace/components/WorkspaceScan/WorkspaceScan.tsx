@@ -7,7 +7,6 @@ import { ReportView } from "@/components/sections/scan/components/ReportView";
 import { ResetScanDialog } from "@/components/sections/scan/components/ResetScanDialog";
 import { ScanStage } from "@/components/sections/scan/components/ScanStage";
 import { UrlConsole } from "@/components/sections/scan/components/UrlConsole";
-import { RefreshIcon } from "@/components/sections/scan/components/icons";
 import { useScanEngine } from "@/components/sections/scan/hooks/useScanEngine";
 import type { WcagLevel } from "@/components/sections/scan/types";
 import {
@@ -21,9 +20,10 @@ import { normalizeUrl } from "@/lib/scan/url";
 import { hostFromUrl, pageLabel, pathFromUrl } from "@/lib/workspace";
 import type { Workspace } from "@/lib/workspace";
 import type { DashboardTab } from "@/lib/data/dashboard";
-import { ScannerUpgradeCard } from "../billing";
+import { ScannerUpgradeCard } from "../../../billing";
+import { ProjectIcon } from "../../../shared/ProjectIcon";
 import scanStyles from "@/components/sections/scan/ScanStudio.module.scss";
-import styles from "./Workspace.module.scss";
+import styles from "../../styles/Workspace.module.scss";
 
 interface WorkspaceScanProps {
   workspace: Workspace;
@@ -177,7 +177,13 @@ export const WorkspaceScan = ({
   }, [engine.reduce, quotaFocusSignal]);
 
   const recentPages = workspace.projects
-    .flatMap((project) => project.pages.map((page) => ({ host: project.host, page })))
+    .flatMap((project) =>
+      project.pages.map((page) => ({
+        host: project.host,
+        iconUrl: project.iconUrl,
+        page,
+      })),
+    )
     .sort((a, b) => lastScanAt(b.page.scans).localeCompare(lastScanAt(a.page.scans)))
     .slice(0, 3);
 
@@ -334,7 +340,7 @@ export const WorkspaceScan = ({
           {recentPages.length > 0 && (
             <div className={styles.recentRow}>
               <span className={styles.recentLabel}>Re-scan</span>
-              {recentPages.map(({ host, page }) => (
+              {recentPages.map(({ host, iconUrl, page }) => (
                 <button
                   key={page.id}
                   type="button"
@@ -342,7 +348,7 @@ export const WorkspaceScan = ({
                   onClick={() => scanTarget(page.url)}
                   disabled={busy}
                 >
-                  <RefreshIcon size={11} />
+                  <ProjectIcon host={host} url={page.url} iconUrl={iconUrl} size={18} />
                   {pageLabel(host, page.path)}
                 </button>
               ))}

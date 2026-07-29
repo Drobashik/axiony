@@ -15,6 +15,7 @@ const isPendingScan = (value: unknown): value is PendingScan => {
   const scan = value as Partial<PendingScan>;
   return (
     typeof scan.url === "string" &&
+    (scan.siteIcon === undefined || typeof scan.siteIcon === "string") &&
     typeof scan.host === "string" &&
     typeof scan.path === "string" &&
     (scan.level === "A" || scan.level === "AA" || scan.level === "AAA") &&

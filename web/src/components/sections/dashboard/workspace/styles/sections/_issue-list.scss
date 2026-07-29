@@ -1,0 +1,106 @@
+@use "abstracts" as *;
+
+// ── Issue list (debt) ────────────────────────────────────────────────
+.issueList {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.issueRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 2px;
+  border-bottom: 1px solid var(--border-subtle);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.issueMain {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+
+.issueTitle {
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  @include truncate;
+}
+
+.issueRule {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.newPill {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: 99px;
+  border: 1px solid var(--blue-border);
+  background: var(--blue-dim);
+  color: var(--blue);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.resolvedPill {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: 99px;
+  border: 1px solid var(--green-border);
+  background: var(--green-dim);
+  color: var(--green);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.issueCount {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.moreLink {
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--blue);
+  font-family: var(--font-sans);
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+.empty {
+  margin: 0;
+  padding: 8px 0;
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+}
+
+// ── Projects / Issues tab wrappers ───────────────────────────────────

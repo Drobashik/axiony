@@ -89,6 +89,46 @@
   margin-bottom: 8px;
 }
 
+.singleProject {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: linear-gradient(90deg, var(--blue-dim), transparent 72%), var(--bg-elevated);
+}
+
+.singleProjectCopy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+
+  strong {
+    color: var(--text-primary);
+    font-size: 0.78rem;
+    font-weight: 700;
+    @include truncate;
+  }
+
+  span {
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.61rem;
+    @include truncate;
+  }
+}
+
+.noProject {
+  padding: 9px 10px;
+  border: 1px dashed var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-size: 0.76rem;
+}
+
 .pageScope {
   display: flex;
   flex-direction: column;

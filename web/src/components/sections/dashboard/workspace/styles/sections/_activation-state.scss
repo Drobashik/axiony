@@ -1,0 +1,48 @@
+@use "abstracts" as *;
+
+// ── Activation zero-state (account, no baseline yet) ─────────────────
+.activation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+  max-width: 480px;
+  margin: 40px auto;
+  padding: 36px 28px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  background: var(--bg-surface);
+}
+
+.activationIcon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 1px solid var(--blue-border);
+  background: var(--blue-dim);
+  color: var(--blue);
+}
+
+.activationTitle {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.activationText {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trendEnter,
+  .trendTip {
+    animation: none;
+  }
+}

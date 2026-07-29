@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui";
 import cn from "classnames";
 import { PROJECTS } from "@/lib/data/dashboard";
+import { ProjectIcon } from "../shared/ProjectIcon";
 import { ScoreRing } from "../shared/ScoreRing";
 import { Sparkline } from "./Sparkline";
 import styles from "./ProjectsTab.module.scss";
@@ -53,7 +54,7 @@ export function ProjectsTab() {
           <article className={styles.card} key={p.id}>
             <header className={styles.cardHeader}>
               <div className={styles.cardLogo}>
-                <div className={styles.favicon}>🌐</div>
+                <ProjectIcon host={p.url} size={22} />
                 <div className={styles.cardTitleWrap}>
                   <div className={styles.name}>{p.name}</div>
                   <div className={styles.url}>

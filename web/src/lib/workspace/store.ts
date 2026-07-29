@@ -45,6 +45,7 @@ interface PersistedScanReportRow {
   scannedAt?: string;
   report?: {
     url?: string;
+    siteIcon?: string;
     level?: unknown;
     scannedAt?: string;
     score?: number;
@@ -267,6 +268,7 @@ function projectFromPending(pending: PendingScan): Project {
   return {
     id: randomId(),
     host: pending.host,
+    iconUrl: pending.siteIcon,
     createdAt: pending.scannedAt,
     pages: [pageFromPending(pending)],
   };
@@ -301,15 +303,27 @@ function applyScan(ws: Workspace, pending: PendingScan): void {
 
   if (!project) {
     ws.projects.push(projectFromPending(pending));
-    ws.onboarding.justCreated = { kind: "project", host: pending.host, path: pending.path };
+    ws.onboarding.justCreated = {
+      kind: "project",
+      host: pending.host,
+      iconUrl: pending.siteIcon,
+      path: pending.path,
+    };
     ws.onboarding.steps.baseline = true;
     return;
   }
 
+  if (pending.siteIcon) project.iconUrl = pending.siteIcon;
+
   const page = project.pages.find((pg) => pg.path === pending.path);
   if (!page) {
     project.pages.push(pageFromPending(pending));
-    ws.onboarding.justCreated = { kind: "page", host: pending.host, path: pending.path };
+    ws.onboarding.justCreated = {
+      kind: "page",
+      host: pending.host,
+      iconUrl: pending.siteIcon ?? project.iconUrl,
+      path: pending.path,
+    };
     return;
   }
 
@@ -327,7 +341,12 @@ function createWorkspace(account: WorkspaceAccount, pending: PendingScan | null)
       account,
       projects: [projectFromPending(pending)],
       onboarding: {
-        justCreated: { kind: "project", host: pending.host, path: pending.path },
+        justCreated: {
+          kind: "project",
+          host: pending.host,
+          iconUrl: pending.siteIcon,
+          path: pending.path,
+        },
         steps: { ...emptySteps(), baseline: true },
       },
     };
@@ -423,6 +442,7 @@ const pendingFromPersistedReport = (row: PersistedScanReportRow): PendingScan | 
 
   return {
     url,
+    siteIcon: report?.siteIcon,
     host: row.host || hostFromUrl(url),
     path: row.path || pathFromUrl(url),
     level,

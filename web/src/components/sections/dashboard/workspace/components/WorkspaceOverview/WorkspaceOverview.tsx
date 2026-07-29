@@ -16,9 +16,10 @@ import {
   workspaceSummary,
 } from "@/lib/workspace";
 import type { JustCreated, Workspace, WorkspaceChangeDigest } from "@/lib/workspace";
-import { ScoreRing, colorForScore } from "../shared/ScoreRing";
-import { TrendChart } from "./TrendChart";
-import styles from "./Workspace.module.scss";
+import { ProjectIcon } from "../../../shared/ProjectIcon";
+import { ScoreRing, colorForScore } from "../../../shared/ScoreRing";
+import { TrendChart } from "./components/TrendChart";
+import styles from "../../styles/Workspace.module.scss";
 
 interface WorkspaceOverviewProps {
   workspace: Workspace;
@@ -27,9 +28,7 @@ interface WorkspaceOverviewProps {
 
 const Celebration = ({ created, onDismiss }: { created: JustCreated; onDismiss: () => void }) => (
   <section className={styles.celebrate}>
-    <span className={styles.celebrateIcon} aria-hidden="true">
-      <Icon name="check" size={26} />
-    </span>
+    <ProjectIcon host={created.host} iconUrl={created.iconUrl} size={46} />
     <div className={styles.celebrateBody}>
       <h2 className={styles.celebrateTitle}>
         {created.kind === "project" ? "Project created" : "Page added"}
@@ -272,8 +271,14 @@ export const WorkspaceOverview = ({ workspace, onTab }: WorkspaceOverviewProps) 
         <header className={styles.panelHead}>
           <span className={styles.panelTitle}>Trends</span>
           {located && (
-            <span className={styles.panelMeta}>
-              {pageLabel(located.project.host, located.page.path)}
+            <span className={cn(styles.panelMeta, styles.panelProjectMeta)}>
+              <ProjectIcon
+                host={located.project.host}
+                url={located.page.url}
+                iconUrl={located.project.iconUrl}
+                size={22}
+              />
+              <span>{pageLabel(located.project.host, located.page.path)}</span>
             </span>
           )}
         </header>
@@ -309,6 +314,12 @@ export const WorkspaceOverview = ({ workspace, onTab }: WorkspaceOverviewProps) 
                 return (
                   <li key={locatedIssueKey(located, index)} className={styles.issueRow}>
                     <Badge severity={issue.severity} />
+                    <ProjectIcon
+                      host={host}
+                      url={located.url}
+                      iconUrl={located.iconUrl}
+                      size={22}
+                    />
                     <span className={styles.issueMain}>
                       <span className={styles.issueTitle}>{issue.title}</span>
                       <span className={styles.issueRule}>

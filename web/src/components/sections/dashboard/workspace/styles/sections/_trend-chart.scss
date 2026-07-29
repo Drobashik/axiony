@@ -1,0 +1,391 @@
+@use "abstracts" as *;
+
+// ── Trend chart ──────────────────────────────────────────────────────
+.trend {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.trendHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.trendTabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, var(--tint-weak), transparent), var(--bg-base);
+  box-shadow:
+    inset 0 1px 0 var(--edge-highlight),
+    var(--shadow-md);
+}
+
+.trendTab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 30px;
+  padding: 6px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: transparent;
+  cursor: pointer;
+  transition:
+    border-color var(--transition),
+    color var(--transition),
+    background var(--transition),
+    box-shadow var(--transition),
+    transform var(--transition);
+
+  &::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--border-strong);
+    box-shadow: 0 0 0 3px transparent;
+    transition:
+      background var(--transition),
+      box-shadow var(--transition);
+  }
+
+  &:hover {
+    color: var(--text-primary);
+    background: var(--tint-weak);
+  }
+  &:focus-visible {
+    @include focus-ring($offset: 2px);
+  }
+}
+
+.trendTabOn {
+  color: var(--text-primary);
+  border-color: var(--blue-border);
+  background:
+    radial-gradient(110% 140% at 0% 0%, var(--blue-dim), transparent 62%), var(--bg-elevated);
+  box-shadow:
+    var(--shadow-md),
+    inset 0 1px 0 var(--edge-highlight);
+
+  &::before {
+    background: var(--blue);
+    box-shadow:
+      0 0 0 3px var(--blue-dim),
+      0 0 16px oklch(0.62 0.22 240 / 0.36);
+  }
+}
+
+.trendStat {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.trendStatNow {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.trendStatDelta {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.trendUp {
+  color: var(--green);
+  background: var(--green-dim);
+}
+.trendDown {
+  color: var(--severity-serious);
+  background: oklch(0.72 0.18 50 / 0.14);
+}
+.trendFlat {
+  color: var(--text-muted);
+  background: var(--bg-muted);
+}
+
+.trendCaption {
+  margin: -2px 0 0;
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  letter-spacing: 0.01em;
+}
+
+.trendPlot {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 8px;
+}
+
+.trendYAxis {
+  position: relative;
+  grid-column: 1;
+  grid-row: 1;
+  width: 22px;
+}
+
+.trendYTick {
+  position: absolute;
+  right: 0;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  line-height: 1;
+}
+
+.trendCanvas {
+  position: relative;
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.trendXAxis {
+  position: relative;
+  grid-column: 2;
+  grid-row: 2;
+  height: 16px;
+  margin-top: 4px;
+}
+
+.trendXTick {
+  position: absolute;
+  top: 0;
+  transform: translateX(var(--shift, -50%));
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  white-space: nowrap;
+}
+
+.trendSvg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.trendEnter {
+  animation: trendEnter 0.3s ease;
+}
+
+@keyframes trendEnter {
+  from {
+    opacity: 0;
+  }
+}
+
+.trendGrid {
+  stroke: var(--border-subtle);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.trendBaseline {
+  stroke: var(--text-muted);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+  opacity: 0.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.trendGuide {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.trendHit {
+  fill: transparent;
+  cursor: pointer;
+  outline: none;
+
+  &:focus {
+    outline: none;
+  }
+  &:focus-visible {
+    outline: none;
+    fill: transparent;
+  }
+}
+
+.trendTip {
+  position: absolute;
+  z-index: 3;
+  min-width: 120px;
+  padding: 9px 11px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-md);
+  pointer-events: none;
+  transform: translate(-50%, calc(-100% - 12px));
+  animation: trendTipIn 0.12s ease;
+}
+
+@keyframes trendTipIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-100% - 6px));
+  }
+}
+
+.tipDate {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.tipBig {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 1.3rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.tipNote {
+  display: block;
+  margin-top: 3px;
+  color: var(--text-secondary);
+  font-size: 0.74rem;
+}
+
+.tipList {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tipRow {
+  display: grid;
+  grid-template-columns: 10px 1fr auto;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+}
+
+.tipDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.tipLabel {
+  white-space: nowrap;
+}
+
+.tipVal {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.tipTotal {
+  margin-top: 3px;
+  padding-top: 5px;
+  border-top: 1px solid var(--border-subtle);
+  grid-template-columns: 1fr auto;
+}
+
+.trendLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.trendLegendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+}
+
+.trendLegendDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.trendLegendLabel {
+  color: var(--text-muted);
+}
+
+.trendLegendVal {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.trendHint {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+@include breakpoint-down(sm) {
+  .trendHead {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .trendTabs {
+    width: 100%;
+  }
+  .trendTab {
+    flex: 1;
+    justify-content: center;
+    text-align: center;
+  }
+  .trendStat {
+    justify-content: space-between;
+  }
+  .trendStatNow {
+    font-size: 1.35rem;
+  }
+  .trendYAxis {
+    width: 18px;
+  }
+  .trendYTick,
+  .trendXTick {
+    font-size: 0.6rem;
+  }
+  .trendTip {
+    min-width: 104px;
+  }
+}

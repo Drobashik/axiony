@@ -5,8 +5,8 @@ import type { CSSProperties } from "react";
 import cn from "classnames";
 import { SEVERITY_COLOR, SEVERITY_LABEL, SEVERITY_ORDER } from "@/lib/scan/issues";
 import type { TrendPoint } from "@/lib/workspace";
-import { colorForScore } from "../shared/ScoreRing";
-import styles from "./Workspace.module.scss";
+import { colorForScore } from "@/components/sections/dashboard/shared/ScoreRing";
+import styles from "../../../../styles/Workspace.module.scss";
 
 type Metric = "score" | "issues";
 

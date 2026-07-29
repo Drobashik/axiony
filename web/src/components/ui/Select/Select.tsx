@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import type { KeyboardEvent, ReactNode } from "react";
+import { createPortal } from "react-dom";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { CSSProperties, KeyboardEvent, ReactNode } from "react";
 import cn from "classnames";
 import styles from "./Select.module.scss";
 
@@ -25,7 +26,17 @@ export interface SelectProps {
   size?: "sm" | "md";
   align?: "start" | "end";
   block?: boolean;
+  /** Render the menu outside overflow containers and anchor it to the trigger. */
+  floating?: boolean;
+  /** Minimum floating-menu width in pixels. */
+  menuMinWidth?: number;
   className?: string;
+}
+
+interface FloatingMenuPosition {
+  top: number;
+  left: number;
+  width: number;
 }
 
 const ChevronIcon = ({ className }: { className?: string }) => (
@@ -72,23 +83,64 @@ export const Select = ({
   size = "md",
   align = "start",
   block,
+  floating = false,
+  menuMinWidth,
   className,
 }: SelectProps) => {
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [floatingPosition, setFloatingPosition] = useState<FloatingMenuPosition | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLUListElement>(null);
 
   const selected = options.find((o) => o.value === value);
   const selectedIndex = options.findIndex((o) => o.value === value);
 
+  const updateFloatingPosition = useCallback(() => {
+    if (!floating || !rootRef.current) return;
+
+    const triggerRect = rootRef.current.getBoundingClientRect();
+    const viewportGap = 8;
+    const availableWidth = Math.max(0, window.innerWidth - viewportGap * 2);
+    const width = Math.min(Math.max(triggerRect.width, menuMinWidth ?? 0), availableWidth);
+    const menuHeight = menuRef.current?.getBoundingClientRect().height ?? 0;
+    const spaceBelow = window.innerHeight - triggerRect.bottom - viewportGap;
+    const spaceAbove = triggerRect.top - viewportGap;
+    const openAbove = menuHeight > spaceBelow && spaceAbove > spaceBelow;
+    const top = openAbove
+      ? Math.max(viewportGap, triggerRect.top - menuHeight - 6)
+      : triggerRect.bottom + 6;
+    const preferredLeft = align === "end" ? triggerRect.right - width : triggerRect.left;
+    const left = Math.min(
+      Math.max(viewportGap, preferredLeft),
+      Math.max(viewportGap, window.innerWidth - width - viewportGap),
+    );
+
+    setFloatingPosition({ top, left, width });
+  }, [align, floating, menuMinWidth]);
+
   useEffect(() => {
     if (!open) return;
     const onDoc = (e: MouseEvent) => {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false);
+      const target = e.target as Node;
+      if (rootRef.current?.contains(target) || menuRef.current?.contains(target)) return;
+      setOpen(false);
     };
     document.addEventListener("mousedown", onDoc);
     return () => document.removeEventListener("mousedown", onDoc);
   }, [open]);
+
+  useEffect(() => {
+    if (!open || !floating) return;
+
+    updateFloatingPosition();
+    window.addEventListener("resize", updateFloatingPosition);
+    window.addEventListener("scroll", updateFloatingPosition, true);
+    return () => {
+      window.removeEventListener("resize", updateFloatingPosition);
+      window.removeEventListener("scroll", updateFloatingPosition, true);
+    };
+  }, [floating, open, options.length, updateFloatingPosition]);
 
   const openMenu = () => {
     setActiveIndex(selectedIndex >= 0 ? selectedIndex : 0);
@@ -138,6 +190,52 @@ export const Select = ({
     }
   };
 
+  const floatingStyle: CSSProperties | undefined = floating
+    ? floatingPosition
+      ? floatingPosition
+      : { visibility: "hidden", pointerEvents: "none" }
+    : undefined;
+
+  const menu = (
+    <ul
+      ref={menuRef}
+      className={cn(
+        styles.menu,
+        floating && styles.menuFloating,
+        align === "end" && !floating && styles.menuEnd,
+      )}
+      role="listbox"
+      style={floatingStyle}
+    >
+      {options.map((option, i) => (
+        <li
+          key={option.value}
+          role="option"
+          aria-selected={option.value === value}
+          className={cn(
+            styles.option,
+            i === activeIndex && styles.optionActive,
+            option.value === value && styles.optionSelected,
+          )}
+          onMouseEnter={() => setActiveIndex(i)}
+          onClick={() => choose(option.value)}
+        >
+          {option.icon && <span className={styles.glyph}>{option.icon}</span>}
+          {option.color && <span className={styles.dot} style={{ background: option.color }} />}
+          <span className={styles.optionLabel}>
+            <span className={styles.optionText}>{option.label}</span>
+            {option.hint && <span className={styles.optionHint}>{option.hint}</span>}
+          </span>
+          {option.value === value && (
+            <span className={styles.check}>
+              <CheckIcon />
+            </span>
+          )}
+        </li>
+      ))}
+    </ul>
+  );
+
   return (
     <div ref={rootRef} className={cn(styles.root, block && styles.block, className)}>
       <button
@@ -155,36 +253,8 @@ export const Select = ({
         <ChevronIcon className={cn(styles.chevron, open && styles.chevronOpen)} />
       </button>
 
-      {open && (
-        <ul className={cn(styles.menu, align === "end" && styles.menuEnd)} role="listbox">
-          {options.map((option, i) => (
-            <li
-              key={option.value}
-              role="option"
-              aria-selected={option.value === value}
-              className={cn(
-                styles.option,
-                i === activeIndex && styles.optionActive,
-                option.value === value && styles.optionSelected,
-              )}
-              onMouseEnter={() => setActiveIndex(i)}
-              onClick={() => choose(option.value)}
-            >
-              {option.icon && <span className={styles.glyph}>{option.icon}</span>}
-              {option.color && <span className={styles.dot} style={{ background: option.color }} />}
-              <span className={styles.optionLabel}>
-                {option.label}
-                {option.hint && <span className={styles.optionHint}>{option.hint}</span>}
-              </span>
-              {option.value === value && (
-                <span className={styles.check}>
-                  <CheckIcon />
-                </span>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
+      {open &&
+        (floating && typeof document !== "undefined" ? createPortal(menu, document.body) : menu)}
     </div>
   );
 };

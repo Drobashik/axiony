@@ -12,6 +12,7 @@ export interface ScanPhase {
 
 export interface ScanReport {
   url: string;
+  siteIcon?: string;
   level: WcagLevel;
   scannedAt: Date;
   issues: Issue[];

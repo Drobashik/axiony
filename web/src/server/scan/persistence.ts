@@ -338,6 +338,7 @@ export const upsertUserIssueState = async ({
 
 const pendingToReportPayload = (pending: PendingScan): ScanReportPayload => ({
   url: pending.url,
+  siteIcon: pending.siteIcon,
   level: pending.level,
   scannedAt: pending.scannedAt,
   score: pending.score,

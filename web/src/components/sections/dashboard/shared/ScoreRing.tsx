@@ -30,7 +30,9 @@ export function ScoreRing({ score, size = 48 }: ScoreRingProps) {
       setDrawn(eased * score);
       if (progress < 1) frame = requestAnimationFrame(tick);
     };
+
     frame = requestAnimationFrame(tick);
+
     return () => cancelAnimationFrame(frame);
   }, [score]);
 
@@ -57,7 +59,10 @@ export function ScoreRing({ score, size = 48 }: ScoreRingProps) {
           strokeLinecap="round"
         />
       </svg>
-      <div className={styles.value} style={{ color }}>
+      <div
+        className={styles.value}
+        style={{ color, fontSize: Math.max(11, Math.round(size * 0.22)) }}
+      >
         {Math.round(drawn)}
       </div>
     </div>
@@ -66,6 +71,8 @@ export function ScoreRing({ score, size = 48 }: ScoreRingProps) {
 
 export function colorForScore(score: number): string {
   if (score >= 80) return "var(--green)";
+
   if (score >= 60) return "oklch(0.75 0.15 80)";
+
   return "oklch(0.72 0.20 20)";
 }

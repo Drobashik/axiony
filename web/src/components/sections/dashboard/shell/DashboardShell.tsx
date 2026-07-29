@@ -8,6 +8,7 @@ import type { BillingPlan } from "@/lib/billing";
 import { startRouteLoading } from "@/lib/navigation/route-loading";
 import {
   importPendingScanToServer,
+  projectModel,
   readPendingScan,
   restoreWorkspaceFromServer,
   signOut,
@@ -19,7 +20,7 @@ import { UpgradeDialog } from "../billing";
 import { Sidebar } from "../navigation/Sidebar";
 import { Topbar } from "../navigation/Topbar";
 import { PreviewBanner } from "../preview/PreviewBanner";
-import { DashboardTutorial } from "../workspace/DashboardTutorial";
+import { DashboardTutorial } from "../workspace/components";
 import { DashboardWorkspaceContext } from "./dashboard-workspace-context";
 import type { NavigationGuard } from "./dashboard-workspace-context";
 import { SignOutDialog } from "./SignOutDialog";
@@ -218,10 +219,12 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   // neutral so preview/workspace modes don't flash.
   if (!ready || !billingReady) return <div className={styles.page} aria-busy="true" />;
 
-  // Ignore a stale selection (e.g. project removed) → treat as "all".
+  // Ignore a stale selection; a single-project workspace is always scoped to that project.
   const effectiveProjectId = workspace?.projects.some((p) => p.id === selectedProjectId)
     ? selectedProjectId
-    : null;
+    : workspace?.projects.length === 1
+      ? workspace.projects[0].id
+      : null;
   const selectedProject = workspace?.projects.find((p) => p.id === effectiveProjectId);
   const effectivePagePath =
     selectedProject && selectedProject.pages.some((page) => page.path === selectedPagePath)
@@ -283,7 +286,18 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             onSignOut={workspace ? requestSignOut : undefined}
             billingPlan={workspace ? billing.plan : undefined}
             onUpgrade={workspace ? openUpgrade : undefined}
-            projects={workspace?.projects.map((p) => ({ id: p.id, host: p.host }))}
+            projects={workspace?.projects.map((project) => {
+              const model = projectModel(project);
+              return {
+                id: project.id,
+                host: project.host,
+                url: project.pages[0]?.url,
+                iconUrl: project.iconUrl,
+                pageCount: model.pageCount,
+                avgScore: model.avgScore,
+                openIssues: model.openIssues,
+              };
+            })}
             pages={selectedProject?.pages.map((page) => ({
               path: page.path,
               openIssues: page.open.filter((issue) => OPEN_ISSUE_STATUSES.has(issue.status)).length,
