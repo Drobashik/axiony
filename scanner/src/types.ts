@@ -24,6 +24,7 @@ export interface Issue {
 
 export interface ScanReportPayload {
   url: string;
+  siteIcon?: string;
   level: WcagLevel;
   scannedAt: string;
   issues: Issue[];
@@ -78,6 +79,7 @@ export interface CliScanResult {
   timestamp: string;
   metadata?: {
     selector?: string;
+    siteIcon?: string;
     warnings?: string[];
   };
   issues: CliScanIssue[];

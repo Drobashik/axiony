@@ -112,6 +112,7 @@ export const toScanReportPayload = (
 
   return {
     url: result.url,
+    siteIcon: result.metadata?.siteIcon,
     level,
     scannedAt: result.timestamp || new Date().toISOString(),
     issues,

@@ -118,6 +118,7 @@ export const phaseForProgress = (progress: number): number => {
 
 export interface ScanEngine {
   status: StudioState;
+  jobId: string | null;
   url: string;
   lines: TerminalLine[];
   progress: number;
@@ -134,6 +135,7 @@ export interface ScanEngine {
 export const useScanEngine = (): ScanEngine => {
   const reduce = usePrefersReducedMotion();
   const [status, setStatus] = useState<StudioState>("idle");
+  const [jobId, setJobId] = useState<string | null>(null);
   const [url, setUrl] = useState("");
   const [lines, setLines] = useState<TerminalLine[]>([]);
   const [progress, setProgress] = useState(0);
@@ -158,6 +160,7 @@ export const useScanEngine = (): ScanEngine => {
   useEffect(() => clearPolling, [clearPolling]);
 
   const fail = useCallback((target: string, message: string) => {
+    setJobId(null);
     setUrl(target);
     setStatus("failed");
     setProgress((current) => Math.max(current, 5));
@@ -231,6 +234,7 @@ export const useScanEngine = (): ScanEngine => {
 
   const applyJob = useCallback(
     (job: ApiScanJob) => {
+      setJobId(job.jobId);
       setUrl(job.url);
       setProgress(job.progress);
       setLines(job.lines.map(toTerminalLine));
@@ -310,6 +314,7 @@ export const useScanEngine = (): ScanEngine => {
       clearPolling();
       const runId = scanRunId.current + 1;
       scanRunId.current = runId;
+      setJobId(null);
       setUrl(target);
       setReport(null);
       setError(null);
@@ -372,6 +377,7 @@ export const useScanEngine = (): ScanEngine => {
     scanRunId.current += 1;
     clearPolling();
     activeJob.current = null;
+    setJobId(null);
     setStatus("idle");
     setLines([]);
     setProgress(0);
@@ -380,5 +386,5 @@ export const useScanEngine = (): ScanEngine => {
     setDiagnostic(null);
   }, [clearPolling]);
 
-  return { status, url, lines, progress, report, error, diagnostic, reduce, start, reset };
+  return { status, jobId, url, lines, progress, report, error, diagnostic, reduce, start, reset };
 };
