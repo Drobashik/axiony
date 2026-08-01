@@ -1,0 +1,80 @@
+.overview {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.celebration {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 13px;
+  padding: 16px 18px;
+  border: 1px solid var(--green-border);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(100% 140% at 0% 0%, var(--green-dim), transparent 64%), var(--bg-surface);
+
+  h2 {
+    margin: 2px 0 3px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    max-width: 76ch;
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.76rem;
+    line-height: 1.48;
+  }
+
+  > button {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border: 0;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 1rem;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--tint-medium);
+      color: var(--text-primary);
+    }
+
+    &:focus-visible {
+      @include focus-ring;
+    }
+  }
+}
+
+.celebrationKicker {
+  color: var(--green);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@include breakpoint-down(sm) {
+  .overview {
+    gap: 12px;
+  }
+
+  .celebration {
+    grid-template-columns: auto minmax(0, 1fr);
+    padding: 14px;
+
+    > button {
+      position: absolute;
+      right: 10px;
+    }
+  }
+}
