@@ -1,0 +1,1 @@
+export { PageHealthTable } from "./PageHealthTable";

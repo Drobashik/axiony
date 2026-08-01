@@ -1,0 +1,102 @@
+.banner {
+  --action-accent: var(--blue);
+  --action-dim: var(--blue-dim);
+  --action-border: var(--blue-border);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 13px;
+  padding: 15px;
+  border: 1px solid var(--action-border);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(70% 160% at 100% 50%, var(--action-dim), transparent 68%), var(--bg-surface);
+
+  &[data-tone="good"] {
+    --action-accent: var(--green);
+    --action-dim: var(--green-dim);
+    --action-border: var(--green-border);
+  }
+
+  &[data-tone="watch"] {
+    --action-accent: var(--severity-serious);
+    --action-dim: oklch(0.72 0.18 50 / 0.1);
+    --action-border: oklch(0.72 0.18 50 / 0.24);
+  }
+
+  &[data-tone="risk"] {
+    --action-accent: var(--severity-critical);
+    --action-dim: oklch(0.64 0.22 25 / 0.1);
+    --action-border: oklch(0.64 0.22 25 / 0.24);
+  }
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--action-border);
+  border-radius: var(--radius-md);
+  background: var(--action-dim);
+  color: var(--action-accent);
+}
+
+.copy {
+  min-width: 0;
+
+  h3 {
+    margin: 2px 0 1px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 720;
+    letter-spacing: -0.015em;
+  }
+
+  p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    line-height: 1.4;
+  }
+}
+
+.kicker {
+  color: var(--action-accent);
+  font-family: var(--font-mono);
+  font-size: 0.61rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  grid-column: 1 / -1;
+  width: 100%;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--action-border);
+  border-radius: var(--radius-md);
+  background: var(--action-dim);
+  color: var(--action-accent);
+  font-family: var(--font-sans);
+  font-size: 0.74rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition:
+    transform var(--transition),
+    background var(--transition);
+
+  &:hover {
+    transform: translateY(-1px);
+    background: var(--bg-elevated);
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}

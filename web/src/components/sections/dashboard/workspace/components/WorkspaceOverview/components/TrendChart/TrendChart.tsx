@@ -18,10 +18,12 @@ interface TrendChartProps {
 }
 
 const W = 640;
-const H = 150;
+const H = 300;
+
 const PAD_X = 12;
 const PAD_T = 14;
 const PAD_B = 12;
+
 const INNER_W = W - PAD_X * 2;
 const INNER_H = H - PAD_T - PAD_B;
 

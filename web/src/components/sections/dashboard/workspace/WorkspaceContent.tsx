@@ -261,7 +261,14 @@ export const WorkspaceContent = ({
           />
         );
       }
-      return <WorkspaceOverview workspace={scoped} onTab={onTab} />;
+      return (
+        <WorkspaceOverview
+          workspace={scoped}
+          selectedPagePath={selectedPagePath}
+          onTab={onTab}
+          onSelectPage={onSelectPage}
+        />
+      );
     }
 
     if (tab === "projects")
@@ -302,7 +309,14 @@ export const WorkspaceContent = ({
       );
     if (COMING_SOON.includes(tab)) return <ComingSoon title={tab} />;
 
-    return <WorkspaceOverview workspace={scoped} onTab={onTab} />;
+    return (
+      <WorkspaceOverview
+        workspace={scoped}
+        selectedPagePath={selectedPagePath}
+        onTab={onTab}
+        onSelectPage={onSelectPage}
+      />
+    );
   })();
 
   return content;
