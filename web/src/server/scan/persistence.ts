@@ -1,6 +1,8 @@
 import type { Prisma, ScanJob } from "@prisma/client";
+import { entitlementsForPlan } from "@/lib/billing/plans";
 import { prisma } from "@/lib/db";
 import type { IssueStatus, PendingScan } from "@/lib/workspace/types";
+import { getUserBillingState } from "@/server/billing/state";
 import type { ScanDiagnostic, ScanJobSnapshot, ScanReportPayload, WcagLevel } from "./types";
 
 const REPORT_TTL_MS = 1000 * 60 * 60 * 24 * 30;
@@ -91,6 +93,12 @@ const pathFromUrl = (url: string): string => {
   }
 };
 
+const normalizeHost = (host: string): string =>
+  host
+    .trim()
+    .toLowerCase()
+    .replace(/^www\./, "");
+
 export const toClientScanJob = (job: ScanJob): ScanJobSnapshot => ({
   jobId: job.id,
   status: job.status as ScanJobSnapshot["status"],
@@ -143,6 +151,30 @@ export const persistUserScanReport = async (
   });
 };
 
+const persistUserScanReportWithinDomainLimit = async (
+  userId: string,
+  job: ScanJob,
+  report: ScanReportPayload,
+): Promise<boolean> => {
+  const [billing, trackedHosts] = await Promise.all([
+    getUserBillingState(userId),
+    prisma.userScanReport.findMany({
+      where: { userId },
+      select: { host: true },
+      distinct: ["host"],
+    }),
+  ]);
+  const targetHost = normalizeHost(hostFromUrl(report.url));
+  const tracked = new Set(trackedHosts.map(({ host }) => normalizeHost(host)));
+
+  if (!tracked.has(targetHost) && tracked.size >= entitlementsForPlan(billing.plan).domainLimit) {
+    return false;
+  }
+
+  await persistUserScanReport(userId, job, report);
+  return true;
+};
+
 export const createPersistedScanJob = async (
   userId: string,
   normalizedUrl: string,
@@ -176,7 +208,7 @@ export const createPersistedScanJob = async (
   });
 
   if (report) {
-    await persistUserScanReport(userId, job, report);
+    await persistUserScanReportWithinDomainLimit(userId, job, report);
   }
 
   return toClientScanJob(job);
@@ -217,7 +249,7 @@ export const syncPersistedScanJob = async (
   });
 
   if (report) {
-    await persistUserScanReport(userId, updated, report);
+    await persistUserScanReportWithinDomainLimit(userId, updated, report);
   }
 
   return toClientScanJob(updated);
@@ -269,6 +301,100 @@ export const deleteUserScanReportsByHost = async (userId: string, host: string) 
   ]);
 
   return reports;
+};
+
+export class DomainReplacementError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+    this.name = "DomainReplacementError";
+  }
+}
+
+export const replaceUserDomainWithScanReport = async ({
+  userId,
+  jobId,
+  replacedHost,
+}: {
+  userId: string;
+  jobId: string;
+  replacedHost: string;
+}) => {
+  const job = await prisma.scanJob.findFirst({
+    where: { id: jobId, userId },
+  });
+
+  if (!job) {
+    throw new DomainReplacementError("Scan result was not found.", 404);
+  }
+
+  const report = job.status === "complete" ? reportPayload(job.report) : undefined;
+  if (!report) {
+    throw new DomainReplacementError("This scan has not completed yet.", 409);
+  }
+
+  const requestedHost = normalizeHost(replacedHost);
+  const incomingHost = normalizeHost(hostFromUrl(report.url));
+
+  if (!requestedHost) {
+    throw new DomainReplacementError("Choose a project to replace.", 400);
+  }
+
+  if (requestedHost === incomingHost) {
+    throw new DomainReplacementError("The incoming scan already belongs to this project.", 400);
+  }
+
+  const trackedProjects = await prisma.userScanReport.findMany({
+    where: { userId },
+    select: { host: true },
+    distinct: ["host"],
+  });
+  const incomingAlreadyTracked = trackedProjects.some(
+    ({ host }) => normalizeHost(host) === incomingHost,
+  );
+  const matchedProject = trackedProjects.find(({ host }) => normalizeHost(host) === requestedHost);
+
+  if (incomingAlreadyTracked) {
+    throw new DomainReplacementError("This project is already saved in your workspace.", 409);
+  }
+
+  if (!matchedProject) {
+    throw new DomainReplacementError("The selected project is no longer in your workspace.", 404);
+  }
+
+  const data = reportData(userId, job, report);
+
+  const [deletedReports] = await prisma.$transaction([
+    prisma.userScanReport.deleteMany({
+      where: { userId, host: matchedProject.host },
+    }),
+    prisma.userIssueState.deleteMany({
+      where: { userId, host: matchedProject.host },
+    }),
+    prisma.userScanReport.upsert({
+      where: { scanJobId: job.id },
+      create: data,
+      update: {
+        url: data.url,
+        host: data.host,
+        path: data.path,
+        level: data.level,
+        score: data.score,
+        total: data.total,
+        counts: data.counts,
+        report: data.report,
+        scannedAt: data.scannedAt,
+      },
+    }),
+  ]);
+
+  return {
+    replacedHost: matchedProject.host,
+    projectHost: data.host,
+    deletedReports: deletedReports.count,
+  };
 };
 
 const toClientIssueState = (state: {

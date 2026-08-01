@@ -22,6 +22,7 @@ import type { Workspace } from "@/lib/workspace";
 import type { DashboardTab } from "@/lib/data/dashboard";
 import { ScannerUpgradeCard } from "../../../billing";
 import { ProjectIcon } from "../../../shared/ProjectIcon";
+import { DomainReplacement } from "./components/DomainReplacement";
 import scanStyles from "@/components/sections/scan/ScanStudio.module.scss";
 import styles from "../../styles/Workspace.module.scss";
 
@@ -259,6 +260,26 @@ export const WorkspaceScan = ({
     setScanFocusSignal((value) => value + 1);
   };
 
+  const replaceDomain = async (replacedHost: string) => {
+    if (!engine.jobId || !resultKey) {
+      throw new Error("This scan result is no longer available. Run the scan again.");
+    }
+
+    const response = await fetch(`/api/scans/${encodeURIComponent(engine.jobId)}/replace`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ replacedHost }),
+    });
+
+    if (!response.ok) {
+      const body = (await response.json().catch(() => null)) as { error?: string } | null;
+      throw new Error(body?.error ?? "Could not replace this project. Please try again.");
+    }
+
+    await refreshWorkspace();
+    savedKey.current = resultKey;
+  };
+
   const urlConsole = (
     <UrlConsole
       url={query}
@@ -436,6 +457,19 @@ export const WorkspaceScan = ({
               )}
             </div>
           </div>
+
+          {saveBlocked && engine.jobId && (
+            <div className={styles.scanReveal}>
+              <DomainReplacement
+                key={resultKey}
+                incomingHost={resultHost}
+                incomingUrl={report.url}
+                incomingIconUrl={report.siteIcon}
+                projects={workspace.projects}
+                onReplace={replaceDomain}
+              />
+            </div>
+          )}
 
           <div className={styles.scanReveal}>
             <ReportView
