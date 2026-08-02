@@ -80,6 +80,7 @@ export const PortfolioInsights = ({
                   host={located.host}
                   url={located.url}
                   iconUrl={located.iconUrl}
+                  iconAppearance={located.iconAppearance}
                   size={24}
                 />
                 <span className={styles.issueMain}>

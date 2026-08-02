@@ -9,6 +9,9 @@ export const dynamic = "force-dynamic";
 const isSeverity = (value: unknown) =>
   value === "critical" || value === "serious" || value === "moderate" || value === "minor";
 
+const isSiteIconAppearance = (value: unknown) =>
+  value === "dark" || value === "light" || value === "balanced";
+
 const isPendingScan = (value: unknown): value is PendingScan => {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
 
@@ -16,6 +19,7 @@ const isPendingScan = (value: unknown): value is PendingScan => {
   return (
     typeof scan.url === "string" &&
     (scan.siteIcon === undefined || typeof scan.siteIcon === "string") &&
+    (scan.siteIconAppearance === undefined || isSiteIconAppearance(scan.siteIconAppearance)) &&
     typeof scan.host === "string" &&
     typeof scan.path === "string" &&
     (scan.level === "A" || scan.level === "AA" || scan.level === "AAA") &&

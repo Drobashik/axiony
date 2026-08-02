@@ -75,6 +75,7 @@ const ProjectCard = ({
               host={project.host}
               url={project.pages[0]?.url}
               iconUrl={project.iconUrl}
+              iconAppearance={project.iconAppearance}
               size={42}
             />
             <span className={styles.projectId}>

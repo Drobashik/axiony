@@ -38,6 +38,7 @@ export const ProjectHealthHero = ({ model, onScan, onShowProject }: ProjectHealt
           host={model.project.host}
           url={model.url}
           iconUrl={model.project.iconUrl}
+          iconAppearance={model.project.iconAppearance}
           size={48}
         />
         <div className={styles.identityCopy}>

@@ -27,6 +27,20 @@ const plural = (value: number, word: string): string => `${value} ${word}${value
 const openIssueCount = (page: ProjectPage): number =>
   page.open.filter((issue) => issue.status !== "resolved" && issue.status !== "ignored").length;
 
+const pageScopeName = (page?: ProjectPage): string => {
+  if (!page) {
+    return "All pages";
+  }
+
+  return page.path === "/" ? "Homepage" : page.path;
+};
+
+const pageOptionHint = (page: ProjectPage): string => {
+  const pathPrefix = page.path === "/" ? "/ · " : "";
+
+  return `${pathPrefix}${openIssueCount(page)} open`;
+};
+
 const PortfolioIcon = ({ compact = false }: { compact?: boolean }) => (
   <span className={styles.portfolioIcon} data-compact={compact || undefined} aria-hidden="true">
     <span />
@@ -58,9 +72,8 @@ export const HeaderScopeSwitcher = ({
   const pageCount = projects.reduce((sum, project) => sum + project.pages.length, 0);
 
   const canSwitchProjects = projectCount > 1 && Boolean(onSelectProject);
-  const canSwitchPages = Boolean(
-    selectedProject && selectedProject.pages.length > 1 && onSelectPage,
-  );
+  const showPageField = Boolean(selectedProject && selectedProject.pages.length > 1);
+  const canSwitchPages = Boolean(showPageField && selectedProject && onSelectPage);
 
   let scopeTitle = "Dashboard preview";
 
@@ -70,20 +83,6 @@ export const HeaderScopeSwitcher = ({
 
   if (selectedProject) {
     scopeTitle = selectedProject.host;
-  }
-
-  let scopeMeta = TAB_LABELS[activeTab];
-
-  if (workspace && projectCount > 0) {
-    scopeMeta = `${plural(projectCount, "project")} · ${plural(pageCount, "page")}`;
-  }
-
-  if (selectedProject) {
-    scopeMeta = `${plural(selectedProject.pages.length, "page")} · ${TAB_LABELS[activeTab]}`;
-  }
-
-  if (selectedPage) {
-    scopeMeta = `${selectedPage.path} · ${TAB_LABELS[activeTab]}`;
   }
 
   const projectOptions: SelectOption[] = [
@@ -105,6 +104,7 @@ export const HeaderScopeSwitcher = ({
             host={project.host}
             url={project.pages[0]?.url}
             iconUrl={project.iconUrl}
+            iconAppearance={project.iconAppearance}
             size={27}
           />
         ),
@@ -114,70 +114,87 @@ export const HeaderScopeSwitcher = ({
 
   const pageOptions: SelectOption[] = selectedProject
     ? [
-        { value: ALL_PAGES, label: "All pages" },
+        {
+          value: ALL_PAGES,
+          label: "All pages",
+          hint: plural(selectedProject.pages.length, "page"),
+        },
         ...selectedProject.pages.map((page) => ({
           value: page.path,
-          label: page.path,
-          hint: `${openIssueCount(page)} open`,
+          label: pageScopeName(page),
+          hint: pageOptionHint(page),
         })),
       ]
     : [];
 
-  const pageScopeControl =
+  const projectControl = canSwitchProjects ? (
+    <Select
+      floating
+      menuMinWidth={340}
+      className={styles.projectSelect}
+      ariaLabel="Select project scope"
+      value={selectedProject?.id ?? ALL_PROJECTS}
+      options={projectOptions}
+      onChange={(value) => onSelectProject?.(value === ALL_PROJECTS ? null : value)}
+    />
+  ) : (
+    <div className={styles.staticProject}>
+      <span className={styles.contextIcon}>
+        {selectedProject ? (
+          <ProjectIcon
+            host={selectedProject.host}
+            url={selectedPage?.url ?? selectedProject.pages[0]?.url}
+            iconUrl={selectedProject.iconUrl}
+            iconAppearance={selectedProject.iconAppearance}
+            size={29}
+          />
+        ) : (
+          <PortfolioIcon />
+        )}
+      </span>
+      <strong>{scopeTitle}</strong>
+    </div>
+  );
+
+  const pageScopeLabel = pageScopeName(selectedPage);
+
+  const pageControl =
     canSwitchPages && selectedProject ? (
-      <>
-        <Select
-          floating
-          menuMinWidth={250}
-          className={styles.pageSelect}
-          ariaLabel="Select page scope"
-          value={selectedPage?.path ?? ALL_PAGES}
-          options={pageOptions}
-          onChange={(value) => onSelectPage?.(value === ALL_PAGES ? null : value)}
-        />
-        <span aria-hidden="true">·</span>
-        <span>{TAB_LABELS[activeTab]}</span>
-      </>
+      <Select
+        floating
+        align="end"
+        menuMinWidth={270}
+        className={styles.pageSelect}
+        ariaLabel="Select page scope"
+        value={selectedPage?.path ?? ALL_PAGES}
+        options={pageOptions}
+        onChange={(value) => onSelectPage?.(value === ALL_PAGES ? null : value)}
+      />
     ) : (
-      <span>{scopeMeta}</span>
+      <div className={styles.staticPage} title={pageScopeLabel}>
+        {pageScopeLabel}
+      </div>
     );
 
   return (
-    <div className={styles.context}>
-      {canSwitchProjects ? (
-        <div className={styles.switcherBody}>
-          <Select
-            floating
-            menuMinWidth={320}
-            className={styles.projectSelect}
-            ariaLabel="Select project scope"
-            value={selectedProject?.id ?? ALL_PROJECTS}
-            options={projectOptions}
-            onChange={(value) => onSelectProject?.(value === ALL_PROJECTS ? null : value)}
-          />
-
-          <div className={styles.scopeMeta}>{pageScopeControl}</div>
+    <div
+      className={styles.context}
+      data-has-page={showPageField || undefined}
+      aria-label={`${TAB_LABELS[activeTab]} scope`}
+    >
+      <div className={styles.scopeNavigator} data-has-page={showPageField || undefined}>
+        <div className={styles.projectField}>
+          <span className={styles.fieldLabel}>Project</span>
+          {projectControl}
         </div>
-      ) : (
-        <>
-          <span className={styles.contextIcon}>
-            {selectedProject ? (
-              <ProjectIcon
-                host={selectedProject.host}
-                url={selectedPage?.url ?? selectedProject.pages[0]?.url}
-                iconUrl={selectedProject.iconUrl}
-                size={31}
-              />
-            ) : (
-              <PortfolioIcon />
-            )}
-          </span>
-          <div className={styles.contextCopy}>
-            <strong>{scopeTitle}</strong>
-            <div className={styles.staticMeta}>{pageScopeControl}</div>
+
+        {showPageField && (
+          <div className={styles.pageField}>
+            <span className={styles.fieldLabel}>Page</span>
+            {pageControl}
           </div>
-        </>
-      )}
+        )}
+      </div>
     </div>
   );
 };

@@ -288,8 +288,6 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             issuesBadge={workspace ? openIssueCount : undefined}
             inlineScan={workspace !== null}
             onSignOut={workspace ? requestSignOut : undefined}
-            billingPlan={workspace ? billing.plan : undefined}
-            onUpgrade={workspace ? openUpgrade : undefined}
           />
 
           <div className={styles.main}>

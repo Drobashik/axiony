@@ -1,4 +1,5 @@
 import type { Issue, SeverityCounts } from "@/lib/scan/issues";
+import type { SiteIconAppearance } from "@/types";
 
 export type WcagLevel = "A" | "AA" | "AAA";
 
@@ -13,6 +14,7 @@ export interface ScanPhase {
 export interface ScanReport {
   url: string;
   siteIcon?: string;
+  siteIconAppearance?: SiteIconAppearance;
   level: WcagLevel;
   scannedAt: Date;
   issues: Issue[];
