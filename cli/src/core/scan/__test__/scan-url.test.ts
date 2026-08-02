@@ -149,6 +149,47 @@ test('allows a URL scan with refresh warnings when the page has meaningful findi
   }
 });
 
+test('classifies a dark transparent favicon for contrast-aware rendering', async () => {
+  const { server, url } = await listenWithResponseHandler((request, response) => {
+    if (request.url === '/favicon.svg') {
+      response.writeHead(200, { 'content-type': 'image/svg+xml' });
+      response.end(`
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+          <circle cx="32" cy="32" r="24" fill="#171a1f" />
+        </svg>
+      `);
+
+      return;
+    }
+
+    response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+    response.end(`
+      <!doctype html>
+      <html lang="en">
+        <head>
+          <title>Dark icon project</title>
+          <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+        </head>
+        <body>
+          <main>
+            <h1>Dark icon project</h1>
+            <input type="text">
+          </main>
+        </body>
+      </html>
+    `);
+  });
+
+  try {
+    const result = await scanUrl(url);
+
+    assert.equal(result.metadata?.siteIcon, `${url}/favicon.svg`);
+    assert.equal(result.metadata?.siteIconAppearance, 'dark');
+  } finally {
+    await closeServer(server);
+  }
+});
+
 test('allows a short meta refresh to resolve naturally', async () => {
   const { server, url } = await listenWithHandler((request) => {
     if (request.url === '/ready') {

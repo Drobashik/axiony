@@ -5,12 +5,14 @@ import { createPortal } from "react-dom";
 import { Button, Icon, Select } from "@/components/ui";
 import { ProjectIcon } from "@/components/sections/dashboard/shared/ProjectIcon";
 import type { Project } from "@/lib/workspace";
+import type { SiteIconAppearance } from "@/types";
 import styles from "./DomainReplacement.module.scss";
 
 interface DomainReplacementProps {
   incomingHost: string;
   incomingUrl: string;
   incomingIconUrl?: string;
+  incomingIconAppearance?: SiteIconAppearance;
   projects: Project[];
   onReplace: (replacedHost: string) => Promise<void>;
 }
@@ -19,6 +21,7 @@ export const DomainReplacement = ({
   incomingHost,
   incomingUrl,
   incomingIconUrl,
+  incomingIconAppearance,
   projects,
   onReplace,
 }: DomainReplacementProps) => {
@@ -40,6 +43,7 @@ export const DomainReplacement = ({
             host={project.host}
             url={project.pages[0]?.url}
             iconUrl={project.iconUrl}
+            iconAppearance={project.iconAppearance}
             size={20}
           />
         ),
@@ -108,6 +112,7 @@ export const DomainReplacement = ({
                 host={incomingHost}
                 url={incomingUrl}
                 iconUrl={incomingIconUrl}
+                iconAppearance={incomingIconAppearance}
                 size={32}
               />
               <span>
@@ -181,6 +186,7 @@ export const DomainReplacement = ({
                     host={selectedProject.host}
                     url={selectedProject.pages[0]?.url}
                     iconUrl={selectedProject.iconUrl}
+                    iconAppearance={selectedProject.iconAppearance}
                     size={28}
                   />
                   <strong>{selectedProject.host}</strong>
@@ -198,6 +204,7 @@ export const DomainReplacement = ({
                     host={incomingHost}
                     url={incomingUrl}
                     iconUrl={incomingIconUrl}
+                    iconAppearance={incomingIconAppearance}
                     size={28}
                   />
                   <strong>{incomingHost}</strong>

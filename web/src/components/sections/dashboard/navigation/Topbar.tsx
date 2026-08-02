@@ -161,35 +161,37 @@ export function Topbar({
             data-score={score >= 85 ? "good" : score >= 70 ? "watch" : "risk"}
           >
             <span>Score</span>
-            <strong>{score}</strong>
-            {scoreDelta !== 0 && (
-              <small data-direction={scoreDelta > 0 ? "up" : "down"}>
-                {scoreDelta > 0 ? "↑" : "↓"} {Math.abs(scoreDelta)}
-              </small>
-            )}
+            <div className={styles.metricValue}>
+              <strong>{score}</strong>
+              {scoreDelta !== 0 && (
+                <small data-direction={scoreDelta > 0 ? "up" : "down"}>
+                  {scoreDelta > 0 ? "↑" : "↓"} {Math.abs(scoreDelta)}
+                </small>
+              )}
+            </div>
           </div>
           <span className={styles.metricDivider} aria-hidden="true" />
           <div className={styles.metric}>
             <span>Issues</span>
-            <strong>{openIssues}</strong>
-            <small>open</small>
+            <div className={styles.metricValue}>
+              <strong>{openIssues}</strong>
+              <small>open</small>
+            </div>
           </div>
           <span className={styles.metricDivider} aria-hidden="true" />
           <div className={styles.metric}>
             <span>Last scan</span>
-            <strong className={styles.lastScan}>{relativeTime(lastScannedAt)}</strong>
+            <div className={styles.metricValue}>
+              <strong className={styles.lastScan}>{relativeTime(lastScannedAt)}</strong>
+            </div>
           </div>
         </div>
       )}
 
       <div className={styles.actions}>
-        {billingPlan && billingPlan !== "team" && onUpgrade && (
-          <button
-            type="button"
-            className={styles.upgrade}
-            onClick={() => onUpgrade(billingPlan === "free" ? "pro" : "team")}
-          >
-            {billingPlan === "free" ? "Upgrade" : "Unlock Team"}
+        {billingPlan === "free" && onUpgrade && (
+          <button type="button" className={styles.upgrade} onClick={() => onUpgrade("pro")}>
+            Upgrade
           </button>
         )}
 

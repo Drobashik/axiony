@@ -11,7 +11,7 @@ import {
 } from './page-readiness';
 import { createWcagAxeOptions } from './profile';
 import { readScanSessionCookies, writeScanSessionCookies } from './session-cookies';
-import { resolvePageIcon } from './site-icon';
+import { resolvePageIcon, resolvePageIconAppearance } from './site-icon';
 import { ScanDiagnosticError } from './types';
 import type { ScanResult, ScanUrlOptions } from './types';
 
@@ -44,6 +44,7 @@ const buildScanUrlMetadata = (
   selector: string | undefined,
   warnings: string[],
   siteIcon: string | undefined,
+  siteIconAppearance: ScanUrlMetadata['siteIconAppearance'],
 ): ScanUrlMetadata | undefined => {
   const metadata: ScanUrlMetadata = {};
 
@@ -57,6 +58,10 @@ const buildScanUrlMetadata = (
 
   if (siteIcon) {
     metadata.siteIcon = siteIcon;
+  }
+
+  if (siteIconAppearance) {
+    metadata.siteIconAppearance = siteIconAppearance;
   }
 
   if (Object.keys(metadata).length === 0) {
@@ -139,6 +144,9 @@ export async function scanUrl(url: string, options: ScanUrlOptions = {}): Promis
           : await detectPageWarnings(page);
 
       const siteIcon = await resolvePageIcon(page).catch(() => undefined);
+      const siteIconAppearance = siteIcon
+        ? await resolvePageIconAppearance(page, siteIcon).catch(() => undefined)
+        : undefined;
 
       const result = await runAxeOnPage(page, {
         axeOptions: level ? createWcagAxeOptions(level) : undefined,
@@ -164,7 +172,7 @@ export async function scanUrl(url: string, options: ScanUrlOptions = {}): Promis
       return {
         url: result.url,
         timestamp: result.timestamp,
-        metadata: buildScanUrlMetadata(selector, warnings, siteIcon),
+        metadata: buildScanUrlMetadata(selector, warnings, siteIcon, siteIconAppearance),
         issues: result.issues,
         manualChecks: result.manualChecks,
       };

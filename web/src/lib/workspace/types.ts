@@ -1,4 +1,4 @@
-import type { Severity } from "@/types";
+import type { Severity, SiteIconAppearance } from "@/types";
 import type { SeverityCounts } from "@/lib/scan/issues";
 
 // =====================================================================
@@ -50,6 +50,7 @@ export interface TrackedIssue {
 export interface PendingScan {
   url: string;
   siteIcon?: string;
+  siteIconAppearance?: SiteIconAppearance;
   host: string;
   path: string;
   level: WcagLevel;
@@ -109,6 +110,7 @@ export interface Project {
   id: string;
   host: string; // "acme.com"
   iconUrl?: string;
+  iconAppearance?: SiteIconAppearance;
   createdAt: string; // ISO
   pages: ProjectPage[];
 }
@@ -120,6 +122,7 @@ export interface JustCreated {
   kind: "project" | "page";
   host: string;
   iconUrl?: string;
+  iconAppearance?: SiteIconAppearance;
   path: string;
 }
 

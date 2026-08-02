@@ -58,6 +58,7 @@ export const ProjectHealthTable = ({
                     host={row.project.host}
                     url={row.project.pages[0]?.url}
                     iconUrl={row.project.iconUrl}
+                    iconAppearance={row.project.iconAppearance}
                     size={36}
                   />
                   <span className={styles.identityCopy}>

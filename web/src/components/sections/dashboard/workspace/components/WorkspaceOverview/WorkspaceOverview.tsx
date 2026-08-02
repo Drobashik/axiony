@@ -23,7 +23,12 @@ interface WorkspaceOverviewProps {
 
 const Celebration = ({ created, onDismiss }: { created: JustCreated; onDismiss: () => void }) => (
   <section className={styles.celebration}>
-    <ProjectIcon host={created.host} iconUrl={created.iconUrl} size={42} />
+    <ProjectIcon
+      host={created.host}
+      iconUrl={created.iconUrl}
+      iconAppearance={created.iconAppearance}
+      size={42}
+    />
     <div>
       <span className={styles.celebrationKicker}>
         {created.kind === "project" ? "Project created" : "Page added"}

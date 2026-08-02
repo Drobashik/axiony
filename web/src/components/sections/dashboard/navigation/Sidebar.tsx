@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { LogoMark } from "@/components/ui";
 import cn from "classnames";
-import type { BillingPlan } from "@/lib/billing";
 import { DashboardTab } from "@/lib/data/dashboard";
 import { ChevronDownIcon, SignOutIcon, TAB_ICONS } from "./sidebar-icons";
 import styles from "./Sidebar.module.scss";
@@ -39,8 +38,6 @@ export interface SidebarProps {
   inlineScan?: boolean;
   onHome?: () => void;
   onSignOut?: () => void;
-  billingPlan?: BillingPlan;
-  onUpgrade?: (plan?: Exclude<BillingPlan, "free">) => void;
 }
 
 export function Sidebar({
@@ -54,8 +51,6 @@ export function Sidebar({
   inlineScan = false,
   onHome,
   onSignOut,
-  billingPlan,
-  onUpgrade,
 }: SidebarProps) {
   const primary: NavItem[] = [
     { id: "overview", label: "Overview" },
@@ -118,16 +113,7 @@ export function Sidebar({
         </span>
       </Link>
 
-      <div className={styles.section}>
-        {billingPlan === "pro" && onUpgrade && (
-          <button type="button" className={styles.upgradeCard} onClick={() => onUpgrade("team")}>
-            <span className={styles.upgradeKicker}>Pro plan</span>
-            <span className={styles.upgradeTitle}>Unlock Team</span>
-            <span className={styles.upgradeText}>Members, roles, PR checks</span>
-          </button>
-        )}
-        {primary.map(renderNavItem)}
-      </div>
+      <div className={styles.section}>{primary.map(renderNavItem)}</div>
 
       <div className={styles.section}>
         <div className={styles.label}>Settings</div>

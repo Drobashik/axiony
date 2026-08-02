@@ -334,6 +334,7 @@ export const WorkspaceIssues = ({ workspace, refreshWorkspace }: WorkspaceIssues
                       host={host}
                       url={located.url}
                       iconUrl={located.iconUrl}
+                      iconAppearance={located.iconAppearance}
                       size={22}
                     />
                     <span>{project}</span>

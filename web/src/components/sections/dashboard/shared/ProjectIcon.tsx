@@ -2,12 +2,14 @@
 
 import { useCallback, useEffect, useState } from "react";
 import cn from "classnames";
+import type { SiteIconAppearance } from "@/types";
 import styles from "./ProjectIcon.module.scss";
 
 interface ProjectIconProps {
   host: string;
   url?: string;
   iconUrl?: string;
+  iconAppearance?: SiteIconAppearance;
   size?: number;
   className?: string;
 }
@@ -80,7 +82,14 @@ const highResolutionFavicon = (origin: string): Promise<string | null> => {
   return request;
 };
 
-export const ProjectIcon = ({ host, url, iconUrl, size = 32, className }: ProjectIconProps) => {
+export const ProjectIcon = ({
+  host,
+  url,
+  iconUrl,
+  iconAppearance,
+  size = 32,
+  className,
+}: ProjectIconProps) => {
   const origin = projectOrigin(host, url);
   const accessibleLabel = `${host.replace(/^www\./, "")} project icon`;
 
@@ -96,6 +105,7 @@ export const ProjectIcon = ({ host, url, iconUrl, size = 32, className }: Projec
   const favicon = iconUrl && !failedFavicons.includes(iconUrl) ? iconUrl : resolvedFavicon;
   const failed = failedFavicons.includes(favicon);
   const wide = wideFavicons.includes(favicon);
+  const resolvedAppearance = favicon === iconUrl ? iconAppearance : undefined;
 
   const markFaviconShape = useCallback(
     (image: HTMLImageElement | null) => {
@@ -125,7 +135,13 @@ export const ProjectIcon = ({ host, url, iconUrl, size = 32, className }: Projec
 
   return (
     <span
-      className={cn(styles.icon, failed && styles.fallbackOnly, className)}
+      className={cn(
+        styles.icon,
+        resolvedAppearance === "dark" && styles.darkArtwork,
+        resolvedAppearance === "light" && styles.lightArtwork,
+        failed && styles.fallbackOnly,
+        className,
+      )}
       style={{ width: size, height: size }}
       role={failed ? "img" : undefined}
       aria-label={failed ? accessibleLabel : undefined}

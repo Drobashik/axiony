@@ -1,4 +1,4 @@
-import type { Severity } from "@/types";
+import type { Severity, SiteIconAppearance } from "@/types";
 import type { SeverityCounts } from "@/lib/scan/issues";
 import { SEVERITY_WEIGHT } from "@/lib/scan/issues";
 import type {
@@ -124,6 +124,7 @@ export const issuePersistenceKey = (issue: TrackedIssue): string => {
 interface ReportLike {
   url: string;
   siteIcon?: string;
+  siteIconAppearance?: SiteIconAppearance;
   level: WcagLevel;
   score: number;
   counts: SeverityCounts;
@@ -152,6 +153,7 @@ export const pendingFromReport = (report: ReportLike): PendingScan => {
   return {
     url: report.url,
     siteIcon: report.siteIcon,
+    siteIconAppearance: report.siteIconAppearance,
     host: hostFromUrl(report.url),
     path: pathFromUrl(report.url),
     level: report.level,
@@ -301,6 +303,7 @@ export interface WorkspaceChangeEvent {
   id: string;
   host: string;
   iconUrl?: string;
+  iconAppearance?: SiteIconAppearance;
   url: string;
   path: string;
   label: string;
@@ -351,6 +354,7 @@ export const workspaceChangeDigest = (
           id: scan.id,
           host: project.host,
           iconUrl: project.iconUrl,
+          iconAppearance: project.iconAppearance,
           url: page.url,
           path: page.path,
           label: pageLabel(project.host, page.path),
@@ -412,6 +416,7 @@ export const latestScannedPage = (ws: Workspace): LocatedPage | null => {
 export interface LocatedIssue {
   host: string;
   iconUrl?: string;
+  iconAppearance?: SiteIconAppearance;
   url: string;
   path: string;
   issue: TrackedIssue;
@@ -451,6 +456,7 @@ export const aggregateCurrentIssues = (ws: Workspace): LocatedIssue[] => {
         out.push({
           host: project.host,
           iconUrl: project.iconUrl,
+          iconAppearance: project.iconAppearance,
           url: page.url,
           path: page.path,
           issue,
@@ -478,6 +484,7 @@ export const aggregateResolvedIssues = (ws: Workspace): LocatedIssue[] => {
           out.push({
             host: project.host,
             iconUrl: project.iconUrl,
+            iconAppearance: project.iconAppearance,
             url: page.url,
             path: page.path,
             issue: { ...issue, status: "resolved" },

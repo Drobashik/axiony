@@ -1,4 +1,8 @@
 .icon {
+  --icon-plate-glow: var(--tint-medium);
+  --icon-plate-start: var(--bg-elevated);
+  --icon-plate-end: var(--bg-muted);
+
   position: relative;
   display: inline-grid;
   place-items: center;
@@ -33,8 +37,8 @@
   display: grid;
   place-items: center;
   background:
-    radial-gradient(circle at 24% 16%, var(--tint-medium), transparent 58%),
-    linear-gradient(145deg, var(--bg-elevated), var(--bg-muted));
+    radial-gradient(circle at 24% 16%, var(--icon-plate-glow), transparent 58%),
+    linear-gradient(145deg, var(--icon-plate-start), var(--icon-plate-end));
 }
 
 .image {
@@ -49,6 +53,44 @@
   height: 64%;
 }
 
+.darkArtwork {
+  --icon-plate-glow: oklch(1 0 0 / 0.18);
+  --icon-plate-start: oklch(0.52 0.016 255);
+  --icon-plate-end: oklch(0.4 0.014 255);
+}
+
+.lightArtwork {
+  --icon-plate-glow: oklch(1 0 0 / 0.08);
+  --icon-plate-start: oklch(0.25 0.014 255);
+  --icon-plate-end: oklch(0.18 0.012 255);
+}
+
 .fallbackOnly {
   border-color: var(--blue-border);
+}
+
+:global(:root[data-theme="light"]) .darkArtwork {
+  --icon-plate-glow: oklch(1 0 0 / 0.5);
+  --icon-plate-start: oklch(0.91 0.008 255);
+  --icon-plate-end: oklch(0.82 0.01 255);
+}
+
+:global(:root[data-theme="light"]) .lightArtwork {
+  --icon-plate-glow: oklch(1 0 0 / 0.09);
+  --icon-plate-start: oklch(0.38 0.014 255);
+  --icon-plate-end: oklch(0.27 0.012 255);
+}
+
+@media (prefers-color-scheme: light) {
+  :global(:root:not([data-theme])) .darkArtwork {
+    --icon-plate-glow: oklch(1 0 0 / 0.5);
+    --icon-plate-start: oklch(0.91 0.008 255);
+    --icon-plate-end: oklch(0.82 0.01 255);
+  }
+
+  :global(:root:not([data-theme])) .lightArtwork {
+    --icon-plate-glow: oklch(1 0 0 / 0.09);
+    --icon-plate-start: oklch(0.38 0.014 255);
+    --icon-plate-end: oklch(0.27 0.012 255);
+  }
 }
