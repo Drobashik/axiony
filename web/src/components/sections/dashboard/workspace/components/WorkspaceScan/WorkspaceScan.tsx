@@ -50,8 +50,14 @@ const normalizeDomain = (host: string): string =>
     .split("/")[0] ?? "";
 
 const nextPlan = (plan: BillingPlan): Exclude<BillingPlan, "free"> | null => {
-  if (plan === "free") return "pro";
-  if (plan === "pro") return "team";
+  if (plan === "free") {
+    return "pro";
+  }
+
+  if (plan === "pro") {
+    return "team";
+  }
+
   return null;
 };
 
@@ -94,6 +100,7 @@ export const WorkspaceScan = ({
   const [scanFocusSignal, setScanFocusSignal] = useState(0);
   const [pendingScan, setPendingScan] = useState<PendingScanRequest | null>(null);
   const [stopDialogOpen, setStopDialogOpen] = useState(false);
+
   // Dedupe usage and auto-save independently across re-renders.
   const recordedKey = useRef<string | null>(null);
   const savedKey = useRef<string | null>(null);
@@ -103,6 +110,7 @@ export const WorkspaceScan = ({
   const busy = engine.status === "scanning";
   const hasProjects = workspace.projects.length > 0;
   const report = engine.report;
+
   const plan = planDefinition(billing.plan);
   const entitlements = entitlementsForPlan(billing.plan);
   const scansLeft = remainingScans(billing);
@@ -112,16 +120,20 @@ export const WorkspaceScan = ({
   );
   const domainCount = workspace.projects.length;
   const upgradeTarget = nextPlan(billing.plan);
+
   const approachingScanLimit =
     scansLeft <= Math.max(10, Math.ceil(entitlements.monthlyScans * 0.1));
   const showQuotaCard = billing.plan === "free" || approachingScanLimit || quotaAlert !== null;
+
   const resultKey =
     engine.status === "results" && report ? `${report.url}@${report.scannedAt.getTime()}` : null;
   const hasVisibleResult = engine.status === "results" && Boolean(report);
   const resultHost = report ? normalizeDomain(hostFromUrl(report.url)) : "";
+
   const resultIsNewDomainProject =
     Boolean(resultHost) &&
     !workspace.projects.some((project) => normalizeDomain(project.host) === resultHost);
+
   const saveBlocked =
     resultKey && resultIsNewDomainProject && workspace.projects.length >= entitlements.domainLimit
       ? `${plan.name} can save ${entitlements.domainLimit.toLocaleString()} domain project${
@@ -132,14 +144,18 @@ export const WorkspaceScan = ({
 
   // Auto-create / update the baseline as soon as a scan finishes.
   useEffect(() => {
-    if (!resultKey || !report) return;
+    if (!resultKey || !report) {
+      return;
+    }
 
     if (recordedKey.current !== resultKey) {
       recordedKey.current = resultKey;
       void syncBillingFromServer();
     }
 
-    if (saveBlocked || savedKey.current === resultKey) return;
+    if (saveBlocked || savedKey.current === resultKey) {
+      return;
+    }
 
     savedKey.current = resultKey;
     void refreshWorkspace();
@@ -148,26 +164,37 @@ export const WorkspaceScan = ({
   useEffect(() => {
     if (!unsavedResult) {
       setNavigationGuard(null);
+
       return;
     }
 
     const message = "This scan result has not been saved. If you leave now, you will lose it.";
+
     setNavigationGuard(() => window.confirm(message));
+
     return () => setNavigationGuard(null);
   }, [setNavigationGuard, unsavedResult]);
 
   useEffect(() => {
-    if (!unsavedResult) return;
+    if (!unsavedResult) {
+      return;
+    }
+
     const onBeforeUnload = (event: BeforeUnloadEvent) => {
       event.preventDefault();
       event.returnValue = "";
     };
+
     window.addEventListener("beforeunload", onBeforeUnload);
+
     return () => window.removeEventListener("beforeunload", onBeforeUnload);
   }, [unsavedResult]);
 
   useEffect(() => {
-    if (quotaFocusSignal === 0) return;
+    if (quotaFocusSignal === 0) {
+      return;
+    }
+
     const target = quotaAlertRef.current ?? quotaCardRef.current;
 
     quotaCardRef.current?.scrollIntoView({
@@ -197,7 +224,10 @@ export const WorkspaceScan = ({
 
   const executeScan = (rawUrl: string, nextQuery?: string) => {
     setPendingScan(null);
-    if (nextQuery !== undefined) setQuery(nextQuery);
+
+    if (nextQuery !== undefined) {
+      setQuery(nextQuery);
+    }
 
     const url = normalizeUrl(rawUrl);
     const host = normalizeDomain(hostFromUrl(url));
@@ -239,20 +269,30 @@ export const WorkspaceScan = ({
   };
 
   const confirmPendingScan = () => {
-    if (!pendingScan) return;
+    if (!pendingScan) {
+      return;
+    }
+
     executeScan(pendingScan.url, pendingScan.query);
   };
 
   const runScan = (url: string) => requestScan(url);
+
   const scanTarget = (url: string) => {
     requestScan(url, url, "rescan-history");
   };
+
   const rescan = () => {
     const target = report?.url || engine.url || query;
-    if (target) requestScan(target);
+
+    if (target) {
+      requestScan(target);
+    }
   };
+
   const stopScan = () => {
     const target = engine.url;
+
     setStopDialogOpen(false);
     setPendingScan(null);
     engine.reset();
@@ -294,7 +334,7 @@ export const WorkspaceScan = ({
   );
 
   return (
-    <div className={styles.scanColumn} data-tour="scan-runner">
+    <div className={styles.scanColumn}>
       <header className={styles.scanHead}>
         <div className={styles.scanHeadMain}>
           <span className={styles.scanKicker}>

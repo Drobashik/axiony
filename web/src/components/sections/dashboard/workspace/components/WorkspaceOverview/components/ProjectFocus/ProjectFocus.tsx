@@ -20,7 +20,7 @@ export const ProjectFocus = ({
   onIssues,
 }: ProjectFocusProps) => (
   <div className={styles.grid}>
-    <section className={styles.trendCard} data-tour="overview-trends" aria-labelledby="trend-title">
+    <section className={styles.trendCard} aria-labelledby="trend-title">
       <header className={styles.header}>
         <div>
           <span className={styles.kicker}>Monitor</span>

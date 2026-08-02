@@ -1,4 +1,3 @@
-export { DashboardTutorial } from "./DashboardTutorial";
 export { PortfolioOverview } from "./PortfolioOverview";
 export { WorkspaceIssues } from "./WorkspaceIssues";
 export { WorkspaceOverview } from "./WorkspaceOverview";

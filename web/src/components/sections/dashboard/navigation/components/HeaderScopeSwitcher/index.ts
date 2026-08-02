@@ -1,0 +1,1 @@
+export { HeaderScopeSwitcher } from "./HeaderScopeSwitcher";

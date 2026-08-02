@@ -19,19 +19,19 @@ const signed = (value: number): string => (value === 0 ? "±0" : `${value > 0 ? 
 const fixed = (value: number): string => (value > 0 ? `+${value}` : `${value}`);
 
 const scoreTone = (score: number): "good" | "watch" | "risk" => {
-  if (score >= 80) return "good";
+  if (score >= 80) {
+    return "good";
+  }
 
-  if (score >= 60) return "watch";
+  if (score >= 60) {
+    return "watch";
+  }
 
   return "risk";
 };
 
 export const ProjectHealthHero = ({ model, onScan, onShowProject }: ProjectHealthHeroProps) => (
-  <section
-    className={styles.hero}
-    data-score-tone={scoreTone(model.score)}
-    data-tour="overview-summary"
-  >
+  <section className={styles.hero} data-score-tone={scoreTone(model.score)}>
     <header className={styles.header}>
       <div className={styles.identity}>
         <ProjectIcon

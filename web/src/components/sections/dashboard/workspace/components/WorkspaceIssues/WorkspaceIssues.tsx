@@ -81,6 +81,7 @@ export const WorkspaceIssues = ({ workspace, refreshWorkspace }: WorkspaceIssues
   const [detailKey, setDetailKey] = useState<DetailKey | null>(null);
   const [statusOverrides, setStatusOverrides] = useState<Record<string, IssueStatus>>({});
   const [statusError, setStatusError] = useState<string | null>(null);
+
   const baseIssues = useMemo(() => aggregateTrackedIssues(workspace), [workspace]);
   const keyedIssues = useMemo<IssueRow[]>(
     () =>
@@ -94,6 +95,7 @@ export const WorkspaceIssues = ({ workspace, refreshWorkspace }: WorkspaceIssues
     () =>
       keyedIssues.map((located) => {
         const status = statusOverrides[located.rowKey];
+
         return status ? { ...located, issue: { ...located.issue, status } } : located;
       }),
     [keyedIssues, statusOverrides],
@@ -103,15 +105,24 @@ export const WorkspaceIssues = ({ workspace, refreshWorkspace }: WorkspaceIssues
     if (filter === "open" && (issue.status === "resolved" || issue.status === "ignored")) {
       return false;
     }
-    if (filter === "resolved" && issue.status !== "resolved") return false;
+
+    if (filter === "resolved" && issue.status !== "resolved") {
+      return false;
+    }
+
     return true;
   });
 
   const filtered = statusFiltered.filter(({ host, path, issue, isRegression }) => {
-    if (severityFilter !== "all" && issue.severity !== severityFilter) return false;
+    if (severityFilter !== "all" && issue.severity !== severityFilter) {
+      return false;
+    }
 
-    const q = search.trim().toLowerCase();
-    if (!q) return true;
+    const normalizedSearch = search.trim().toLowerCase();
+
+    if (!normalizedSearch) {
+      return true;
+    }
 
     const project = pageLabel(host, path);
     const status = statusMeta(issue.status).label;
@@ -128,13 +139,14 @@ export const WorkspaceIssues = ({ workspace, refreshWorkspace }: WorkspaceIssues
       .join(" ")
       .toLowerCase();
 
-    return haystack.includes(q);
+    return haystack.includes(normalizedSearch);
   });
 
-  const detailLoc = detailKey && issues.find((l) => l.rowKey === detailKey.rowKey);
+  const detailLoc = detailKey && issues.find((located) => located.rowKey === detailKey.rowKey);
 
   const changeStatus = async (located: IssueRow, status: IssueStatus) => {
     const previous = statusOverrides[located.rowKey] ?? located.issue.status;
+
     setStatusError(null);
     setStatusOverrides((current) => ({
       ...current,
@@ -154,13 +166,17 @@ export const WorkspaceIssues = ({ workspace, refreshWorkspace }: WorkspaceIssues
         }),
       });
 
-      if (!response.ok) throw new Error("Status update failed.");
+      if (!response.ok) {
+        throw new Error("Status update failed.");
+      }
+
       await refreshWorkspace();
     } catch {
       setStatusOverrides((current) => ({
         ...current,
         [located.rowKey]: previous,
       }));
+
       setStatusError("Could not save status. Try again.");
     }
   };
@@ -175,27 +191,30 @@ export const WorkspaceIssues = ({ workspace, refreshWorkspace }: WorkspaceIssues
         </p>
       </header>
 
-      <div className={styles.issueToolbar} data-tour="issues-filters">
+      <div className={styles.issueToolbar}>
         <div className={styles.issueSearch}>
           <SearchIcon />
           <input
             type="text"
             placeholder="Search issues..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(event) => setSearch(event.target.value)}
             aria-label="Search issues"
           />
         </div>
 
         <div className={styles.issueFilterChips} role="group" aria-label="Filter issues">
-          {FILTERS.map((f) => (
+          {FILTERS.map((filterOption) => (
             <button
-              key={f.id}
+              key={filterOption.id}
               type="button"
-              className={cn(styles.issueFilterChip, filter === f.id && styles.issueFilterActive)}
-              onClick={() => setFilter(f.id)}
+              className={cn(
+                styles.issueFilterChip,
+                filter === filterOption.id && styles.issueFilterActive,
+              )}
+              onClick={() => setFilter(filterOption.id)}
             >
-              {f.label}
+              {filterOption.label}
             </button>
           ))}
         </div>
@@ -230,7 +249,7 @@ export const WorkspaceIssues = ({ workspace, refreshWorkspace }: WorkspaceIssues
               <span className={styles.issueSeverityFilterDot} aria-hidden="true" />
               <span className={styles.issueSeverityFilterText}>{SEVERITY_LABEL[severity]}</span>
               <span className={styles.issueSeverityFilterCount}>
-                {statusFiltered.filter((l) => l.issue.severity === severity).length}
+                {statusFiltered.filter((located) => located.issue.severity === severity).length}
               </span>
             </button>
           ))}
@@ -242,7 +261,7 @@ export const WorkspaceIssues = ({ workspace, refreshWorkspace }: WorkspaceIssues
         </p>
       )}
 
-      <div className={styles.issueTableCard} data-tour="issues-table">
+      <div className={styles.issueTableCard}>
         <div className={styles.issueTableHeader}>
           {["Issue", "Project", "Assignee", "Status", ""].map((heading) => (
             <div key={heading} className={styles.issueTableHeaderCell}>
@@ -263,6 +282,7 @@ export const WorkspaceIssues = ({ workspace, refreshWorkspace }: WorkspaceIssues
           <ul className={styles.issueList}>
             {filtered.map((located) => {
               const { rowKey, host, path, issue, isRegression, resolvedAt } = located;
+
               const project = pageLabel(host, path);
               const assignedToCurrentUser = issue.status === "in-progress";
               const createdLabel = issue.createdAt
@@ -334,7 +354,7 @@ export const WorkspaceIssues = ({ workspace, refreshWorkspace }: WorkspaceIssues
                       value={issue.status}
                       options={STATUS_OPTIONS}
                       ariaLabel={`Status for ${issue.title}`}
-                      onChange={(v) => void changeStatus(located, v as IssueStatus)}
+                      onChange={(value) => void changeStatus(located, value as IssueStatus)}
                     />
                   </div>
 

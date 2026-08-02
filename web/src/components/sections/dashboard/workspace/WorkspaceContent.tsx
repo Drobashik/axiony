@@ -37,6 +37,7 @@ const EMPTY_COPY: Partial<Record<DashboardTab, { title: string; text: string }>>
 
 const ScanEmpty = ({ tab, onScan }: { tab: DashboardTab; onScan: () => void }) => {
   const copy = EMPTY_COPY[tab] ?? EMPTY_COPY.overview;
+
   return (
     <div className={styles.activation}>
       <span className={styles.activationIcon} aria-hidden="true">
@@ -160,7 +161,7 @@ const GATED_TABS: Partial<Record<DashboardTab, GatedTabConfig>> = {
 };
 
 const FeaturePage = ({ kicker, title, text, cards }: GatedTabConfig["unlocked"]) => (
-  <div className={styles.featurePage} data-tour="feature-page">
+  <div className={styles.featurePage}>
     <header className={styles.featureHero}>
       <span className={styles.scanKicker}>{kicker}</span>
       <h2>{title}</h2>
@@ -190,7 +191,6 @@ interface WorkspaceContentProps {
   onSelectPage: (path: string | null) => void;
   billing: BillingState;
   onUpgrade: (plan?: Exclude<BillingPlan, "free">) => void;
-  onStartTutorial: () => void;
   setNavigationGuard: (guard: (() => boolean) | null) => void;
   refreshWorkspace: () => Promise<void>;
 }
@@ -205,7 +205,6 @@ export const WorkspaceContent = ({
   onSelectPage,
   billing,
   onUpgrade,
-  onStartTutorial,
   setNavigationGuard,
   refreshWorkspace,
 }: WorkspaceContentProps) => {
@@ -233,7 +232,7 @@ export const WorkspaceContent = ({
     // Overview + Issues respect the project/page switchers; Projects always lists all.
     const scopedProjects = selectedProjectId
       ? workspace.projects
-          .filter((p) => p.id === selectedProjectId)
+          .filter((project) => project.id === selectedProjectId)
           .map((project) =>
             selectedPagePath
               ? {
@@ -246,21 +245,24 @@ export const WorkspaceContent = ({
       : workspace.projects;
     const scoped = selectedProjectId ? { ...workspace, projects: scopedProjects } : workspace;
 
+    const isPortfolioOverview = tab === "overview" && !selectedProjectId;
+
+    if (isPortfolioOverview && workspace.projects.length > 1) {
+      return (
+        <PortfolioOverview
+          workspace={workspace}
+          onProjects={() => onTab("projects")}
+          onIssues={() => onTab("issues")}
+          onScan={() => onTab("scan")}
+          onOpenProject={(projectId) => {
+            onSelectProject(projectId);
+            onSelectPage(null);
+          }}
+        />
+      );
+    }
+
     if (tab === "overview") {
-      if (!selectedProjectId && workspace.projects.length > 1) {
-        return (
-          <PortfolioOverview
-            workspace={workspace}
-            onProjects={() => onTab("projects")}
-            onIssues={() => onTab("issues")}
-            onScan={() => onTab("scan")}
-            onOpenProject={(projectId) => {
-              onSelectProject(projectId);
-              onSelectPage(null);
-            }}
-          />
-        );
-      }
       return (
         <WorkspaceOverview
           workspace={scoped}
@@ -271,7 +273,7 @@ export const WorkspaceContent = ({
       );
     }
 
-    if (tab === "projects")
+    if (tab === "projects") {
       return (
         <WorkspaceProjects
           workspace={workspace}
@@ -283,31 +285,33 @@ export const WorkspaceContent = ({
           refreshWorkspace={refreshWorkspace}
         />
       );
-    if (tab === "issues")
+    }
+
+    if (tab === "issues") {
       return <WorkspaceIssues workspace={scoped} refreshWorkspace={refreshWorkspace} />;
+    }
 
     const gated = GATED_TABS[tab];
+
+    if (gated && !canAccessPlan(billing.plan, gated.requiredPlan)) {
+      return (
+        <div>
+          <BillingGate requiredPlan={gated.requiredPlan} {...gated.gate} onUpgrade={onUpgrade} />
+        </div>
+      );
+    }
+
     if (gated) {
-      if (!canAccessPlan(billing.plan, gated.requiredPlan)) {
-        return (
-          <div data-tour="feature-page">
-            <BillingGate requiredPlan={gated.requiredPlan} {...gated.gate} onUpgrade={onUpgrade} />
-          </div>
-        );
-      }
       return <FeaturePage {...gated.unlocked} />;
     }
 
-    if (tab === "settings")
-      return (
-        <BillingSettings
-          billing={billing}
-          workspace={workspace}
-          onUpgrade={onUpgrade}
-          onStartTutorial={onStartTutorial}
-        />
-      );
-    if (COMING_SOON.includes(tab)) return <ComingSoon title={tab} />;
+    if (tab === "settings") {
+      return <BillingSettings billing={billing} workspace={workspace} onUpgrade={onUpgrade} />;
+    }
+
+    if (COMING_SOON.includes(tab)) {
+      return <ComingSoon title={tab} />;
+    }
 
     return (
       <WorkspaceOverview

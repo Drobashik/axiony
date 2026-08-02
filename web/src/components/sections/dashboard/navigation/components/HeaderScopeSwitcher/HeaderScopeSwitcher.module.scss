@@ -1,0 +1,190 @@
+.context {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 215px;
+  max-width: 360px;
+  padding: 0 18px;
+}
+
+.contextIcon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 31px;
+  width: 31px;
+  height: 31px;
+}
+
+.portfolioIcon {
+  display: grid;
+  grid-template-columns: repeat(2, 6px);
+  place-content: center;
+  gap: 3px;
+  width: 31px;
+  height: 31px;
+  border: 1px solid var(--blue-border);
+  border-radius: var(--radius-md);
+  background: var(--blue-dim);
+
+  span {
+    width: 6px;
+    height: 6px;
+    border: 1px solid var(--blue);
+    border-radius: 1px;
+  }
+
+  &[data-compact="true"] {
+    grid-template-columns: repeat(2, 5px);
+    flex: 0 0 27px;
+    gap: 2px;
+    width: 27px;
+    height: 27px;
+
+    span {
+      width: 5px;
+      height: 5px;
+    }
+  }
+}
+
+.contextCopy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+
+  strong,
+  .staticMeta {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  strong {
+    color: var(--text-primary);
+    font-size: 0.82rem;
+    font-weight: 750;
+    letter-spacing: -0.014em;
+  }
+}
+
+.staticMeta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.61rem;
+}
+
+.switcherBody {
+  display: flex;
+  min-width: 0;
+  width: 100%;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+}
+
+.projectSelect {
+  min-width: 0;
+  width: 100%;
+
+  :global(button) {
+    gap: 9px;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font-size: 0.82rem;
+    font-weight: 750;
+    letter-spacing: -0.014em;
+    box-shadow: none;
+  }
+
+  :global(button:hover),
+  :global(button[aria-expanded="true"]) {
+    background: transparent;
+    color: var(--blue);
+  }
+
+  :global(button:focus-visible) {
+    border-radius: var(--radius-sm);
+  }
+}
+
+.scopeMeta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  padding-left: 36px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.61rem;
+  white-space: nowrap;
+
+  > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.pageSelect {
+  min-width: 0;
+  max-width: 132px;
+
+  :global(button) {
+    gap: 3px;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.61rem;
+    box-shadow: none;
+  }
+
+  :global(button:hover),
+  :global(button[aria-expanded="true"]) {
+    background: transparent;
+    color: var(--blue);
+  }
+
+  :global(button:focus-visible) {
+    border-radius: var(--radius-sm);
+  }
+}
+
+@include breakpoint-down(lg) {
+  .context {
+    padding-left: 10px;
+    border-left: 1px solid var(--border-subtle);
+  }
+}
+
+@include breakpoint-down(md) {
+  .context {
+    min-width: 0;
+    max-width: none;
+    flex: 1;
+  }
+}
+
+@include breakpoint-down(sm) {
+  .context {
+    padding-right: 8px;
+  }
+
+  .staticMeta,
+  .scopeMeta {
+    display: none;
+  }
+
+  .contextCopy strong,
+  .projectSelect :global(button) {
+    font-size: 0.76rem;
+  }
+}
