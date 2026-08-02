@@ -23,7 +23,6 @@ export function DashboardTabView({ tab }: { tab: DashboardTab }) {
     billing,
     openUpgrade,
     navigateTab,
-    startDashboardTutorial,
     setNavigationGuard,
     refreshWorkspace,
   } = useDashboardWorkspace();
@@ -40,7 +39,6 @@ export function DashboardTabView({ tab }: { tab: DashboardTab }) {
         onSelectPage={setSelectedPagePath}
         billing={billing}
         onUpgrade={openUpgrade}
-        onStartTutorial={startDashboardTutorial}
         setNavigationGuard={setNavigationGuard}
         refreshWorkspace={refreshWorkspace}
       />
@@ -48,8 +46,17 @@ export function DashboardTabView({ tab }: { tab: DashboardTab }) {
   }
 
   // Public preview (sample data).
-  if (tab === "overview") return <OverviewTab />;
-  if (tab === "projects") return <ProjectsTab />;
-  if (tab === "issues") return <IssuesTab />;
+  if (tab === "overview") {
+    return <OverviewTab />;
+  }
+
+  if (tab === "projects") {
+    return <ProjectsTab />;
+  }
+
+  if (tab === "issues") {
+    return <IssuesTab />;
+  }
+
   return <ComingSoon title={tab} />;
 }

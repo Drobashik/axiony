@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { planDefinition, useBilling } from "@/lib/billing";
@@ -8,7 +8,6 @@ import type { BillingPlan } from "@/lib/billing";
 import { startRouteLoading } from "@/lib/navigation/route-loading";
 import {
   importPendingScanToServer,
-  projectModel,
   readPendingScan,
   restoreWorkspaceFromServer,
   signOut,
@@ -20,7 +19,6 @@ import { UpgradeDialog } from "../billing";
 import { Sidebar } from "../navigation/Sidebar";
 import { Topbar } from "../navigation/Topbar";
 import { PreviewBanner } from "../preview/PreviewBanner";
-import { DashboardTutorial } from "../workspace/components";
 import { DashboardWorkspaceContext } from "./dashboard-workspace-context";
 import type { NavigationGuard } from "./dashboard-workspace-context";
 import { SignOutDialog } from "./SignOutDialog";
@@ -36,7 +34,6 @@ const VALID_TABS: DashboardTab[] = [
   "team",
   "settings",
 ];
-const TUTORIAL_STORAGE_PREFIX = "axiony.dashboard_tutorial";
 const OPEN_ISSUE_STATUSES = new Set(["open", "in-progress"]);
 
 /** Derive the active tab from /dashboard/<tab> (root = overview). */
@@ -53,8 +50,8 @@ const tabFromPath = (pathname: string): DashboardTab => {
 export function DashboardShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+
   const [state, setState] = useState<WorkspaceState>({ ready: false, workspace: null });
-  const billingState = useBilling();
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedPagePath, setSelectedPagePath] = useState<string | null>(null);
   const [upgradePlan, setUpgradePlan] = useState<Exclude<BillingPlan, "free"> | null>(null);
@@ -63,25 +60,25 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const [signingOut, setSigningOut] = useState(false);
   const [navigationGuard, setNavigationGuardValue] = useState<NavigationGuard | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [tutorialOpen, setTutorialOpen] = useState(false);
-  const [tutorialDismissed, setTutorialDismissed] = useState(true);
+
+  const billingState = useBilling();
   const { ready, workspace } = state;
   const { ready: billingReady, billing } = billingState;
   const tab = tabFromPath(pathname);
-  const tutorialStorageKey = useMemo(() => {
-    if (!workspace) return null;
-    const owner = workspace.account.email || workspace.account.name || "workspace";
-    return `${TUTORIAL_STORAGE_PREFIX}.${owner}.${billing.plan}`;
-  }, [billing.plan, workspace]);
 
   const closeSidebar = useCallback(() => setSidebarOpen(false), []);
 
   useEffect(() => {
-    if (!sidebarOpen) return;
+    if (!sidebarOpen) {
+      return;
+    }
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setSidebarOpen(false);
+      if (event.key === "Escape") {
+        setSidebarOpen(false);
+      }
     };
+
     window.addEventListener("keydown", onKeyDown);
 
     return () => window.removeEventListener("keydown", onKeyDown);
@@ -93,19 +90,24 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const sessionUser = session?.user;
   const sessionEmail = sessionUser?.email;
   const sessionName = sessionUser?.name;
+
   const refreshWorkspace = useCallback(async () => {
     if (!sessionEmail) {
       setState({ ready: true, workspace: null });
+
       return;
     }
 
     const identity = { name: sessionName ?? sessionEmail, email: sessionEmail };
     const workspace = await restoreWorkspaceFromServer(identity);
+
     setState({ ready: true, workspace });
   }, [sessionEmail, sessionName]);
 
   useEffect(() => {
-    if (sessionPending || signingOut) return;
+    if (sessionPending || signingOut) {
+      return;
+    }
 
     void (async () => {
       const pendingScan = readPendingScan();
@@ -121,111 +123,96 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const setNavigationGuard = useCallback((guard: NavigationGuard | null) => {
     setNavigationGuardValue(() => guard);
   }, []);
-  const rememberTutorial = useCallback(
-    (status: "completed" | "skipped") => {
-      try {
-        if (tutorialStorageKey) window.localStorage.setItem(tutorialStorageKey, status);
-      } catch {
-        // Losing this preference is harmless; the dashboard itself still works.
-      }
-      setTutorialDismissed(true);
-      setTutorialOpen(false);
-    },
-    [tutorialStorageKey],
-  );
-  const startDashboardTutorial = useCallback(() => {
-    setSidebarOpen(false);
-    setTutorialOpen(true);
-  }, []);
-  const skipDashboardTutorial = useCallback(() => rememberTutorial("skipped"), [rememberTutorial]);
+
   const go = useCallback(
     (next: DashboardTab) => {
       setSidebarOpen(false);
-      if (next === tab) return;
-      if (!canNavigate()) return;
+
+      if (next === tab) {
+        return;
+      }
+
+      if (!canNavigate()) {
+        return;
+      }
+
       startRouteLoading();
+
       router.push(`/dashboard/${next}`);
     },
     [canNavigate, router, tab],
   );
+
   const goHome = useCallback(() => {
-    if (!canNavigate()) return;
+    if (!canNavigate()) {
+      return;
+    }
+
     startRouteLoading();
+
     router.push("/");
   }, [canNavigate, router]);
+
   const handleSelectProject = useCallback((id: string | null) => {
     setSelectedProjectId(id);
     setSelectedPagePath(null);
   }, []);
+
   const openUpgrade = useCallback(
     (plan: Exclude<BillingPlan, "free"> = "pro") => setUpgradePlan(plan),
     [],
   );
+
   const requestSignOut = useCallback(() => {
-    if (!canNavigate()) return;
-    if (!workspace) return;
+    if (!canNavigate()) {
+      return;
+    }
+
+    if (!workspace) {
+      return;
+    }
+
     setSidebarOpen(false);
     setSignOutUserName(workspace.account.name || workspace.account.email);
     setSignOutOpen(true);
   }, [canNavigate, workspace]);
+
   const closeSignOut = useCallback(() => {
     setSignOutOpen(false);
     setSignOutUserName(null);
   }, []);
+
   const handleSignOut = useCallback(async () => {
     setSigningOut(true);
+
     try {
       await authSignOut(); // clear the BetterAuth server session (cookie)
       signOut(); // clear pending scan + legacy client workspace key
       startRouteLoading();
+
       router.replace("/");
     } catch (error) {
       console.error("Unable to sign out", error);
+
       setSigningOut(false);
       closeSignOut();
     }
   }, [closeSignOut, router]);
 
-  useEffect(() => {
-    const frame = window.requestAnimationFrame(() => {
-      if (!tutorialStorageKey) {
-        setTutorialDismissed(true);
-        setTutorialOpen(false);
-        return;
-      }
-
-      let dismissed = true;
-      try {
-        dismissed = Boolean(window.localStorage.getItem(tutorialStorageKey));
-      } catch {
-        dismissed = true;
-      }
-
-      setTutorialDismissed(dismissed);
-      setTutorialOpen(false);
-    });
-
-    return () => window.cancelAnimationFrame(frame);
-  }, [tutorialStorageKey]);
-
-  useEffect(() => {
-    if (tutorialDismissed || !workspace || workspace.projects.length === 0) return;
-
-    const frame = window.requestAnimationFrame(() => setTutorialOpen(true));
-    return () => window.cancelAnimationFrame(frame);
-  }, [tutorialDismissed, workspace]);
-
   // First client tick before auth/billing/report state is ready — keep it
   // neutral so preview/workspace modes don't flash.
-  if (!ready || !billingReady) return <div className={styles.page} aria-busy="true" />;
+  if (!ready || !billingReady) {
+    return <div className={styles.page} aria-busy="true" />;
+  }
 
   // Ignore a stale selection; a single-project workspace is always scoped to that project.
-  const effectiveProjectId = workspace?.projects.some((p) => p.id === selectedProjectId)
-    ? selectedProjectId
-    : workspace?.projects.length === 1
-      ? workspace.projects[0].id
-      : null;
-  const selectedProject = workspace?.projects.find((p) => p.id === effectiveProjectId);
+  const selectedProjectExists = workspace?.projects.some(
+    (project) => project.id === selectedProjectId,
+  );
+  const singleProjectId = workspace?.projects.length === 1 ? workspace.projects[0].id : null;
+  const effectiveProjectId = selectedProjectExists ? selectedProjectId : singleProjectId;
+
+  const selectedProject = workspace?.projects.find((project) => project.id === effectiveProjectId);
   const effectivePagePath =
     selectedProject && selectedProject.pages.some((page) => page.path === selectedPagePath)
       ? selectedPagePath
@@ -234,11 +221,13 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   // Open-issue count for the sidebar badge, scoped to the selected project/page.
   const scopedProjects =
     workspace && effectiveProjectId
-      ? workspace.projects.filter((p) => p.id === effectiveProjectId)
+      ? workspace.projects.filter((project) => project.id === effectiveProjectId)
       : (workspace?.projects ?? []);
+
   const scopedPages = scopedProjects
-    .flatMap((p) => p.pages)
+    .flatMap((project) => project.pages)
     .filter((page) => !effectivePagePath || page.path === effectivePagePath);
+
   const openIssueCount = scopedPages.reduce(
     (sum, page) => sum + page.open.filter((issue) => OPEN_ISSUE_STATUSES.has(issue.status)).length,
     0,
@@ -255,13 +244,28 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         billing,
         openUpgrade,
         navigateTab: go,
-        startDashboardTutorial,
         setNavigationGuard,
         refreshWorkspace,
       }}
     >
       <div className={styles.page}>
         {!workspace && <PreviewBanner />}
+
+        <Topbar
+          activeTab={tab}
+          workspace={workspace}
+          selectedProjectId={effectiveProjectId}
+          selectedPagePath={effectivePagePath}
+          onHome={goHome}
+          onNavigate={go}
+          onSelectProject={handleSelectProject}
+          onSelectPage={setSelectedPagePath}
+          onNewScan={workspace ? () => go("scan") : undefined}
+          billingPlan={workspace ? billing.plan : undefined}
+          onUpgrade={workspace ? openUpgrade : undefined}
+          menuOpen={sidebarOpen}
+          onMenuToggle={() => setSidebarOpen((open) => !open)}
+        />
 
         <div className={styles.shell}>
           {sidebarOpen && (
@@ -286,38 +290,9 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             onSignOut={workspace ? requestSignOut : undefined}
             billingPlan={workspace ? billing.plan : undefined}
             onUpgrade={workspace ? openUpgrade : undefined}
-            projects={workspace?.projects.map((project) => {
-              const model = projectModel(project);
-              return {
-                id: project.id,
-                host: project.host,
-                url: project.pages[0]?.url,
-                iconUrl: project.iconUrl,
-                pageCount: model.pageCount,
-                avgScore: model.avgScore,
-                openIssues: model.openIssues,
-              };
-            })}
-            pages={selectedProject?.pages.map((page) => ({
-              path: page.path,
-              openIssues: page.open.filter((issue) => OPEN_ISSUE_STATUSES.has(issue.status)).length,
-            }))}
-            selectedProjectId={effectiveProjectId}
-            selectedPagePath={effectivePagePath}
-            onSelectProject={handleSelectProject}
-            onSelectPage={setSelectedPagePath}
           />
 
           <div className={styles.main}>
-            <Topbar
-              activeTab={tab}
-              onHome={goHome}
-              onNewScan={workspace ? () => go("scan") : undefined}
-              billingPlan={workspace ? billing.plan : undefined}
-              onUpgrade={workspace ? openUpgrade : undefined}
-              menuOpen={sidebarOpen}
-              onMenuToggle={() => setSidebarOpen((open) => !open)}
-            />
             <div className={styles.content}>{children}</div>
           </div>
         </div>
@@ -334,16 +309,6 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             userName={signOutUserName}
             onClose={closeSignOut}
             onConfirm={handleSignOut}
-          />
-        )}
-        {workspace && (
-          <DashboardTutorial
-            open={tutorialOpen}
-            plan={billing.plan}
-            activeTab={tab}
-            onNavigate={go}
-            onSkip={skipDashboardTutorial}
-            onComplete={() => rememberTutorial("completed")}
           />
         )}
       </div>

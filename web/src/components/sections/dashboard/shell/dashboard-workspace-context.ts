@@ -17,7 +17,6 @@ export interface DashboardContextValue extends WorkspaceState {
   billing: BillingState;
   openUpgrade: (plan?: Exclude<BillingPlan, "free">) => void;
   navigateTab: (tab: DashboardTab) => void;
-  startDashboardTutorial: () => void;
   setNavigationGuard: (guard: NavigationGuard | null) => void;
   refreshWorkspace: () => Promise<void>;
 }
@@ -51,7 +50,6 @@ export const DashboardWorkspaceContext = createContext<DashboardContextValue>({
   billing: DEFAULT_BILLING,
   openUpgrade: () => {},
   navigateTab: () => {},
-  startDashboardTutorial: () => {},
   setNavigationGuard: () => {},
   refreshWorkspace: async () => {},
 });
