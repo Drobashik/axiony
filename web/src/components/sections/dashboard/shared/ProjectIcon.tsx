@@ -39,9 +39,9 @@ const highResolutionFavicon = (origin: string): Promise<string | null> => {
   if (cached) return cached;
 
   const candidates = [
-    `${origin}/favicon.svg`,
     `${origin}/apple-touch-icon.png`,
     `${origin}/favicon-96x96.png`,
+    `${origin}/favicon.svg`,
   ];
 
   const request = new Promise<string | null>((resolve) => {
@@ -65,8 +65,13 @@ const highResolutionFavicon = (origin: string): Promise<string | null> => {
       probe.referrerPolicy = "no-referrer";
 
       probe.onload = () => {
-        if (candidate.endsWith(".svg") || probe.naturalWidth >= 64) resolve(candidate);
-        else tryNextCandidate();
+        if (candidate.endsWith(".svg") || probe.naturalWidth >= 64) {
+          resolve(candidate);
+
+          return;
+        }
+
+        tryNextCandidate();
       };
 
       probe.onerror = tryNextCandidate;
