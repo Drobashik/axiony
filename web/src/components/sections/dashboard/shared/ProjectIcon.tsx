@@ -2,14 +2,11 @@
 
 import { useCallback, useEffect, useState } from "react";
 import cn from "classnames";
-import type { SiteIconAppearance } from "@/types";
 import styles from "./ProjectIcon.module.scss";
 
 interface ProjectIconProps {
   host: string;
   url?: string;
-  iconUrl?: string;
-  iconAppearance?: SiteIconAppearance;
   size?: number;
   className?: string;
 }
@@ -31,86 +28,53 @@ const projectOrigin = (host: string, url?: string): string => {
   }
 };
 
-const highResolutionCache = new Map<string, Promise<string | null>>();
+const projectIconCache = new Map<string, Promise<string | null>>();
 
-const highResolutionFavicon = (origin: string): Promise<string | null> => {
-  const cached = highResolutionCache.get(origin);
+const resolveProjectIcon = (origin: string): Promise<string | null> => {
+  const cached = projectIconCache.get(origin);
 
   if (cached) return cached;
 
-  const candidates = [
-    `${origin}/apple-touch-icon.png`,
-    `${origin}/favicon-96x96.png`,
-    `${origin}/favicon.svg`,
-  ];
+  const request = fetch(`/api/projects/icon?url=${encodeURIComponent(origin)}`, {
+    cache: "no-cache",
+  })
+    .then(async (response) => {
+      if (!response.ok) return null;
 
-  const request = new Promise<string | null>((resolve) => {
-    let candidateIndex = 0;
+      const body = (await response.json()) as { iconUrl?: unknown };
 
-    const tryNextCandidate = () => {
-      if (candidateIndex >= candidates.length) {
-        resolve(null);
+      return typeof body.iconUrl === "string" ? body.iconUrl : null;
+    })
+    .catch(() => null);
 
-        return;
-      }
+  projectIconCache.set(origin, request);
 
-      const candidate = candidates[candidateIndex];
-
-      candidateIndex += 1;
-
-      const probe = new window.Image();
-
-      probe.decoding = "async";
-
-      probe.referrerPolicy = "no-referrer";
-
-      probe.onload = () => {
-        if (candidate.endsWith(".svg") || probe.naturalWidth >= 64) {
-          resolve(candidate);
-
-          return;
-        }
-
-        tryNextCandidate();
-      };
-
-      probe.onerror = tryNextCandidate;
-
-      probe.src = candidate;
-    };
-
-    tryNextCandidate();
+  void request.then((src) => {
+    if (!src && projectIconCache.get(origin) === request) {
+      projectIconCache.delete(origin);
+    }
   });
-
-  highResolutionCache.set(origin, request);
 
   return request;
 };
 
-export const ProjectIcon = ({
-  host,
-  url,
-  iconUrl,
-  iconAppearance,
-  size = 32,
-  className,
-}: ProjectIconProps) => {
+export const ProjectIcon = ({ host, url, size = 32, className }: ProjectIconProps) => {
   const origin = projectOrigin(host, url);
   const accessibleLabel = `${host.replace(/^www\./, "")} project icon`;
-
   const baseFavicon = `${origin}/favicon.ico`;
 
-  const [upgradedFavicon, setUpgradedFavicon] = useState<{ origin: string; src: string } | null>(
-    null,
-  );
+  const [resolvedProjectIcon, setResolvedProjectIcon] = useState<{
+    origin: string;
+    src: string;
+  } | null>(null);
   const [failedFavicons, setFailedFavicons] = useState<string[]>([]);
   const [wideFavicons, setWideFavicons] = useState<string[]>([]);
 
-  const resolvedFavicon = upgradedFavicon?.origin === origin ? upgradedFavicon.src : baseFavicon;
-  const favicon = iconUrl && !failedFavicons.includes(iconUrl) ? iconUrl : resolvedFavicon;
+  const resolvedFavicon = resolvedProjectIcon?.origin === origin ? resolvedProjectIcon.src : null;
+  const favicon =
+    resolvedFavicon && !failedFavicons.includes(resolvedFavicon) ? resolvedFavicon : baseFavicon;
   const failed = failedFavicons.includes(favicon);
   const wide = wideFavicons.includes(favicon);
-  const resolvedAppearance = favicon === iconUrl ? iconAppearance : undefined;
 
   const markFaviconShape = useCallback(
     (image: HTMLImageElement | null) => {
@@ -129,8 +93,8 @@ export const ProjectIcon = ({
   useEffect(() => {
     let cancelled = false;
 
-    highResolutionFavicon(origin).then((src) => {
-      if (!cancelled && src) setUpgradedFavicon({ origin, src });
+    resolveProjectIcon(origin).then((src) => {
+      if (!cancelled && src) setResolvedProjectIcon({ origin, src });
     });
 
     return () => {
@@ -140,13 +104,7 @@ export const ProjectIcon = ({
 
   return (
     <span
-      className={cn(
-        styles.icon,
-        resolvedAppearance === "dark" && styles.darkArtwork,
-        resolvedAppearance === "light" && styles.lightArtwork,
-        failed && styles.fallbackOnly,
-        className,
-      )}
+      className={cn(styles.icon, failed && styles.fallbackOnly, className)}
       style={{ width: size, height: size }}
       role={failed ? "img" : undefined}
       aria-label={failed ? accessibleLabel : undefined}

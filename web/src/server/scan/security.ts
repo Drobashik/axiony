@@ -94,30 +94,15 @@ const ensurePublicHost = async (hostname: string) => {
   }
 };
 
-export const validateScanRequest = async (
-  body: unknown,
-): Promise<{ url: string; level: WcagLevel }> => {
-  if (!body || typeof body !== "object") {
-    throw new ScanRequestError("Request body must be a JSON object.");
-  }
-
-  const { url, level } = body as { url?: unknown; level?: unknown };
-
-  if (typeof url !== "string" || url.trim().length === 0) {
-    throw new ScanRequestError("Enter a website URL to scan.");
-  }
-
-  if (url.length > MAX_URL_LENGTH) {
+export const validatePublicUrl = async (value: string): Promise<string> => {
+  if (value.length > MAX_URL_LENGTH) {
     throw new ScanRequestError("URL is too long.");
   }
 
-  if (!isWcagLevel(level)) {
-    throw new ScanRequestError("Choose a valid WCAG level.");
-  }
-
   let parsed: URL;
+
   try {
-    parsed = new URL(url);
+    parsed = new URL(value);
   } catch {
     throw new ScanRequestError("That does not look like a valid URL.");
   }
@@ -134,8 +119,28 @@ export const validateScanRequest = async (
 
   parsed.hash = "";
 
+  return parsed.toString();
+};
+
+export const validateScanRequest = async (
+  body: unknown,
+): Promise<{ url: string; level: WcagLevel }> => {
+  if (!body || typeof body !== "object") {
+    throw new ScanRequestError("Request body must be a JSON object.");
+  }
+
+  const { url, level } = body as { url?: unknown; level?: unknown };
+
+  if (typeof url !== "string" || url.trim().length === 0) {
+    throw new ScanRequestError("Enter a website URL to scan.");
+  }
+
+  if (!isWcagLevel(level)) {
+    throw new ScanRequestError("Choose a valid WCAG level.");
+  }
+
   return {
-    url: parsed.toString(),
+    url: await validatePublicUrl(url),
     level,
   };
 };

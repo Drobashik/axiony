@@ -330,13 +330,7 @@ export const WorkspaceIssues = ({ workspace, refreshWorkspace }: WorkspaceIssues
                   </button>
 
                   <div className={styles.issueTableProject}>
-                    <ProjectIcon
-                      host={host}
-                      url={located.url}
-                      iconUrl={located.iconUrl}
-                      iconAppearance={located.iconAppearance}
-                      size={22}
-                    />
+                    <ProjectIcon host={host} url={located.url} size={22} />
                     <span>{project}</span>
                   </div>
 

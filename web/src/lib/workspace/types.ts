@@ -1,4 +1,4 @@
-import type { Severity, SiteIconAppearance } from "@/types";
+import type { Severity } from "@/types";
 import type { SeverityCounts } from "@/lib/scan/issues";
 
 // =====================================================================
@@ -49,8 +49,6 @@ export interface TrackedIssue {
 /** A scan result captured at the point the user chose to save it. */
 export interface PendingScan {
   url: string;
-  siteIcon?: string;
-  siteIconAppearance?: SiteIconAppearance;
   host: string;
   path: string;
   level: WcagLevel;
@@ -109,8 +107,6 @@ export interface ProjectPage {
 export interface Project {
   id: string;
   host: string; // "acme.com"
-  iconUrl?: string;
-  iconAppearance?: SiteIconAppearance;
   createdAt: string; // ISO
   pages: ProjectPage[];
 }
@@ -121,8 +117,6 @@ export type OnboardingStepId = "baseline" | "connect" | "ci" | "invite";
 export interface JustCreated {
   kind: "project" | "page";
   host: string;
-  iconUrl?: string;
-  iconAppearance?: SiteIconAppearance;
   path: string;
 }
 

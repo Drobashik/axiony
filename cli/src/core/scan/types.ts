@@ -16,15 +16,11 @@ export type ScanResult = {
     disabledRules?: string[];
     profile?: string;
     selector?: string;
-    siteIcon?: string;
-    siteIconAppearance?: SiteIconAppearance;
     warnings?: string[];
   };
   issues: ScanIssue[];
   manualChecks: ScanIssue[];
 };
-
-export type SiteIconAppearance = 'dark' | 'light' | 'balanced';
 
 export interface ScanDiagnostic {
   capturedAt: string;

@@ -89,13 +89,7 @@ export const PortfolioHealthCards = ({
                 className={styles.attentionRow}
                 onClick={() => onOpenProject(row.project.id)}
               >
-                <ProjectIcon
-                  host={row.project.host}
-                  url={row.project.pages[0]?.url}
-                  iconUrl={row.project.iconUrl}
-                  iconAppearance={row.project.iconAppearance}
-                  size={32}
-                />
+                <ProjectIcon host={row.project.host} url={row.project.pages[0]?.url} size={32} />
                 <span className={styles.attentionMain}>
                   <span className={styles.attentionHost}>{row.project.host}</span>
                   <span className={styles.attentionReason}>{row.attentionReason}</span>

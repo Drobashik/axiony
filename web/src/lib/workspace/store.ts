@@ -45,8 +45,6 @@ interface PersistedScanReportRow {
   scannedAt?: string;
   report?: {
     url?: string;
-    siteIcon?: string;
-    siteIconAppearance?: PendingScan["siteIconAppearance"];
     level?: unknown;
     scannedAt?: string;
     score?: number;
@@ -269,8 +267,6 @@ function projectFromPending(pending: PendingScan): Project {
   return {
     id: randomId(),
     host: pending.host,
-    iconUrl: pending.siteIcon,
-    iconAppearance: pending.siteIconAppearance,
     createdAt: pending.scannedAt,
     pages: [pageFromPending(pending)],
   };
@@ -308,17 +304,10 @@ function applyScan(ws: Workspace, pending: PendingScan): void {
     ws.onboarding.justCreated = {
       kind: "project",
       host: pending.host,
-      iconUrl: pending.siteIcon,
-      iconAppearance: pending.siteIconAppearance,
       path: pending.path,
     };
     ws.onboarding.steps.baseline = true;
     return;
-  }
-
-  if (pending.siteIcon) {
-    project.iconUrl = pending.siteIcon;
-    project.iconAppearance = pending.siteIconAppearance;
   }
 
   const page = project.pages.find((pg) => pg.path === pending.path);
@@ -327,8 +316,6 @@ function applyScan(ws: Workspace, pending: PendingScan): void {
     ws.onboarding.justCreated = {
       kind: "page",
       host: pending.host,
-      iconUrl: pending.siteIcon ?? project.iconUrl,
-      iconAppearance: pending.siteIconAppearance ?? project.iconAppearance,
       path: pending.path,
     };
     return;
@@ -351,8 +338,6 @@ function createWorkspace(account: WorkspaceAccount, pending: PendingScan | null)
         justCreated: {
           kind: "project",
           host: pending.host,
-          iconUrl: pending.siteIcon,
-          iconAppearance: pending.siteIconAppearance,
           path: pending.path,
         },
         steps: { ...emptySteps(), baseline: true },
@@ -450,8 +435,6 @@ const pendingFromPersistedReport = (row: PersistedScanReportRow): PendingScan | 
 
   return {
     url,
-    siteIcon: report?.siteIcon,
-    siteIconAppearance: report?.siteIconAppearance,
     host: row.host || hostFromUrl(url),
     path: row.path || pathFromUrl(url),
     level,

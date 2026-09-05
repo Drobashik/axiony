@@ -208,8 +208,6 @@ export const WorkspaceScan = ({
     .flatMap((project) =>
       project.pages.map((page) => ({
         host: project.host,
-        iconUrl: project.iconUrl,
-        iconAppearance: project.iconAppearance,
         page,
       })),
     )
@@ -402,7 +400,7 @@ export const WorkspaceScan = ({
           {recentPages.length > 0 && (
             <div className={styles.recentRow}>
               <span className={styles.recentLabel}>Re-scan</span>
-              {recentPages.map(({ host, iconUrl, iconAppearance, page }) => (
+              {recentPages.map(({ host, page }) => (
                 <button
                   key={page.id}
                   type="button"
@@ -410,13 +408,7 @@ export const WorkspaceScan = ({
                   onClick={() => scanTarget(page.url)}
                   disabled={busy}
                 >
-                  <ProjectIcon
-                    host={host}
-                    url={page.url}
-                    iconUrl={iconUrl}
-                    iconAppearance={iconAppearance}
-                    size={18}
-                  />
+                  <ProjectIcon host={host} url={page.url} size={18} />
                   {pageLabel(host, page.path)}
                 </button>
               ))}
@@ -511,8 +503,6 @@ export const WorkspaceScan = ({
                 key={resultKey}
                 incomingHost={resultHost}
                 incomingUrl={report.url}
-                incomingIconUrl={report.siteIcon}
-                incomingIconAppearance={report.siteIconAppearance}
                 projects={workspace.projects}
                 onReplace={replaceDomain}
               />
