@@ -76,13 +76,7 @@ export const PortfolioInsights = ({
             {model.issues.slice(0, 5).map((located, index) => (
               <li key={locatedIssueKey(located, index)}>
                 <Badge severity={located.issue.severity} />
-                <ProjectIcon
-                  host={located.host}
-                  url={located.url}
-                  iconUrl={located.iconUrl}
-                  iconAppearance={located.iconAppearance}
-                  size={24}
-                />
+                <ProjectIcon host={located.host} url={located.url} size={24} />
                 <span className={styles.issueMain}>
                   <strong>{located.issue.title}</strong>
                   <span>

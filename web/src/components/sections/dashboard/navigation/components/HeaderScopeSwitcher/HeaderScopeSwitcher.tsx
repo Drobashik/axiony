@@ -99,15 +99,7 @@ export const HeaderScopeSwitcher = ({
         value: project.id,
         label: project.host,
         hint: `${model.avgScore} score · ${model.openIssues} open`,
-        icon: (
-          <ProjectIcon
-            host={project.host}
-            url={project.pages[0]?.url}
-            iconUrl={project.iconUrl}
-            iconAppearance={project.iconAppearance}
-            size={27}
-          />
-        ),
+        icon: <ProjectIcon host={project.host} url={project.pages[0]?.url} size={27} />,
       };
     }),
   ];
@@ -144,8 +136,6 @@ export const HeaderScopeSwitcher = ({
           <ProjectIcon
             host={selectedProject.host}
             url={selectedPage?.url ?? selectedProject.pages[0]?.url}
-            iconUrl={selectedProject.iconUrl}
-            iconAppearance={selectedProject.iconAppearance}
             size={29}
           />
         ) : (

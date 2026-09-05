@@ -87,8 +87,6 @@ export const toScanReportPayload = (result: CliScanResult, level: WcagLevel): Sc
 
   return {
     url: result.url,
-    siteIcon: result.metadata?.siteIcon,
-    siteIconAppearance: result.metadata?.siteIconAppearance,
     level,
     scannedAt: result.timestamp || new Date().toISOString(),
     issues,

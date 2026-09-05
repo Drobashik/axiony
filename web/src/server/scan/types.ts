@@ -1,5 +1,4 @@
 import type { Issue, SeverityCounts } from "@/lib/scan/issues";
-import type { SiteIconAppearance } from "@/types";
 
 export type WcagLevel = "A" | "AA" | "AAA";
 
@@ -7,8 +6,6 @@ export type ScanJobStatus = "queued" | "scanning" | "complete" | "failed";
 
 export interface ScanReportPayload {
   url: string;
-  siteIcon?: string;
-  siteIconAppearance?: SiteIconAppearance;
   level: WcagLevel;
   scannedAt: string;
   issues: Issue[];
@@ -59,8 +56,6 @@ export interface CliScanResult {
   timestamp: string;
   metadata?: {
     selector?: string;
-    siteIcon?: string;
-    siteIconAppearance?: SiteIconAppearance;
     warnings?: string[];
   };
   issues: CliScanIssue[];

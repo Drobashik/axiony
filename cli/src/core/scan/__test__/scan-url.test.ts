@@ -115,10 +115,8 @@ test('fails clearly when URL scan remains on a meta-refresh page', async () => {
 
 test('allows a URL scan with refresh warnings when the page has meaningful findings', async () => {
   let requestCount = 0;
-  const { server, url } = await listenWithHandler((request) => {
-    if (request.url === '/') {
-      requestCount += 1;
-    }
+  const { server, url } = await listenWithHandler(() => {
+    requestCount += 1;
 
     return `
       <!doctype html>
@@ -146,110 +144,6 @@ test('allows a URL scan with refresh warnings when the page has meaningful findi
       result.issues.some((issue) => issue.id === 'label'),
       true,
     );
-  } finally {
-    await closeServer(server);
-  }
-});
-
-test('classifies a dark transparent favicon for contrast-aware rendering', async () => {
-  const { server, url } = await listenWithResponseHandler((request, response) => {
-    if (request.url === '/favicon.svg') {
-      response.writeHead(200, { 'content-type': 'image/svg+xml' });
-      response.end(`
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-          <circle cx="32" cy="32" r="24" fill="#171a1f" />
-        </svg>
-      `);
-
-      return;
-    }
-
-    response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
-    response.end(`
-      <!doctype html>
-      <html lang="en">
-        <head>
-          <title>Dark icon project</title>
-          <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-        </head>
-        <body>
-          <main>
-            <h1>Dark icon project</h1>
-            <input type="text">
-          </main>
-        </body>
-      </html>
-    `);
-  });
-
-  try {
-    const result = await scanUrl(url);
-
-    assert.equal(result.metadata?.siteIcon, `${url}/favicon.svg`);
-    assert.equal(result.metadata?.siteIconAppearance, 'dark');
-  } finally {
-    await closeServer(server);
-  }
-});
-
-test('prefers a favicon with its own background over larger transparent artwork', async () => {
-  const { server, url } = await listenWithResponseHandler((request, response) => {
-    if (request.url === '/favicon-with-background.svg') {
-      response.writeHead(200, { 'content-type': 'image/svg+xml' });
-      response.end(`
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-          <rect width="64" height="64" rx="12" fill="#59636f" />
-          <circle cx="32" cy="32" r="14" fill="#ffffff" />
-        </svg>
-      `);
-
-      return;
-    }
-
-    if (request.url === '/transparent-artwork.svg') {
-      response.writeHead(200, { 'content-type': 'image/svg+xml' });
-      response.end(`
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-          <circle cx="32" cy="32" r="14" fill="#ffffff" />
-        </svg>
-      `);
-
-      return;
-    }
-
-    response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
-    response.end(`
-      <!doctype html>
-      <html lang="en">
-        <head>
-          <title>Icon candidate project</title>
-          <link
-            rel="fluid-icon"
-            type="image/svg+xml"
-            sizes="32x32"
-            href="/favicon-with-background.svg"
-          >
-          <link
-            rel="icon"
-            type="image/svg+xml"
-            sizes="512x512"
-            href="/transparent-artwork.svg"
-          >
-        </head>
-        <body>
-          <main>
-            <h1>Icon candidate project</h1>
-            <input type="text">
-          </main>
-        </body>
-      </html>
-    `);
-  });
-
-  try {
-    const result = await scanUrl(url);
-
-    assert.equal(result.metadata?.siteIcon, `${url}/favicon-with-background.svg`);
   } finally {
     await closeServer(server);
   }

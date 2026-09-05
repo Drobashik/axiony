@@ -1,20 +1,16 @@
 .icon {
-  --icon-plate-glow: var(--tint-medium);
-  --icon-plate-start: var(--bg-elevated);
-  --icon-plate-end: var(--bg-muted);
-
   position: relative;
   display: inline-grid;
   place-items: center;
   flex: none;
   overflow: hidden;
   isolation: isolate;
-  border: 1px solid color-mix(in oklch, var(--border-strong) 78%, transparent);
+  border: 1px solid var(--border-default);
   border-radius: 22%;
   background: var(--bg-elevated);
   box-shadow:
     inset 0 1px 0 var(--edge-highlight),
-    0 1px 2px oklch(0.12 0.015 255 / 0.14);
+    var(--shadow-sm);
 }
 
 .fallback,
@@ -37,8 +33,7 @@
   display: grid;
   place-items: center;
   background:
-    radial-gradient(circle at 24% 16%, var(--icon-plate-glow), transparent 58%),
-    linear-gradient(145deg, var(--icon-plate-start), var(--icon-plate-end));
+    radial-gradient(circle at 28% 18%, var(--tint-medium), transparent 62%), var(--bg-elevated);
 }
 
 .image {
@@ -46,6 +41,8 @@
   height: 76%;
   object-fit: contain;
   image-rendering: auto;
+  filter: drop-shadow(0 0 0.7px color-mix(in oklch, var(--text-primary) 72%, transparent))
+    drop-shadow(0 1px 1.5px oklch(0 0 0 / 0.28));
 }
 
 .imageWide {
@@ -53,44 +50,6 @@
   height: 64%;
 }
 
-.darkArtwork {
-  --icon-plate-glow: oklch(1 0 0 / 0.18);
-  --icon-plate-start: oklch(0.52 0.016 255);
-  --icon-plate-end: oklch(0.4 0.014 255);
-}
-
-.lightArtwork {
-  --icon-plate-glow: oklch(1 0 0 / 0.08);
-  --icon-plate-start: oklch(0.25 0.014 255);
-  --icon-plate-end: oklch(0.18 0.012 255);
-}
-
 .fallbackOnly {
   border-color: var(--blue-border);
-}
-
-:global(:root[data-theme="light"]) .darkArtwork {
-  --icon-plate-glow: oklch(1 0 0 / 0.5);
-  --icon-plate-start: oklch(0.91 0.008 255);
-  --icon-plate-end: oklch(0.82 0.01 255);
-}
-
-:global(:root[data-theme="light"]) .lightArtwork {
-  --icon-plate-glow: oklch(1 0 0 / 0.09);
-  --icon-plate-start: oklch(0.38 0.014 255);
-  --icon-plate-end: oklch(0.27 0.012 255);
-}
-
-@media (prefers-color-scheme: light) {
-  :global(:root:not([data-theme])) .darkArtwork {
-    --icon-plate-glow: oklch(1 0 0 / 0.5);
-    --icon-plate-start: oklch(0.91 0.008 255);
-    --icon-plate-end: oklch(0.82 0.01 255);
-  }
-
-  :global(:root:not([data-theme])) .lightArtwork {
-    --icon-plate-glow: oklch(1 0 0 / 0.09);
-    --icon-plate-start: oklch(0.38 0.014 255);
-    --icon-plate-end: oklch(0.27 0.012 255);
-  }
 }

@@ -34,13 +34,7 @@ export const ProjectHealthHero = ({ model, onScan, onShowProject }: ProjectHealt
   <section className={styles.hero} data-score-tone={scoreTone(model.score)}>
     <header className={styles.header}>
       <div className={styles.identity}>
-        <ProjectIcon
-          host={model.project.host}
-          url={model.url}
-          iconUrl={model.project.iconUrl}
-          iconAppearance={model.project.iconAppearance}
-          size={48}
-        />
+        <ProjectIcon host={model.project.host} url={model.url} size={48} />
         <div className={styles.identityCopy}>
           <span className={styles.kicker}>
             {model.isPageScope ? "Tracked page" : "Project health"}

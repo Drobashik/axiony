@@ -5,14 +5,11 @@ import { createPortal } from "react-dom";
 import { Button, Icon, Select } from "@/components/ui";
 import { ProjectIcon } from "@/components/sections/dashboard/shared/ProjectIcon";
 import type { Project } from "@/lib/workspace";
-import type { SiteIconAppearance } from "@/types";
 import styles from "./DomainReplacement.module.scss";
 
 interface DomainReplacementProps {
   incomingHost: string;
   incomingUrl: string;
-  incomingIconUrl?: string;
-  incomingIconAppearance?: SiteIconAppearance;
   projects: Project[];
   onReplace: (replacedHost: string) => Promise<void>;
 }
@@ -20,8 +17,6 @@ interface DomainReplacementProps {
 export const DomainReplacement = ({
   incomingHost,
   incomingUrl,
-  incomingIconUrl,
-  incomingIconAppearance,
   projects,
   onReplace,
 }: DomainReplacementProps) => {
@@ -38,15 +33,7 @@ export const DomainReplacement = ({
         value: project.host,
         label: project.host,
         hint: `${project.pages.length} ${project.pages.length === 1 ? "page" : "pages"}`,
-        icon: (
-          <ProjectIcon
-            host={project.host}
-            url={project.pages[0]?.url}
-            iconUrl={project.iconUrl}
-            iconAppearance={project.iconAppearance}
-            size={20}
-          />
-        ),
+        icon: <ProjectIcon host={project.host} url={project.pages[0]?.url} size={20} />,
       })),
     [projects],
   );
@@ -108,13 +95,7 @@ export const DomainReplacement = ({
           <div className={styles.incomingProject}>
             <span className={styles.fieldLabel}>Ready to save</span>
             <div className={styles.projectIdentity}>
-              <ProjectIcon
-                host={incomingHost}
-                url={incomingUrl}
-                iconUrl={incomingIconUrl}
-                iconAppearance={incomingIconAppearance}
-                size={32}
-              />
+              <ProjectIcon host={incomingHost} url={incomingUrl} size={32} />
               <span>
                 <strong>{incomingHost}</strong>
                 <small>Completed scan</small>
@@ -185,8 +166,6 @@ export const DomainReplacement = ({
                   <ProjectIcon
                     host={selectedProject.host}
                     url={selectedProject.pages[0]?.url}
-                    iconUrl={selectedProject.iconUrl}
-                    iconAppearance={selectedProject.iconAppearance}
                     size={28}
                   />
                   <strong>{selectedProject.host}</strong>
@@ -200,13 +179,7 @@ export const DomainReplacement = ({
                 </span>
                 <div className={styles.comparisonProject} data-tone="add">
                   <span>Save</span>
-                  <ProjectIcon
-                    host={incomingHost}
-                    url={incomingUrl}
-                    iconUrl={incomingIconUrl}
-                    iconAppearance={incomingIconAppearance}
-                    size={28}
-                  />
+                  <ProjectIcon host={incomingHost} url={incomingUrl} size={28} />
                   <strong>{incomingHost}</strong>
                   <small>New baseline</small>
                 </div>

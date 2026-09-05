@@ -159,13 +159,7 @@ export const IssueDetail = ({ located, onClose, onStatus }: IssueDetailProps) =>
           <div className={styles.dialogMetaItem}>
             <span className={styles.dialogMetaLabel}>Page</span>
             <span className={`${styles.dialogMetaValue} ${styles.dialogProjectValue}`}>
-              <ProjectIcon
-                host={host}
-                url={located.url}
-                iconUrl={located.iconUrl}
-                iconAppearance={located.iconAppearance}
-                size={20}
-              />
+              <ProjectIcon host={host} url={located.url} size={20} />
               <span>{page}</span>
             </span>
           </div>

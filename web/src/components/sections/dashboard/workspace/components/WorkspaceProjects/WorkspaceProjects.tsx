@@ -71,13 +71,7 @@ const ProjectCard = ({
       <article className={styles.projectCard} style={{ "--accent": accent } as CSSProperties}>
         <div className={styles.projectTop}>
           <button type="button" className={styles.projectIdentityButton} onClick={onOpen}>
-            <ProjectIcon
-              host={project.host}
-              url={project.pages[0]?.url}
-              iconUrl={project.iconUrl}
-              iconAppearance={project.iconAppearance}
-              size={42}
-            />
+            <ProjectIcon host={project.host} url={project.pages[0]?.url} size={42} />
             <span className={styles.projectId}>
               <span className={styles.projectName}>
                 {project.host}

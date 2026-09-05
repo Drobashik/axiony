@@ -54,13 +54,7 @@ export const ProjectHealthTable = ({
                 onClick={() => onOpenProject(row.project.id)}
               >
                 <span className={styles.identity}>
-                  <ProjectIcon
-                    host={row.project.host}
-                    url={row.project.pages[0]?.url}
-                    iconUrl={row.project.iconUrl}
-                    iconAppearance={row.project.iconAppearance}
-                    size={36}
-                  />
+                  <ProjectIcon host={row.project.host} url={row.project.pages[0]?.url} size={36} />
                   <span className={styles.identityCopy}>
                     <strong>{row.project.host}</strong>
                     <span>{plural(row.pageCount, "page")}</span>
